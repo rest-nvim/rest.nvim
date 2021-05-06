@@ -85,6 +85,35 @@ local function get_json(term, bufnr, stop_line, query_line)
 	return json
 end
 
+-- get_array retrieves the array elements in the desired line and then returns a
+-- lua table with its elements
+-- @param term The term to search, e.g. AUTH
+-- @param bufnr Buffer number, a.k.a id
+-- @param stop_line Line to stop searching
+-- @param query_line Line to set cursor position
+local function get_array(term, bufnr, stop_line, query_line)
+	local array = {}
+	local start_line = 0
+	local end_line = 0
+
+	start_line = fn.search(term .. ' {', '', stop_line)
+	end_line = fn.search('}', 'n', stop_line)
+
+	if start_line > 0 then
+		local array_elements =
+			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
+		for _, element in ipairs(array_elements) do
+			table.insert(array, element)
+		end
+	end
+
+	go_to_line(bufnr, query_line)
+	return array
+end
+
+-- curl_cmd runs curl with the passed options, gets or creates a new buffer
+-- and then the results are printed to the recently obtained/created buffer
+-- @param opts curl arguments
 local function curl_cmd(opts)
 	local res = curl[opts.method](opts)
 	local res_bufnr = get_or_create_buf()
@@ -129,6 +158,7 @@ local function curl_cmd(opts)
 	for line in utils.iter_lines(res.body) do
 		if json_body then
 			-- Format JSON output and then add it into the buffer
+			-- line by line because Vim doesn't allow strings with newlines
 			local out = fn.system("echo '" .. line .. "' | jq .")
 			for _, _line in ipairs(utils.split(out, '\n')) do
 				line_count = api.nvim_buf_line_count(res_bufnr) - 1
@@ -164,6 +194,8 @@ local function curl_cmd(opts)
 	end)
 end
 
+-- run will retrieve the required request information from the current buffer
+-- and then execute curl
 local function run()
 	local bufnr = api.nvim_win_get_buf(0)
 	local parsed_url = parse_url(fn.getline('.'))
@@ -182,13 +214,18 @@ local function run()
 	local body = get_json('BODY', bufnr, next_query, last_query_line_number)
 	local queries =
 		get_json('QUERIES', bufnr, next_query, last_query_line_number)
+	local form = get_json('FORM', bufnr, next_query, last_query_line_number)
+	local auth =
+		get_array('AUTH', bufnr, next_query, last_query_line_number)
 
 	curl_cmd({
 		method = parsed_url.method:lower(),
 		url = parsed_url.url,
+		query = queries,
 		headers = headers,
 		body = body,
-		query = queries,
+		form = form,
+		auth = auth,
 	})
 
 	go_to_line(bufnr, last_query_line_number)
