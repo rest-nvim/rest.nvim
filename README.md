@@ -15,6 +15,8 @@
 
 A fast Neovim http client written in Lua in less than 250 lines.
 
+> **IMPORTANT:** `rest.nvim` is a WIP, there may be things that doesn't work properly _yet_
+
 # Features
 
 - Easy to use
