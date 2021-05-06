@@ -1,7 +1,5 @@
 if exists('b:current_syntax') | finish | endif
 
-let b:current_syntax = 'http'
-
 syn match httpUrl "\(https\?:\/\{2}\)\?\(\w\+\(:\w\+\)\?@\)\?\([A-Za-z][-_0-9A-Za-z]*\.\)\{1,}\(\w\{2,}\.\?\)\{1,}\(:[0-9]\{1,5}\)\?\S*"
 
 syn keyword httpCommentKeyword TODO contained
@@ -31,4 +29,5 @@ hi link httpVarKey          Constant
 hi link httpVarSeparator    Todo
 hi link httpParamSection    Constant
 hi link httpParamSeparator  Todo
-hi link jsonBody            Structure
+
+let b:current_syntax = 'http'

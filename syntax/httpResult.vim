@@ -1,7 +1,5 @@
 if exists("b:current_syntax") | finish | endif
 
-let b:current_syntax = "httpResult"
-
 syn match httpResultComment "\v^#.*$"
 syn keyword httpResultTitle GET POST PATCH PUT HEAD DELETE nextgroup=httpResultPath
 syn match httpResultPath    ".*$" contained
@@ -12,3 +10,5 @@ syn region jsonBody start="\v^\{" end="\v\S+\}$" contains=@json keepend
 hi link httpResultComment Comment
 hi link httpResultTitle   Type
 hi link httpResultPath    Title
+
+let b:current_syntax = "httpResult"
