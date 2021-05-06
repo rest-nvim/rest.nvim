@@ -15,6 +15,10 @@
 
 A fast Neovim http client written in Lua in less than 250 lines.
 
+`rest.nvim` makes use of a curl wrapper made in pure Lua by [tami5] and implemented
+in `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you don't
+have to leave Neovim!
+
 > **IMPORTANT:** `rest.nvim` is a WIP, there may be things that doesn't work properly _yet_.
 >
 > If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
@@ -53,7 +57,7 @@ use {
 By default `rest.nvim` does not have any key mappings so you will not have
 conflicts with any of your existing ones.
 
-To run `rest.nvim`, you should use `:lua require('rest-nvim').run()<CR>`
+To run `rest.nvim` you should map the `<Plug>RestNvim` command.
 
 # Usage
 
