@@ -11,7 +11,7 @@ local function get_or_create_buf()
 
 	-- Check if the file is already loaded in the buffer
 	local existing_bufnr = fn.bufnr(tmp_name)
-	if existing_bufnr > -1 then
+	if existing_bufnr ~= -1 then
 		-- Set modifiable
 		api.nvim_buf_set_option(existing_bufnr, 'modifiable', true)
 		-- Delete buffer content
@@ -66,24 +66,15 @@ local function get_json(term, bufnr, stop_line, query_line)
 	local start_line = 0
 	local end_line = 0
 
-	if term == 'BODY' then
-		-- { "foo": ... }
-		start_line = fn.search('{', '', stop_line)
-		end_line = fn.search('}', 'n', stop_line)
-	elseif term == 'HEADER' then
-		-- HEADER=foo: bar
-		start_line = fn.search(term .. '=', '', stop_line)
-		end_line = fn.search(term, 'n', stop_line)
-	end
+	start_line = fn.search(term .. ' {', '', stop_line)
+	end_line = fn.search('}', 'n', stop_line)
 
 	if start_line > 0 then
 		local json_string = ''
 		local json_lines =
 			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
-
-		-- Append the buffer lines to json_string variable
-		for _, line in ipairs(json_lines) do
-			json_string = json_string .. line
+		for _, v in ipairs(json_lines) do
+			json_string = json_string .. v
 		end
 
 		json_string = '{' .. json_string .. '}'
@@ -98,6 +89,16 @@ local function curl_cmd(opts)
 	local res = curl[opts.method](opts)
 	local res_bufnr = get_or_create_buf()
 	local parsed_url = parse_url(fn.getline('.'))
+	local json_body = false
+
+	-- Check if the content-type is "application/json" so we can format the JSON
+	-- output later
+	for _, header in ipairs(res.headers) do
+		if string.find(header, 'application/json') then
+			json_body = true
+			break
+		end
+	end
 
 	--- Add metadata into the created buffer (status code, date, etc)
 	local line_count = api.nvim_buf_line_count(res_bufnr) - 1
@@ -126,16 +127,27 @@ local function curl_cmd(opts)
 
 	--- Add the curl command results into the created buffer
 	for line in utils.iter_lines(res.body) do
-		-- Format JSON output and then add it into the buffer
-		local out = fn.system("echo '" .. line .. "' | jq .")
-		for _, _line in ipairs(utils.split(out, '\n')) do
+		if json_body then
+			-- Format JSON output and then add it into the buffer
+			local out = fn.system("echo '" .. line .. "' | jq .")
+			for _, _line in ipairs(utils.split(out, '\n')) do
+				line_count = api.nvim_buf_line_count(res_bufnr) - 1
+				api.nvim_buf_set_lines(
+					res_bufnr,
+					line_count,
+					line_count,
+					false,
+					{ _line }
+				)
+			end
+		else
 			line_count = api.nvim_buf_line_count(res_bufnr) - 1
 			api.nvim_buf_set_lines(
 				res_bufnr,
 				line_count,
 				line_count,
 				false,
-				{ _line }
+				{ line }
 			)
 		end
 	end
@@ -166,7 +178,7 @@ local function run()
 	next_query = next_query > 1 and next_query or fn.line('$')
 
 	local headers =
-		get_json('HEADER', bufnr, next_query, last_query_line_number)
+		get_json('HEADERS', bufnr, next_query, last_query_line_number)
 	local body = get_json('BODY', bufnr, next_query, last_query_line_number)
 
 	curl_cmd({
