@@ -180,12 +180,15 @@ local function run()
 	local headers =
 		get_json('HEADERS', bufnr, next_query, last_query_line_number)
 	local body = get_json('BODY', bufnr, next_query, last_query_line_number)
+	local queries =
+		get_json('QUERIES', bufnr, next_query, last_query_line_number)
 
 	curl_cmd({
 		method = parsed_url.method:lower(),
 		url = parsed_url.url,
 		headers = headers,
 		body = body,
+		query = queries,
 	})
 
 	go_to_line(bufnr, last_query_line_number)
