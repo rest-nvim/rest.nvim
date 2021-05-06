@@ -1,6 +1,7 @@
 POST https://reqres.in/api/users
 
-BODY {
+# You can also use body :)
+FORM {
     "name": "morpheus",
     "job": "leader"
 }
