@@ -88,8 +88,6 @@ BODY {
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
 5. Create a new Pull Request
 
-> **NOTE:** Before commit your changes, format the code by running `make fmt`.
-
 # License
 
 nvenv is [MIT Licensed](./LICENSE).
