@@ -2,7 +2,7 @@ if exists("b:current_syntax") | finish | endif
 
 let b:current_syntax = "httpResult"
 
-syn match httpResultComment "^#\+"
+syn match httpResultComment "\v^#.*$"
 syn keyword httpResultTitle GET POST PATCH PUT HEAD DELETE nextgroup=httpResultPath
 syn match httpResultPath    ".*$" contained
 

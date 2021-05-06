@@ -17,12 +17,8 @@ syn match httpVarSection   "^\(VAR\)[=:]" nextgroup=httpVarKey skipwhite
 syn match httpVarKey       "[^:]\+" contained nextgroup=httpVarSeparator skipwhite
 syn match httpVarSeparator "[=:]" contained
 
-syn match httpHeaderSection "^\(HEADER\)[=:]" nextgroup=httpHeaderKey skipwhite
-syn match httpHeaderKey       "[^:]\+" contained nextgroup=httpHeaderSeparator skipwhite
-syn match httpHeaderSeparator "[=:]" contained
-
 syn include @json syntax/json.vim
-syn region jsonBody start="\v^\{" end="\v\}$" contains=@json keepend
+syn region jsonBody start="\v\{" end="\v\}$" contains=@json keepend
 
 
 hi link httpComment         Comment
@@ -33,9 +29,6 @@ hi link httpPath            Title
 hi link httpVarSection      Type
 hi link httpVarKey          Constant
 hi link httpVarSeparator    Todo
-hi link httpHeaderSection   Type
-hi link httpHeaderKey       Constant
-hi link httpHeaderSeparator Todo
 hi link httpParamSection    Constant
 hi link httpParamSeparator  Todo
 hi link jsonBody            Structure
