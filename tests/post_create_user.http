@@ -1,0 +1,6 @@
+POST https://reqres.in/api/users
+
+BODY {
+    "name": "morpheus",
+    "job": "leader"
+}
