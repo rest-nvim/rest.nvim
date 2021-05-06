@@ -1,6 +1,10 @@
-GET https://reqres.in/api/users?page=2
+GET https://reqres.in/api/users
 
 # Optional, curl already identifies the content-type of the run output
 HEADERS {
     "Content-Type": "application/json"
+}
+
+QUERIES {
+    "page": 5
 }
