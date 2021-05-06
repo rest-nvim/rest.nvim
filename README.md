@@ -15,7 +15,9 @@
 
 A fast Neovim http client written in Lua in less than 250 lines.
 
-> **IMPORTANT:** `rest.nvim` is a WIP, there may be things that doesn't work properly _yet_
+> **IMPORTANT:** `rest.nvim` is a WIP, there may be things that doesn't work properly _yet_.
+>
+> If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
 
 # Features
 
@@ -27,12 +29,13 @@ A fast Neovim http client written in Lua in less than 250 lines.
 
 # Install
 
-> **WARNING:** rest.nvim requires Neovim> = 0.5 to work.
+> **WARNING:** rest.nvim requires Neovim >= 0.5 to work.
 
-## Dependencies
+### Dependencies
 
 - System-wide
   - curl
+  - jq (to format JSON output so it can be human-readable)
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
@@ -61,12 +64,16 @@ request method (e.g. `GET`) and run `rest.nvim`.
 GET http://localhost:3000/foo
 ```
 
-If you want to use headers, then put `HEADER=foo: bar` below the request statement (WIP).
+If you want to use headers, then put a `HEADERS` block below the request statement.
 
 ```http
 POST http://localhost:3000/foo
-HEADER=foo: bar
-{
+
+HEADERS {
+    "foo": "bar"
+}
+
+BODY {
     "json": "body"
 }
 ```
