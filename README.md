@@ -59,7 +59,7 @@ request method (e.g. `GET`) and run `rest.nvim`.
 GET http://localhost:3000/foo
 ```
 
-If you want to use headers, then put `HEADER=foo: bar` below the request statement.
+If you want to use headers, then put `HEADER=foo: bar` below the request statement (WIP).
 
 ```http
 POST http://localhost:3000/foo
