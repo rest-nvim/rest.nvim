@@ -92,7 +92,7 @@ end
 -- @param stop_line Line to stop searching
 -- @param query_line Line to set cursor position
 local function get_array(term, bufnr, stop_line, query_line)
-	local array = {}
+	local array = nil
 	local start_line = 0
 	local end_line = 0
 
@@ -100,6 +100,7 @@ local function get_array(term, bufnr, stop_line, query_line)
 	end_line = fn.search('}', 'n', stop_line)
 
 	if start_line > 0 then
+        array = {}
 		local array_elements =
 			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
 		for _, element in ipairs(array_elements) do
