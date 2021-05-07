@@ -26,7 +26,7 @@ have to leave Neovim!
 # Features
 
 - Easy to use
-- JSON body support
+- JSON like syntax
 - Fast execution time
 - Run request under cursor
 - Syntax highlight for http files and output
@@ -71,16 +71,28 @@ GET http://localhost:3000/foo
 If you want to use headers, then put a `HEADERS` block below the request statement.
 
 ```http
-POST http://localhost:3000/foo
+GET http://localhost:3000/foo
 
 HEADERS {
-    "foo": "bar"
-}
-
-BODY {
-    "json": "body"
+    "Content-Type": "application/json"
 }
 ```
+
+### List of valid requests
+
+- GET
+- POST
+- PUT
+- PATCH
+- DELETE
+
+### List of valid fields
+
+- BODY (json)
+- QUERIES (json)
+- HEADERS (json)
+- FORM (json)
+- AUTH (array)
 
 ---
 
