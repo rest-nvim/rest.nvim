@@ -43,7 +43,8 @@ local function parse_url(stmt)
 	local parsed = utils.split(stmt, ' ')
 	return {
 		method = parsed[1],
-		url = parsed[2],
+        -- Encode URL
+		url = utils.encode_url(parsed[2]),
 	}
 end
 
