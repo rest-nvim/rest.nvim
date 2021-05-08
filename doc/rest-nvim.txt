@@ -1,0 +1,144 @@
+*rest-nvim.txt* A fast Neovim http client written in Lua based on curl
+
+             ______                                _        ~
+            (_____ \              _               (_)       ~
+             _____) )_____  ___ _| |_   ____ _   _ _ ____   ~
+            |  __  /| ___ |/___|_   _) |  _ \ | | | |    \  ~
+            | |  \ \| ____|___ | | |_ _| | | \ V /| | | | | ~
+            |_|   |_|_____|___/   \__|_)_| |_|\_/ |_|_|_|_| ~
+
+
+ NTBBloodbath                                                      *rest-nvim*
+
+===============================================================================
+CONTENTS                                                   *rest-nvim-contents*
+    1. Introduction...........................................|rest-nvim-intro|
+    2. Quick start......................................|rest-nvim-quick-start|
+    3. Usage..................................................|rest-nvim-usage|
+        1. Commands..................................|rest-nvim-usage-commands|
+        1. Requests..................................|rest-nvim-usage-requests|
+        2. Fields......................................|rest-nvim-usage-fields|
+    4. Known issues..........................................|rest-nvim-issues|
+    5. License..............................................|rest-nvim-license|
+    6. Contributing....................................|rest-nvim-contributing|
+
+
+===============================================================================
+INTRODUCTION                                                  *rest-nvim-intro*
+
+`rest.nvim` is a fast Neovim http client written in Lua which makes use of a
+curl wrapper made in pure Lua by github.com/tami5 and implemented in the
+plugin `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you
+don't have to leave Neovim!
+
+
+===============================================================================
+QUICK START                                             *rest-nvim-quick-start*
+
+For now `rest.vnim` uses a JSON-based syntax for its operations. That means
+that by example, to send headers a syntax of `{key: value}` is used.
+
+In this section we will be using `https://reqres.in/` for requests.
+
+Let's say we want to create a new user and send our body as a JSON, so we
+will do the following:
+
+    1. We declare the HTTP method to use followed by the URL.
+       `POST https://reqres.in/api/users`
+
+    2. Since we want to send our body as a JSON object, we set the
+       Content-Type header.
+       `HEADERS {`
+       `    "Content-Type": "application/json"`
+       `}`
+
+    3. Now, we set the body of our request.
+       `BODY {`
+       `    "name": "morpheus",`
+       `    "job": "leader"`
+       `}`
+
+    4. Finally, we place the cursor over the method of our request and call
+       `rest.nvim`!.
+       `:lua require('rest-nvim').run()`
+
+Since the way to call rest.nvim with Lua is not comfortable, rest.nvim
+exposes a command to be mapped. See |rest-nvim-usage-commands|
+
+
+===============================================================================
+USAGE                                                         *rest-nvim-usage*
+
+
+===============================================================================
+COMMANDS                                             *rest-nvim-usage-commands*
+
+`<Plug>RestNvim`
+Run `rest.nvim` in the current cursor position.
+
+
+===============================================================================
+REQUESTS                                             *rest-nvim-usage-requests*
+
+Currently `rest.nvim` supports the following request methods:
+
+    - GET
+    - POST
+    - DELETE
+    - PATCH
+    - PUT
+
+
+===============================================================================
+FIELDS                                                 *rest-nvim-usage-fields*
+
+Currently `rest.nvim` supports the following data fields:
+
+    - HEADERS - The request headers             (lua table, key-value)
+    - BODY    - The request body                (lua table, key-value)
+    - QUERIES - The request queries             (lua table, key-value)
+    - FORM    - The request form                (lua table, key-value)
+    - AUTH    - The request authentication data (lua table, value)
+
+
+===============================================================================
+KNOWN ISSUES                                                 *rest-nvim-issues*
+
+    1. URLs are not being encoded, e.g. `?q=[1,2,3]` should be encoded into
+       `?q=%5B1%2C2%2C3%5D`.
+
+
+===============================================================================
+LICENSE                                                     *rest-nvim-license*
+
+rest.nvim is distributed under MIT License.
+
+Copyright (c) 2021 NTBBloodbath
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+===============================================================================
+CONTRIBUTING                                           *rest-nvim-contributing*
+
+    1. Fork it (`github.com/NTBBloodbath/rest.nvim/fork`)
+    2. Create your feature branch (`git checkout -b my-new-feature`)
+    3. Commit your changes (`git commit -am 'Add some feature'`)
+    4. Push to the branch (`git push origin my-new-feature`)
+    5. Create a new Pull Request
