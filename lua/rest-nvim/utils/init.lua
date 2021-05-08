@@ -53,6 +53,27 @@ M.iter_lines = function(str)
 	return str:gmatch('(.-)\n')
 end
 
+-- char_to_hex returns the provided character as its hex value, e.g., "[" is
+-- converted to "%5B"
+-- @param char The character to convert
+M.char_to_hex = function(char)
+	return string.format('%%%02X', string.byte(char))
+end
+
+-- encode_url encodes the given URL
+-- @param url The URL to encode
+M.encode_url = function(url)
+	if url == nil then
+		error('You must need to provide an URL to encode')
+	end
+
+	url = url:gsub('\n', '\r\n')
+	-- Encode characters but exclude `.`, `_`, `-`, `:`, `/`, `?`, `&`, `=`, `~`
+	url = string.gsub(url, '([^%w _ %- . : / ? & = ~])', M.char_to_hex)
+	url = url:gsub(' ', '+')
+	return url
+end
+
 -- http_status returns the status code and the meaning, e.g. 200 OK
 -- see https://httpstatuses.com/ for reference
 M.http_status = function(code)
