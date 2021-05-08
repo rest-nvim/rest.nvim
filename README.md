@@ -106,6 +106,6 @@ HEADERS {
 
 # License
 
-nvenv is [MIT Licensed](./LICENSE).
+rest.nvim is [MIT Licensed](./LICENSE).
 
 [tami5]: https://github.com/tami5
