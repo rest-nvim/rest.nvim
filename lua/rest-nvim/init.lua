@@ -61,7 +61,11 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
 -- @param query_line Line to set cursor position
-local function get_json(term, bufnr, stop_line, query_line)
+-- @param json_body If the body is a JSON formatted POST request, false by default
+local function get_json(term, bufnr, stop_line, query_line, json_body)
+	if not json_body then
+		json_body = false
+	end
 	local json = nil
 	local start_line = 0
 	local end_line = 0
@@ -73,6 +77,7 @@ local function get_json(term, bufnr, stop_line, query_line)
 		local json_string = ''
 		local json_lines =
 			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
+
 		for _, v in ipairs(json_lines) do
 			json_string = json_string .. v
 		end
@@ -82,6 +87,12 @@ local function get_json(term, bufnr, stop_line, query_line)
 	end
 
 	go_to_line(bufnr, query_line)
+
+	if json_body then
+		-- If the body is a JSON request then return it as raw string
+		-- e.g. `-d "{\"foo\":\"bar\"}"`
+		json = utils.tbl_to_str(json)
+	end
 	return json
 end
 
@@ -100,7 +111,7 @@ local function get_array(term, bufnr, stop_line, query_line)
 	end_line = fn.search('}', 'n', stop_line)
 
 	if start_line > 0 then
-        array = {}
+		array = {}
 		local array_elements =
 			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
 		for _, element in ipairs(array_elements) do
@@ -212,7 +223,25 @@ local function run()
 
 	local headers =
 		get_json('HEADERS', bufnr, next_query, last_query_line_number)
-	local body = get_json('BODY', bufnr, next_query, last_query_line_number)
+
+	local body = {}
+	-- If the header Content-Type was passed and it's application/json then return
+	-- body as `-d '{"foo":"bar"}'`
+	if
+		headers['Content-Type'] ~= nil
+		and string.find(headers['Content-Type'], 'application/json')
+	then
+		body = get_json(
+			'BODY',
+			bufnr,
+			next_query,
+			last_query_line_number,
+			true
+		)
+	else
+		body = get_json('BODY', bufnr, next_query, last_query_line_number)
+	end
+
 	local queries =
 		get_json('QUERIES', bufnr, next_query, last_query_line_number)
 	local form = get_json('FORM', bufnr, next_query, last_query_line_number)

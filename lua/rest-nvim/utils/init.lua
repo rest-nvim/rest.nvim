@@ -1,5 +1,33 @@
 local M = {}
 
+-- tbl_to_str recursively converts the provided table into a json string
+-- @param tbl Table to convert into a String
+M.tbl_to_str = function(tbl)
+	local result = '{'
+	for k, v in pairs(tbl) do
+		-- Check the key type (ignore any numerical keys - assume its an array)
+		if type(k) == 'string' then
+			result = result .. '"' .. k .. '"' .. ':'
+		end
+		-- Check the value type
+		if type(v) == 'table' then
+			result = result .. M.tbl_to_str(v)
+		elseif type(v) == 'boolean' then
+			result = result .. tostring(v)
+		elseif type(v) == 'number' then
+			result = result .. v
+		else
+			result = result .. '"' .. v .. '"'
+		end
+		result = result .. ','
+	end
+	-- Remove leading commas from the result
+	if result ~= '' then
+		result = result:sub(1, result:len() - 1)
+	end
+	return result .. '}'
+end
+
 -- Just a split function because Lua does not have this, nothing more
 M.split = function(str, sep)
 	if sep == nil then
