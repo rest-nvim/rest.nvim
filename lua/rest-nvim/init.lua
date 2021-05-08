@@ -228,7 +228,8 @@ local function run()
 	-- If the header Content-Type was passed and it's application/json then return
 	-- body as `-d '{"foo":"bar"}'`
 	if
-		headers['Content-Type'] ~= nil
+		headers ~= nil
+		and headers['Content-Type'] ~= nil
 		and string.find(headers['Content-Type'], 'application/json')
 	then
 		body = get_json(
