@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/github/license/NTBBloodbath/doom-nvim?style=flat-square)
 ![Neovim version](https://img.shields.io/badge/Neovim-0.5-57A143?style=flat-square&logo=neovim)
 
-[Features](#features) • [Install](#install) • [Contribute](#contribute)
+[Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
 ![Demo](./assets/demo.png)
 
@@ -13,20 +13,17 @@
 
 ---
 
-A fast Neovim http client written in Lua in less than 250 lines.
+A fast Neovim http client written in Lua.
 
 `rest.nvim` makes use of a curl wrapper made in pure Lua by [tami5] and implemented
 in `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you don't
 have to leave Neovim!
 
-> **IMPORTANT:** `rest.nvim` is a WIP, there may be things that doesn't work properly _yet_.
->
-> If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
+> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
 
 # Features
 
 - Easy to use
-- JSON like syntax
 - Fast execution time
 - Run request under cursor
 - Syntax highlight for http files and output
@@ -64,35 +61,12 @@ To run `rest.nvim` you should map the `<Plug>RestNvim` command.
 Create a new http file or open an existing one and place the cursor over the
 request method (e.g. `GET`) and run `rest.nvim`.
 
-```http
-GET http://localhost:3000/foo
-```
-
-If you want to use headers, then put a `HEADERS` block below the request statement.
-
-```http
-GET http://localhost:3000/foo
-
-HEADERS {
-    "Content-Type": "application/json"
-}
-```
-
-### List of valid requests
-
-- GET
-- POST
-- PUT
-- PATCH
-- DELETE
-
-### List of valid fields
-
-- BODY (json)
-- QUERIES (json)
-- HEADERS (json)
-- FORM (json)
-- AUTH (array)
+> **NOTES**:
+>
+> 1. `rest.nvim` follows the RFC 2616 request format so any other
+>    http file should work without problems.
+>
+> 2. You can find examples of use in [tests](./tests)
 
 ---
 
