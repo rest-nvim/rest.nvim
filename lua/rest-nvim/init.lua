@@ -306,7 +306,7 @@ local function run()
 		)
 	next_query = next_query > 1 and next_query or fn.line('$')
 
-	headers = get_headers(bufnr, last_query_line_number)
+	local headers = get_headers(bufnr, last_query_line_number)
 
 	local body = {}
 	-- If the header Content-Type was passed and it's application/json then return
