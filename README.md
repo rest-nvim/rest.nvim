@@ -27,6 +27,7 @@ have to leave Neovim!
 - Fast execution time
 - Run request under cursor
 - Syntax highlight for http files and output
+- Possibility of using environment variables in http files
 
 # Install
 
