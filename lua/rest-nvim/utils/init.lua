@@ -1,8 +1,25 @@
 local M = {}
 
+-- has_value checks if the provided table contains the provided string using a regex
+-- @param tbl Table to iterate over
+-- @param str String to search in the table
+M.has_value = function(tbl, str)
+	for _, element in ipairs(tbl) do
+		print(string.find(str, element))
+		if string.find(str, element) then
+			return true
+		end
+	end
+	return false
+end
+
 -- tbl_to_str recursively converts the provided table into a json string
 -- @param tbl Table to convert into a String
-M.tbl_to_str = function(tbl)
+-- @param json If the string should use a key:value syntax
+M.tbl_to_str = function(tbl, json)
+	if not json then
+		json = false
+	end
 	local result = '{'
 	for k, v in pairs(tbl) do
 		-- Check the key type (ignore any numerical keys - assume its an array)
@@ -19,7 +36,11 @@ M.tbl_to_str = function(tbl)
 		else
 			result = result .. '"' .. v .. '"'
 		end
-		result = result .. ','
+		if json then
+			result = result .. ':'
+		else
+			result = result .. ','
+		end
 	end
 	-- Remove leading commas from the result
 	if result ~= '' then
