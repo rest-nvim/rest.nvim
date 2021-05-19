@@ -5,7 +5,6 @@ local M = {}
 -- @param str String to search in the table
 M.has_value = function(tbl, str)
 	for _, element in ipairs(tbl) do
-		print(string.find(str, element))
 		if string.find(str, element) then
 			return true
 		end
