@@ -211,7 +211,6 @@ end
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts curl arguments
 local function curl_cmd(opts)
-	Opts = opts
 	local res = curl[opts.method](opts)
 	local res_bufnr = get_or_create_buf()
 	local parsed_url = parse_url(fn.getline('.'))
