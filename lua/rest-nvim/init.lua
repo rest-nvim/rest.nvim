@@ -89,7 +89,7 @@ local function get_json(term, bufnr, stop_line, query_line, json_body)
 
 	go_to_line(bufnr, query_line)
 
-	if json_body then
+	if json_body and json ~= nil then
 		-- If the body is a JSON request then return it as raw string
 		-- e.g. `-d "{\"foo\":\"bar\"}"`
 		json = utils.tbl_to_str(json)
