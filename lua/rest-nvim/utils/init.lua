@@ -1,5 +1,66 @@
 local M = {}
 
+-- file_exists checks if the provided file exists and returns a boolean
+-- @param file File to check
+M.file_exists = function(file)
+	file = io.open(file, 'rb')
+	if file then
+		file:close()
+	end
+	return file ~= nil
+end
+
+-- read_env_file Reads the environment variables found in the `.env` file and
+-- returns a table with the variables
+M.read_env_file = function()
+	local variables = {}
+	local env_file_path = vim.fn.getcwd() .. '/.env'
+	-- If there's an env file in the current working dir
+	if M.file_exists(env_file_path) then
+		for line in io.lines(env_file_path) do
+			local vars = M.split(line, '=', 1)
+			variables[vars[1]] = vars[2]
+		end
+	end
+
+	return variables
+end
+
+-- replace_env_vars replaces the env variables fields in the provided string
+-- with the env variable value
+-- @param str Where replace the placers for the env variables
+M.replace_env_vars = function(str)
+    local env_vars = M.read_env_file()
+
+    for var in string.gmatch(str, '{{%w+}}') do
+        var = var:gsub('{', ''):gsub('}', '')
+        -- If the env variable wasn't found in the `.env` file then search it
+        -- in the OS environment variables
+        if M.has_key(env_vars, var) then
+            str = str:gsub('{{' .. var .. '}}', env_vars[var])
+        else
+            if os.getenv(var) ~= nil then
+                str = str:gsub('{{' .. var .. '}}', os.getenv(var))
+            else
+                error(string.format("Environment variable '%s' was not found.", var))
+            end
+        end
+    end
+    return str
+end
+
+-- has_key checks if the provided table contains the provided key using a regex
+-- @param tbl Table to iterate over
+-- @param key The key to be searched in the table
+M.has_key = function(tbl, key)
+    for tbl_key, _ in pairs(tbl) do
+        if string.find(key, tbl_key) then
+            return true
+        end
+    end
+    return false
+end
+
 -- has_value checks if the provided table contains the provided string using a regex
 -- @param tbl Table to iterate over
 -- @param str String to search in the table
@@ -49,15 +110,26 @@ M.tbl_to_str = function(tbl, json)
 end
 
 -- Just a split function because Lua does not have this, nothing more
-M.split = function(str, sep)
+-- @param str String to split
+-- @param sep Separator
+-- @param max_splits Number of times to split the string (optional)
+M.split = function(str, sep, max_splits)
 	if sep == nil then
 		sep = '%s'
 	end
+	max_splits = max_splits or -1
 
 	local str_tbl = {}
-	for match in string.gmatch(str, '([^' .. sep .. ']+)') do
-		table.insert(str_tbl, match)
+	local nField, nStart = 1, 1
+	local nFirst, nLast = str:find(sep, nStart)
+	while nFirst and max_splits ~= 0 do
+		str_tbl[nField] = str:sub(nStart, nFirst - 1)
+		nField = nField + 1
+		nStart = nLast + 1
+		nFirst, nLast = str:find(sep, nStart)
+		max_splits = max_splits - 1
 	end
+	str_tbl[nField] = str:sub(nStart)
 
 	return str_tbl
 end
