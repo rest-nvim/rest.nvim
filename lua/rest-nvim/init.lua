@@ -185,6 +185,7 @@ end
 -- @param query_line Line to set cursor position
 local function get_auth(bufnr, query_line)
 	local auth = {}
+    local auth_not_empty = false
 	-- Set stop at end of bufer
 	local stop_line = fn.line('$')
 
@@ -201,11 +202,15 @@ local function get_auth(bufnr, query_line)
 			auth_data = utils.split(auth_data, '%s+')
 			-- {'user', 'pass'}
 			auth = utils.split(auth_data[2], ':')
+            auth_not_empty = true
 		end
 	end
 
 	go_to_line(bufnr, query_line)
-	return auth
+    if not auth_not_empty then
+        return nil
+    end
+    return auth
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
