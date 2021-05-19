@@ -1,11 +1,13 @@
 rest-nvim	rest-nvim.txt	/*rest-nvim*
 rest-nvim-contents	rest-nvim.txt	/*rest-nvim-contents*
 rest-nvim-contributing	rest-nvim.txt	/*rest-nvim-contributing*
+rest-nvim-features	rest-nvim.txt	/*rest-nvim-features*
 rest-nvim-intro	rest-nvim.txt	/*rest-nvim-intro*
 rest-nvim-issues	rest-nvim.txt	/*rest-nvim-issues*
 rest-nvim-license	rest-nvim.txt	/*rest-nvim-license*
 rest-nvim-quick-start	rest-nvim.txt	/*rest-nvim-quick-start*
 rest-nvim-usage	rest-nvim.txt	/*rest-nvim-usage*
 rest-nvim-usage-commands	rest-nvim.txt	/*rest-nvim-usage-commands*
+rest-nvim-usage-environment-variables	rest-nvim.txt	/*rest-nvim-usage-environment-variables*
 rest-nvim-usage-requests	rest-nvim.txt	/*rest-nvim-usage-requests*
 rest-nvim.txt	rest-nvim.txt	/*rest-nvim.txt*
