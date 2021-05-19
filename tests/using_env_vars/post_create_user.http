@@ -1,0 +1,16 @@
+# Environment variables are readed from an `.env` file in the current working
+# directory and if they are not found, they will fallback to be searched in
+# the system environment variables.
+#
+# Environment variables placeholders can be used in the following fields:
+# - URL
+# - Authorization
+# - Body
+POST {{URL}}
+
+# Authorization: {{USER}}:{{PASSWORD}}
+
+{
+    "name": "{{USERNAME}}",
+    "job": "leader"
+}
