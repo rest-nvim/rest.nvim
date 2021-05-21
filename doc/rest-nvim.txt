@@ -13,14 +13,15 @@
 ===============================================================================
 CONTENTS                                                   *rest-nvim-contents*
     1. Introduction...........................................|rest-nvim-intro|
-    2. Quick start......................................|rest-nvim-quick-start|
-    3. Usage..................................................|rest-nvim-usage|
+    2. Features............................................|rest-nvim-features|
+    3. Quick start......................................|rest-nvim-quick-start|
+    4. Usage..................................................|rest-nvim-usage|
         1. Commands..................................|rest-nvim-usage-commands|
-        1. Requests..................................|rest-nvim-usage-requests|
-        2. Fields......................................|rest-nvim-usage-fields|
-    4. Known issues..........................................|rest-nvim-issues|
-    5. License..............................................|rest-nvim-license|
-    6. Contributing....................................|rest-nvim-contributing|
+        2. Requests..................................|rest-nvim-usage-requests|
+        3. Environment Variables........|rest-nvim-usage-environment-variables|
+    5. Known issues..........................................|rest-nvim-issues|
+    6. License..............................................|rest-nvim-license|
+    7. Contributing....................................|rest-nvim-contributing|
 
 
 ===============================================================================
@@ -30,6 +31,16 @@ INTRODUCTION                                                  *rest-nvim-intro*
 curl wrapper made in pure Lua by github.com/tami5 and implemented in the
 plugin `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you
 don't have to leave Neovim!
+
+
+===============================================================================
+FEATURES                                                   *rest-nvim-features*
+
+- Easy to use
+- Fast execution time
+- Run request under cursor
+- Syntax highlight for http files and output
+- Possibility of using environment variables in http files
 
 
 ===============================================================================
@@ -92,6 +103,18 @@ Currently `rest.nvim` supports the following request methods:
     - DELETE
     - PATCH
     - PUT
+
+
+===============================================================================
+ENVIRONMENT VARIABLES                   *rest-nvim-usage-environment-variables*
+
+`rest.nvim` allows the use of environment variables in requests.
+
+To use environment variables, the following syntax is used: `{{VARIABLE_NAME}}`
+
+These environment variables can be obtained from:
+    - System
+    - `.env` file in the current working directory
 
 
 ===============================================================================

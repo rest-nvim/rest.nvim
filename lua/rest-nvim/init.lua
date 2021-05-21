@@ -44,7 +44,7 @@ local function parse_url(stmt)
 	return {
 		method = parsed[1],
 		-- Encode URL
-		url = utils.encode_url(parsed[2]),
+		url = utils.encode_url(utils.replace_env_vars(parsed[2])),
 	}
 end
 
@@ -81,7 +81,7 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
 
 		for _, v in ipairs(json_lines) do
-			json_string = json_string .. v
+			json_string = json_string .. utils.replace_env_vars(v)
 		end
 
 		json_string = '{' .. json_string .. '}'
@@ -201,8 +201,7 @@ local function get_auth(bufnr, query_line)
 			-- Split by spaces, e.g. {'Authorization:', 'user:pass'}
 			auth_data = utils.split(auth_data, '%s+')
 			-- {'user', 'pass'}
-			auth = utils.split(auth_data[2], ':')
-            auth_not_empty = true
+			auth = utils.split(utils.replace_env_vars(auth_data[2]), ':')
 		end
 	end
 
