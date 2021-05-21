@@ -158,7 +158,7 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param query_line Line to set cursor position
 local function get_accept(bufnr, query_line)
-	local accept = ''
+	local accept = nil
 	-- Set stop at end of bufer
 	local stop_line = fn.line('$')
 
@@ -176,7 +176,8 @@ local function get_accept(bufnr, query_line)
 	end
 
 	go_to_line(bufnr, query_line)
-	return accept
+
+    return accept
 end
 
 -- get_auth retrieves the HTTP Authorization and returns a lua table with its values
@@ -184,6 +185,7 @@ end
 -- @param query_line Line to set cursor position
 local function get_auth(bufnr, query_line)
 	local auth = {}
+    local auth_not_empty = false
 	-- Set stop at end of bufer
 	local stop_line = fn.line('$')
 
@@ -204,7 +206,10 @@ local function get_auth(bufnr, query_line)
 	end
 
 	go_to_line(bufnr, query_line)
-	return auth
+    if not auth_not_empty then
+        return nil
+    end
+    return auth
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
