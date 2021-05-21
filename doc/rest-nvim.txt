@@ -48,12 +48,10 @@ will do the following:
 
     2. Since we want to send our body as a JSON object, we set the
        Content-Type header.
-       `HEADERS {`
-       `    "Content-Type": "application/json"`
-       `}`
+       `"Content-Type": "application/json"`
 
     3. Now, we set the body of our request.
-       `BODY {`
+       `{`
        `    "name": "morpheus",`
        `    "job": "leader"`
        `}`
@@ -68,6 +66,13 @@ exposes a command to be mapped. See |rest-nvim-usage-commands|
 
 ===============================================================================
 USAGE                                                         *rest-nvim-usage*
+
+Create a new http file or open an existing one and place the cursor over the
+request method (e.g. `GET`) and run `rest.nvim` (see |rest-nvim-usage-commands|).
+
+Notes:
+    - `rest.nvim` follows the RFC 2616 request format so any other http file
+      should work without problems.
 
 
 ===============================================================================
@@ -90,22 +95,9 @@ Currently `rest.nvim` supports the following request methods:
 
 
 ===============================================================================
-FIELDS                                                 *rest-nvim-usage-fields*
-
-Currently `rest.nvim` supports the following data fields:
-
-    - HEADERS - The request headers             (lua table, key-value)
-    - BODY    - The request body                (lua table, key-value)
-    - QUERIES - The request queries             (lua table, key-value)
-    - FORM    - The request form                (lua table, key-value)
-    - AUTH    - The request authentication data (lua table, value)
-
-
-===============================================================================
 KNOWN ISSUES                                                 *rest-nvim-issues*
 
-    1. URLs are not being encoded, e.g. `?q=[1,2,3]` should be encoded into
-       `?q=%5B1%2C2%2C3%5D`.
+    - Nothing here at the moment :)
 
 
 ===============================================================================
