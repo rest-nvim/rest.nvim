@@ -46,9 +46,6 @@ FEATURES                                                   *rest-nvim-features*
 ===============================================================================
 QUICK START                                             *rest-nvim-quick-start*
 
-For now `rest.vnim` uses a JSON-based syntax for its operations. That means
-that by example, to send headers a syntax of `{key: value}` is used.
-
 In this section we will be using `https://reqres.in/` for requests.
 
 Let's say we want to create a new user and send our body as a JSON, so we
@@ -59,7 +56,7 @@ will do the following:
 
     2. Since we want to send our body as a JSON object, we set the
        Content-Type header.
-       `"Content-Type": "application/json"`
+       `Content-Type: application/json`
 
     3. Now, we set the body of our request.
        `{`
@@ -79,7 +76,8 @@ exposes a command to be mapped. See |rest-nvim-usage-commands|
 USAGE                                                         *rest-nvim-usage*
 
 Create a new http file or open an existing one and place the cursor over the
-request method (e.g. `GET`) and run `rest.nvim` (see |rest-nvim-usage-commands|).
+request line (e.g. `GET http://localhost:3000/foo`) and run `rest.nvim`
+(see |rest-nvim-usage-commands|).
 
 Notes:
     - `rest.nvim` follows the RFC 2616 request format so any other http file
@@ -89,8 +87,7 @@ Notes:
 ===============================================================================
 COMMANDS                                             *rest-nvim-usage-commands*
 
-`<Plug>RestNvim`
-Run `rest.nvim` in the current cursor position.
+| `<Plug>RestNvim` | Run `rest.nvim` in the current cursor position.
 
 
 ===============================================================================
