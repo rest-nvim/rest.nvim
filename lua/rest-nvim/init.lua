@@ -260,7 +260,7 @@ local function curl_cmd(opts)
 		if json_body then
 			-- Format JSON output and then add it into the buffer
 			-- line by line because Vim doesn't allow strings with newlines
-			local out = fn.system("echo -E '" .. line .. "' | jq .")
+			local out = fn.system("jq", line)
 			for _, _line in ipairs(utils.split(out, '\n')) do
 				line_count = api.nvim_buf_line_count(res_bufnr) - 1
 				api.nvim_buf_set_lines(
