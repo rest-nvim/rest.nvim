@@ -256,32 +256,19 @@ local function curl_cmd(opts)
 	end
 
 	--- Add the curl command results into the created buffer
-	for line in utils.iter_lines(res.body) do
-		if json_body then
-			-- Format JSON output and then add it into the buffer
-			-- line by line because Vim doesn't allow strings with newlines
-			local out = fn.system("jq", line)
-			for _, _line in ipairs(utils.split(out, '\n')) do
-				line_count = api.nvim_buf_line_count(res_bufnr) - 1
-				api.nvim_buf_set_lines(
-					res_bufnr,
-					line_count,
-					line_count,
-					false,
-					{ _line }
-				)
-			end
-		else
-			line_count = api.nvim_buf_line_count(res_bufnr) - 1
-			api.nvim_buf_set_lines(
-				res_bufnr,
-				line_count,
-				line_count,
-				false,
-				{ line }
-			)
-		end
+	line_count = api.nvim_buf_line_count(res_bufnr) - 1
+	if json_body then
+		-- format JSON body
+		res.body = fn.system("jq", res.body)
 	end
+	local lines = utils.split(res.body, '\n')
+	api.nvim_buf_set_lines(
+		res_bufnr,
+		line_count,
+		line_count + #lines,
+		false,
+		lines
+	)
 
 	-- Only open a new split if the buffer is not loaded into the current window
 	if fn.bufwinnr(res_bufnr) == -1 then
