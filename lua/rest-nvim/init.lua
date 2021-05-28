@@ -231,17 +231,16 @@ local function curl_cmd(opts)
 	end
 
 	--- Add metadata into the created buffer (status code, date, etc)
-	local line_count = api.nvim_buf_line_count(res_bufnr) - 1
 	-- Request statement (METHOD URL)
 	api.nvim_buf_set_lines(
 		res_bufnr,
-		line_count,
-		line_count,
+		0,
+		0,
 		false,
 		{ parsed_url.method .. ' ' .. parsed_url.url }
 	)
 	-- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
-	line_count = api.nvim_buf_line_count(res_bufnr)
+	local line_count = api.nvim_buf_line_count(res_bufnr)
 	api.nvim_buf_set_lines(
 		res_bufnr,
 		line_count,
@@ -250,10 +249,13 @@ local function curl_cmd(opts)
 		{ 'HTTP/1.1 ' .. utils.http_status(res.status) }
 	)
 	-- Headers, e.g. Content-Type: application/json
-	for _, header in ipairs(res.headers) do
-		line_count = api.nvim_buf_line_count(res_bufnr)
-		api.nvim_buf_set_lines(res_bufnr, line_count, line_count, false, { header })
-	end
+	api.nvim_buf_set_lines(
+		res_bufnr,
+		line_count + 1,
+		line_count + #res.headers,
+		false,
+		res.headers
+	)
 
 	--- Add the curl command results into the created buffer
 	if json_body then
