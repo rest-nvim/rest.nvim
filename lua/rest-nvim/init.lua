@@ -231,17 +231,16 @@ local function curl_cmd(opts)
 	end
 
 	--- Add metadata into the created buffer (status code, date, etc)
-	local line_count = api.nvim_buf_line_count(res_bufnr) - 1
 	-- Request statement (METHOD URL)
 	api.nvim_buf_set_lines(
 		res_bufnr,
-		line_count,
-		line_count,
+		0,
+		0,
 		false,
 		{ parsed_url.method .. ' ' .. parsed_url.url }
 	)
 	-- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
-	line_count = api.nvim_buf_line_count(res_bufnr)
+	local line_count = api.nvim_buf_line_count(res_bufnr)
 	api.nvim_buf_set_lines(
 		res_bufnr,
 		line_count,
@@ -250,38 +249,28 @@ local function curl_cmd(opts)
 		{ 'HTTP/1.1 ' .. utils.http_status(res.status) }
 	)
 	-- Headers, e.g. Content-Type: application/json
-	for _, header in ipairs(res.headers) do
-		line_count = api.nvim_buf_line_count(res_bufnr)
-		api.nvim_buf_set_lines(res_bufnr, line_count, line_count, false, { header })
-	end
+	api.nvim_buf_set_lines(
+		res_bufnr,
+		line_count + 1,
+		line_count + #res.headers,
+		false,
+		res.headers
+	)
 
 	--- Add the curl command results into the created buffer
-	for line in utils.iter_lines(res.body) do
-		if json_body then
-			-- Format JSON output and then add it into the buffer
-			-- line by line because Vim doesn't allow strings with newlines
-			local out = fn.system("jq", line)
-			for _, _line in ipairs(utils.split(out, '\n')) do
-				line_count = api.nvim_buf_line_count(res_bufnr) - 1
-				api.nvim_buf_set_lines(
-					res_bufnr,
-					line_count,
-					line_count,
-					false,
-					{ _line }
-				)
-			end
-		else
-			line_count = api.nvim_buf_line_count(res_bufnr) - 1
-			api.nvim_buf_set_lines(
-				res_bufnr,
-				line_count,
-				line_count,
-				false,
-				{ line }
-			)
-		end
+	if json_body then
+		-- format JSON body
+		res.body = fn.system("jq", res.body)
 	end
+	local lines = utils.split(res.body, '\n')
+	line_count = api.nvim_buf_line_count(res_bufnr) - 1
+	api.nvim_buf_set_lines(
+		res_bufnr,
+		line_count,
+		line_count + #lines,
+		false,
+		lines
+	)
 
 	-- Only open a new split if the buffer is not loaded into the current window
 	if fn.bufwinnr(res_bufnr) == -1 then
