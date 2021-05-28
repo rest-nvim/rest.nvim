@@ -256,12 +256,12 @@ local function curl_cmd(opts)
 	end
 
 	--- Add the curl command results into the created buffer
-	line_count = api.nvim_buf_line_count(res_bufnr) - 1
 	if json_body then
 		-- format JSON body
 		res.body = fn.system("jq", res.body)
 	end
 	local lines = utils.split(res.body, '\n')
+	line_count = api.nvim_buf_line_count(res_bufnr) - 1
 	api.nvim_buf_set_lines(
 		res_bufnr,
 		line_count,
