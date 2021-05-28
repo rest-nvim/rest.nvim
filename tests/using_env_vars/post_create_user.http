@@ -1,4 +1,4 @@
-# Environment variables are readed from an `.env` file in the current working
+# Environment variables are read from an `.env` file in the current working
 # directory and if they are not found, they will fallback to be searched in
 # the system environment variables.
 #
