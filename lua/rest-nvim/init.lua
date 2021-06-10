@@ -1,4 +1,3 @@
-local vim = vim
 local api, fn = vim.api, vim.fn
 
 local curl = require('plenary.curl')
@@ -71,8 +70,8 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 	local start_line = 0
 	local end_line = 0
 
-	start_line = fn.search('{', '', stop_line)
-	end_line = fn.search('}', 'n', stop_line)
+	start_line = fn.search('^{', '', stop_line)
+	end_line = fn.search('^}', 'n', stop_line)
 
 	if start_line > 0 then
 		local json_string = ''

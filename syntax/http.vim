@@ -12,7 +12,7 @@ syn match httpHeaderKey       "^\(\w\)[^:]\+" nextgroup=httpHeaderSeparator skip
 syn match httpHeaderSeparator "[=:]" contained
 
 syn include @json syntax/json.vim
-syn region  jsonBody start="\v\{" end="\v\}$" contains=@json keepend
+syn region  jsonBody start="\v^\{" end="\v^\}$" contains=@json keepend
 
 
 hi link httpComment         Comment
