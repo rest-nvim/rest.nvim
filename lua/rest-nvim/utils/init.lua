@@ -30,35 +30,40 @@ end
 -- with the env variable value
 -- @param str Where replace the placers for the env variables
 M.replace_env_vars = function(str)
-    local env_vars = M.read_env_file()
+	local env_vars = M.read_env_file()
 
-    for var in string.gmatch(str, '{{%w+}}') do
-        var = var:gsub('{', ''):gsub('}', '')
-        -- If the env variable wasn't found in the `.env` file then search it
-        -- in the OS environment variables
-        if M.has_key(env_vars, var) then
-            str = str:gsub('{{' .. var .. '}}', env_vars[var])
-        else
-            if os.getenv(var) ~= nil then
-                str = str:gsub('{{' .. var .. '}}', os.getenv(var))
-            else
-                error(string.format("Environment variable '%s' was not found.", var))
-            end
-        end
-    end
-    return str
+	for var in string.gmatch(str, '{{%w+}}') do
+		var = var:gsub('{', ''):gsub('}', '')
+		-- If the env variable wasn't found in the `.env` file then search it
+		-- in the OS environment variables
+		if M.has_key(env_vars, var) then
+			str = str:gsub('{{' .. var .. '}}', env_vars[var])
+		else
+			if os.getenv(var) ~= nil then
+				str = str:gsub('{{' .. var .. '}}', os.getenv(var))
+			else
+				error(
+					string.format(
+						"Environment variable '%s' was not found.",
+						var
+					)
+				)
+			end
+		end
+	end
+	return str
 end
 
 -- has_key checks if the provided table contains the provided key using a regex
 -- @param tbl Table to iterate over
 -- @param key The key to be searched in the table
 M.has_key = function(tbl, key)
-    for tbl_key, _ in pairs(tbl) do
-        if string.find(key, tbl_key) then
-            return true
-        end
-    end
-    return false
+	for tbl_key, _ in pairs(tbl) do
+		if string.find(key, tbl_key) then
+			return true
+		end
+	end
+	return false
 end
 
 -- has_value checks if the provided table contains the provided string using a regex
