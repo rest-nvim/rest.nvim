@@ -76,8 +76,12 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 	if start_line > 0 then
 		local json_string = ''
 		local json_lines = {}
-		json_lines =
-			api.nvim_buf_get_lines(bufnr, start_line, end_line - 1, false)
+		json_lines = api.nvim_buf_get_lines(
+			bufnr,
+			start_line,
+			end_line - 1,
+			false
+		)
 
 		for _, v in ipairs(json_lines) do
 			json_string = json_string .. utils.replace_env_vars(v)
@@ -124,24 +128,28 @@ local function get_headers(bufnr, query_line)
 				break_loops = true
 				break
 			else
-				local get_header =
-					api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+				local get_header = api.nvim_buf_get_lines(
+					bufnr,
+					start_line - 1,
+					end_line,
+					false
+				)
 
 				for _, header in ipairs(get_header) do
 					header = utils.split(header, ':')
 					if
 						header[1]:lower() ~= 'accept'
 						and header[1]:lower() ~= 'authorization'
-                        -- If header key doesn't contains double quotes,
-                        -- so we don't get body keys
+						-- If header key doesn't contains double quotes,
+						-- so we don't get body keys
 						and header[1]:find('"') == nil
-                        -- If header key doesn't contains hashes,
-                        -- so we don't get commented headers
-                        and header[1]:find('^#') == nil
-                        -- If header key doesn't contains HTTP methods,
-                        -- so we don't get the http method/url
-                        and not utils.has_value(http_methods, header[1])
-                    then
+						-- If header key doesn't contains hashes,
+						-- so we don't get commented headers
+						and header[1]:find('^#') == nil
+						-- If header key doesn't contains HTTP methods,
+						-- so we don't get the http method/url
+						and not utils.has_value(http_methods, header[1])
+					then
 						headers[header[1]:lower()] = header[2]
 					end
 				end
@@ -166,8 +174,12 @@ local function get_accept(bufnr, query_line)
 		-- Case-insensitive search
 		local start_line = fn.search('\\cAccept:', '', stop_line)
 		local end_line = start_line
-		local accept_line =
-			api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+		local accept_line = api.nvim_buf_get_lines(
+			bufnr,
+			start_line - 1,
+			end_line,
+			false
+		)
 
 		for _, accept_data in pairs(accept_line) do
 			accept = utils.split(accept_data, ':')[2]
@@ -176,7 +188,7 @@ local function get_accept(bufnr, query_line)
 
 	go_to_line(bufnr, query_line)
 
-    return accept
+	return accept
 end
 
 -- get_auth retrieves the HTTP Authorization and returns a lua table with its values
@@ -184,7 +196,7 @@ end
 -- @param query_line Line to set cursor position
 local function get_auth(bufnr, query_line)
 	local auth = {}
-    local auth_not_empty = false
+	local auth_not_empty = false
 	-- Set stop at end of bufer
 	local stop_line = fn.line('$')
 
@@ -193,8 +205,12 @@ local function get_auth(bufnr, query_line)
 		-- Case-insensitive search
 		local start_line = fn.search('\\cAuthorization:', '', stop_line)
 		local end_line = start_line
-		local auth_line =
-			api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+		local auth_line = api.nvim_buf_get_lines(
+			bufnr,
+			start_line - 1,
+			end_line,
+			false
+		)
 
 		for _, auth_data in pairs(auth_line) do
 			-- Split by spaces, e.g. {'Authorization:', 'user:pass'}
@@ -205,10 +221,10 @@ local function get_auth(bufnr, query_line)
 	end
 
 	go_to_line(bufnr, query_line)
-    if not auth_not_empty then
-        return nil
-    end
-    return auth
+	if not auth_not_empty then
+		return nil
+	end
+	return auth
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
@@ -259,7 +275,7 @@ local function curl_cmd(opts)
 	--- Add the curl command results into the created buffer
 	if json_body then
 		-- format JSON body
-		res.body = fn.system("jq", res.body)
+		res.body = fn.system('jq', res.body)
 	end
 	local lines = utils.split(res.body, '\n')
 	line_count = api.nvim_buf_line_count(res_bufnr) - 1
@@ -290,12 +306,11 @@ local function run()
 	local parsed_url = parse_url(fn.getline('.'))
 	local last_query_line_number = fn.line('.')
 
-	local next_query =
-		fn.search(
-			'GET\\|POST\\|PUT\\|PATCH\\|DELETE',
-			'n',
-			fn.line('$')
-		)
+	local next_query = fn.search(
+		'GET\\|POST\\|PUT\\|PATCH\\|DELETE',
+		'n',
+		fn.line('$')
+	)
 	next_query = next_query > 1 and next_query or fn.line('$')
 
 	local headers = get_headers(bufnr, last_query_line_number)
@@ -316,7 +331,7 @@ local function run()
 	local auth = get_auth(bufnr, last_query_line_number)
 	local accept = get_accept(bufnr, last_query_line_number)
 
-	curl_cmd({
+	local success_req = pcall(curl_cmd, {
 		method = parsed_url.method:lower(),
 		url = parsed_url.url,
 		headers = headers,
@@ -325,6 +340,12 @@ local function run()
 		auth = auth,
 	})
 
+	if not success_req then
+		error(
+			'[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.',
+			2
+		)
+	end
 	go_to_line(bufnr, last_query_line_number)
 end
 
