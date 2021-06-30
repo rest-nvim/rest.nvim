@@ -200,7 +200,7 @@ end
 -- @param query_line Line to set cursor position
 local function get_auth(bufnr, query_line)
 	local auth = {}
-	local auth_not_empty = false
+	local is_auth_empty = true
 	-- Set stop at end of bufer
 	local stop_line = fn.line('$')
 
@@ -208,6 +208,10 @@ local function get_auth(bufnr, query_line)
 	for _ = 1, stop_line do
 		-- Case-insensitive search
 		local start_line = fn.search('\\cAuthorization:', '', stop_line)
+        if start_line ~= 0 then
+            is_auth_empty = false
+        end
+
 		local end_line = start_line
 		local auth_line = api.nvim_buf_get_lines(
 			bufnr,
@@ -227,7 +231,7 @@ local function get_auth(bufnr, query_line)
 	end
 
 	go_to_line(bufnr, query_line)
-	if not auth_not_empty then
+	if is_auth_empty then
 		return nil
 	end
 	return auth
