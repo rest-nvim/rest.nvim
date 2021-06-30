@@ -84,7 +84,7 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 		)
 
 		for _, json_line in ipairs(json_lines) do
-			if json_line:find('^%s+#') == nil then
+			if not json_line:find('^%s+#') then
 				json_string = json_string .. utils.replace_env_vars(json_line)
 			end
 		end
@@ -141,17 +141,19 @@ local function get_headers(bufnr, query_line)
 					header = utils.split(header, ':')
 					if
 						header[1]:lower() ~= 'accept'
-						-- If header key doesn't contains double quotes,
-						-- so we don't get body keys
-						and header[1]:find('"') == nil
+						-- If header key doesn't contains double quotes at the
+						-- start, so we don't get body keys
+						and not header[1]:find('^%s+"')
 						-- If header key doesn't contains hashes,
 						-- so we don't get commented headers
-						and header[1]:find('^%s+#') == nil
+						and not header[1]:find('^%s+#')
 						-- If header key doesn't contains HTTP methods,
 						-- so we don't get the http method/url
 						and not utils.has_value(http_methods, header[1])
 					then
-						headers[header[1]:lower()] = header[2]
+						headers[header[1]:lower()] = utils.replace_env_vars(
+							header[2]
+						)
 					end
 				end
 			end
@@ -183,7 +185,7 @@ local function get_accept(bufnr, query_line)
 		)
 
 		for _, accept_data in pairs(accept_line) do
-			if accept_data:find('^%s+#') == nil then
+			if not accept_data:find('^%s+#') then
 				accept = utils.split(accept_data, ':')[2]
 			end
 		end
