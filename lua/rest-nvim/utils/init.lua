@@ -32,14 +32,14 @@ end
 M.replace_env_vars = function(str)
 	local env_vars = M.read_env_file()
 
-	for var in string.gmatch(str, '{{%w+}}') do
+	for var in string.gmatch(str, '{{[%w%W]+}}') do
 		var = var:gsub('{', ''):gsub('}', '')
 		-- If the env variable wasn't found in the `.env` file then search it
 		-- in the OS environment variables
 		if M.has_key(env_vars, var) then
 			str = str:gsub('{{' .. var .. '}}', env_vars[var])
 		else
-			if os.getenv(var) ~= nil then
+			if os.getenv(var) then
 				str = str:gsub('{{' .. var .. '}}', os.getenv(var))
 			else
 				error(
