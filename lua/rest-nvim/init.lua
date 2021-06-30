@@ -84,7 +84,8 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 		)
 
 		for _, json_line in ipairs(json_lines) do
-			if not json_line:find('^%s+#') then
+			-- Ignore commented lines with and without indent
+			if not (json_line:find('^#') or json_line:find('^%s+#')) then
 				json_string = json_string .. utils.replace_env_vars(json_line)
 			end
 		end
@@ -147,7 +148,7 @@ local function get_headers(bufnr, query_line)
 						and not header[1]:find('^%s+"')
 						-- If header key doesn't contains hashes,
 						-- so we don't get commented headers
-						and not header[1]:find('^%s+#')
+						and not (header[1]:find('^#') or header[1]:find('^%s+#'))
 						-- If header key doesn't contains HTTP methods,
 						-- so we don't get the http method/url
 						and not utils.has_value(http_methods, header[1])
@@ -186,7 +187,8 @@ local function get_accept(bufnr, query_line)
 		)
 
 		for _, accept_data in pairs(accept_line) do
-			if not accept_data:find('^%s+#') then
+			-- Ignore commented lines with and without indent
+			if not (accept_data:find('^#') or accept_data:find('(^%s+#)')) then
 				accept = utils.split(accept_data, ':')[2]
 			end
 		end
