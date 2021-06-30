@@ -141,7 +141,6 @@ local function get_headers(bufnr, query_line)
 					header = utils.split(header, ':')
 					if
 						header[1]:lower() ~= 'accept'
-						and header[1]:lower() ~= 'authorization'
 						-- If header key doesn't contains double quotes,
 						-- so we don't get body keys
 						and header[1]:find('"') == nil
@@ -193,44 +192,6 @@ local function get_accept(bufnr, query_line)
 	go_to_line(bufnr, query_line)
 
 	return accept
-end
-
--- get_auth retrieves the HTTP Authorization and returns a lua table with its values
--- @param bufnr Buffer number, a.k.a id
--- @param query_line Line to set cursor position
-local function get_auth(bufnr, query_line)
-	local auth = {}
-	local auth_not_empty = false
-	-- Set stop at end of bufer
-	local stop_line = fn.line('$')
-
-	-- Iterate over all buffer lines
-	for _ = 1, stop_line do
-		-- Case-insensitive search
-		local start_line = fn.search('\\cAuthorization:', '', stop_line)
-		local end_line = start_line
-		local auth_line = api.nvim_buf_get_lines(
-			bufnr,
-			start_line - 1,
-			end_line,
-			false
-		)
-
-		for _, auth_data in pairs(auth_line) do
-			if auth_data:find('^%s+#') == nil then
-				-- Split by spaces, e.g. {'Authorization:', 'user:pass'}
-				auth_data = utils.split(auth_data, '%s+')
-				-- {'user', 'pass'}
-				auth = utils.split(utils.replace_env_vars(auth_data[2]), ':')
-			end
-		end
-	end
-
-	go_to_line(bufnr, query_line)
-	if not auth_not_empty then
-		return nil
-	end
-	return auth
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
@@ -343,7 +304,6 @@ local function run(verbose)
 		body = get_body(bufnr, next_query, last_query_line_number)
 	end
 
-	local auth = get_auth(bufnr, last_query_line_number)
 	local accept = get_accept(bufnr, last_query_line_number)
 
 	local success_req, req_err = pcall(curl_cmd, {
@@ -352,7 +312,6 @@ local function run(verbose)
 		headers = headers,
 		accept = accept,
 		body = body,
-		auth = auth,
 		dry_run = verbose and verbose or false,
 	})
 
