@@ -83,8 +83,10 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 			false
 		)
 
-		for _, v in ipairs(json_lines) do
-			json_string = json_string .. utils.replace_env_vars(v)
+		for _, json_line in ipairs(json_lines) do
+			if json_line:find('^#') == nil then
+				json_string = json_string .. utils.replace_env_vars(json_line)
+			end
 		end
 
 		json_string = '{' .. json_string .. '}'
@@ -182,7 +184,9 @@ local function get_accept(bufnr, query_line)
 		)
 
 		for _, accept_data in pairs(accept_line) do
-			accept = utils.split(accept_data, ':')[2]
+			if accept_data:find('^#') == nil then
+				accept = utils.split(accept_data, ':')[2]
+			end
 		end
 	end
 
@@ -213,10 +217,12 @@ local function get_auth(bufnr, query_line)
 		)
 
 		for _, auth_data in pairs(auth_line) do
-			-- Split by spaces, e.g. {'Authorization:', 'user:pass'}
-			auth_data = utils.split(auth_data, '%s+')
-			-- {'user', 'pass'}
-			auth = utils.split(utils.replace_env_vars(auth_data[2]), ':')
+			if auth_data:find('^#') == nil then
+				-- Split by spaces, e.g. {'Authorization:', 'user:pass'}
+				auth_data = utils.split(auth_data, '%s+')
+				-- {'user', 'pass'}
+				auth = utils.split(utils.replace_env_vars(auth_data[2]), ':')
+			end
 		end
 	end
 
