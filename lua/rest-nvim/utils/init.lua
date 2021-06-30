@@ -171,8 +171,16 @@ M.encode_url = function(url)
 	return url
 end
 
+-- contains_comments checks if the given string contains comments characters
+-- @param str The string that should be checked
+-- @return number
+M.contains_comments = function(str)
+    return str:find('^#') or str:find('^%s+#')
+end
+
 -- http_status returns the status code and the meaning, e.g. 200 OK
 -- see https://httpstatuses.com/ for reference
+-- @param code The request status code
 M.http_status = function(code)
 	-- NOTE: this table does not cover all the statuses _yet_
 	local status_meaning = {
