@@ -8,7 +8,7 @@
 # - Body
 POST {{URL}}
 
-# Authorization: {{USER}}:{{PASSWORD}}
+Authorization: Bearer {{TOKEN}}
 
 {
     "name": "{{USERNAME}}",
