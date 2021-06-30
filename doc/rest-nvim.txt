@@ -87,7 +87,12 @@ Notes:
 ===============================================================================
 COMMANDS                                             *rest-nvim-usage-commands*
 
-| `<Plug>RestNvim` | Run `rest.nvim` in the current cursor position.
+- `<Plug>RestNvim`
+  Run `rest.nvim` in the current cursor position.
+
+- `<Plug>RestNvimPreview`
+  Same as `RestNvim` but it returns the cURL command without executing the
+  request. Intended for debugging purposes.
 
 
 ===============================================================================
