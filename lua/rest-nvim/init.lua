@@ -126,7 +126,8 @@ local function get_headers(bufnr, query_line)
 		end
 
 		for _, next_line_content in pairs(next_line) do
-			if string.find(next_line_content, '{') then
+			-- If the next line starts the request body then break the loop
+			if next_line_content:find('^{') then
 				break_loops = true
 				break
 			else
