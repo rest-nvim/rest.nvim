@@ -232,6 +232,15 @@ end
 -- @param opts curl arguments
 local function curl_cmd(opts)
 	local res = curl[opts.method](opts)
+	if opts.dry_run then
+		print(
+			'[rest.nvim] Request preview:\n'
+				.. 'curl '
+				.. table.concat(res, ' ')
+		)
+		return
+	end
+
 	local res_bufnr = get_or_create_buf()
 	local parsed_url = parse_url(fn.getline('.'))
 	local json_body = false
@@ -301,7 +310,7 @@ end
 
 -- run will retrieve the required request information from the current buffer
 -- and then execute curl
-local function run()
+local function run(verbose)
 	local bufnr = api.nvim_win_get_buf(0)
 	local parsed_url = parse_url(fn.getline('.'))
 	local last_query_line_number = fn.line('.')
@@ -331,18 +340,20 @@ local function run()
 	local auth = get_auth(bufnr, last_query_line_number)
 	local accept = get_accept(bufnr, last_query_line_number)
 
-	local success_req = pcall(curl_cmd, {
+	local success_req, req_err = pcall(curl_cmd, {
 		method = parsed_url.method:lower(),
 		url = parsed_url.url,
 		headers = headers,
 		accept = accept,
 		body = body,
 		auth = auth,
+		dry_run = verbose and verbose or false,
 	})
 
 	if not success_req then
 		error(
-			'[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.',
+			'[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: '
+				.. req_err,
 			2
 		)
 	end
