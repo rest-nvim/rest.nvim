@@ -175,7 +175,7 @@ end
 -- @param str The string that should be checked
 -- @return number
 M.contains_comments = function(str)
-    return str:find('^#') or str:find('^%s+#')
+	return str:find('^#') or str:find('^%s+#')
 end
 
 -- http_status returns the status code and the meaning, e.g. 200 OK
