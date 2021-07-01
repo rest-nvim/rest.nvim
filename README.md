@@ -21,7 +21,13 @@ have to leave Neovim!
 
 > **IMPORTANT:** If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
 
-# Features
+## Notices
+
+- **2021-07-01**: Now for getting syntax highlighting in http files you should
+  add a `require('rest-nvim').setup()` to your `rest.nvim` setup, refer to [packer.nivm](#packernvim).
+  This breaking change should allow lazy-loading of `rest.nvim`.
+
+## Features
 
 - Easy to use
 - Fast execution time
@@ -29,7 +35,7 @@ have to leave Neovim!
 - Syntax highlight for http files and output
 - Possibility of using environment variables in http files
 
-# Install
+## Install
 
 > **WARNING:** rest.nvim requires Neovim >= 0.5 to work.
 
@@ -41,23 +47,26 @@ have to leave Neovim!
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
-## packer.nvim
+### packer.nvim
 
 ```lua
 use {
     'NTBBloodbath/rest.nvim',
-    requires = { 'nvim-lua/plenary.nvim' }
+    requires = { 'nvim-lua/plenary.nvim' },
+    config = function()
+        require('rest-nvim').setup()
+    end
 }
 ```
 
-# Keybindings
+## Keybindings
 
 By default `rest.nvim` does not have any key mappings so you will not have
 conflicts with any of your existing ones.
 
-To run `rest.nvim` you should map the `<Plug>RestNvim` command.
+To run `rest.nvim` you should map the `<Plug>RestNvim` and `<Plug>RestNvimPreview` commands.
 
-# Usage
+## Usage
 
 Create a new http file or open an existing one and place the cursor over the
 request method (e.g. `GET`) and run `rest.nvim`.
@@ -71,7 +80,7 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ---
 
-# Contribute
+## Contribute
 
 1. Fork it (https://github.com/NTBBloodbath/rest.nvim/fork)
 2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
@@ -79,7 +88,7 @@ request method (e.g. `GET`) and run `rest.nvim`.
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
 5. Create a new Pull Request
 
-# License
+## License
 
 rest.nvim is [MIT Licensed](./LICENSE).
 
