@@ -5,9 +5,9 @@ local utils = require('rest-nvim.utils')
 
 -- setup is needed for enabling syntax highlighting for http files
 rest.setup = function()
-    if vim.fn.expand('%:e') == 'http' then
-        vim.api.nvim_buf_set_option('%', 'filetype', 'http')
-    end
+	if vim.fn.expand('%:e') == 'http' then
+		vim.api.nvim_buf_set_option('%', 'filetype', 'http')
+	end
 end
 
 -- get_or_create_buf checks if there is already a buffer with the rest run results
