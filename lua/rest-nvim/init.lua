@@ -133,7 +133,7 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 			end
 		end
 
-		json =  '{' .. json_string .. '}'
+		json = '{' .. json_string .. '}'
 	end
 
 	go_to_line(bufnr, query_line)
