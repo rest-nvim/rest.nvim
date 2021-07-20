@@ -68,28 +68,30 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
 local function get_importfile(bufnr, stop_line)
-    local import_line = 0
-    import_line = vim.fn.search('^<', '', stop_line)
-    if import_line > 0 then
-        local fileimport_string = ''
-        local fileimport_line = {}
+	local import_line = 0
+	import_line = vim.fn.search('^<', '', stop_line)
+	if import_line > 0 then
+		local fileimport_string = ''
+		local fileimport_line = {}
 		fileimport_line = vim.api.nvim_buf_get_lines(
 			bufnr,
 			import_line - 1,
 			import_line,
 			false
 		)
-        fileimport_string = fileimport_line[1]
-        fileimport_string = string.gsub(fileimport_string, "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
-        local fileimport_path = path.new(fileimport_string)
-        if not fileimport_path:is_absolute() then
-            local buffer_name = vim.api.nvim_buf_get_name(bufnr)
-            local buffer_path = path.new(path.new(buffer_name):parent())
-            fileimport_path = buffer_path:joinpath(fileimport_path)
-        end
-        return fileimport_path:absolute()
-    end
-    return nil
+		fileimport_string = fileimport_line[1]
+		fileimport_string = string.gsub(fileimport_string, '<', '', 1)
+			:gsub('^%s+', '')
+			:gsub('%s+$', '')
+		local fileimport_path = path.new(fileimport_string)
+		if not fileimport_path:is_absolute() then
+			local buffer_name = vim.api.nvim_buf_get_name(bufnr)
+			local buffer_path = path.new(path.new(buffer_name):parent())
+			fileimport_path = buffer_path:joinpath(fileimport_path)
+		end
+		return fileimport_path:absolute()
+	end
+	return nil
 end
 
 -- get_body retrieves the body lines in the buffer and then returns a raw table
@@ -106,10 +108,10 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 	local start_line = 0
 	local end_line = 0
 
-    local importfile = get_importfile(bufnr, stop_line)
-    if importfile ~= nil then
-        return importfile
-    end
+	local importfile = get_importfile(bufnr, stop_line)
+	if importfile ~= nil then
+		return importfile
+	end
 
 	start_line = vim.fn.search('^{', '', stop_line)
 	end_line = vim.fn.search('^}', 'n', stop_line)
@@ -145,7 +147,6 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 
 	return json
 end
-
 
 -- get_headers retrieves all the found headers and returns a lua table with them
 -- @param bufnr Buffer number, a.k.a id
