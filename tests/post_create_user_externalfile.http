@@ -1,0 +1,3 @@
+POST https://reqres.in/api/users
+
+< ./user.json
