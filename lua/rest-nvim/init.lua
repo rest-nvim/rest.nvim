@@ -114,7 +114,7 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 	end
 
 	start_line = vim.fn.search('^{', '', stop_line)
-	end_line = vim.fn.search('^}', 'n', stop_line)
+	end_line = vim.fn.searchpair('{', '', '}', 'n', '', stop_line)
 
 	if start_line > 0 then
 		local json_string = ''
@@ -133,17 +133,10 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 			end
 		end
 
-		json_string = '{' .. json_string .. '}'
-		json = vim.fn.json_decode(json_string)
+		json =  '{' .. json_string .. '}'
 	end
 
 	go_to_line(bufnr, query_line)
-
-	if json_body and json ~= nil then
-		-- If the body is a JSON request then return it as raw string
-		-- e.g. `-d "{\"foo\":\"bar\"}"`
-		json = utils.tbl_to_str(json)
-	end
 
 	return json
 end
@@ -359,7 +352,7 @@ rest.run = function(verbose)
 		url = parsed_url.url,
 		headers = headers,
 		accept = accept,
-		body = body,
+		raw_body = body,
 		dry_run = verbose and verbose or false,
 	})
 
