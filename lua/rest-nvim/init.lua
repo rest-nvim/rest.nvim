@@ -78,7 +78,7 @@ local function get_body(bufnr, stop_line, query_line, json_body)
 	local end_line = 0
 
 	start_line = vim.fn.search('^{', '', stop_line)
-	end_line = vim.fn.search('^}', 'n', stop_line)
+	end_line = vim.fn.searchpair('{', '', '}', 'n', '', stop_line)
 
 	if start_line > 0 then
 		local json_string = ''
