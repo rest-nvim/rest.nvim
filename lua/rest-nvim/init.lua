@@ -4,7 +4,6 @@ local curl = require('plenary.curl')
 local path = require('plenary.path')
 local utils = require('rest-nvim.utils')
 
-
 -- setup is needed for enabling syntax highlighting for http files
 rest.setup = function()
 	if vim.fn.expand('%:e') == 'http' then
@@ -105,8 +104,8 @@ end
 -- @param stop_line Line to stop searching
 -- @param json_body If the body is a JSON formatted POST request, false by default
 local function get_body(bufnr, stop_line, json_body)
-    -- store old cursor position
-    local oldpos = vim.fn.getcurpos()
+	-- store old cursor position
+	local oldpos = vim.fn.getcurpos()
 	if not json_body then
 		json_body = false
 	end
@@ -114,54 +113,54 @@ local function get_body(bufnr, stop_line, json_body)
 	local start_line = 0
 	local end_line = 0
 
-    -- first check if the body should be imported from an external file
+	-- first check if the body should be imported from an external file
 	local importfile = get_importfile(bufnr, stop_line)
 	if importfile ~= nil then
 		return importfile
 	end
 
-    if json_body then
-        start_line = vim.fn.search('^{', '', stop_line)
-        end_line = vim.fn.searchpair('{', '', '}', 'n', '', stop_line)
+	if json_body then
+		start_line = vim.fn.search('^{', '', stop_line)
+		end_line = vim.fn.searchpair('{', '', '}', 'n', '', stop_line)
 
-        if start_line > 0 then
-            local json_string = ''
-            local json_lines = {}
-            json_lines = vim.api.nvim_buf_get_lines(
-                bufnr,
-                start_line,
-                end_line - 1,
-                false
-            )
+		if start_line > 0 then
+			local json_string = ''
+			local json_lines = {}
+			json_lines = vim.api.nvim_buf_get_lines(
+				bufnr,
+				start_line,
+				end_line - 1,
+				false
+			)
 
-            for _, json_line in ipairs(json_lines) do
-                -- Ignore commented lines with and without indent
-                if not utils.contains_comments(json_line) then
-                    json_string = json_string .. utils.replace_env_vars(json_line)
-                end
-            end
+			for _, json_line in ipairs(json_lines) do
+				-- Ignore commented lines with and without indent
+				if not utils.contains_comments(json_line) then
+					json_string = json_string
+						.. utils.replace_env_vars(json_line)
+				end
+			end
 
-            json = '{' .. json_string .. '}'
-        end
+			json = '{' .. json_string .. '}'
+		end
 
-        -- restore old cursor position
-        go_to_line(bufnr, oldpos[2])
+		-- restore old cursor position
+		go_to_line(bufnr, oldpos[2])
 
-        return json
-    end
+		return json
+	end
 end
 
 -- is_request_line checks if the given line is a http request line according to RFC 2616
 local function is_request_line(line)
 	local http_methods = { 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' }
-    for _, method in ipairs(http_methods) do
-        if line:find('^'..method) then
-            return true
-        end
-    end
-    return false
+	for _, method in ipairs(http_methods) do
+		if line:find('^' .. method) then
+			return true
+		end
+	end
+	return false
 end
-
 
 -- get_headers retrieves all the found headers and returns a lua table with them
 -- @param bufnr Buffer number, a.k.a id
@@ -174,25 +173,25 @@ local function get_headers(bufnr, query_line)
 	-- Iterate over all buffer lines
 	for line_number = query_line + 1, stop_line do
 		local line = vim.fn.getbufline(bufnr, line_number)
-        local line_content = line[1]
+		local line_content = line[1]
 
-        -- message header and message body are seperated by CRLF (see RFC 2616)
-        -- for our purpose also the next request line will stop the header search
-        if is_request_line(line_content) or line_content == "" then
-            break
-        end
-        if not line_content:find(":") then
-            print("[rest.nvim] Missing Key/Value pair in message header. Ignoring entry")
-            goto continue
-        end
+		-- message header and message body are seperated by CRLF (see RFC 2616)
+		-- for our purpose also the next request line will stop the header search
+		if is_request_line(line_content) or line_content == '' then
+			break
+		end
+		if not line_content:find(':') then
+			print(
+				'[rest.nvim] Missing Key/Value pair in message header. Ignoring entry'
+			)
+			goto continue
+		end
 
-        local header = utils.split(line_content, ':')
-        if not utils.contains_comments(header[1]) then
-            headers[header[1]:lower()] = utils.replace_env_vars(
-                header[2]
-            )
-        end
-        ::continue::
+		local header = utils.split(line_content, ':')
+		if not utils.contains_comments(header[1]) then
+			headers[header[1]:lower()] = utils.replace_env_vars(header[2])
+		end
+		::continue::
 	end
 
 	return headers
@@ -212,9 +211,9 @@ local function curl_cmd(opts)
 		return
 	end
 
-    if res.exit ~= 0 then
-        error("[rest.nvim] " .. utils.curl_error(res.exit))
-    end
+	if res.exit ~= 0 then
+		error('[rest.nvim] ' .. utils.curl_error(res.exit))
+	end
 
 	local res_bufnr = get_or_create_buf()
 	local parsed_url = parse_url(vim.fn.getline('.'))
@@ -278,8 +277,8 @@ local function curl_cmd(opts)
 		vim.api.nvim_buf_set_option(res_bufnr, 'modifiable', false)
 	end
 
-    -- Send cursor in response buffer to start
-    go_to_line(res_bufnr, 1)
+	-- Send cursor in response buffer to start
+	go_to_line(res_bufnr, 1)
 end
 
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
@@ -287,38 +286,34 @@ end
 -- The current request is defined as the next request line above the cursor
 -- @param bufnr The buffer nummer of the .http-file
 local function start_request()
-	return vim.fn.search(
-		'^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE',
-		'cbn',
-	    1
-	)
+	return vim.fn.search('^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE', 'cbn', 1)
 end
 
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
 -- @param bufnr The buffer nummer of the .http-file
 local function end_request(bufnr)
-    -- store old cursor position
-    local curpos = vim.fn.getcurpos()
-    local linenumber = curpos[1]
-    local oldlinenumber = linenumber
+	-- store old cursor position
+	local curpos = vim.fn.getcurpos()
+	local linenumber = curpos[1]
+	local oldlinenumber = linenumber
 
-    -- start searching for next request from the next line
-    -- as the current line does contain the current, not the next request
-    if linenumber < vim.fn.line('$') then
-        linenumber = linenumber + 1
-    end
-    go_to_line(bufnr, linenumber)
+	-- start searching for next request from the next line
+	-- as the current line does contain the current, not the next request
+	if linenumber < vim.fn.line('$') then
+		linenumber = linenumber + 1
+	end
+	go_to_line(bufnr, linenumber)
 
 	local next = vim.fn.search(
 		'^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE',
 		'cn',
-	    vim.fn.line('$')
+		vim.fn.line('$')
 	)
 
-    -- restore cursor position
-    go_to_line(bufnr, oldlinenumber)
-    return next > 1 and next-1 or vim.fn.line('$')
+	-- restore cursor position
+	go_to_line(bufnr, oldlinenumber)
+	return next > 1 and next - 1 or vim.fn.line('$')
 end
 
 -- run will retrieve the required request information from the current buffer
@@ -328,12 +323,12 @@ rest.run = function(verbose)
 	local bufnr = vim.api.nvim_win_get_buf(0)
 
 	local start_line = start_request()
-    if start_line == 0 then
-        error("[rest.nvim]: No request found")
-        return
-    end
-    local end_line = end_request()
-    go_to_line(bufnr, start_line)
+	if start_line == 0 then
+		error('[rest.nvim]: No request found')
+		return
+	end
+	local end_line = end_request()
+	go_to_line(bufnr, start_line)
 
 	local parsed_url = parse_url(vim.fn.getline(start_line))
 
