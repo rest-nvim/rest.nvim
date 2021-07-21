@@ -1,4 +1,8 @@
 POST https://reqres.in/api/users
+Accept: */*
+Cache-Control: no-cache
+Content-Type: application/json
+X-Idempotency-Key: aaaaa
 
 {
     "name": "morpheus",
