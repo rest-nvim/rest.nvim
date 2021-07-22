@@ -24,7 +24,7 @@ have to leave Neovim!
 ## Notices
 
 - **2021-07-01**: Now for getting syntax highlighting in http files you should
-  add a `require('rest-nvim').setup()` to your `rest.nvim` setup, refer to [packer.nivm](#packernvim).
+  add a `require('rest-nvim').setup()` to your `rest.nvim` setup, refer to [packer.nvim](#packernvim).
   This breaking change should allow lazy-loading of `rest.nvim`.
 
 ## Features
