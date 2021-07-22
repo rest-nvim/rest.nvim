@@ -1,8 +1,10 @@
 POST https://reqres.in/api/users
+Content-Type: application/json
 
 {
     "name": "morpheus",
     "job": "leader",
+    "hans" : "{{$uuid}}",
     "array": ["a", "b", "c"],
     "object_ugly_closing": {
       "some_key": "some_value"
