@@ -1,4 +1,0 @@
-{
-    "name": "morpheus",
-    "job": "leader"
-}
