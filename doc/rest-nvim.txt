@@ -66,9 +66,8 @@ will do the following:
        `    "job": "leader"`
        `}`
 
-    4. Finally, we place the cursor over the method of our request and call
-       `rest.nvim`!.
-       `:lua require('rest-nvim').run()`
+    4. Finally, we place the cursor over or below the method of our request 
+       and call `rest.nvim` with `:lua require('rest-nvim').run()`.
 
 Since the way to call rest.nvim with Lua is not comfortable, rest.nvim
 exposes a command to be mapped. See |rest-nvim-usage-commands|
