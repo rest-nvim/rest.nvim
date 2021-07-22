@@ -1,4 +1,15 @@
+local random = math.random
+math.randomseed(os.time())
+
 local M = {}
+
+M.uuid = function()
+	local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+	return string.gsub(template, '[xy]', function(c)
+		local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+		return string.format('%x', v)
+	end)
+end
 
 -- file_exists checks if the provided file exists and returns a boolean
 -- @param file File to check
@@ -26,18 +37,40 @@ M.read_env_file = function()
 	return variables
 end
 
--- replace_env_vars replaces the env variables fields in the provided string
+M.read_dynamic_variables = function()
+	local dynamic_variables = {
+		['$uuid'] = M.uuid,
+        ['$timestamp'] = os.time,
+        ['$randomInt'] = function() return math.random(0,1000) end,
+	}
+	return dynamic_variables
+end
+
+M.read_variables = function()
+	local first = M.read_env_file()
+	local second = M.read_dynamic_variables()
+
+	for k, v in pairs(second) do
+		first[k] = v
+	end
+
+	return first
+end
+
+-- replace_vars replaces the env variables fields in the provided string
 -- with the env variable value
 -- @param str Where replace the placers for the env variables
-M.replace_env_vars = function(str)
-	local env_vars = M.read_env_file()
+M.replace_vars = function(str)
+	local vars = M.read_variables()
 
 	for var in string.gmatch(str, '{{[%w%W]+}}') do
 		var = var:gsub('{', ''):gsub('}', '')
-		-- If the env variable wasn't found in the `.env` file then search it
+		-- If the env variable wasn't found in the `.env` file or in the dynamic variables then search it
 		-- in the OS environment variables
-		if M.has_key(env_vars, var) then
-			str = str:gsub('{{' .. var .. '}}', env_vars[var])
+		if M.has_key(vars, var) then
+			str = type(vars[var]) == 'function'
+					and str:gsub('{{' .. var .. '}}', vars[var]())
+				or str:gsub('{{' .. var .. '}}', vars[var])
 		else
 			if os.getenv(var) then
 				str = str:gsub('{{' .. var .. '}}', os.getenv(var))

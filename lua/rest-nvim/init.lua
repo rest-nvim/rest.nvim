@@ -54,7 +54,7 @@ local function parse_url(stmt)
 	return {
 		method = parsed[1],
 		-- Encode URL
-		url = utils.encode_url(utils.replace_env_vars(parsed[2])),
+		url = utils.encode_url(utils.replace_vars(parsed[2])),
 	}
 end
 
@@ -136,8 +136,7 @@ local function get_body(bufnr, stop_line, json_body)
 			for _, json_line in ipairs(json_lines) do
 				-- Ignore commented lines with and without indent
 				if not utils.contains_comments(json_line) then
-					json_string = json_string
-						.. utils.replace_env_vars(json_line)
+					json_string = json_string .. utils.replace_vars(json_line)
 				end
 			end
 
@@ -189,7 +188,7 @@ local function get_headers(bufnr, query_line)
 
 		local header = utils.split(line_content, ':')
 		if not utils.contains_comments(header[1]) then
-			headers[header[1]:lower()] = utils.replace_env_vars(header[2])
+			headers[header[1]:lower()] = utils.replace_vars(header[2])
 		end
 		::continue::
 	end
