@@ -40,8 +40,10 @@ end
 M.read_dynamic_variables = function()
 	local dynamic_variables = {
 		['$uuid'] = M.uuid,
-        ['$timestamp'] = os.time,
-        ['$randomInt'] = function() return math.random(0,1000) end,
+		['$timestamp'] = os.time,
+		['$randomInt'] = function()
+			return math.random(0, 1000)
+		end,
 	}
 	return dynamic_variables
 end
