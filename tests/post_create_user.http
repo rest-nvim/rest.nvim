@@ -1,4 +1,5 @@
 POST https://reqres.in/api/users
+content-type: application/json
 
 {
     "name": "morpheus",
