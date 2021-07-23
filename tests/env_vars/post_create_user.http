@@ -7,10 +7,11 @@
 # - Authorization
 # - Body
 POST {{URL}}
-
+Content-Type: application/json
 Authorization: Bearer {{TOKEN}}
 
 {
     "name": "{{USERNAME}}",
-    "job": "leader"
+    "job": "leader",
+    "id" : "{{$uuid}}"
 }
