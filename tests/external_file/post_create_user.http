@@ -1,3 +1,4 @@
 POST https://reqres.in/api/users
+Content-Type: application/json
 
 < ./user.json
