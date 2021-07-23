@@ -71,9 +71,15 @@ end
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
-local function get_importfile(bufnr, stop_line)
-	local import_line = 0
-	import_line = vim.fn.search('^<', 'n', stop_line)
+local function get_importfile(bufnr,start_line, stop_line)
+    -- store old cursor position
+    local oldpos = vim.fn.getcurpos()
+    go_to_line(bufnr, start_line)
+
+	local import_line = vim.fn.search('^<', 'n', stop_line)
+    -- restore old cursor position
+    go_to_line(bufnr, oldpos[2])
+
 	if import_line > 0 then
 		local fileimport_string = ''
 		local fileimport_line = {}
@@ -102,53 +108,40 @@ end
 -- either a raw string with the body if it is JSON, or a filename. Plenary.curl can distinguish
 -- between strings with filenames and strings with the raw body
 -- @param bufnr Buffer number, a.k.a id
--- @param stop_line Line to stop searching
--- @param json_body If the body is a JSON formatted POST request, false by default
-local function get_body(bufnr, stop_line, json_body)
-	-- store old cursor position
-	local oldpos = vim.fn.getcurpos()
-	if not json_body then
-		json_body = false
-	end
-	local json = nil
-	local start_line = 0
-	local end_line = 0
+-- @param start_line Line where body starts
+-- @param stop_line Line where body stops
+local function get_body(bufnr, start_line, stop_line)
+    if start_line >= stop_line then
+        return
+    end
 
 	-- first check if the body should be imported from an external file
-	local importfile = get_importfile(bufnr, stop_line)
+	local importfile = get_importfile(bufnr, start_line, stop_line)
 	if importfile ~= nil then
 		return importfile
 	end
 
-	if json_body then
-		start_line = vim.fn.search('^{', '', stop_line)
-		end_line = vim.fn.searchpair('{', '', '}', 'n', '', stop_line)
+    local lines = {}
+    local body = ""
+    -- nvim_buf_get_lines is zero based and end-exclusive
+    -- but start_line and stop_line are one-based and inclusive
+    -- magically, this fits :-) start_line is the CRLF between header and body
+    -- which should not be included in the body, stop_line is the last line of the body
+    lines = vim.api.nvim_buf_get_lines(
+        bufnr,
+        start_line,
+        stop_line,
+        false
+    )
+    for _, line in ipairs(lines) do
+        -- Ignore commented lines with and without indent
+        if not utils.contains_comments(line) then
+            body = body
+                .. utils.replace_vars(line)
+        end
+    end
 
-		if start_line > 0 then
-			local json_string = ''
-			local json_lines = {}
-			json_lines = vim.api.nvim_buf_get_lines(
-				bufnr,
-				start_line,
-				end_line - 1,
-				false
-			)
-
-			for _, json_line in ipairs(json_lines) do
-				-- Ignore commented lines with and without indent
-				if not utils.contains_comments(json_line) then
-					json_string = json_string .. utils.replace_vars(json_line)
-				end
-			end
-
-			json = '{' .. json_string .. '}'
-		end
-
-		-- restore old cursor position
-		go_to_line(bufnr, oldpos[2])
-
-		return json
-	end
+    return body
 end
 
 -- is_request_line checks if the given line is a http request line according to RFC 2616
@@ -169,6 +162,7 @@ local function get_headers(bufnr, query_line)
 	local headers = {}
 	-- Set stop at end of buffer
 	local stop_line = vim.fn.line('$')
+    local body_start = 0
 
 	-- Iterate over all buffer lines
 	for line_number = query_line + 1, stop_line do
@@ -178,6 +172,7 @@ local function get_headers(bufnr, query_line)
 		-- message header and message body are seperated by CRLF (see RFC 2616)
 		-- for our purpose also the next request line will stop the header search
 		if is_request_line(line_content) or line_content == '' then
+            body_start = line_number
 			break
 		end
 		if not line_content:find(':') then
@@ -195,7 +190,7 @@ local function get_headers(bufnr, query_line)
 		::continue::
 	end
 
-	return headers
+	return headers, body_start
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
@@ -296,7 +291,7 @@ end
 local function end_request(bufnr)
 	-- store old cursor position
 	local curpos = vim.fn.getcurpos()
-	local linenumber = curpos[1]
+	local linenumber = curpos[2]
 	local oldlinenumber = linenumber
 
 	-- start searching for next request from the next line
@@ -333,20 +328,9 @@ rest.run = function(verbose)
 
 	local parsed_url = parse_url(vim.fn.getline(start_line))
 
-	local headers = get_headers(bufnr, start_line)
+	local headers, body_start = get_headers(bufnr, start_line)
 
-	local body
-	-- If the header Content-Type was passed and it's application/json then return
-	-- body as `-d '{"foo":"bar"}'`
-	if
-		headers ~= nil
-		and headers['content-type'] ~= nil
-		and string.find(headers['content-type'], 'application/json')
-	then
-		body = get_body(bufnr, end_line, true)
-	else
-		body = get_body(bufnr, end_line)
-	end
+	local body = get_body(bufnr, body_start, end_line)
 
 	local success_req, req_err = pcall(curl_cmd, {
 		method = parsed_url.method:lower(),
