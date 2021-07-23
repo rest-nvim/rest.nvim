@@ -18,7 +18,9 @@ CONTENTS                                                   *rest-nvim-contents*
     4. Usage..................................................|rest-nvim-usage|
         1. Commands..................................|rest-nvim-usage-commands|
         2. Requests..................................|rest-nvim-usage-requests|
-        3. Environment Variables........|rest-nvim-usage-environment-variables|
+        3. Import body from external file......|rest-nvim-usage-external-files|
+        4. Environment Variables........|rest-nvim-usage-environment-variables|
+        5. Dynamic Variables................|rest-nvim-usage-dynamic-variables|
     5. Known issues..........................................|rest-nvim-issues|
     6. License..............................................|rest-nvim-license|
     7. Contributing....................................|rest-nvim-contributing|
@@ -64,9 +66,8 @@ will do the following:
        `    "job": "leader"`
        `}`
 
-    4. Finally, we place the cursor over the method of our request and call
-       `rest.nvim`!.
-       `:lua require('rest-nvim').run()`
+    4. Finally, we place the cursor over or below the method of our request 
+       and call `rest.nvim` with `:lua require('rest-nvim').run()`.
 
 Since the way to call rest.nvim with Lua is not comfortable, rest.nvim
 exposes a command to be mapped. See |rest-nvim-usage-commands|
@@ -76,12 +77,14 @@ exposes a command to be mapped. See |rest-nvim-usage-commands|
 USAGE                                                         *rest-nvim-usage*
 
 Create a new http file or open an existing one and place the cursor over the
-request line (e.g. `GET http://localhost:3000/foo`) and run `rest.nvim`
+request line (e.g. `GET http://localhost:3000/foo`) or below and run `rest.nvim`
 (see |rest-nvim-usage-commands|).
 
 Notes:
     - `rest.nvim` follows the RFC 2616 request format so any other http file
       should work without problems.
+    - `rest.nvim` supports multiple http requests in one file. It selects the
+      nearest request in or above the current cursor line.
 
 
 ===============================================================================
@@ -108,6 +111,15 @@ Currently `rest.nvim` supports the following request methods:
 
 
 ===============================================================================
+IMPORT BODY FROM EXTERNAL FILE                 *rest-nvim-usage-external-files*
+
+`rest.nvim` allows the http file to import the body from an external file.
+
+The syntax is `< path/to/file.json`. `rest.nvim` supports absolute and relative
+paths to the external file.
+
+
+===============================================================================
 ENVIRONMENT VARIABLES                   *rest-nvim-usage-environment-variables*
 
 `rest.nvim` allows the use of environment variables in requests.
@@ -117,6 +129,20 @@ To use environment variables, the following syntax is used: `{{VARIABLE_NAME}}`
 These environment variables can be obtained from:
     - System
     - `.env` file in the current working directory
+
+
+===============================================================================
+DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
+
+`rest.nvim` allows the use of dynamic variables in requests.
+
+The following dynamic variables are currenty supported:
+    - $uuid: generates a universally unique identifier (UUID-v4)
+    - $timestamp: generates the current UNIX timestamp (seconds since epoch)
+    - $randomInt: generates a random integer between 0 and 1000
+
+To use dynamic variables, the following syntax is used: `{{DYNAMIC_VARIABLE}}`, 
+e.g. `{{$uuid}}`
 
 
 ===============================================================================
