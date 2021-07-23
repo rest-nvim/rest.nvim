@@ -3,7 +3,7 @@ local rest = {}
 local curl = require('plenary.curl')
 local path = require('plenary.path')
 local utils = require('rest-nvim.utils')
-local log = require('plenary.log').new { plugin = 'rest.nvim', level = 'warn' }
+local log = require('plenary.log').new({ plugin = 'rest.nvim', level = 'warn' })
 
 -- setup is needed for enabling syntax highlighting for http files
 rest.setup = function()
@@ -181,7 +181,10 @@ local function get_headers(bufnr, query_line)
 			break
 		end
 		if not line_content:find(':') then
-            log.warn("Missing Key/Value pair in message header. Ignoring line: ", line_content)
+			log.warn(
+				'Missing Key/Value pair in message header. Ignoring line: ',
+				line_content
+			)
 			goto continue
 		end
 
