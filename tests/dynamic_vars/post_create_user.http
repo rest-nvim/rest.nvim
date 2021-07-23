@@ -2,6 +2,9 @@ POST https://reqres.in/api/users
 Content-Type: application/json
 
 {
+    "userid" : "{{$uuid}}",
+    "time" : "{{$timestamp}}",
+    "randomValue": "{{$randomInt}}",
     "name": "morpheus",
     "job": "leader",
     "array": ["a", "b", "c"],
