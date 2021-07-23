@@ -137,7 +137,7 @@ local function get_body(bufnr, start_line, stop_line)
         -- Ignore commented lines with and without indent
         if not utils.contains_comments(line) then
             body = body
-                .. utils.replace_env_vars(line)
+                .. utils.replace_vars(line)
         end
     end
 
