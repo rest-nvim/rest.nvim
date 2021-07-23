@@ -71,14 +71,14 @@ end
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
-local function get_importfile(bufnr,start_line, stop_line)
-    -- store old cursor position
-    local oldpos = vim.fn.getcurpos()
-    go_to_line(bufnr, start_line)
+local function get_importfile(bufnr, start_line, stop_line)
+	-- store old cursor position
+	local oldpos = vim.fn.getcurpos()
+	go_to_line(bufnr, start_line)
 
 	local import_line = vim.fn.search('^<', 'n', stop_line)
-    -- restore old cursor position
-    go_to_line(bufnr, oldpos[2])
+	-- restore old cursor position
+	go_to_line(bufnr, oldpos[2])
 
 	if import_line > 0 then
 		local fileimport_string = ''
@@ -111,9 +111,9 @@ end
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
 local function get_body(bufnr, start_line, stop_line)
-    if start_line >= stop_line then
-        return
-    end
+	if start_line >= stop_line then
+		return
+	end
 
 	-- first check if the body should be imported from an external file
 	local importfile = get_importfile(bufnr, start_line, stop_line)
@@ -121,27 +121,21 @@ local function get_body(bufnr, start_line, stop_line)
 		return importfile
 	end
 
-    local lines = {}
-    local body = ""
-    -- nvim_buf_get_lines is zero based and end-exclusive
-    -- but start_line and stop_line are one-based and inclusive
-    -- magically, this fits :-) start_line is the CRLF between header and body
-    -- which should not be included in the body, stop_line is the last line of the body
-    lines = vim.api.nvim_buf_get_lines(
-        bufnr,
-        start_line,
-        stop_line,
-        false
-    )
-    for _, line in ipairs(lines) do
-        -- Ignore commented lines with and without indent
-        if not utils.contains_comments(line) then
-            body = body
-                .. utils.replace_vars(line)
-        end
-    end
+	local lines = {}
+	local body = ''
+	-- nvim_buf_get_lines is zero based and end-exclusive
+	-- but start_line and stop_line are one-based and inclusive
+	-- magically, this fits :-) start_line is the CRLF between header and body
+	-- which should not be included in the body, stop_line is the last line of the body
+	lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+	for _, line in ipairs(lines) do
+		-- Ignore commented lines with and without indent
+		if not utils.contains_comments(line) then
+			body = body .. utils.replace_vars(line)
+		end
+	end
 
-    return body
+	return body
 end
 
 -- is_request_line checks if the given line is a http request line according to RFC 2616
@@ -162,7 +156,7 @@ local function get_headers(bufnr, query_line)
 	local headers = {}
 	-- Set stop at end of buffer
 	local stop_line = vim.fn.line('$')
-    local body_start = 0
+	local body_start = 0
 
 	-- Iterate over all buffer lines
 	for line_number = query_line + 1, stop_line do
@@ -172,7 +166,7 @@ local function get_headers(bufnr, query_line)
 		-- message header and message body are seperated by CRLF (see RFC 2616)
 		-- for our purpose also the next request line will stop the header search
 		if is_request_line(line_content) or line_content == '' then
-            body_start = line_number
+			body_start = line_number
 			break
 		end
 		if not line_content:find(':') then
