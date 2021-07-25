@@ -81,8 +81,8 @@ local function get_importfile(bufnr, start_line, stop_line)
 	go_to_line(bufnr, oldpos[2])
 
 	if import_line > 0 then
-		local fileimport_string = ''
-		local fileimport_line = {}
+		local fileimport_string
+		local fileimport_line
 		fileimport_line = vim.api.nvim_buf_get_lines(
 			bufnr,
 			import_line - 1,
@@ -121,7 +121,7 @@ local function get_body(bufnr, start_line, stop_line)
 		return importfile
 	end
 
-	local lines = {}
+	local lines
 	local body = ''
 	-- nvim_buf_get_lines is zero based and end-exclusive
 	-- but start_line and stop_line are one-based and inclusive
