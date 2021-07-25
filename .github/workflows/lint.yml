@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  selene:
+  luacheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
