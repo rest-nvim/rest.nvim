@@ -1,7 +1,0 @@
-# for Neovim development
-[vim]
-any = true
-
-# for LuaJIT
-# [jit]
-# any = true
