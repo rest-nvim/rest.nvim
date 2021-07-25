@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup and run selene
-        uses: NTBBloodbath/selene-action@v1.0.0
+      - uses: nebularg/actions-luacheck@v1.1.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: "lua/"
+          files: 'lua/'
+          config: 'https://raw.githubusercontent.com/NTBBloodbath/rest.nvim/main/.luacheckrc'
+          annotate: 'error'
