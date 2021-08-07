@@ -54,7 +54,9 @@ use {
     'NTBBloodbath/rest.nvim',
     requires = { 'nvim-lua/plenary.nvim' },
     config = function()
-        require('rest-nvim').setup()
+        require('rest-nvim').setup({
+          result_split_horizontal = false,
+        })
     end
 }
 ```
@@ -65,6 +67,11 @@ By default `rest.nvim` does not have any key mappings so you will not have
 conflicts with any of your existing ones.
 
 To run `rest.nvim` you should map the `<Plug>RestNvim` and `<Plug>RestNvimPreview` commands.
+
+## Settings
+
+* `result_split_horizontal` opens result on a horizontal split (default opens 
+on vertical)
 
 ## Usage
 
