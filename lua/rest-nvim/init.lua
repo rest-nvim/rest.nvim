@@ -9,6 +9,8 @@ local Config = {
     result_split_horizontal = false,
 }
 
+local LastOpts = {}
+
 -- setup is needed for enabling syntax highlighting for http files
 rest.setup = function(config)
     if config ~= nil then
@@ -198,6 +200,7 @@ end
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts curl arguments
 local function curl_cmd(opts)
+    LastOpts = opts
     local res = curl[opts.method](opts)
     if opts.dry_run then
         print(
@@ -213,7 +216,6 @@ local function curl_cmd(opts)
     end
 
     local res_bufnr = get_or_create_buf()
-    local parsed_url = parse_url(vim.fn.getline('.'))
     local json_body = false
 
     -- Check if the content-type is "application/json" so we can format the JSON
@@ -232,7 +234,7 @@ local function curl_cmd(opts)
         0,
         0,
         false,
-        { parsed_url.method .. ' ' .. parsed_url.url }
+        { opts.method .. ' ' .. opts.url }
     )
     -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
     local line_count = vim.api.nvim_buf_line_count(res_bufnr)
@@ -345,6 +347,20 @@ rest.run = function(verbose)
         body = body, -- the request body (string/filepath/table)
         dry_run = verbose and verbose or false,
     })
+
+    if not success_req then
+        vim.api.nvim_err_writeln(
+            '[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: '
+                .. req_err
+        )
+    end
+end
+
+rest.last = function()
+    if LastOpts.url == nil then
+        error('[rest.nvim]: Last request not found')
+    end
+    local success_req, req_err = pcall(curl_cmd, LastOpts)
 
     if not success_req then
         vim.api.nvim_err_writeln(

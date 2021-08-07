@@ -7,6 +7,7 @@ if exists('g:loaded_rest_nvim') | finish | endif
 
 nnoremap <Plug>RestNvim :lua require('rest-nvim').run()<CR>
 nnoremap <Plug>RestNvimPreview :lua require('rest-nvim').run(true)<CR>
+nnoremap <Plug>RestNvimLast :lua require('rest-nvim').last()<CR>
 
 let s:save_cpo = &cpo
 set cpo&vim
