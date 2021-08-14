@@ -202,7 +202,7 @@ local function curl_cmd(opts)
   end
 
   local res_bufnr = get_or_create_buf()
-  local parsed_url = {}
+  local parsed_url
   if opts.run_last then
     parsed_url = {
       method = opts.method,
