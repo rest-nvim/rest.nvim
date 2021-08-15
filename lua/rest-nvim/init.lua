@@ -337,15 +337,15 @@ end
 
 rest.last = function()
   if LastOpts.url == nil then
-    error('[rest.nvim]: Last request not found')
+    error("[rest.nvim]: Last request not found")
   end
   LastOpts.run_last = true
   local success_req, req_err = pcall(curl_cmd, LastOpts)
 
   if not success_req then
     vim.api.nvim_err_writeln(
-    '[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: '
-    .. req_err
+      "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
+        .. req_err
     )
   end
 end
