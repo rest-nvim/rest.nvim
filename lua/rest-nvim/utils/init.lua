@@ -70,8 +70,7 @@ M.replace_vars = function(str)
     -- If the env variable wasn't found in the `.env` file or in the dynamic variables then search it
     -- in the OS environment variables
     if M.has_key(vars, var) then
-      str = type(vars[var]) == "function"
-          and str:gsub("{{" .. var .. "}}", vars[var]())
+      str = type(vars[var]) == "function" and str:gsub("{{" .. var .. "}}", vars[var]())
         or str:gsub("{{" .. var .. "}}", vars[var])
     else
       if os.getenv(var) then
