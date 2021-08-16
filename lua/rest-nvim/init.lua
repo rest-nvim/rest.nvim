@@ -5,15 +5,11 @@ local path = require("plenary.path")
 local utils = require("rest-nvim.utils")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
 
-local Config = {
-  result_split_horizontal = false,
-}
+local config = {}
 
 -- setup is needed for enabling syntax highlighting for http files
-rest.setup = function(config)
-  if config ~= nil then
-    Config = config
-  end
+rest.setup = function(user_configs)
+  config = require("rest-nvim.config").set(user_configs or {})
   if vim.fn.expand("%:e") == "http" then
     vim.api.nvim_buf_set_option("%", "filetype", "http")
   end
@@ -244,7 +240,7 @@ local function curl_cmd(opts)
   -- Only open a new split if the buffer is not loaded into the current window
   if vim.fn.bufwinnr(res_bufnr) == -1 then
     local cmd_split = [[vert sb]]
-    if Config.result_split_horizontal == true then
+    if config.result_split_horizontal == true then
       cmd_split = [[sb]]
     end
     vim.cmd(cmd_split .. res_bufnr)
