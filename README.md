@@ -54,9 +54,12 @@ use {
     'NTBBloodbath/rest.nvim',
     requires = { 'nvim-lua/plenary.nvim' },
     config = function()
-        require('rest-nvim').setup({
-          result_split_horizontal = false,
-        })
+      require("rest-nvim").setup({
+        -- Open request results in a horizontal split
+        result_split_horizontal = false,
+        -- Skip SSL verification, useful for unknown certificates
+        skip_ssl_verification = false,
+      })
     end
 }
 ```
@@ -66,12 +69,17 @@ use {
 By default `rest.nvim` does not have any key mappings so you will not have
 conflicts with any of your existing ones.
 
-To run `rest.nvim` you should map the `<Plug>RestNvim` and `<Plug>RestNvimPreview` commands.
+To run `rest.nvim` you should map the following commands:
+- `<Plug>RestNvim`, run the request under the cursor
+- `<Plug>RestNvimPreview`, preview the request cURL command
+- `<Plug>RestNvimLast`, re-run the last request
 
 ## Settings
 
-* `result_split_horizontal` opens result on a horizontal split (default opens 
-on vertical)
+- `result_split_horizontal` opens result on a horizontal split (default opens 
+    on vertical)
+- `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
+    useful when using unknown certificates
 
 ## Usage
 
