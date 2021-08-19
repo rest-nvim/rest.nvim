@@ -2,6 +2,7 @@ local M = {}
 
 local config = {
   result_split_horizontal = false,
+  skip_ssl_verification = false,
 }
 
 --- Get a configuration value
