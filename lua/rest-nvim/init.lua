@@ -319,8 +319,9 @@ rest.run = function(verbose)
     url = parsed_url.url,
     headers = headers,
     -- accept = accept,
+    raw = config.skip_ssl_verification and { "-k" } or nil,
     body = body, -- the request body (string/filepath/table)
-    dry_run = verbose and verbose or false,
+    dry_run = verbose or false,
   })
 
   if not success_req then
