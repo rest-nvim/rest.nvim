@@ -65,7 +65,7 @@ end
 M.replace_vars = function(str)
   local vars = M.read_variables()
 
-  for var in string.gmatch(str, "{{[%w%W]+}}") do
+  for var in string.gmatch(str, "{{[^}]+}}") do
     var = var:gsub("{", ""):gsub("}", "")
     -- If the env variable wasn't found in the `.env` file or in the dynamic variables then search it
     -- in the OS environment variables
