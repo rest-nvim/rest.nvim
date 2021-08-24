@@ -1,4 +1,5 @@
 {
     "name": "morpheus",
-    "job": "leader"
+    "job": "leader",
+    "time" : "{{$timestamp}}"
 }
