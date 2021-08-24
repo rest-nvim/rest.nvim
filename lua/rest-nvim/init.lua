@@ -149,15 +149,14 @@ end
 
 -- get_headers retrieves all the found headers and returns a lua table with them
 -- @param bufnr Buffer number, a.k.a id
--- @param query_line Line to set cursor position
-local function get_headers(bufnr, query_line)
+-- @param start_line Line where the request starts
+-- @param end_line Line where the request ends
+local function get_headers(bufnr, start_line, end_line)
   local headers = {}
-  -- Set stop at end of buffer
-  local stop_line = vim.fn.line("$")
-  local body_start = 0
+  local body_start = end_line
 
-  -- Iterate over all buffer lines
-  for line_number = query_line + 1, stop_line do
+  -- Iterate over all buffer lines starting after the request line
+  for line_number = start_line + 1, end_line do
     local line = vim.fn.getbufline(bufnr, line_number)
     local line_content = line[1]
 
@@ -302,7 +301,7 @@ rest.run = function(verbose)
 
   local start_line = start_request()
   if start_line == 0 then
-    error("[rest.nvim]: No request found")
+     vim.api.nvim_err_writeln("[rest.nvim]: No request found")
     return
   end
   local end_line = end_request()
@@ -310,7 +309,7 @@ rest.run = function(verbose)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
-  local headers, body_start = get_headers(bufnr, start_line)
+  local headers, body_start = get_headers(bufnr, start_line, end_line)
 
   local body = get_body(bufnr, body_start, end_line)
 
