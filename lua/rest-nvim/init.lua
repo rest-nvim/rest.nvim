@@ -301,7 +301,7 @@ rest.run = function(verbose)
 
   local start_line = start_request()
   if start_line == 0 then
-     vim.api.nvim_err_writeln("[rest.nvim]: No request found")
+    vim.api.nvim_err_writeln("[rest.nvim]: No request found")
     return
   end
   local end_line = end_request()
