@@ -6,7 +6,7 @@ local M = {}
 -- go_to_line moves the cursor to the desired line in the provided buffer
 -- @param bufnr Buffer number, a.k.a id
 -- @param line the desired cursor position
-M.go_to_line = function (bufnr, line)
+M.go_to_line = function(bufnr, line)
   vim.api.nvim_buf_call(bufnr, function()
     vim.fn.cursor(line, 1)
   end)
@@ -33,7 +33,9 @@ end
 -- read_file Reads all lines from a file and returns the content as a table
 -- returns empty table if file does not exist
 M.read_file = function(file)
-  if not M.file_exists(file) then return {} end
+  if not M.file_exists(file) then
+    return {}
+  end
   local lines = {}
   for line in io.lines(file) do
     lines[#lines + 1] = line

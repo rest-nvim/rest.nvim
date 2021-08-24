@@ -31,7 +31,7 @@ rest.run = function(verbose)
     dry_run = verbose or false,
   }
 
-  local success_req, req_err = pcall(curl.curl_cmd,LastOpts)
+  local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
 
   if not success_req then
     vim.api.nvim_err_writeln(
