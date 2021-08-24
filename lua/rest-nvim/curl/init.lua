@@ -5,7 +5,7 @@ local config = require("rest-nvim.config")
 local M = {}
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
-M.get_or_create_buf = function ()
+M.get_or_create_buf = function()
   local tmp_name = "rest_nvim_results"
 
   -- Check if the file is already loaded in the buffer
@@ -39,11 +39,10 @@ M.get_or_create_buf = function ()
   return new_bufnr
 end
 
-
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts curl arguments
-M.curl_cmd = function (opts)
+M.curl_cmd = function(opts)
   local res = curl[opts.method](opts)
   if opts.dry_run then
     print("[rest.nvim] Request preview:\n" .. "curl " .. table.concat(res, " "))

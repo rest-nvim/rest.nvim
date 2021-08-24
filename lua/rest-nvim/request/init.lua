@@ -2,7 +2,6 @@ local utils = require("rest-nvim.utils")
 local path = require("plenary.path")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
 
-
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
@@ -19,11 +18,13 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_string
     local fileimport_line
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
+      :gsub("^%s+", "")
+      :gsub("%s+$", "")
     -- local fileimport_path = path:new(fileimport_string)
     -- if fileimport_path:is_absolute() then
     if path:new(fileimport_string):is_absolute() then
-       return fileimport_string
+      return fileimport_string
     else
       local file_dirname = vim.fn.expand("%:p:h")
       local file_name = path:new(path:new(file_dirname), fileimport_string)
@@ -49,7 +50,7 @@ local function get_body(bufnr, start_line, stop_line)
   local lines
   if importfile ~= nil then
     if not utils.file_exists(importfile) then
-        error("import file " .. importfile .. " not found")
+      error("import file " .. importfile .. " not found")
     end
     lines = utils.read_file(importfile)
   else
@@ -115,7 +116,6 @@ local function get_headers(bufnr, start_line, end_line)
   return headers, body_start
 end
 
-
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
 -- of the current request and returns the linenumber of this request line.
 -- The current request is defined as the next request line above the cursor
@@ -176,11 +176,11 @@ M.get_current_request = function()
   local body = get_body(bufnr, body_start, end_line)
 
   return {
-      method = parsed_url.method,
-      url = parsed_url.url,
-      headers = headers,
-      body = body,
-    }
+    method = parsed_url.method,
+    url = parsed_url.url,
+    headers = headers,
+    body = body,
+  }
 end
 
 return M
