@@ -23,6 +23,8 @@ have to leave Neovim!
 
 ## Notices
 
+- **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,
+  please see [Tree-Sitter parser](#tree-sitter-parser) section for more information.
 - **2021-07-01**: Now for getting syntax highlighting in http files you should
   add a `require('rest-nvim').setup()` to your `rest.nvim` setup, refer to [packer.nvim](#packernvim).
   This breaking change should allow lazy-loading of `rest.nvim`.
