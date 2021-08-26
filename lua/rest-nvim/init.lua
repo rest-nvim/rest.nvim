@@ -4,12 +4,8 @@ local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
 local LastOpts = {}
 
--- setup is needed for enabling syntax highlighting for http files
 rest.setup = function(user_configs)
   config.set(user_configs or {})
-  if vim.fn.expand("%:e") == "http" then
-    vim.api.nvim_buf_set_option("%", "filetype", "http")
-  end
 end
 
 -- run will retrieve the required request information from the current buffer
