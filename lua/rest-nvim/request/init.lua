@@ -1,6 +1,7 @@
 local utils = require("rest-nvim.utils")
 local path = require("plenary.path")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
+local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
@@ -144,7 +145,13 @@ local function end_request(bufnr)
 
   -- restore cursor position
   utils.go_to_line(bufnr, oldlinenumber)
-  return next > 1 and next - 1 or vim.fn.line("$")
+  local last_line = vim.fn.line("$")
+
+  if next == 0 or (next == last_line and linenumber == last_line) then
+      return last_line
+  else
+      return next - 1
+  end
 end
 
 -- parse_url returns a table with the method of the request and the URL
@@ -180,7 +187,38 @@ M.get_current_request = function()
     url = parsed_url.url,
     headers = headers,
     body = body,
+    bufnr = bufnr,
+    start_line = start_line,
+    end_line = end_line,
   }
 end
+
+local select_ns = vim.api.nvim_create_namespace('rest-nvim')
+M.highlight = function(bufnr, start_line, end_line)
+  local opts = config.get("highlight") or {}
+  -- local higroup = "RestNvimSelect"
+  local higroup = "IncSearch"
+  local timeout =  opts.timeout or 150
+
+  vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+
+  local end_column = string.len(vim.fn.getline(end_line))
+
+  vim.highlight.range(bufnr, select_ns, higroup, {start_line-1,0}, {end_line-1,end_column}, "c", false)
+
+  vim.defer_fn(
+    function()
+      print("in defer")
+      if vim.api.nvim_buf_is_valid(bufnr) then
+        print("is valid")
+        vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+      else
+        print("not valid")
+      end
+    end,
+    timeout
+  )
+end
+
 
 return M
