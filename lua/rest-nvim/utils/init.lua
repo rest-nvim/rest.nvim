@@ -1,14 +1,17 @@
 local random = math.random
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 math.randomseed(os.time())
 
 local M = {}
 
--- go_to_line moves the cursor to the desired line in the provided buffer
+-- move_cursor moves the cursor to the desired position in the provided buffer
 -- @param bufnr Buffer number, a.k.a id
--- @param line the desired cursor position
-M.go_to_line = function(bufnr, line)
+-- @param line the desired line
+-- @param column the desired column, defaults to 1
+M.move_cursor = function(bufnr, line, column)
+  column = column or 1
   vim.api.nvim_buf_call(bufnr, function()
-    vim.fn.cursor(line, 1)
+    vim.fn.cursor(line, column)
   end)
 end
 

@@ -33,18 +33,17 @@ rest.run = function(verbose)
   }
 
   if config.get("highlight").enabled == true then
-      log.debug("highlighting request")
       request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
-  -- local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
+  local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
 
-  -- if not success_req then
-  --   vim.api.nvim_err_writeln(
-  --     "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
-  --       .. req_err
-  --   )
-  -- end
+  if not success_req then
+    vim.api.nvim_err_writeln(
+      "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
+        .. req_err
+    )
+  end
 end
 
 -- last will run the last curl request, if available

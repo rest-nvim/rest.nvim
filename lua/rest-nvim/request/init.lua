@@ -9,11 +9,11 @@ local config = require("rest-nvim.config")
 local function get_importfile_name(bufnr, start_line, stop_line)
   -- store old cursor position
   local oldpos = vim.fn.getcurpos()
-  utils.go_to_line(bufnr, start_line)
+  utils.move_cursor(bufnr, start_line)
 
   local import_line = vim.fn.search("^<", "n", stop_line)
   -- restore old cursor position
-  utils.go_to_line(bufnr, oldpos[2])
+  utils.move_cursor(bufnr, oldpos[2])
 
   if import_line > 0 then
     local fileimport_string
@@ -139,12 +139,12 @@ local function end_request(bufnr)
   if linenumber < vim.fn.line("$") then
     linenumber = linenumber + 1
   end
-  utils.go_to_line(bufnr, linenumber)
+  utils.move_cursor(bufnr, linenumber)
 
   local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn", vim.fn.line("$"))
 
   -- restore cursor position
-  utils.go_to_line(bufnr, oldlinenumber)
+  utils.move_cursor(bufnr, oldlinenumber)
   local last_line = vim.fn.line("$")
 
   if next == 0 or (oldlinenumber == last_line) then
@@ -167,6 +167,7 @@ end
 
 local M = {}
 M.get_current_request = function()
+  local curpos = vim.fn.getcurpos()
   local bufnr = vim.api.nvim_win_get_buf(0)
 
   local start_line = start_request()
@@ -174,13 +175,15 @@ M.get_current_request = function()
     error("No request found")
   end
   local end_line = end_request()
-  utils.go_to_line(bufnr, start_line)
+  -- utils.move_cursor(bufnr, start_line)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
   local headers, body_start = get_headers(bufnr, start_line, end_line)
 
   local body = get_body(bufnr, body_start, end_line)
+
+  utils.move_cursor(bufnr,curpos[2], curpos[3])
 
   return {
     method = parsed_url.method,
@@ -193,16 +196,9 @@ M.get_current_request = function()
   }
 end
 
-local function time_with_ms()
-   local ms = require'socket'.gettime()*1000
-   local tf=os.date('%H:%M:%S.',os.time())
-   return tf..ms
-end
 
 local select_ns = vim.api.nvim_create_namespace('rest-nvim')
-local clearfunc
 M.highlight = function(bufnr, start_line, end_line)
-  log.debug(time_with_ms() .. ": highlighting request")
   local opts = config.get("highlight") or {}
   -- local higroup = "RestNvimSelect"
   local higroup = "IncSearch"
@@ -216,30 +212,13 @@ M.highlight = function(bufnr, start_line, end_line)
 
   vim.defer_fn(
     function()
-      log.debug(time_with_ms() .. ": in defer")
       if vim.api.nvim_buf_is_valid(bufnr) then
-        log.debug(time_with_ms() .. ": is valid")
         vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
       else
-        log.debug(time_with_ms() .. ": not valid")
       end
     end,
     timeout
   )
-  clearfunc = function()
-      if vim.api.nvim_buf_is_valid(bufnr) then
-        -- log.debug("is valid")
-        vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
-      else
-        -- log.debug("not valid")
-      end
-    end
 end
-
-M.clear = function()
-    clearfunc()
-end
-
-
 
 return M
