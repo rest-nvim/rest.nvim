@@ -1,11 +1,13 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local config = require("rest-nvim.config")
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 
 local M = {}
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
+  log.debug("curl.get_or_create_buf")
   local tmp_name = "rest_nvim_results"
 
   -- Check if the file is already loaded in the buffer
@@ -30,12 +32,14 @@ M.get_or_create_buf = function()
     return existing_bufnr
   end
 
+  log.debug("create new buffer")
   -- Create new buffer
   local new_bufnr = vim.api.nvim_create_buf(false, "nomodeline")
   vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
   vim.api.nvim_buf_set_option(new_bufnr, "ft", "httpResult")
   vim.api.nvim_buf_set_option(new_bufnr, "buftype", "nofile")
 
+  log.debug("exit get_or_create_buf")
   return new_bufnr
 end
 
@@ -45,7 +49,7 @@ end
 M.curl_cmd = function(opts)
   local res = curl[opts.method](opts)
   if opts.dry_run then
-    print("[rest.nvim] Request preview:\n" .. "curl " .. table.concat(res, " "))
+    log.debug("[rest.nvim] Request preview:\n" .. "curl " .. table.concat(res, " "))
     return
   end
 
@@ -65,6 +69,7 @@ M.curl_cmd = function(opts)
     end
   end
 
+  log.debug("writing to result buffer...")
   --- Add metadata into the created buffer (status code, date, etc)
   -- Request statement (METHOD URL)
   vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { opts.method:upper() .. " " .. opts.url })
@@ -86,6 +91,7 @@ M.curl_cmd = function(opts)
     res.headers
   )
 
+  log.debug("calling jq...")
   --- Add the curl command results into the created buffer
   if json_body then
     -- format JSON body

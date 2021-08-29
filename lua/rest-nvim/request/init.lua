@@ -1,6 +1,6 @@
 local utils = require("rest-nvim.utils")
 local path = require("plenary.path")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
@@ -147,7 +147,7 @@ local function end_request(bufnr)
   utils.go_to_line(bufnr, oldlinenumber)
   local last_line = vim.fn.line("$")
 
-  if next == 0 or (next == last_line and linenumber == last_line) then
+  if next == 0 or (oldlinenumber == last_line) then
       return last_line
   else
       return next - 1
@@ -193,8 +193,16 @@ M.get_current_request = function()
   }
 end
 
+local function time_with_ms()
+   local ms = require'socket'.gettime()*1000
+   local tf=os.date('%H:%M:%S.',os.time())
+   return tf..ms
+end
+
 local select_ns = vim.api.nvim_create_namespace('rest-nvim')
+local clearfunc
 M.highlight = function(bufnr, start_line, end_line)
+  log.debug(time_with_ms() .. ": highlighting request")
   local opts = config.get("highlight") or {}
   -- local higroup = "RestNvimSelect"
   local higroup = "IncSearch"
@@ -208,17 +216,30 @@ M.highlight = function(bufnr, start_line, end_line)
 
   vim.defer_fn(
     function()
-      print("in defer")
+      log.debug(time_with_ms() .. ": in defer")
       if vim.api.nvim_buf_is_valid(bufnr) then
-        print("is valid")
+        log.debug(time_with_ms() .. ": is valid")
         vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
       else
-        print("not valid")
+        log.debug(time_with_ms() .. ": not valid")
       end
     end,
     timeout
   )
+  clearfunc = function()
+      if vim.api.nvim_buf_is_valid(bufnr) then
+        -- log.debug("is valid")
+        vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+      else
+        -- log.debug("not valid")
+      end
+    end
 end
+
+M.clear = function()
+    clearfunc()
+end
+
 
 
 return M

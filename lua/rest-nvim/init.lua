@@ -1,4 +1,5 @@
 local rest = {}
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
@@ -32,7 +33,7 @@ rest.run = function(verbose)
   }
 
   if config.get("highlight").enabled == true then
-      print("highlighting request")
+      log.debug("highlighting request")
       request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
