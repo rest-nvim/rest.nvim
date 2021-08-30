@@ -7,7 +7,6 @@ local LastOpts = {}
 
 rest.setup = function(user_configs)
   config.set(user_configs or {})
-  vim.api.nvim_command("hi def link RestNvimSelect Search")
 end
 
 -- run will retrieve the required request information from the current buffer
@@ -52,6 +51,11 @@ rest.last = function()
     vim.api.nvim_err_writeln("[rest.nvim]: Last request not found")
     return
   end
+
+  if config.get("highlight").enabled == true then
+      request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
+  end
+
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
 
   if not success_req then

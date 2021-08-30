@@ -6,7 +6,8 @@ local config = {
   highlight = {
       enabled = true,
       timeout = 150,
-    }
+  },
+  jump_to_request = false,
 }
 
 --- Get a configuration value

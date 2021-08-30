@@ -175,7 +175,6 @@ M.get_current_request = function()
     error("No request found")
   end
   local end_line = end_request()
-  -- utils.move_cursor(bufnr, start_line)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
@@ -183,7 +182,11 @@ M.get_current_request = function()
 
   local body = get_body(bufnr, body_start, end_line)
 
-  utils.move_cursor(bufnr,curpos[2], curpos[3])
+  if config.get("jump_to_request") == true then
+    utils.move_cursor(bufnr, start_line)
+  else
+    utils.move_cursor(bufnr,curpos[2], curpos[3])
+  end
 
   return {
     method = parsed_url.method,
@@ -200,7 +203,6 @@ end
 local select_ns = vim.api.nvim_create_namespace('rest-nvim')
 M.highlight = function(bufnr, start_line, end_line)
   local opts = config.get("highlight") or {}
-  -- local higroup = "RestNvimSelect"
   local higroup = "IncSearch"
   local timeout =  opts.timeout or 150
 
