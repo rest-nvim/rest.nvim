@@ -31,7 +31,7 @@ rest.run = function(verbose)
   }
 
   if config.get("highlight").enabled == true then
-      request.highlight(result.bufnr, result.start_line, result.end_line)
+    request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
@@ -52,7 +52,7 @@ rest.last = function()
   end
 
   if config.get("highlight").enabled == true then
-      request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
+    request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
   end
 
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)

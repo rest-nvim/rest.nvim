@@ -148,9 +148,9 @@ local function end_request(bufnr)
   local last_line = vim.fn.line("$")
 
   if next == 0 or (oldlinenumber == last_line) then
-      return last_line
+    return last_line
   else
-      return next - 1
+    return next - 1
   end
 end
 
@@ -185,7 +185,7 @@ M.get_current_request = function()
   if config.get("jump_to_request") == true then
     utils.move_cursor(bufnr, start_line)
   else
-    utils.move_cursor(bufnr,curpos[2], curpos[3])
+    utils.move_cursor(bufnr, curpos[2], curpos[3])
   end
 
   return {
@@ -199,27 +199,31 @@ M.get_current_request = function()
   }
 end
 
-
-local select_ns = vim.api.nvim_create_namespace('rest-nvim')
+local select_ns = vim.api.nvim_create_namespace("rest-nvim")
 M.highlight = function(bufnr, start_line, end_line)
   local opts = config.get("highlight") or {}
   local higroup = "IncSearch"
-  local timeout =  opts.timeout or 150
+  local timeout = opts.timeout or 150
 
   vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
 
   local end_column = string.len(vim.fn.getline(end_line))
 
-  vim.highlight.range(bufnr, select_ns, higroup, {start_line-1,0}, {end_line-1,end_column}, "c", false)
-
-  vim.defer_fn(
-    function()
-      if vim.api.nvim_buf_is_valid(bufnr) then
-        vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
-      end
-    end,
-    timeout
+  vim.highlight.range(
+    bufnr,
+    select_ns,
+    higroup,
+    { start_line - 1, 0 },
+    { end_line - 1, end_column },
+    "c",
+    false
   )
+
+  vim.defer_fn(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+    end
+  end, timeout)
 end
 
 return M

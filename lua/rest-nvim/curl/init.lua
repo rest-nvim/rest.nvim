@@ -41,69 +41,68 @@ M.get_or_create_buf = function()
 end
 
 local function create_callback(method, url)
-   return function(res)
-      if res.exit ~= 0 then
-        log.error("[rest.nvim] " .. utils.curl_error(res.exit))
-        return
-      end
-      local res_bufnr = M.get_or_create_buf()
-      local json_body = false
+  return function(res)
+    if res.exit ~= 0 then
+      log.error("[rest.nvim] " .. utils.curl_error(res.exit))
+      return
+    end
+    local res_bufnr = M.get_or_create_buf()
+    local json_body = false
 
-      -- Check if the content-type is "application/json" so we can format the JSON
-      -- output later
-      for _, header in ipairs(res.headers) do
-        if string.find(header, "application/json") then
-          json_body = true
-          break
-        end
+    -- Check if the content-type is "application/json" so we can format the JSON
+    -- output later
+    for _, header in ipairs(res.headers) do
+      if string.find(header, "application/json") then
+        json_body = true
+        break
       end
+    end
 
     --- Add metadata into the created buffer (status code, date, etc)
     -- Request statement (METHOD URL)
-     vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { method:upper() .. " " .. url })
+    vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { method:upper() .. " " .. url })
 
-      -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
-      local line_count = vim.api.nvim_buf_line_count(res_bufnr)
-      vim.api.nvim_buf_set_lines(
-        res_bufnr,
-        line_count,
-        line_count,
-        false,
-        { "HTTP/1.1 " .. utils.http_status(res.status) }
-      )
-      -- Headers, e.g. Content-Type: application/json
-      vim.api.nvim_buf_set_lines(
-        res_bufnr,
-        line_count + 1,
-        line_count + 1 + #res.headers,
-        false,
-        res.headers
-      )
+    -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
+    local line_count = vim.api.nvim_buf_line_count(res_bufnr)
+    vim.api.nvim_buf_set_lines(
+      res_bufnr,
+      line_count,
+      line_count,
+      false,
+      { "HTTP/1.1 " .. utils.http_status(res.status) }
+    )
+    -- Headers, e.g. Content-Type: application/json
+    vim.api.nvim_buf_set_lines(
+      res_bufnr,
+      line_count + 1,
+      line_count + 1 + #res.headers,
+      false,
+      res.headers
+    )
 
-      --- Add the curl command results into the created buffer
-      if json_body then
-        -- format JSON body
-        res.body = vim.fn.system("jq", res.body)
-      end
-      local lines = utils.split(res.body, "\n")
-      line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
-      vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
-
-      -- Only open a new split if the buffer is not loaded into the current window
-      if vim.fn.bufwinnr(res_bufnr) == -1 then
-        local cmd_split = [[vert sb]]
-        if config.result_split_horizontal == true then
-          cmd_split = [[sb]]
-        end
-        vim.cmd(cmd_split .. res_bufnr)
-        -- Set unmodifiable state
-        vim.api.nvim_buf_set_option(res_bufnr, "modifiable", false)
-      end
-
-      -- Send cursor in response buffer to start
-      utils.move_cursor(res_bufnr, 1)
-
+    --- Add the curl command results into the created buffer
+    if json_body then
+      -- format JSON body
+      res.body = vim.fn.system("jq", res.body)
     end
+    local lines = utils.split(res.body, "\n")
+    line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
+    vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
+
+    -- Only open a new split if the buffer is not loaded into the current window
+    if vim.fn.bufwinnr(res_bufnr) == -1 then
+      local cmd_split = [[vert sb]]
+      if config.result_split_horizontal == true then
+        cmd_split = [[sb]]
+      end
+      vim.cmd(cmd_split .. res_bufnr)
+      -- Set unmodifiable state
+      vim.api.nvim_buf_set_option(res_bufnr, "modifiable", false)
+    end
+
+    -- Send cursor in response buffer to start
+    utils.move_cursor(res_bufnr, 1)
+  end
 end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
@@ -119,6 +118,5 @@ M.curl_cmd = function(opts)
     curl[opts.method](opts)
   end
 end
-
 
 return M
