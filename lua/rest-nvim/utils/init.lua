@@ -1,5 +1,4 @@
 local random = math.random
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 math.randomseed(os.time())
 
 local M = {}

@@ -216,7 +216,6 @@ M.highlight = function(bufnr, start_line, end_line)
     function()
       if vim.api.nvim_buf_is_valid(bufnr) then
         vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
-      else
       end
     end,
     timeout

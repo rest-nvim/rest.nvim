@@ -1,5 +1,4 @@
 local rest = {}
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
