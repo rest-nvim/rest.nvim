@@ -182,7 +182,7 @@ M.get_current_request = function()
 
   local body = get_body(bufnr, body_start, end_line)
 
-  if config.get("jump_to_request") == true then
+  if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
   else
     utils.move_cursor(bufnr, curpos[2], curpos[3])

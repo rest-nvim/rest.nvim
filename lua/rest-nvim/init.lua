@@ -30,7 +30,7 @@ rest.run = function(verbose)
     end_line = result.end_line,
   }
 
-  if config.get("highlight").enabled == true then
+  if config.get("highlight").enabled then
     request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
@@ -51,7 +51,7 @@ rest.last = function()
     return
   end
 
-  if config.get("highlight").enabled == true then
+  if config.get("highlight").enabled then
     request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
   end
 
