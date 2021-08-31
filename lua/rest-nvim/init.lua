@@ -25,7 +25,14 @@ rest.run = function(verbose)
     raw = config.skip_ssl_verification and { "-k" } or nil,
     body = result.body,
     dry_run = verbose or false,
+    bufnr = result.bufnr,
+    start_line = result.start_line,
+    end_line = result.end_line,
   }
+
+  if config.get("highlight").enabled then
+    request.highlight(result.bufnr, result.start_line, result.end_line)
+  end
 
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
 
@@ -43,6 +50,11 @@ rest.last = function()
     vim.api.nvim_err_writeln("[rest.nvim]: Last request not found")
     return
   end
+
+  if config.get("highlight").enabled then
+    request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
+  end
+
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
 
   if not success_req then

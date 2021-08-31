@@ -1,6 +1,7 @@
 local utils = require("rest-nvim.utils")
 local path = require("plenary.path")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
@@ -8,11 +9,11 @@ local log = require("plenary.log").new({ plugin = "rest.nvim", level = "warn" })
 local function get_importfile_name(bufnr, start_line, stop_line)
   -- store old cursor position
   local oldpos = vim.fn.getcurpos()
-  utils.go_to_line(bufnr, start_line)
+  utils.move_cursor(bufnr, start_line)
 
   local import_line = vim.fn.search("^<", "n", stop_line)
   -- restore old cursor position
-  utils.go_to_line(bufnr, oldpos[2])
+  utils.move_cursor(bufnr, oldpos[2])
 
   if import_line > 0 then
     local fileimport_string
@@ -138,13 +139,19 @@ local function end_request(bufnr)
   if linenumber < vim.fn.line("$") then
     linenumber = linenumber + 1
   end
-  utils.go_to_line(bufnr, linenumber)
+  utils.move_cursor(bufnr, linenumber)
 
   local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn", vim.fn.line("$"))
 
   -- restore cursor position
-  utils.go_to_line(bufnr, oldlinenumber)
-  return next > 1 and next - 1 or vim.fn.line("$")
+  utils.move_cursor(bufnr, oldlinenumber)
+  local last_line = vim.fn.line("$")
+
+  if next == 0 or (oldlinenumber == last_line) then
+    return last_line
+  else
+    return next - 1
+  end
 end
 
 -- parse_url returns a table with the method of the request and the URL
@@ -160,6 +167,7 @@ end
 
 local M = {}
 M.get_current_request = function()
+  local curpos = vim.fn.getcurpos()
   local bufnr = vim.api.nvim_win_get_buf(0)
 
   local start_line = start_request()
@@ -167,7 +175,6 @@ M.get_current_request = function()
     error("No request found")
   end
   local end_line = end_request()
-  utils.go_to_line(bufnr, start_line)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
@@ -175,12 +182,48 @@ M.get_current_request = function()
 
   local body = get_body(bufnr, body_start, end_line)
 
+  if config.get("jump_to_request") then
+    utils.move_cursor(bufnr, start_line)
+  else
+    utils.move_cursor(bufnr, curpos[2], curpos[3])
+  end
+
   return {
     method = parsed_url.method,
     url = parsed_url.url,
     headers = headers,
     body = body,
+    bufnr = bufnr,
+    start_line = start_line,
+    end_line = end_line,
   }
+end
+
+local select_ns = vim.api.nvim_create_namespace("rest-nvim")
+M.highlight = function(bufnr, start_line, end_line)
+  local opts = config.get("highlight") or {}
+  local higroup = "IncSearch"
+  local timeout = opts.timeout or 150
+
+  vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+
+  local end_column = string.len(vim.fn.getline(end_line))
+
+  vim.highlight.range(
+    bufnr,
+    select_ns,
+    higroup,
+    { start_line - 1, 0 },
+    { end_line - 1, end_column },
+    "c",
+    false
+  )
+
+  vim.defer_fn(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, select_ns, 0, -1)
+    end
+  end, timeout)
 end
 
 return M
