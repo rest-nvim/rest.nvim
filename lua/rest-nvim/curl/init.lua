@@ -52,7 +52,7 @@ local function create_callback(method, url)
     -- Check if the content-type is "application/json" so we can format the JSON
     -- output later
     for _, header in ipairs(res.headers) do
-      if string.find(header, "application/json") then
+      if header:find("application") and header:find("json") then
         json_body = true
         break
       end
