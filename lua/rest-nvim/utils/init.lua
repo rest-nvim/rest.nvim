@@ -48,6 +48,9 @@ end
 -- read_env_file Reads the environment variables found in the `.env` file and
 -- returns a table with the variables
 M.read_env_file = function()
+
+  local variables = {}
+
   -- Directories to search for env files
   local env_file_paths = {
     -- current working directory
