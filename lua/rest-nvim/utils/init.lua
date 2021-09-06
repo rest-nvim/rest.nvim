@@ -49,12 +49,22 @@ end
 -- returns a table with the variables
 M.read_env_file = function()
   local variables = {}
-  local env_file_path = vim.fn.getcwd() .. "/.env"
-  -- If there's an env file in the current working dir
-  if M.file_exists(env_file_path) then
-    for line in io.lines(env_file_path) do
-      local vars = M.split(line, "=", 1)
-      variables[vars[1]] = vars[2]
+  
+	-- Directories to search for env files
+  local env_file_paths = {
+		-- current working directory 
+		vim.fn.getcwd() .. "/.env", 
+		-- directory of the currently opened file
+		vim.fn.expand("%:p:h") .. "/.env"
+	}
+
+	-- If there's an env file in the current working dir
+  for env_file_path in env_file_paths do
+    if M.file_exists(env_file_path) then
+      for line in io.lines(env_file_path) do
+        local vars = M.split(line, "=", 1)
+        variables[vars[1]] = vars[2]
+      end
     end
   end
 
