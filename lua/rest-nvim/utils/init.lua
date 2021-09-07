@@ -48,7 +48,6 @@ end
 -- read_env_file Reads the environment variables found in the `.env` file and
 -- returns a table with the variables
 M.read_env_file = function()
-
   local variables = {}
 
   -- Directories to search for env files
@@ -56,7 +55,7 @@ M.read_env_file = function()
     -- current working directory
     vim.fn.getcwd() .. "/.env",
     -- directory of the currently opened file
-    vim.fn.expand("%:p:h") .. "/.env"
+    vim.fn.expand("%:p:h") .. "/.env",
   }
 
   -- If there's an env file in the current working dir
