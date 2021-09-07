@@ -60,7 +60,7 @@ M.read_env_file = function()
   }
 
   -- If there's an env file in the current working dir
-  for k, env_file_path in ipairs(env_file_paths) do
+  for _, env_file_path in ipairs(env_file_paths) do
     if M.file_exists(env_file_path) then
       for line in io.lines(env_file_path) do
         local vars = M.split(line, "=", 1)
