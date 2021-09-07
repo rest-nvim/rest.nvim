@@ -45,7 +45,7 @@ have to leave Neovim!
 
 - System-wide
   - curl
-  - jq (to format JSON output so it can be human-readable)
+  - jq +1.6 (to format JSON output so it can be human-readable)
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
