@@ -2,8 +2,8 @@
 
 # rest.nvim
 
-![License](https://img.shields.io/github/license/NTBBloodbath/doom-nvim?style=flat-square)
-![Neovim version](https://img.shields.io/badge/Neovim-0.5-57A143?style=flat-square&logo=neovim)
+![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
+![Neovim version](https://img.shields.io/badge/Neovim-0.5-57A143?style=for-the-badge&logo=neovim)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
