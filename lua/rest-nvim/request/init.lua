@@ -108,8 +108,11 @@ local function get_headers(bufnr, start_line, end_line)
     end
 
     local header = utils.split(line_content, ":")
-    if not utils.contains_comments(header[1]) then
-      headers[header[1]:lower()] = utils.replace_vars(header[2])
+    local header_name = header[1]:lower()
+    table.remove(header, 1)
+    local header_value = table.concat(header, ":")
+    if not utils.contains_comments(header_name) then
+      headers[header_name] = utils.replace_vars(header_value)
     end
     ::continue::
   end
