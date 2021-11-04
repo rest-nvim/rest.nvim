@@ -23,6 +23,8 @@ have to leave Neovim!
 
 ## Notices
 
+- **2021-11-04**: HTTP Tree-Sitter parser now depends on JSON parser for the JSON bodies detection,
+  please install it too.
 - **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,
   please see [Tree-Sitter parser](#tree-sitter-parser) section for more information.
 - **2021-07-01**: Now for getting syntax highlighting in http files you should
@@ -89,7 +91,7 @@ parser_configs.http = {
 }
 ```
 
-And then add `"http"` in your `ensure_installed` table or manually run `:TSInstall http`.
+And then add `"http"` and `"json"` in your `ensure_installed` table or manually run `:TSInstall http json`.
 
 ## Keybindings
 
