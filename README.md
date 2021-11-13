@@ -84,20 +84,14 @@ use {
 ### Tree-Sitter parser
 
 We are using a Tree-Sitter parser for our HTTP files, in order to get the correct syntax highlighting
-you should add this before your tree-sitter setup.
+for HTTP files (including JSON bodies) you should add the following into your `ensure_installed` table
+in your tree-sitter setup.
 
 ```lua
-local parser_configs = require("nvim-treesitter.parsers").get_parser_configs()
-parser_configs.http = {
-  install_info = {
-    url = "https://github.com/NTBBloodbath/tree-sitter-http",
-    files = { "src/parser.c" },
-    branch = "main",
-  },
-}
+ensure_installed = { "http", "json" }
 ```
 
-And then add `"http"` and `"json"` in your `ensure_installed` table or manually run `:TSInstall http json`.
+Or manually run `:TSInstall http json`.
 
 ## Keybindings
 
