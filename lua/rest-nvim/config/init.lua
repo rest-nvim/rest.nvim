@@ -7,6 +7,11 @@ local config = {
     enabled = true,
     timeout = 150,
   },
+  result = {
+    show_url = true,
+    show_http_info = true,
+    show_headers = true,
+  },
   jump_to_request = false,
 }
 
