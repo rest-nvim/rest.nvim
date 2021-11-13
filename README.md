@@ -68,6 +68,12 @@ use {
         enabled = true,
         timeout = 150,
       },
+      result = {
+        -- toggle showing URL, HTTP info, headers at top the of result window
+        show_url = true,
+        show_http_info = true,
+        show_headers = true,
+      },
       -- Jump to request line on run
       jump_to_request = false,
     })
