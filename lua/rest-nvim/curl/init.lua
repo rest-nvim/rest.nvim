@@ -58,27 +58,36 @@ local function create_callback(method, url)
       end
     end
 
-    --- Add metadata into the created buffer (status code, date, etc)
-    -- Request statement (METHOD URL)
-    vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { method:upper() .. " " .. url })
+    if config.get("result").show_url then
+      --- Add metadata into the created buffer (status code, date, etc)
+      -- Request statement (METHOD URL)
+      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { method:upper() .. " " .. url })
+    end
 
-    -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
-    local line_count = vim.api.nvim_buf_line_count(res_bufnr)
-    vim.api.nvim_buf_set_lines(
-      res_bufnr,
-      line_count,
-      line_count,
-      false,
-      { "HTTP/1.1 " .. utils.http_status(res.status) }
-    )
-    -- Headers, e.g. Content-Type: application/json
-    vim.api.nvim_buf_set_lines(
-      res_bufnr,
-      line_count + 1,
-      line_count + 1 + #res.headers,
-      false,
-      res.headers
-    )
+    if config.get("result").show_http_info then
+      local line_count = vim.api.nvim_buf_line_count(res_bufnr)
+      local separator = config.get("result").show_url and 0 or 1
+      -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
+      vim.api.nvim_buf_set_lines(
+        res_bufnr,
+        line_count - separator,
+        line_count - separator,
+        false,
+        { "HTTP/1.1 " .. utils.http_status(res.status) }
+      )
+    end
+
+    if config.get("result").show_headers then
+      local line_count = vim.api.nvim_buf_line_count(res_bufnr)
+      -- Headers, e.g. Content-Type: application/json
+      vim.api.nvim_buf_set_lines(
+        res_bufnr,
+        line_count + 1,
+        line_count + 1 + #res.headers,
+        false,
+        res.headers
+      )
+    end
 
     --- Add the curl command results into the created buffer
     if json_body then
@@ -86,7 +95,7 @@ local function create_callback(method, url)
       res.body = vim.fn.system("jq", res.body)
     end
     local lines = utils.split(res.body, "\n")
-    line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
+    local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
 
     -- Only open a new split if the buffer is not loaded into the current window
