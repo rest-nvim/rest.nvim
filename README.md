@@ -76,6 +76,7 @@ use {
       },
       -- Jump to request line on run
       jump_to_request = false,
+      env_file = '.env'
     })
   end
 }
@@ -105,12 +106,13 @@ To run `rest.nvim` you should map the following commands:
 
 ## Settings
 
-- `result_split_horizontal` opens result on a horizontal split (default opens 
+- `result_split_horizontal` opens result on a horizontal split (default opens
     on vertical)
 - `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
     useful when using unknown certificates
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
 - `jump_to_request` moves the cursor to the selected request line when send,
+- `env_file` specifies file name that consist environment variables (default: .env)
 
 ## Usage
 

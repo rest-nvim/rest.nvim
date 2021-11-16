@@ -13,6 +13,7 @@ local config = {
     show_headers = true,
   },
   jump_to_request = false,
+  env_file = ".env",
 }
 
 --- Get a configuration value

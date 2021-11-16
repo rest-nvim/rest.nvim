@@ -1,3 +1,5 @@
+local config = require("rest-nvim.config")
+
 local random = math.random
 math.randomseed(os.time())
 
@@ -45,17 +47,19 @@ M.read_file = function(file)
   return lines
 end
 
--- read_env_file Reads the environment variables found in the `.env` file and
--- returns a table with the variables
+-- read_env_file Reads the environment variables found in the env_file option
+-- (defualt: .env) specified in configuration and returns a table with the
+-- variables
 M.read_env_file = function()
   local variables = {}
+  local env_file = "/" .. (config.get("env_file") or ".env")
 
   -- Directories to search for env files
   local env_file_paths = {
     -- current working directory
-    vim.fn.getcwd() .. "/.env",
+    vim.fn.getcwd() .. env_file,
     -- directory of the currently opened file
-    vim.fn.expand("%:p:h") .. "/.env",
+    vim.fn.expand("%:p:h") .. env_file,
   }
 
   -- If there's an env file in the current working dir

@@ -8,6 +8,8 @@ rest-nvim-license	rest-nvim.txt	/*rest-nvim-license*
 rest-nvim-quick-start	rest-nvim.txt	/*rest-nvim-quick-start*
 rest-nvim-usage	rest-nvim.txt	/*rest-nvim-usage*
 rest-nvim-usage-commands	rest-nvim.txt	/*rest-nvim-usage-commands*
+rest-nvim-usage-dynamic-variables	rest-nvim.txt	/*rest-nvim-usage-dynamic-variables*
 rest-nvim-usage-environment-variables	rest-nvim.txt	/*rest-nvim-usage-environment-variables*
+rest-nvim-usage-external-files	rest-nvim.txt	/*rest-nvim-usage-external-files*
 rest-nvim-usage-requests	rest-nvim.txt	/*rest-nvim-usage-requests*
 rest-nvim.txt	rest-nvim.txt	/*rest-nvim.txt*
