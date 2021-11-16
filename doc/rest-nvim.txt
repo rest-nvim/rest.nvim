@@ -63,6 +63,7 @@ function, it looks like this by default:
 `  },`
 `  -- Jump to request line on run`
 `  jump_to_request = false,`
+`  env_file = '.env'`
 `})`
 
 In this section we will be using `https://reqres.in/` for requests.
@@ -144,8 +145,8 @@ ENVIRONMENT VARIABLES                   *rest-nvim-usage-environment-variables*
 To use environment variables, the following syntax is used: `{{VARIABLE_NAME}}`
 
 These environment variables can be obtained from:
+    - File in the current working directory (env_file in config or '.env')
     - System
-    - `.env` file in the current working directory
 
 
 ===============================================================================
