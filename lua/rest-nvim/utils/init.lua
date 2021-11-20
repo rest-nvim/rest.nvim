@@ -76,6 +76,7 @@ M.read_env_file = function()
 end
 
 M.read_dynamic_variables = function()
+  local from_config = config.get("custom_dynamic_variables") or {}
   local dynamic_variables = {
     ["$uuid"] = M.uuid,
     ["$timestamp"] = os.time,
@@ -83,6 +84,9 @@ M.read_dynamic_variables = function()
       return math.random(0, 1000)
     end,
   }
+  for k, v in pairs(from_config) do
+    dynamic_variables[k] = v
+  end
   return dynamic_variables
 end
 
