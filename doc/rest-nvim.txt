@@ -169,7 +169,7 @@ You can extend or overwrite built-in dynamic variables, with the config key
 `  custom_dynamic_variables = {`
 `    -- overwrite built-in`
 `    ['$uuid'] = function()`
-`      return "$uuid"`
+`      return "{{$uuid}}"`
 `    end,`
 `    -- add new dynamic variable function`
 `    ["$date"] = function()`
