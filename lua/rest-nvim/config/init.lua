@@ -14,6 +14,7 @@ local config = {
   },
   jump_to_request = false,
   env_file = ".env",
+  custom_dynamic_variables = {},
 }
 
 --- Get a configuration value
