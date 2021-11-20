@@ -76,7 +76,8 @@ use {
       },
       -- Jump to request line on run
       jump_to_request = false,
-      env_file = '.env'
+      env_file = '.env',
+      custom_dynamic_variables = {},
     })
   end
 }
@@ -113,6 +114,8 @@ To run `rest.nvim` you should map the following commands:
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
 - `jump_to_request` moves the cursor to the selected request line when send,
 - `env_file` specifies file name that consist environment variables (default: .env)
+- `custom_dynamic_variables` allows to extend or overwrite built-in dynamic variable functions
+    (default: {})
 
 ## Usage
 

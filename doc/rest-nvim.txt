@@ -162,6 +162,23 @@ The following dynamic variables are currenty supported:
 To use dynamic variables, the following syntax is used: `{{DYNAMIC_VARIABLE}}`, 
 e.g. `{{$uuid}}`
 
+You can extend or overwrite built-in dynamic variables, with the config key
+`custom_dynamic_variables`:
+
+`require("rest-nvim").setup({`
+`  custom_dynamic_variables = {`
+`    -- overwrite built-in`
+`    ['$uuid'] = function()`
+`      return "$uuid"`
+`    end,`
+`    -- add new dynamic variable function`
+`    ["$date"] = function()`
+`      local os_date = os.date('%Y-%m-%d')`
+`      return os_date`
+`    end,`
+`  },`
+`})`
+
 
 ===============================================================================
 KNOWN ISSUES                                                 *rest-nvim-issues*
