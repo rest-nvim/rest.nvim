@@ -93,7 +93,7 @@ end
 M.get_node_value = function(node, bufnr)
   local start_row, start_col, _, end_col = node:range()
   local line = api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
-  return line and string.sub(line, start_col + 1, end_col):gsub('"', '') or nil
+  return line and string.sub(line, start_col + 1, end_col):gsub('^["\'](.*)["\']$', '%1') or nil
 end
 
 M.read_document_variables = function()
