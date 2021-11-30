@@ -93,33 +93,38 @@ end
 M.get_node_value = function(node, bufnr)
   local start_row, start_col, _, end_col = node:range()
   local line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
-  return line and string.sub(line, start_col + 1, end_col):gsub('^["\'](.*)["\']$', '%1') or nil
+  return line and string.sub(line, start_col + 1, end_col):gsub("^[\"'](.*)[\"']$", "%1") or nil
 end
 
 M.read_document_variables = function()
   local variables = {}
   local bufnr = vim.api.nvim_get_current_buf()
   local parser = vim.treesitter.get_parser(bufnr)
-  if not parser then return variables end
+  if not parser then
+    return variables
+  end
 
   local first_tree = parser:trees()[1]
-  if not first_tree then return variables end
+  if not first_tree then
+    return variables
+  end
 
   local root = first_tree:root()
-  if not root then return variables end
+  if not root then
+    return variables
+  end
 
   for node in root:iter_children() do
     local type = node:type()
-    if type == 'header' then
+    if type == "header" then
       local name = node:named_child(0)
       local value = node:named_child(1)
       variables[M.get_node_value(name, bufnr)] = M.get_node_value(value, bufnr)
-    elseif type ~= 'comment' then
+    elseif type ~= "comment" then
       break
     end
   end
   return variables
-
 end
 
 M.read_variables = function()
@@ -127,7 +132,7 @@ M.read_variables = function()
   local second = M.read_dynamic_variables()
   local third = M.read_document_variables()
 
-  return vim.tbl_extend('force', first, second, third)
+  return vim.tbl_extend("force", first, second, third)
 end
 
 -- replace_vars replaces the env variables fields in the provided string
