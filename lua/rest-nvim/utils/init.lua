@@ -98,6 +98,8 @@ end
 -- @param str Where replace the placers for the env variables
 M.replace_vars = function(str)
   local vars = M.read_variables()
+  -- remove $dotenv tags, which are used by the vscode rest client for cross compatibility
+  str = str:gsub("%$dotenv ", ""):gsub("%$DOTENV ", "")
 
   for var in string.gmatch(str, "{{[^}]+}}") do
     var = var:gsub("{", ""):gsub("}", "")
