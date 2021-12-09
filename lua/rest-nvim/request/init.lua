@@ -161,10 +161,14 @@ end
 -- @param stmt the request statement, e.g., POST http://localhost:3000/foo
 local function parse_url(stmt)
   local parsed = utils.split(stmt, " ")
+  local http_method = parsed[1]
+  table.remove(parsed, 1)
+  local target_url = table.concat(parsed, " ")
+
   return {
-    method = parsed[1],
+    method = http_method,
     -- Encode URL
-    url = utils.encode_url(utils.replace_vars(parsed[2])),
+    url = utils.encode_url(utils.replace_vars(target_url)),
   }
 end
 
