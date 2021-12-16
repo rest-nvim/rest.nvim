@@ -78,6 +78,7 @@ use {
       jump_to_request = false,
       env_file = '.env',
       custom_dynamic_variables = {},
+      yank_dry_run = true,
     })
   end
 }
