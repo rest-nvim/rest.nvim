@@ -115,11 +115,11 @@ local function create_callback(method, url)
 end
 
 local function format_curl_cmd(res)
-  local cmd = 'curl'
+  local cmd = "curl"
 
   for _, value in pairs(res) do
-    if string.sub(value, 1, 1) == '-' then
-      cmd = cmd .. ' ' .. value
+    if string.sub(value, 1, 1) == "-" then
+      cmd = cmd .. " " .. value
     else
       cmd = cmd .. " '" .. value .. "'"
     end
@@ -130,7 +130,6 @@ local function format_curl_cmd(res)
   return cmd
 end
 
-
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts curl arguments
@@ -139,7 +138,7 @@ M.curl_cmd = function(opts)
     local res = curl[opts.method](opts)
     local curl_cmd = format_curl_cmd(res)
 
-    if config.get('yank_dry_run') then
+    if config.get("yank_dry_run") then
       vim.cmd('let @+="' .. curl_cmd .. '"')
     end
 
