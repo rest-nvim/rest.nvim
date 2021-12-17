@@ -139,7 +139,7 @@ M.curl_cmd = function(opts)
     local curl_cmd = format_curl_cmd(res)
 
     if config.get("yank_dry_run") then
-      vim.cmd('let @+="' .. curl_cmd .. '"')
+      vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
 
     log.debug("[rest.nvim] Request preview:\n" .. curl_cmd)
