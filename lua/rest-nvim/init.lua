@@ -2,6 +2,7 @@ local rest = {}
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
+local Opts = {}
 local LastOpts = {}
 
 rest.setup = function(user_configs)
@@ -18,7 +19,7 @@ rest.run = function(verbose)
     return
   end
 
-  LastOpts = {
+  Opts = {
     method = result.method:lower(),
     url = result.url,
     headers = result.headers,
@@ -30,11 +31,15 @@ rest.run = function(verbose)
     end_line = result.end_line,
   }
 
+  if not verbose then
+    LastOpts = Opts
+  end
+
   if config.get("highlight").enabled then
     request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
-  local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
+  local success_req, req_err = pcall(curl.curl_cmd, Opts)
 
   if not success_req then
     vim.api.nvim_err_writeln(
