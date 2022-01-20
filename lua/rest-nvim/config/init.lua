@@ -2,6 +2,10 @@ local M = {}
 
 local config = {
   result_split_horizontal = false,
+  result_split = {
+    horizontal = false,
+    in_place = false,
+  },
   skip_ssl_verification = false,
   highlight = {
     enabled = true,
