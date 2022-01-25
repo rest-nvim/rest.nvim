@@ -181,7 +181,7 @@ M.get_current_request = function()
   if start_line == 0 then
     error("No request found")
   end
-  local end_line = end_request()
+  local end_line = end_request(bufnr)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
