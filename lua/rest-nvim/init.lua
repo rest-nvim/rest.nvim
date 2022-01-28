@@ -29,6 +29,7 @@ rest.run = function(verbose)
     bufnr = result.bufnr,
     start_line = result.start_line,
     end_line = result.end_line,
+    req_var = result.req_var,
   }
 
   if not verbose then

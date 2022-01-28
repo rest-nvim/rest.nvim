@@ -1,6 +1,7 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local config = require("rest-nvim.config")
+local json = require("rest-nvim.json_parser")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 
 local M = {}
@@ -40,7 +41,7 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(method, url)
+local function create_callback(method, url, req_var)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
@@ -94,6 +95,12 @@ local function create_callback(method, url)
       -- format JSON body
       res.body = vim.fn.system("jq", res.body)
     end
+    -- 1. check if there exists a variable for saving the json-data
+    -- 2. parse the json and get the data on to memory?
+    if json_body and req_var ~= '' then
+      local parsed = json.decode(res.body)
+      print(parsed[req_var])
+    end
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
@@ -145,7 +152,7 @@ M.curl_cmd = function(opts)
     log.debug("[rest.nvim] Request preview:\n" .. curl_cmd)
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))
+    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url, opts.req_var))
     curl[opts.method](opts)
   end
 end

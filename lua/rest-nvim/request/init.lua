@@ -128,6 +128,11 @@ local function start_request()
   return vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cbn", 1)
 end
 
+-- checks if request has variables
+local function request_var(url_line)
+  return vim.fn.search("^#@", 'cbn', url_line - 1)
+end
+
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
 -- @param bufnr The buffer nummer of the .http-file
@@ -172,6 +177,11 @@ local function parse_url(stmt)
   }
 end
 
+local function parse_req_var(stmt)
+  local parsed = stmt:sub(3)
+  return parsed
+end
+
 local M = {}
 M.get_current_request = function()
   local curpos = vim.fn.getcurpos()
@@ -184,6 +194,12 @@ M.get_current_request = function()
   local end_line = end_request(bufnr)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
+
+  local req_var_line = request_var(start_line)
+  local parsed_req_var_str = ''
+  if req_var_line ~= 0 then
+    parsed_req_var_str = parse_req_var(vim.fn.getline(req_var_line))
+  end
 
   local headers, body_start = get_headers(bufnr, start_line, end_line)
 
@@ -203,6 +219,7 @@ M.get_current_request = function()
     bufnr = bufnr,
     start_line = start_line,
     end_line = end_line,
+    req_var = parsed_req_var_str,
   }
 end
 
