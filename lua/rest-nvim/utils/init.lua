@@ -116,10 +116,17 @@ M.read_document_variables = function()
 
   for node in root:iter_children() do
     local type = node:type()
+    -- check if variable has assigned other variable, e.g.
+    -- foo: {{bar}}
+    -- if so, then replace {{bar}} with the proper value 
+    -- {{bar}} can only be a request variable
+
     if type == "header" then
       local name = node:named_child(0)
       local value = node:named_child(1)
-      variables[M.get_node_value(name, bufnr)] = M.get_node_value(value, bufnr)
+      local value_processed = M.replace_req_varibles(M.get_node_value(value, bufnr))
+      -- local value_processed = M.get_node_value(value, bufnr)
+      variables[M.get_node_value(name, bufnr)] = value_processed
     elseif type ~= "comment" then
       break
     end
@@ -133,6 +140,44 @@ M.read_variables = function()
   local third = M.read_document_variables()
 
   return vim.tbl_extend("force", first, second, third)
+end
+
+
+-- replaces the variables that have assigned another variable, e.g.
+-- foo: {{bar}} or foo: {{bar.baz}}
+-- when `bar` has a value in REQ_VAR_STORE
+M.replace_req_varibles = function(value_str)
+  -- first check if 'value_str' has the form {{bar}}
+  -- if not then return them as is
+  local match = string.match(value_str, "{{[^}]+}}")
+  if match == nil then
+    return value_str
+  end
+
+  match = match:gsub("{", ""):gsub("}", "")
+
+  -- split the value_str, e.g.
+  -- 'foo.bar.baz' -> {'foo', 'bar', 'baz'}
+  local splitted_values = {}
+  for var in match:gmatch("([^.]+)") do
+    table.insert(splitted_values, var)
+  end
+
+  local result = REQ_VAR_STORE
+  if not result.__loaded  then
+    error(string.format("The rest-nvim's global JSON has been unset, it is needed", match))
+  end
+  for _, val in pairs(splitted_values) do
+    if result[val] then
+      result = result[val]
+      print('result get value from global json', result)
+    else
+      result = ''
+      break
+    end
+  end
+
+  return result
 end
 
 -- replace_vars replaces the env variables fields in the provided string

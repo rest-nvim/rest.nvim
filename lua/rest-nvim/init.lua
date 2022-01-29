@@ -5,6 +5,8 @@ local curl = require("rest-nvim.curl")
 local Opts = {}
 local LastOpts = {}
 
+REQ_VAR_STORE = {__loaded = true}
+
 rest.setup = function(user_configs)
   config.set(user_configs or {})
 end

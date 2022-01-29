@@ -1,4 +1,11 @@
-#@page
+page: 5
+
+varprueba: {{something.page}}
+urltest: {{something.support.url}}
+#@something
 GET https://reqres.in/api/users?page=5
 
+####
+GET https://reqres.in/api/users?page={{varprueba}}
 
+GET {{urltest}}
