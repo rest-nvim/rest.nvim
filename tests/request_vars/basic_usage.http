@@ -1,0 +1,14 @@
+page: {{response.page}}
+url: {{response.support.url}}
+
+# normal var
+foo: 4
+
+#@response
+GET https://reqres.in/api/users?page=5
+
+GET https://reqres.in/api/users?page={{foo}}
+
+GET https://reqres.in/api/users?page={{page}}
+
+GET {{url}}
