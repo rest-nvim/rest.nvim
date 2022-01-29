@@ -95,9 +95,8 @@ local function create_callback(method, url, req_var)
       -- format JSON body
       res.body = vim.fn.system("jq", res.body)
     end
-    -- 1. check if there exists a variable for saving the json-data
-    -- 2. parse the json and get the data on to memory?
-    if json_body and req_var ~= '' then
+    -- parse the json response and store the data on memory
+    if json_body and req_var ~= "" then
       REQ_VAR_STORE[req_var] = json.decode(res.body)
     end
     local lines = utils.split(res.body, "\n")

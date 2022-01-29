@@ -19,7 +19,6 @@
 "
 
 function! YourFirstPlugin()
-	" dont forget to remove this ...
 	lua for k in pairs(package.loaded) do if k:match("^rest%-nvim") then package.loaded[k] = nil end end
 endfun
 

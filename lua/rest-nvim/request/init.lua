@@ -128,9 +128,17 @@ local function start_request()
   return vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cbn", 1)
 end
 
--- checks if request has variables
+-- request_var will find the request variable if it exists, e.g.
+-- ```
+-- #@foo
+-- GET http://localhost:8081/bar
+-- ````
+-- of the current request and returns the linenumber of the found request variable
+-- the current request,
+-- variable is defined as the variable that starts with '#@' one line above the request line
+-- @param url_line The request line
 local function request_var(url_line)
-  return vim.fn.search("^#@", 'cbn', url_line - 1)
+  return vim.fn.search("^#@", "cbn", url_line - 1)
 end
 
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
@@ -177,6 +185,9 @@ local function parse_url(stmt)
   }
 end
 
+-- parse_req_var returns a string with the name of the request variable, e.g.
+-- #@foo -> parse_req_var -> foo
+-- @param stmt the request variable (#@foo)
 local function parse_req_var(stmt)
   local parsed = stmt:sub(3)
   return parsed
@@ -196,7 +207,7 @@ M.get_current_request = function()
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
   local req_var_line = request_var(start_line)
-  local parsed_req_var_str = ''
+  local parsed_req_var_str = ""
   if req_var_line ~= 0 then
     parsed_req_var_str = parse_req_var(vim.fn.getline(req_var_line))
   end
