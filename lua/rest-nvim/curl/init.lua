@@ -1,7 +1,6 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local config = require("rest-nvim.config")
-local json = require("rest-nvim.json_parser")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 
 local M = {}
@@ -97,7 +96,7 @@ local function create_callback(method, url, req_var)
     end
     -- parse the json response and store the data on memory
     if json_body and req_var ~= "" then
-      REQ_VAR_STORE[req_var] = json.decode(res.body)
+      REQ_VAR_STORE[req_var] = vim.json.decode(res.body)
     end
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
