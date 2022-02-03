@@ -96,7 +96,9 @@ local function create_callback(method, url, req_var)
     end
     -- parse the json response and store the data on memory
     if json_body and req_var ~= "" then
-      REQ_VAR_STORE[req_var] = vim.json.decode(res.body)
+      local req_var_store = vim.api.nvim_get_var('req_var_store')
+      req_var_store[req_var] = vim.json.decode(res.body)
+      vim.api.nvim_set_var('req_var_store', req_var_store)
     end
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1

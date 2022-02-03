@@ -5,9 +5,7 @@ local curl = require("rest-nvim.curl")
 local Opts = {}
 local LastOpts = {}
 
--- global variable, used to store request variables' data
-REQ_VAR_STORE = { __loaded = true }
-
+vim.api.nvim_set_var("req_var_store", { __loaded = true })
 rest.setup = function(user_configs)
   config.set(user_configs or {})
 end

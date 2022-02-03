@@ -140,7 +140,7 @@ end
 
 -- replaces the variables that have assigned another variable, e.g. foo: {{bar}} or foo: {{bar.baz}}
 -- if so, then replace {{bar}} or {{bar.baz}} with the proper value else return the same string
--- only works if `bar` is a key in REQ_VAR_STORE
+-- only works if `bar` is a key in req_var_store
 -- @param value_str the value to evaluate
 M.replace_req_varibles = function(value_str)
   -- first check if 'value_str' has the form {{bar}} if not then return them as is
@@ -157,7 +157,7 @@ M.replace_req_varibles = function(value_str)
     table.insert(splitted_values, var)
   end
 
-  local result = REQ_VAR_STORE
+  local result = vim.api.nvim_get_var('req_var_store')
   if not result.__loaded then
     error(
       string.format(
