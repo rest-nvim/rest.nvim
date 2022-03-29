@@ -101,7 +101,7 @@ local function create_callback(method, url)
     -- Only open a new split if the buffer is not loaded into the current window
     if vim.fn.bufwinnr(res_bufnr) == -1 then
       local cmd_split = [[vert sb]]
-      if config.result_split_horizontal then
+      if config.get("result_split_horizontal") then
         cmd_split = [[sb]]
       end
       vim.cmd(cmd_split .. res_bufnr)
