@@ -61,6 +61,8 @@ use {
     require("rest-nvim").setup({
       -- Open request results in a horizontal split
       result_split_horizontal = false,
+      -- Keep the http file buffer above|left when split horizontal|vertical
+      result_split_in_place = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
       -- Highlight request on run
@@ -110,6 +112,8 @@ To run `rest.nvim` you should map the following commands:
 
 - `result_split_horizontal` opens result on a horizontal split (default opens
     on vertical)
+- `result_split_in_place` opens result below|right on horizontal|vertical split
+    (default opens top|left on horizontal|vertical split)
 - `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
     useful when using unknown certificates
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
