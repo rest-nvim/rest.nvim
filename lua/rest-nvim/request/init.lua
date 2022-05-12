@@ -36,7 +36,8 @@ local function get_importfile_name(bufnr, start_line, stop_line)
 end
 
 -- get_body retrieves the body lines in the buffer and then returns
--- either a raw string with the body if it is JSON, or a filename. Plenary.curl can distinguish
+-- either a table if the body is a JSON or a raw string if it is a filename
+-- Plenary.curl allows a table or a raw string as body and can distinguish
 -- between strings with filenames and strings with the raw body
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
@@ -68,6 +69,11 @@ local function get_body(bufnr, start_line, stop_line)
     if not utils.contains_comments(line) then
       body = body .. utils.replace_vars(line)
     end
+  end
+
+  local is_json, json_body = pcall(vim.fn.json_decode, body)
+  if is_json then
+    return json_body
   end
 
   return body
