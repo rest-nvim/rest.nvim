@@ -89,12 +89,34 @@ local function is_request_line(line)
   return false
 end
 
+-- If the header_line is "Authorization: Basic <user>:<password>", returns "<user>:<password>" else false
+local function get_basic_auth_credentials(header_line)
+  local header = utils.split(header_line, ":", 1)
+  local header_name = header[1]
+  local header_value = header[2]:gsub("^%s*", "")
+
+  if header_name ~= "Authorization" then
+    return false
+  end
+
+  local resolved_value = utils.replace_vars(header_value)
+  local i, j = string.find(resolved_value, "Basic ")
+  local colon_location = string.find(resolved_value, ":")
+
+  if i == 1 and j == 6 and colon_location > 6 then
+    return string.sub(resolved_value, 7)
+  else
+    return false
+  end
+end
+
 -- get_headers retrieves all the found headers and returns a lua table with them
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where the request starts
 -- @param end_line Line where the request ends
 local function get_headers(bufnr, start_line, end_line)
   local headers = {}
+  local auth = nil
   local body_start = end_line
 
   -- Iterate over all buffer lines starting after the request line
@@ -114,16 +136,21 @@ local function get_headers(bufnr, start_line, end_line)
     end
 
     local header = utils.split(line_content, ":")
+    local basic_auth = get_basic_auth_credentials(line_content)
     local header_name = header[1]:lower()
     table.remove(header, 1)
     local header_value = table.concat(header, ":")
     if not utils.contains_comments(header_name) then
-      headers[header_name] = utils.replace_vars(header_value)
+      if basic_auth then
+        auth = basic_auth
+      else
+        headers[header_name] = utils.replace_vars(header_value)
+      end
     end
     ::continue::
   end
 
-  return headers, body_start
+  return headers, auth, body_start
 end
 
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
@@ -191,7 +218,7 @@ M.get_current_request = function()
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
-  local headers, body_start = get_headers(bufnr, start_line, end_line)
+  local headers, auth, body_start = get_headers(bufnr, start_line, end_line)
 
   local body = get_body(bufnr, body_start, end_line)
 
@@ -206,6 +233,7 @@ M.get_current_request = function()
     url = parsed_url.url,
     headers = headers,
     body = body,
+    auth = auth,
     bufnr = bufnr,
     start_line = start_line,
     end_line = end_line,

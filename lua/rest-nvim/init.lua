@@ -25,6 +25,7 @@ rest.run = function(verbose)
     headers = result.headers,
     raw = config.get("skip_ssl_verification") and { "-k" } or nil,
     body = result.body,
+    auth = result.auth,
     dry_run = verbose or false,
     bufnr = result.bufnr,
     start_line = result.start_line,
