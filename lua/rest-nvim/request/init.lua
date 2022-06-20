@@ -27,7 +27,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
       return fileimport_string
     else
       local file_dirname = vim.fn.expand("%:p:h")
-      local file_name = path:new(path:new(file_dirname), fileimport_string)
+      local file_name = path:new(path:new(file_dirname), fileimport_spliced)
       return file_name:absolute()
     end
   end
