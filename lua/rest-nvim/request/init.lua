@@ -22,13 +22,12 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
       :gsub("^%s+", "")
       :gsub("%s+$", "")
-    -- local fileimport_path = path:new(fileimport_string)
-    -- if fileimport_path:is_absolute() then
-    if path:new(fileimport_string):is_absolute() then
-      return fileimport_string
+	fileimport_spliced = utils.replace_vars(fileimport_string)
+    if path:new(fileimport_spliced):is_absolute() then
+      return fileimport_spliced
     else
       local file_dirname = vim.fn.expand("%:p:h")
-      local file_name = path:new(path:new(file_dirname), fileimport_string)
+      local file_name = path:new(path:new(file_dirname), fileimport_spliced)
       return file_name:absolute()
     end
   end
