@@ -42,6 +42,7 @@ end
 
 local function create_callback(method, url)
   return function(res)
+    log.debug("Starting callback")
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
       return
@@ -148,6 +149,8 @@ M.curl_cmd = function(opts)
     log.debug("[rest.nvim] Request preview:\n" .. curl_cmd)
     return
   else
+    log.debug("Generated curl command ", curl_cmd)
+
     opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))
     curl[opts.method](opts)
   end
