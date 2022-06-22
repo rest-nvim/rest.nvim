@@ -227,9 +227,12 @@ M.get_current_request = function()
   if start_line == 0 then
     error("No request found")
   end
+  log.debug("Request starting line", start_line)
   local end_line = end_request(bufnr)
+  log.debug("Request ending at line", end_line)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
+  log.fmt_debug("Identified method %s", parsed_url.method)
 
   local headers, headers_end = get_headers(bufnr, start_line, end_line)
 
@@ -248,6 +251,7 @@ M.get_current_request = function()
     end_line,
     string.find(headers["content-type"] or "", "application/[^ ]-json")
   )
+  log.fmt_debug("Identified body as:\n %s", body)
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
