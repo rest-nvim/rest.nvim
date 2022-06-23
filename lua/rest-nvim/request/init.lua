@@ -71,11 +71,6 @@ local function get_body(bufnr, start_line, stop_line)
     end
   end
 
-  local is_json, json_body = pcall(vim.fn.json_decode, body)
-  if is_json then
-    return json_body
-  end
-
   return body
 end
 -- is_request_line checks if the given line is a http request line according to RFC 2616
