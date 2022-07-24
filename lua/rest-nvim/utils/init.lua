@@ -65,9 +65,18 @@ M.read_env_file = function()
   -- If there's an env file in the current working dir
   for _, env_file_path in ipairs(env_file_paths) do
     if M.file_exists(env_file_path) then
-      for line in io.lines(env_file_path) do
-        local vars = M.split(line, "=", 1)
-        variables[vars[1]] = vars[2]
+      if string.match(env_file_path, ".*.json$") then
+        local f = io.open(env_file_path, "r")
+        if f ~= nil then
+          local json_vars = f:read("*all")
+          variables = vim.fn.json_decode(json_vars)
+          f:close()
+        end
+      else
+        for line in io.lines(env_file_path) do
+          local vars = M.split(line, "=", 1)
+          variables[vars[1]] = vars[2]
+        end
       end
     end
   end
