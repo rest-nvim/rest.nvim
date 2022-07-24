@@ -51,7 +51,7 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(method, url)
+local function create_callback(method, url, script_str)
   return function(res)
     log.debug("Starting callback")
     if res.exit ~= 0 then
@@ -66,6 +66,21 @@ local function create_callback(method, url)
       if string.lower(header):find("^content%-type") then
         content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
         break
+      end
+    end
+
+    if script_str ~= nil then
+      local context = {
+        result = res,
+        pretty_print = vim.pretty_print,
+        json_decode = vim.fn.json_decode,
+        set_env = utils.set_env,
+      }
+      local env = { context = context }
+      setmetatable(env, { __index = _G })
+      local f = load(script_str, nil, "bt", env)
+      if f ~= nil then
+        f()
       end
     end
 
@@ -211,9 +226,7 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    log.debug("Generated curl command ", curl_cmd)
-
-    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))
+    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str))
     curl[opts.method](opts)
   end
 end

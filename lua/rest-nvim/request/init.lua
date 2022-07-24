@@ -60,11 +60,17 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   end
 
   local body = ""
+  local script_line
   -- nvim_buf_get_lines is zero based and end-exclusive
   -- but start_line and stop_line are one-based and inclusive
   -- magically, this fits :-) start_line is the CRLF between header and body
   -- which should not be included in the body, stop_line is the last line of the body
-  for _, line in ipairs(lines) do
+  for i, line in ipairs(lines) do
+    -- stop if a script opening tag is found 
+    if line:find("{%%") then
+      script_line = i
+      break
+    end
     -- Ignore commented lines with and without indent
     if not utils.contains_comments(line) then
       body = body .. utils.replace_vars(line)
@@ -80,7 +86,21 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
   end
 
-  return body
+  return body, script_line
+end
+local function get_response_script(bufnr, start_line, stop_line)
+    local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+
+  local script_str = ""
+
+  for _, line in ipairs(lines) do
+    script_str = script_str..line.."\n"
+    if line:find("%%}") then
+      break
+    end
+  end
+  return script_str:match("{%%(.-)%%}")
+
 end
 
 -- is_request_line checks if the given line is a http request line according to RFC 2616
@@ -178,7 +198,7 @@ local function end_request(bufnr)
   end
   utils.move_cursor(bufnr, linenumber)
 
-  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn", vim.fn.line("$"))
+  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn", vim.fn.line("$"))
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
@@ -269,6 +289,7 @@ M.get_current_request = function()
     bufnr = bufnr,
     start_line = start_line,
     end_line = end_line,
+    script_str = script_str
   }
 end
 

@@ -12,4 +12,5 @@ rest-nvim-usage-dynamic-variables	rest-nvim.txt	/*rest-nvim-usage-dynamic-variab
 rest-nvim-usage-environment-variables	rest-nvim.txt	/*rest-nvim-usage-environment-variables*
 rest-nvim-usage-external-files	rest-nvim.txt	/*rest-nvim-usage-external-files*
 rest-nvim-usage-requests	rest-nvim.txt	/*rest-nvim-usage-requests*
+rest-nvim-response-script	rest-nvim.txt	/*rest-nvim-response-script*
 rest-nvim.txt	rest-nvim.txt	/*rest-nvim.txt*

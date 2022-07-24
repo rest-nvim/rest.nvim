@@ -33,6 +33,7 @@ rest.run = function(verbose)
     bufnr = result.bufnr,
     start_line = result.start_line,
     end_line = result.end_line,
+    script_str = result.script_str,
   }
 
   if not verbose then
