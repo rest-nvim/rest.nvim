@@ -6,6 +6,7 @@ rest-nvim-intro	rest-nvim.txt	/*rest-nvim-intro*
 rest-nvim-issues	rest-nvim.txt	/*rest-nvim-issues*
 rest-nvim-license	rest-nvim.txt	/*rest-nvim-license*
 rest-nvim-quick-start	rest-nvim.txt	/*rest-nvim-quick-start*
+rest-nvim-response-script	rest-nvim.txt	/*rest-nvim-response-script*
 rest-nvim-usage	rest-nvim.txt	/*rest-nvim-usage*
 rest-nvim-usage-commands	rest-nvim.txt	/*rest-nvim-usage-commands*
 rest-nvim-usage-dynamic-variables	rest-nvim.txt	/*rest-nvim-usage-dynamic-variables*

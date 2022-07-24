@@ -56,8 +56,8 @@ end
 rest.run_request = function(req, opts)
   local result = req
   opts = vim.tbl_deep_extend(
-    "force",  -- use value from rightmost map
-    {verbose = false},  -- defaults
+    "force", -- use value from rightmost map
+    { verbose = false }, -- defaults
     opts or {}
   )
 
@@ -74,6 +74,7 @@ rest.run_request = function(req, opts)
     bufnr = result.bufnr,
     start_line = result.start_line,
     end_line = result.end_line,
+    script_str = result.script_str,
   }
 
   if not opts.verbose then
@@ -117,5 +118,14 @@ rest.last = function()
 end
 
 rest.request = request
+
+rest.select_env = function(path)
+  if path ~= nil then
+    vim.validate({ path = { path, "string" } })
+    config.set({ env_file = path })
+  else
+    print("No path given")
+  end
+end
 
 return rest
