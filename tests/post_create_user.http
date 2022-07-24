@@ -7,5 +7,5 @@ Content-Type: application/json
     "array": ["a", "b", "c"],
     "object_ugly_closing": {
       "some_key": "some_value"
-}
+  }
 }

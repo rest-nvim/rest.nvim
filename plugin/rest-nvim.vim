@@ -8,6 +8,9 @@ if exists('g:loaded_rest_nvim') | finish | endif
 nnoremap <Plug>RestNvim :lua require('rest-nvim').run()<CR>
 nnoremap <Plug>RestNvimPreview :lua require('rest-nvim').run(true)<CR>
 nnoremap <Plug>RestNvimLast :lua require('rest-nvim').last()<CR>
+" nnoremap <Plug>RestNvimSelectEnv :lua require('rest-nvim').last()<CR>
+
+command! -nargs=? -complete=file RestSelectEnv :lua require('rest-nvim').select_env(<f-args>)<cr>
 
 let s:save_cpo = &cpo
 set cpo&vim

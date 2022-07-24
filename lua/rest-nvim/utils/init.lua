@@ -16,6 +16,41 @@ M.move_cursor = function(bufnr, line, column)
   end)
 end
 
+M.set_env = function(key, value)
+  local variables = M.get_env_variables()
+  variables[key] = value
+  M.write_env_file(variables)
+end
+
+M.write_env_file = function(variables)
+  local env_file = "/" .. (config.get("env_file") or ".env")
+
+  -- Directories to search for env files
+  local env_file_paths = {
+    -- current working directory
+    vim.fn.getcwd() .. env_file,
+    -- directory of the currently opened file
+    vim.fn.expand("%:p:h") .. env_file,
+  }
+
+  -- If there's an env file in the current working dir
+  for _, env_file_path in ipairs(env_file_paths) do
+    if M.file_exists(env_file_path) then
+      local file = io.open(env_file_path, "w+")
+      if file ~= nil then
+        if string.match(env_file_path, "(.-)%.json$") then
+          file:write(vim.fn.json_encode(variables))
+        else
+          for key, value in pairs(variables) do
+            file:write(key .. "=" .. value .. "\n")
+          end
+        end
+        file:close()
+      end
+    end
+  end
+end
+
 M.uuid = function()
   local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
   return string.gsub(template, "[xy]", function(c)
@@ -43,10 +78,8 @@ M.read_file = function(file)
   return lines
 end
 
--- get_variables Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration or from the files being read
--- with variables beginning with @ and returns a table with the variables
-M.get_variables = function()
+-- reads the variables contained in the current file
+M.get_file_variables = function()
   local variables = {}
 
   -- If there is a line at the beginning with @ first
@@ -64,7 +97,11 @@ M.get_variables = function()
       end
     end
   end
-
+  return variables
+end
+-- Gets the variables from the currently selected env_file
+M.get_env_variables = function()
+  local variables = {}
   local env_file = "/" .. (config.get("env_file") or ".env")
 
   -- Directories to search for env files
@@ -78,11 +115,38 @@ M.get_variables = function()
   -- If there's an env file in the current working dir
   for _, env_file_path in ipairs(env_file_paths) do
     if M.file_exists(env_file_path) then
-      for line in io.lines(env_file_path) do
-        local vars = M.split(line, "%s*=%s*", 1)
-        variables[vars[1]] = vars[2]
+      if string.match(env_file_path, "(.-)%.json$") then
+        local f = io.open(env_file_path, "r")
+        if f ~= nil then
+          local json_vars = f:read("*all")
+          variables = vim.fn.json_decode(json_vars)
+          f:close()
+        end
+      else
+        for line in io.lines(env_file_path) do
+          local vars = M.split(line, "%s*=%s*", 1)
+          variables[vars[1]] = vars[2]
+        end
       end
     end
+  end
+  return variables
+end
+
+-- get_variables Reads the environment variables found in the env_file option
+-- (defualt: .env) specified in configuration or from the files being read
+-- with variables beginning with @ and returns a table with the variables
+M.get_variables = function()
+  local variables = {}
+  local file_variables = M.get_file_variables()
+  local env_variables = M.get_env_variables()
+
+  for k, v in pairs(file_variables) do
+    variables[k] = v
+  end
+
+  for k, v in pairs(env_variables) do
+    variables[k] = v
   end
 
   -- For each variable name
@@ -165,8 +229,10 @@ end
 -- replace_vars replaces the env variables fields in the provided string
 -- with the env variable value
 -- @param str Where replace the placers for the env variables
-M.replace_vars = function(str)
-  local vars = M.read_variables()
+M.replace_vars = function(str, vars)
+  if vars == nil then
+    vars = M.read_variables()
+  end
   -- remove $dotenv tags, which are used by the vscode rest client for cross compatibility
   str = str:gsub("%$dotenv ", ""):gsub("%$DOTENV ", "")
 

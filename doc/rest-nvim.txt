@@ -43,6 +43,7 @@ FEATURES                                                   *rest-nvim-features*
 - Run request under cursor
 - Syntax highlight for http files and output
 - Possibility of using environment variables in http files
+- Set environment variables based on the response
 
 
 ===============================================================================
@@ -118,6 +119,9 @@ COMMANDS                                             *rest-nvim-usage-commands*
   Same as `RestNvim` but it returns the cURL command without executing the
   request. Intended for debugging purposes.
 
+- `:RestSelectEnv path/to/env`
+  Set the path to an env file.
+
 
 ===============================================================================
 REQUESTS                                             *rest-nvim-usage-requests*
@@ -151,6 +155,40 @@ These environment variables can be obtained from:
     - File in the current working directory (env_file in config or '.env')
     - System
 
+Environment variables can be set in .env format or in json.
+
+To change the environment for the session use :RestSelectEnv path/to/environment
+
+Environment variables can be set dynamically from the response body. 
+(see rest-nvim-usage-dynamic-variables)
+
+
+===============================================================================
+RESPONSE SCRIPT                                     *rest-nvim-response-script*
+
+A lua script can be run after a request has completed. This script must below
+the body and wrapped in {% script %}. A context table is avaliable in the 
+response script. The context table can be used to read the response and set
+environment variables. 
+
+The context table:
+`{`
+`  result = res,`
+`  pretty_print = vim.pretty_print,`
+`  json_decode = vim.fn.json_decode,`
+`  set_env = utils.set_env,`
+`}`
+
+Now environment variables can be set like so:
+ 
+`GET https://jsonplaceholder.typicode.com/posts/3`
+` `
+`{%` 
+` `
+`local body = context.json_decode(context.result.body)`
+`context.set_env("postId", body.id)`
+` `
+`%}`
 
 ===============================================================================
 DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
