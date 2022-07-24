@@ -74,4 +74,13 @@ rest.last = function()
   end
 end
 
+rest.select_env = function(path)
+  if path ~= nil then
+    vim.validate({ path = { path, "string" } })
+    config.set({ env_file = path })
+  else
+    print("No path given")
+  end
+end
+
 return rest
