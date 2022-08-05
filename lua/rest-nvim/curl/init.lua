@@ -52,7 +52,7 @@ local function create_callback(method, url)
     -- Check if the content-type is "application/json" so we can format the JSON
     -- output later
     for _, header in ipairs(res.headers) do
-      if header:find("application") and header:find("json") then
+      if header:find("application/json") then
         json_body = true
         break
       end
@@ -92,7 +92,7 @@ local function create_callback(method, url)
     --- Add the curl command results into the created buffer
     if json_body then
       -- format JSON body
-      res.body = vim.fn.system("jq", res.body)
+      res.body = vim.fn.system("jq", res.body):gsub("\n$", "")
     end
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
