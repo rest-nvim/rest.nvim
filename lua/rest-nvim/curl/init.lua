@@ -47,13 +47,12 @@ local function create_callback(method, url)
       return
     end
     local res_bufnr = M.get_or_create_buf()
-    local json_body = false
+    local content_type = nil
 
-    -- Check if the content-type is "application/json" so we can format the JSON
-    -- output later
+    -- get content type
     for _, header in ipairs(res.headers) do
-      if header:find("application/json") then
-        json_body = true
+      if string.lower(header):find("^content%-type") then
+        content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
         break
       end
     end
@@ -90,7 +89,7 @@ local function create_callback(method, url)
     end
 
     --- Add the curl command results into the created buffer
-    if json_body then
+    if content_type == "json" then
       -- format JSON body
       res.body = vim.fn.system("jq", res.body):gsub("\n$", "")
     end
@@ -114,6 +113,25 @@ local function create_callback(method, url)
 
     -- Send cursor in response buffer to start
     utils.move_cursor(res_bufnr, 1)
+
+    -- add syntax highlights for response
+    if content_type == "json" then
+      vim.cmd([[
+        unlet b:current_syntax
+        syn include @json syntax/json.vim
+        syn region jsonBody start="\v\{" end="\v\}$" contains=@json
+
+        let b:current_syntax = "httpResult"
+      ]])
+    elseif content_type == "html" then
+      vim.cmd([[
+        unlet b:current_syntax
+        syn include @html syntax/html.vim
+        syn region htmlBody start=+<html.*>+ end=+<\/ *html>+ contains=@html
+
+        let b:current_syntax = "httpResult"
+      ]])
+    end
   end
 end
 
