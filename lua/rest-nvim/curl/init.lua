@@ -89,10 +89,12 @@ local function create_callback(method, url)
     end
 
     --- Add the curl command results into the created buffer
-    if content_type == "json" then
-      -- format JSON body
-      res.body = vim.fn.system("jq", res.body):gsub("\n$", "")
+    local formatter = config.get("result").formatters[content_type]
+    -- formate response body
+    if formatter and vim.fn.executable(type(formatter) == "string" and formatter or formatter[1]) == 1 then
+      res.body = vim.fn.system(formatter, res.body):gsub("\n$", "")
     end
+
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
