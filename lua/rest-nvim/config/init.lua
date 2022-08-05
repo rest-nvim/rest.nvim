@@ -12,6 +12,10 @@ local config = {
     show_url = true,
     show_http_info = true,
     show_headers = true,
+    formatters = {
+      json = "jq",
+      html = {"tidy", "-i", "-q", "--show-errors", "0", "-"}
+    },
   },
   jump_to_request = false,
   env_file = ".env",

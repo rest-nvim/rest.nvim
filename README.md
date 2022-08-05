@@ -47,7 +47,6 @@ have to leave Neovim!
 
 - System-wide
   - curl
-  - jq +1.6 (to format JSON output so it can be human-readable)
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
@@ -75,6 +74,12 @@ use {
         show_url = true,
         show_http_info = true,
         show_headers = true,
+        -- executables for formatting response body [optional]
+        formatters = {
+          -- set them to nil if you want to disable them
+          json = "jq",
+          html = {"tidy", "-i", "-q", "--show-errors", "0", "-"}
+        },
       },
       -- Jump to request line on run
       jump_to_request = false,
