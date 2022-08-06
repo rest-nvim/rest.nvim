@@ -14,7 +14,14 @@ local config = {
     show_headers = true,
     formatters = {
       json = "jq",
-      html = {"tidy", "-i", "-q", "--show-errors", "0", "-"}
+      html = {
+        "tidy", "-i", "-q",
+        "--tidy-mark",      "no",
+        "--show-body-only", "auto",
+        "--show-errors",    "0",
+        "--show-warnings",  "0",
+        "-"
+      }
     },
   },
   jump_to_request = false,
