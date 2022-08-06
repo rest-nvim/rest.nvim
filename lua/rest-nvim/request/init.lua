@@ -42,7 +42,8 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
-local function get_body(bufnr, start_line, stop_line)
+-- @param has_hson True if content-type is set to json
+local function get_body(bufnr, start_line, stop_line, has_json)
   if start_line >= stop_line then
     return
   end
@@ -73,7 +74,11 @@ local function get_body(bufnr, start_line, stop_line)
 
   local is_json, json_body = pcall(vim.fn.json_decode, body)
   if is_json then
-    return json_body
+    if has_json then
+      return vim.fn.json_encode(json_body)
+    else
+      return json_body
+    end
   end
 
   return body
@@ -113,12 +118,10 @@ local function get_headers(bufnr, start_line, end_line)
       goto continue
     end
 
-    local header = utils.split(line_content, ":")
-    local header_name = header[1]:lower()
-    table.remove(header, 1)
-    local header_value = table.concat(header, ":")
+    local header_name, header_value = line_content:match("^(.-): ?(.*)$")
+
     if not utils.contains_comments(header_name) then
-      headers[header_name] = utils.replace_vars(header_value)
+      headers[header_name:lower()] = utils.replace_vars(header_value)
     end
     ::continue::
   end
@@ -225,7 +228,7 @@ M.get_current_request = function()
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  local body = get_body(bufnr, body_start, end_line)
+  local body = get_body(bufnr, body_start, end_line, string.find(headers["content-type"] or "", "application/[^ ]-json"))
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
