@@ -1,2 +1,11 @@
+###
+# test with Host
+
 GET /api/users?page=5
 Host: https://reqres.in
+
+###
+# test with port
+
+GET /api/users?page=5
+Host: https://reqres.in:443
