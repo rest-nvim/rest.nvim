@@ -167,7 +167,13 @@ end
 -- parse_url returns a table with the method of the request and the URL
 -- @param stmt the request statement, e.g., POST http://localhost:3000/foo
 local function parse_url(stmt)
-  local parsed = utils.split(stmt, " ")
+  -- remove HTTP
+  local parsed = utils.split(stmt, " HTTP/")
+  local http_version = nil
+  if parsed[2] ~= nil then
+    http_version = parsed[2]
+  end
+  parsed = utils.split(parsed[1], " ")
   local http_method = parsed[1]
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
@@ -176,6 +182,7 @@ local function parse_url(stmt)
     method = http_method,
     -- Encode URL
     url = utils.encode_url(utils.replace_vars(target_url)),
+    http_version = http_version
   }
 end
 
@@ -212,6 +219,7 @@ M.get_current_request = function()
   return {
     method = parsed_url.method,
     url = parsed_url.url,
+    http_version = parsed_url.http_version,
     headers = headers,
     body = body,
     bufnr = bufnr,
