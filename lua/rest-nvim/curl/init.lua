@@ -95,6 +95,9 @@ local function create_callback(method, url)
       res.body = vim.fn.system(formatter, res.body):gsub("\n$", "")
     end
 
+    -- append response container
+    res.body = "#+RESPONSE\n" .. res.body .. "\n#+END"
+
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
@@ -117,22 +120,16 @@ local function create_callback(method, url)
     utils.move_cursor(res_bufnr, 1)
 
     -- add syntax highlights for response
-    if content_type == "json" then
-      vim.cmd([[
+    local syntax_file = vim.fn.expand(string.format("$VIMRUNTIME/syntax/%s.vim", content_type))
+
+    if vim.fn.filereadable(syntax_file) == 1 then
+      vim.cmd(string.gsub([[
         unlet b:current_syntax
-        syn include @json syntax/json.vim
-        syn region jsonBody start="\v\{" end="\v\}$" contains=@json
+        syn include @%s syntax/%s.vim
+        syn region %sBody matchgroup=Comment start=+\v^#\+RESPONSE$+ end=+\v^#\+END$+ contains=@%s
 
         let b:current_syntax = "httpResult"
-      ]])
-    elseif content_type == "html" then
-      vim.cmd([[
-        unlet b:current_syntax
-        syn include @html syntax/html.vim
-        syn region htmlBody start=+<html.*>+ end=+<\/ *html>+ contains=@html
-
-        let b:current_syntax = "httpResult"
-      ]])
+      ]], "%%s",content_type))
     end
   end
 end
@@ -165,7 +162,7 @@ M.curl_cmd = function(opts)
       vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
 
-    log.debug("[rest.nvim] Request preview:\n" .. curl_cmd)
+    vim.api.nvim_echo({{"[rest.nvim] Request preview:\n", "Comment"}, {curl_cmd}}, false, {})
     return
   else
     opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))

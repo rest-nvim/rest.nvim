@@ -4,19 +4,19 @@ syn match   httpResultComment "\v^#.*$"
 syn keyword httpResultTitle GET POST PATCH PUT HEAD DELETE nextgroup=httpResultPath
 syn match   httpResultPat  /.*$/ contained
 
-syn match   httpResultField /^\(\w\)[^:]\+:/he=e-1
-syn region  httpResultDateField start=+^[Dd]ate:+he=e-1 end=+ + nextgroup=httpResultDate
-syn region  httpResultDateField start=+^[Ee]xpires:+he=e-1 end=+ + nextgroup=httpResultDate
-syn match   httpResultDate /.*$/ contained
+syn match httpResultField /^\(\w\)[^:]\+:/he=e-1
+syn match httpResultDateField /^[Dd]ate:/he=e-1    nextgroup=httpResultDate
+syn match httpResultDateField /^[Ee]xpires:/he=e-1 nextgroup=httpResultDate
+syn match httpResultDate /.*$/ contained
 
 syn region httpResultHeader start=+^HTTP/+ end=+ + nextgroup=httpResult200,httpResult300,httpResult400,httpResult500
-syn match  httpResult200 /2.*$/ contained
-syn match  httpResult300 /3.*$/ contained
-syn match  httpResult400 /4.*$/ contained
-syn match  httpResult500 /5.*$/ contained
+syn match  httpResult200 /2\d\d.*$/ contained
+syn match  httpResult300 /3\d\d.*$/ contained
+syn match  httpResult400 /4\d\d.*$/ contained
+syn match  httpResult500 /5\d\d.*$/ contained
 
 syn region httpResultString start=/\vr?"/ end=/\v"/
-syn match  httpResultNumber /\v[ =]@1<=\d+[ \n]/
+syn match  httpResultNumber /\v[ =]@1<=[0-9]*.?[0-9]+[ ,;&\n]/he=e-1
 
 hi link httpResultComment   Comment
 hi link httpResultTitle     Type
