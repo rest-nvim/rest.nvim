@@ -74,11 +74,13 @@ use {
         show_url = true,
         show_http_info = true,
         show_headers = true,
-        -- executables for formatting response body [optional]
+        -- executables or functions for formatting response body [optional]
+        -- set them to nil if you want to disable them
         formatters = {
-          -- set them to nil if you want to disable them
           json = "jq",
-          html = {"tidy", "-i", "-q", "--show-errors", "0", "-"}
+          html = function(body)
+            return vim.fn.system({"tidy", "-i", "-q", "-"}, body)
+          end
         },
       },
       -- Jump to request line on run
