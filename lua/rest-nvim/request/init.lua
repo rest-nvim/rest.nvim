@@ -66,8 +66,10 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   -- magically, this fits :-) start_line is the CRLF between header and body
   -- which should not be included in the body, stop_line is the last line of the body
   for i, line in ipairs(lines) do
+    log.fmt_debug("Line %s", line)
     -- stop if a script opening tag is found 
     if line:find("{%%") then
+        print("FOUND a script")
       script_line = i
       break
     end
@@ -89,7 +91,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   return body, script_line
 end
 local function get_response_script(bufnr, start_line, stop_line)
-    local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
 
   local script_str = ""
 
