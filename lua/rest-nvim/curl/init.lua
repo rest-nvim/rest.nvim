@@ -3,6 +3,17 @@ local curl = require("plenary.curl")
 local config = require("rest-nvim.config")
 
 local M = {}
+-- checks if 'x' can be executed by system()
+local function is_executable(x)
+  if type(x) == "string" and vim.fn.executable(x) == 1 then
+    return true
+  elseif vim.tbl_islist(x) and vim.fn.executable(x[1] or "") == 1 then
+    return true
+  end
+
+  return false
+end
+
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -89,8 +100,26 @@ local function create_callback(method, url)
     --- Add the curl command results into the created buffer
     local formatter = config.get("result").formatters[content_type]
     -- formate response body
-    if formatter and vim.fn.executable(type(formatter) == "string" and formatter or formatter[1]) == 1 then
-      res.body = vim.fn.system(formatter, res.body):gsub("\n$", "")
+    if type(formatter) == "function" then
+      local ok, out = pcall(formatter, res.body)
+      -- check if formatter ran successfully
+      if ok and out then
+        res.body = out
+      else
+        vim.api.nvim_echo({{
+          string.format("Error calling formatter on response body:\n%s", out), "Error"
+        }}, false, {})
+      end
+    elseif is_executable(formatter) then
+      local stdout = vim.fn.system(formatter, res.body):gsub("\n$", "")
+      -- check if formatter ran successfully
+      if vim.v.shell_error == 0 then
+        res.body = stdout
+      else
+        vim.api.nvim_echo({{
+          string.format("Error running formatter %s on response body:\n%s", vim.inspect(formatter), stdout), "Error"
+        }}, false, {})
+      end
     end
 
     -- append response container
