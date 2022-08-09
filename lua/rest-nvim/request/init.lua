@@ -1,6 +1,6 @@
-local utils  = require("rest-nvim.utils")
-local path   = require("plenary.path")
-local log    = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local utils = require("rest-nvim.utils")
+local path = require("plenary.path")
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
@@ -19,9 +19,8 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_string
     local fileimport_line
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
-      :gsub("^%s+", "")
-      :gsub("%s+$", "")
+    fileimport_string =
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     -- local fileimport_path = path:new(fileimport_string)
     -- if fileimport_path:is_absolute() then
     if path:new(fileimport_string):is_absolute() then
@@ -134,18 +133,18 @@ end
 -- @param headers_end Line where the headers end
 -- @param end_line Line where the request ends
 local function get_curl_args(bufnr, headers_end, end_line)
-  local curl_args  = {}
+  local curl_args = {}
   local body_start = end_line
 
   for line_number = headers_end, end_line do
     local line = vim.fn.getbufline(bufnr, line_number)
     local line_content = line[1]
 
-    if line_content:find("^ *%-%-?[a-zA-Z%-]+")  then
+    if line_content:find("^ *%-%-?[a-zA-Z%-]+") then
       table.insert(curl_args, line_content)
     elseif not line_content:find("^ *$") then
       if line_number ~= end_line then
-        body_start=line_number - 1
+        body_start = line_number - 1
       end
       break
     end
@@ -228,7 +227,12 @@ M.get_current_request = function()
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  local body = get_body(bufnr, body_start, end_line, string.find(headers["content-type"] or "", "application/[^ ]-json"))
+  local body = get_body(
+    bufnr,
+    body_start,
+    end_line,
+    string.find(headers["content-type"] or "", "application/[^ ]-json")
+  )
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)

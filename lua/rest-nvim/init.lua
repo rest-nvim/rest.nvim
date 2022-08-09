@@ -1,9 +1,9 @@
 local request = require("rest-nvim.request")
-local config  = require("rest-nvim.config")
-local curl    = require("rest-nvim.curl")
+local config = require("rest-nvim.config")
+local curl = require("rest-nvim.curl")
 
-local rest     = {}
-local Opts     = {}
+local rest = {}
+local Opts = {}
 local LastOpts = {}
 
 rest.setup = function(user_configs)
@@ -24,7 +24,8 @@ rest.run = function(verbose)
     method = result.method:lower(),
     url = result.url,
     headers = result.headers,
-    raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" }) or result.raw,
+    raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
+      or result.raw,
     body = result.body,
     dry_run = verbose or false,
     bufnr = result.bufnr,
