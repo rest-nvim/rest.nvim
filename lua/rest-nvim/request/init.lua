@@ -19,9 +19,8 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_string
     local fileimport_line
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
-        :gsub("^%s+", "")
-        :gsub("%s+$", "")
+    fileimport_string =
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     -- local fileimport_path = path:new(fileimport_string)
     -- if fileimport_path:is_absolute() then
     if path:new(fileimport_string):is_absolute() then
@@ -215,7 +214,7 @@ local function parse_url(stmt)
     method = http_method,
     -- Encode URL
     url = utils.encode_url(utils.replace_vars(target_url)),
-    http_version = http_version
+    http_version = http_version,
   }
 end
 
@@ -236,12 +235,11 @@ M.get_current_request = function()
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-
-  if headers['host'] ~= nil then
-    headers['host'] = headers['host']:gsub("%s+", "")
-    headers['host'] = string.gsub(headers['host'], "%s+", "")
-    parsed_url.url = headers['host'] .. parsed_url.url
-    headers['host'] = nil
+  if headers["host"] ~= nil then
+    headers["host"] = headers["host"]:gsub("%s+", "")
+    headers["host"] = string.gsub(headers["host"], "%s+", "")
+    parsed_url.url = headers["host"] .. parsed_url.url
+    headers["host"] = nil
   end
 
   local body = get_body(
