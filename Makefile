@@ -1,0 +1,5 @@
+lint:
+	luacheck .
+
+format:
+	stylua .
