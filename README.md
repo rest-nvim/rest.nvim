@@ -47,6 +47,9 @@ have to leave Neovim!
 
 - System-wide
   - curl
+- Optional [can be changed, see config bellow]
+  - jq   (to format JSON output)
+  - tidy (to format HTML output)
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
