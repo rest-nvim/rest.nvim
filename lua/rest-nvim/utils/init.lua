@@ -182,19 +182,18 @@ end
 -- replace_vars replaces the env variables fields in the provided string
 -- with the env variable value
 -- @param str Where replace the placers for the env variables
-M.replace_vars = function(str)
-  local vars = M.read_variables()
+M.replace_vars = function(str, vars)
   -- remove $dotenv tags, which are used by the vscode rest client for cross compatibility
   str = str:gsub("%$dotenv ", ""):gsub("%$DOTENV ", "")
 
   for var in string.gmatch(str, "{{[^}]+}}") do
     var = var:gsub("{", ""):gsub("}", "")
-    -- If the env variable wasn't found in the `.env` file or in the dynamic variables then search it
-    -- in the OS environment variables
+    -- If the env variable wasn't found in the `.env` file or in the dynamic variables then 
     if M.has_key(vars, var) then
       str = type(vars[var]) == "function" and str:gsub("{{" .. var .. "}}", vars[var]())
         or str:gsub("{{" .. var .. "}}", vars[var])
     else
+      -- search key in the OS environment variables
       if os.getenv(var) then
         str = str:gsub("{{" .. var .. "}}", os.getenv(var))
       else

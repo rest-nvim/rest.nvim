@@ -65,6 +65,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   -- but start_line and stop_line are one-based and inclusive
   -- magically, this fits :-) start_line is the CRLF between header and body
   -- which should not be included in the body, stop_line is the last line of the body
+  local vars = utils.read_variables()
   for i, line in ipairs(lines) do
     log.fmt_debug("Line %s", line)
     -- stop if a script opening tag is found 
@@ -75,7 +76,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
     -- Ignore commented lines with and without indent
     if not utils.contains_comments(line) then
-      body = body .. utils.replace_vars(line)
+      body = body .. utils.replace_vars(line, vars)
     end
   end
 
@@ -143,7 +144,8 @@ local function get_headers(bufnr, start_line, end_line)
     local header_name, header_value = line_content:match("^(.-): ?(.*)$")
 
     if not utils.contains_comments(header_name) then
-      headers[header_name:lower()] = utils.replace_vars(header_value)
+      local vars = utils.read_variables()
+      headers[header_name:lower()] = utils.replace_vars(header_value, vars)
     end
     ::continue::
   end
@@ -232,10 +234,12 @@ local function parse_url(stmt)
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
 
+  local vars = utils.read_variables()
+
   return {
     method = http_method,
     -- Encode URL
-    url = utils.encode_url(utils.replace_vars(target_url)),
+    url = utils.encode_url(utils.replace_vars(target_url, vars)),
     http_version = http_version,
   }
 end
@@ -274,7 +278,7 @@ M.get_current_request = function()
     string.find(headers["content-type"] or "", "application/[^ ]-json")
   )
   log.fmt_debug("Identified body as:\n %s", body)
-  script_str = get_response_script(bufnr, script_line, end_line)
+  script_str = get_response_script(bufnr, body_start, end_line)
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
