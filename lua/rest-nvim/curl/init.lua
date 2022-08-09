@@ -108,16 +108,12 @@ local function create_callback(method, url)
       if ok and out then
         res.body = out
       else
-        vim.api.nvim_echo(
+        vim.api.nvim_echo({
           {
-            {
-              string.format("Error calling formatter on response body:\n%s", out),
-              "Error",
-            },
+            string.format("Error calling formatter on response body:\n%s", out),
+            "Error",
           },
-          false,
-          {}
-        )
+        }, false, {})
       end
     elseif is_executable(formatter) then
       local stdout = vim.fn.system(formatter, res.body):gsub("\n$", "")
@@ -125,20 +121,16 @@ local function create_callback(method, url)
       if vim.v.shell_error == 0 then
         res.body = stdout
       else
-        vim.api.nvim_echo(
+        vim.api.nvim_echo({
           {
-            {
-              string.format(
-                "Error running formatter %s on response body:\n%s",
-                vim.inspect(formatter),
-                stdout
-              ),
-              "Error",
-            },
+            string.format(
+              "Error running formatter %s on response body:\n%s",
+              vim.inspect(formatter),
+              stdout
+            ),
+            "Error",
           },
-          false,
-          {}
-        )
+        }, false, {})
       end
     end
 

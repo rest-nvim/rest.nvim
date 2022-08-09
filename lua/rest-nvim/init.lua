@@ -48,7 +48,7 @@ rest.run = function(verbose)
   if not success_req then
     vim.api.nvim_err_writeln(
       "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
-      .. req_err
+        .. req_err
     )
   end
 end
@@ -69,7 +69,7 @@ rest.last = function()
   if not success_req then
     vim.api.nvim_err_writeln(
       "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
-      .. req_err
+        .. req_err
     )
   end
 end
