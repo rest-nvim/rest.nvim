@@ -1,5 +1,6 @@
-local utils = require("rest-nvim.utils")
-local curl = require("plenary.curl")
+local utils  = require("rest-nvim.utils")
+local curl   = require("plenary.curl")
+local log    = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local config = require("rest-nvim.config")
 
 local M = {}
@@ -53,6 +54,7 @@ end
 local function create_callback(method, url)
   return function(res)
     if res.exit ~= 0 then
+      log.error("[rest.nvim] " .. utils.curl_error(res.exit))
       return
     end
     local res_bufnr = M.get_or_create_buf()

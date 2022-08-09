@@ -1,6 +1,6 @@
-local utils = require("rest-nvim.utils")
-local path = require("plenary.path")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local utils  = require("rest-nvim.utils")
+local path   = require("plenary.path")
+local log    = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
