@@ -1,8 +1,9 @@
-local rest = {}
 local request = require("rest-nvim.request")
-local config = require("rest-nvim.config")
-local curl = require("rest-nvim.curl")
-local Opts = {}
+local config  = require("rest-nvim.config")
+local curl    = require("rest-nvim.curl")
+
+local rest     = {}
+local Opts     = {}
 local LastOpts = {}
 
 rest.setup = function(user_configs)
