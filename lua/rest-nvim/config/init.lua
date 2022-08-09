@@ -14,16 +14,24 @@ local config = {
     show_headers = true,
     formatters = {
       json = "jq",
-      html = function (body)
-        return vim.fn.system({
-          "tidy", "-i", "-q",
-          "--tidy-mark",      "no",
-          "--show-body-only", "auto",
-          "--show-errors",    "0",
-          "--show-warnings",  "0",
-          "-"
-        }, body):gsub("\n$", "")
-      end
+      html = function(body)
+        return vim.fn
+          .system({
+            "tidy",
+            "-i",
+            "-q",
+            "--tidy-mark",
+            "no",
+            "--show-body-only",
+            "auto",
+            "--show-errors",
+            "0",
+            "--show-warnings",
+            "0",
+            "-",
+          }, body)
+          :gsub("\n$", "")
+      end,
     },
   },
   jump_to_request = false,

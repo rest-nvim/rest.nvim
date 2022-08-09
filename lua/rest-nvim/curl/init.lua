@@ -1,6 +1,6 @@
-local utils  = require("rest-nvim.utils")
-local curl   = require("plenary.curl")
-local log    = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local utils = require("rest-nvim.utils")
+local curl = require("plenary.curl")
+local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
 local config = require("rest-nvim.config")
 
 local M = {}
@@ -108,9 +108,16 @@ local function create_callback(method, url)
       if ok and out then
         res.body = out
       else
-        vim.api.nvim_echo({{
-          string.format("Error calling formatter on response body:\n%s", out), "Error"
-        }}, false, {})
+        vim.api.nvim_echo(
+          {
+            {
+              string.format("Error calling formatter on response body:\n%s", out),
+              "Error",
+            },
+          },
+          false,
+          {}
+        )
       end
     elseif is_executable(formatter) then
       local stdout = vim.fn.system(formatter, res.body):gsub("\n$", "")
@@ -118,9 +125,20 @@ local function create_callback(method, url)
       if vim.v.shell_error == 0 then
         res.body = stdout
       else
-        vim.api.nvim_echo({{
-          string.format("Error running formatter %s on response body:\n%s", vim.inspect(formatter), stdout), "Error"
-        }}, false, {})
+        vim.api.nvim_echo(
+          {
+            {
+              string.format(
+                "Error running formatter %s on response body:\n%s",
+                vim.inspect(formatter),
+                stdout
+              ),
+              "Error",
+            },
+          },
+          false,
+          {}
+        )
       end
     end
 
@@ -152,13 +170,17 @@ local function create_callback(method, url)
     local syntax_file = vim.fn.expand(string.format("$VIMRUNTIME/syntax/%s.vim", content_type))
 
     if vim.fn.filereadable(syntax_file) == 1 then
-      vim.cmd(string.gsub([[
+      vim.cmd(string.gsub(
+        [[
         unlet b:current_syntax
         syn include @%s syntax/%s.vim
         syn region %sBody matchgroup=Comment start=+\v^#\+RESPONSE$+ end=+\v^#\+END$+ contains=@%s
 
         let b:current_syntax = "httpResult"
-      ]], "%%s",content_type))
+      ]],
+        "%%s",
+        content_type
+      ))
     end
   end
 end
@@ -191,7 +213,7 @@ M.curl_cmd = function(opts)
       vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
 
-    vim.api.nvim_echo({{"[rest.nvim] Request preview:\n", "Comment"}, {curl_cmd}}, false, {})
+    vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
     opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))
