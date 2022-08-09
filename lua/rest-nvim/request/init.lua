@@ -42,7 +42,7 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
--- @param has_hson True if content-type is set to json
+-- @param has_json True if content-type is set to json
 local function get_body(bufnr, start_line, stop_line, has_json)
   if start_line >= stop_line then
     return
