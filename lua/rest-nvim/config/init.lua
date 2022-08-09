@@ -12,6 +12,27 @@ local config = {
     show_url = true,
     show_http_info = true,
     show_headers = true,
+    formatters = {
+      json = "jq",
+      html = function(body)
+        return vim.fn
+          .system({
+            "tidy",
+            "-i",
+            "-q",
+            "--tidy-mark",
+            "no",
+            "--show-body-only",
+            "auto",
+            "--show-errors",
+            "0",
+            "--show-warnings",
+            "0",
+            "-",
+          }, body)
+          :gsub("\n$", "")
+      end,
+    },
   },
   jump_to_request = false,
   env_file = ".env",

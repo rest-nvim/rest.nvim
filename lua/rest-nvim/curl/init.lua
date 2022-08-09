@@ -1,9 +1,20 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
-local config = require("rest-nvim.config")
 local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local config = require("rest-nvim.config")
 
 local M = {}
+-- checks if 'x' can be executed by system()
+local function is_executable(x)
+  if type(x) == "string" and vim.fn.executable(x) == 1 then
+    return true
+  elseif vim.tbl_islist(x) and vim.fn.executable(x[1] or "") == 1 then
+    return true
+  end
+
+  return false
+end
+
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -47,13 +58,12 @@ local function create_callback(method, url)
       return
     end
     local res_bufnr = M.get_or_create_buf()
-    local json_body = false
+    local content_type = nil
 
-    -- Check if the content-type is "application/json" so we can format the JSON
-    -- output later
+    -- get content type
     for _, header in ipairs(res.headers) do
-      if header:find("application") and header:find("json") then
-        json_body = true
+      if string.lower(header):find("^content%-type") then
+        content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
         break
       end
     end
@@ -90,10 +100,51 @@ local function create_callback(method, url)
     end
 
     --- Add the curl command results into the created buffer
-    if json_body then
-      -- format JSON body
-      res.body = vim.fn.system("jq", res.body)
+    local formatter = config.get("result").formatters[content_type]
+    -- formate response body
+    if type(formatter) == "function" then
+      local ok, out = pcall(formatter, res.body)
+      -- check if formatter ran successfully
+      if ok and out then
+        res.body = out
+      else
+        vim.api.nvim_echo(
+          {
+            {
+              string.format("Error calling formatter on response body:\n%s", out),
+              "Error",
+            },
+          },
+          false,
+          {}
+        )
+      end
+    elseif is_executable(formatter) then
+      local stdout = vim.fn.system(formatter, res.body):gsub("\n$", "")
+      -- check if formatter ran successfully
+      if vim.v.shell_error == 0 then
+        res.body = stdout
+      else
+        vim.api.nvim_echo(
+          {
+            {
+              string.format(
+                "Error running formatter %s on response body:\n%s",
+                vim.inspect(formatter),
+                stdout
+              ),
+              "Error",
+            },
+          },
+          false,
+          {}
+        )
+      end
     end
+
+    -- append response container
+    res.body = "#+RESPONSE\n" .. res.body .. "\n#+END"
+
     local lines = utils.split(res.body, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
@@ -114,6 +165,23 @@ local function create_callback(method, url)
 
     -- Send cursor in response buffer to start
     utils.move_cursor(res_bufnr, 1)
+
+    -- add syntax highlights for response
+    local syntax_file = vim.fn.expand(string.format("$VIMRUNTIME/syntax/%s.vim", content_type))
+
+    if vim.fn.filereadable(syntax_file) == 1 then
+      vim.cmd(string.gsub(
+        [[
+        unlet b:current_syntax
+        syn include @%s syntax/%s.vim
+        syn region %sBody matchgroup=Comment start=+\v^#\+RESPONSE$+ end=+\v^#\+END$+ contains=@%s
+
+        let b:current_syntax = "httpResult"
+      ]],
+        "%%s",
+        content_type
+      ))
+    end
   end
 end
 
@@ -145,7 +213,7 @@ M.curl_cmd = function(opts)
       vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
 
-    log.debug("[rest.nvim] Request preview:\n" .. curl_cmd)
+    vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
     opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url))
