@@ -164,7 +164,9 @@ local function create_callback(method, url)
     if vim.fn.filereadable(syntax_file) == 1 then
       vim.cmd(string.gsub(
         [[
-        unlet b:current_syntax
+        if exists("b:current_syntax")
+          unlet b:current_syntax
+        endif
         syn include @%s syntax/%s.vim
         syn region %sBody matchgroup=Comment start=+\v^#\+RESPONSE$+ end=+\v^#\+END$+ contains=@%s
 
