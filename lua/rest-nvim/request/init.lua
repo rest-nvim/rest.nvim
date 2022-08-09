@@ -19,9 +19,8 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_string
     local fileimport_line
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
-      :gsub("^%s+", "")
-      :gsub("%s+$", "")
+    fileimport_string =
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     -- local fileimport_path = path:new(fileimport_string)
     -- if fileimport_path:is_absolute() then
     if path:new(fileimport_string):is_absolute() then
@@ -36,12 +35,14 @@ local function get_importfile_name(bufnr, start_line, stop_line)
 end
 
 -- get_body retrieves the body lines in the buffer and then returns
--- either a raw string with the body if it is JSON, or a filename. Plenary.curl can distinguish
+-- either a table if the body is a JSON or a raw string if it is a filename
+-- Plenary.curl allows a table or a raw string as body and can distinguish
 -- between strings with filenames and strings with the raw body
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
-local function get_body(bufnr, start_line, stop_line)
+-- @param has_json True if content-type is set to json
+local function get_body(bufnr, start_line, stop_line, has_json)
   if start_line >= stop_line then
     return
   end
@@ -70,8 +71,18 @@ local function get_body(bufnr, start_line, stop_line)
     end
   end
 
+  local is_json, json_body = pcall(vim.fn.json_decode, body)
+  if is_json then
+    if has_json then
+      return vim.fn.json_encode(json_body)
+    else
+      return json_body
+    end
+  end
+
   return body
 end
+
 -- is_request_line checks if the given line is a http request line according to RFC 2616
 local function is_request_line(line)
   local http_methods = { "GET", "POST", "PUT", "PATCH", "DELETE" }
@@ -89,7 +100,7 @@ end
 -- @param end_line Line where the request ends
 local function get_headers(bufnr, start_line, end_line)
   local headers = {}
-  local body_start = end_line
+  local headers_end = end_line
 
   -- Iterate over all buffer lines starting after the request line
   for line_number = start_line + 1, end_line do
@@ -99,7 +110,7 @@ local function get_headers(bufnr, start_line, end_line)
     -- message header and message body are seperated by CRLF (see RFC 2616)
     -- for our purpose also the next request line will stop the header search
     if is_request_line(line_content) or line_content == "" then
-      body_start = line_number
+      headers_end = line_number
       break
     end
     if not line_content:find(":") then
@@ -107,17 +118,40 @@ local function get_headers(bufnr, start_line, end_line)
       goto continue
     end
 
-    local header = utils.split(line_content, ":")
-    local header_name = header[1]:lower()
-    table.remove(header, 1)
-    local header_value = table.concat(header, ":")
+    local header_name, header_value = line_content:match("^(.-): ?(.*)$")
+
     if not utils.contains_comments(header_name) then
-      headers[header_name] = utils.replace_vars(header_value)
+      headers[header_name:lower()] = utils.replace_vars(header_value)
     end
     ::continue::
   end
 
-  return headers, body_start
+  return headers, headers_end
+end
+
+-- get_curl_args finds command line flags and returns a lua table with them
+-- @param bufnr Buffer number, a.k.a id
+-- @param headers_end Line where the headers end
+-- @param end_line Line where the request ends
+local function get_curl_args(bufnr, headers_end, end_line)
+  local curl_args = {}
+  local body_start = end_line
+
+  for line_number = headers_end, end_line do
+    local line = vim.fn.getbufline(bufnr, line_number)
+    local line_content = line[1]
+
+    if line_content:find("^ *%-%-?[a-zA-Z%-]+") then
+      table.insert(curl_args, line_content)
+    elseif not line_content:find("^ *$") then
+      if line_number ~= end_line then
+        body_start = line_number - 1
+      end
+      break
+    end
+  end
+
+  return curl_args, body_start
 end
 
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
@@ -166,6 +200,11 @@ local function end_request(bufnr)
   if next == 0 or (oldlinenumber == last_line) then
     return last_line
   else
+    -- skip comment lines above requests
+    while vim.fn.getline(next - 1):find("^ *#") do
+      next = next - 1
+    end
+
     return next - 1
   end
 end
@@ -173,7 +212,13 @@ end
 -- parse_url returns a table with the method of the request and the URL
 -- @param stmt the request statement, e.g., POST http://localhost:3000/foo
 local function parse_url(stmt)
-  local parsed = utils.split(stmt, " ")
+  -- remove HTTP
+  local parsed = utils.split(stmt, " HTTP/")
+  local http_version = nil
+  if parsed[2] ~= nil then
+    http_version = parsed[2]
+  end
+  parsed = utils.split(parsed[1], " ")
   local http_method = parsed[1]
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
@@ -182,6 +227,7 @@ local function parse_url(stmt)
     method = http_method,
     -- Encode URL
     url = utils.encode_url(utils.replace_vars(target_url)),
+    http_version = http_version,
   }
 end
 
@@ -212,9 +258,23 @@ M.get_current_request = function()
     parsed_req_var_str = parse_req_var(vim.fn.getline(req_var_line))
   end
 
-  local headers, body_start = get_headers(bufnr, start_line, end_line)
+  local headers, headers_end = get_headers(bufnr, start_line, end_line)
 
-  local body = get_body(bufnr, body_start, end_line)
+  local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
+
+  if headers["host"] ~= nil then
+    headers["host"] = headers["host"]:gsub("%s+", "")
+    headers["host"] = string.gsub(headers["host"], "%s+", "")
+    parsed_url.url = headers["host"] .. parsed_url.url
+    headers["host"] = nil
+  end
+
+  local body = get_body(
+    bufnr,
+    body_start,
+    end_line,
+    string.find(headers["content-type"] or "", "application/[^ ]-json")
+  )
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
@@ -225,7 +285,9 @@ M.get_current_request = function()
   return {
     method = parsed_url.method,
     url = parsed_url.url,
+    http_version = parsed_url.http_version,
     headers = headers,
+    raw = curl_args,
     body = body,
     bufnr = bufnr,
     start_line = start_line,

@@ -1,7 +1,8 @@
-local rest = {}
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
+
+local rest = {}
 local Opts = {}
 local LastOpts = {}
 
@@ -23,8 +24,11 @@ rest.run = function(verbose)
   Opts = {
     method = result.method:lower(),
     url = result.url,
+    -- plenary.curl can't set http protocol version
+    -- http_version = result.http_version,
     headers = result.headers,
-    raw = config.get("skip_ssl_verification") and { "-k" } or nil,
+    raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
+      or result.raw,
     body = result.body,
     dry_run = verbose or false,
     bufnr = result.bufnr,

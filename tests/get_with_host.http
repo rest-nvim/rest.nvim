@@ -1,0 +1,29 @@
+###
+
+GET /api/users?page=5
+Host: https://reqres.in
+
+###
+
+GET /api/users?page=5 HTTP/1.1
+Host: reqres.in:443
+
+###
+
+GET /api/users?page=5 HTTP/1.1
+Host: reqres.in:80
+
+###
+
+GET /api/users?page=5 HTTP/1.1
+Host: reqres.in
+
+###
+
+GET /api/users?page=5 HTTP/1.1
+Host: https://reqres.in:443
+
+###
+
+GET /api/users?page=5
+Host: https://reqres.in:443

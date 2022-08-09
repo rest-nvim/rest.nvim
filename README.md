@@ -47,7 +47,9 @@ have to leave Neovim!
 
 - System-wide
   - curl
-  - jq +1.6 (to format JSON output so it can be human-readable)
+- Optional [can be changed, see config bellow]
+  - jq   (to format JSON output)
+  - tidy (to format HTML output)
 - Other plugins
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
@@ -61,6 +63,8 @@ use {
     require("rest-nvim").setup({
       -- Open request results in a horizontal split
       result_split_horizontal = false,
+      -- Keep the http file buffer above|left when split horizontal|vertical
+      result_split_in_place = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
       -- Highlight request on run
@@ -73,6 +77,14 @@ use {
         show_url = true,
         show_http_info = true,
         show_headers = true,
+        -- executables or functions for formatting response body [optional]
+        -- set them to nil if you want to disable them
+        formatters = {
+          json = "jq",
+          html = function(body)
+            return vim.fn.system({"tidy", "-i", "-q", "-"}, body)
+          end
+        },
       },
       -- Jump to request line on run
       jump_to_request = false,
@@ -110,6 +122,8 @@ To run `rest.nvim` you should map the following commands:
 
 - `result_split_horizontal` opens result on a horizontal split (default opens
     on vertical)
+- `result_split_in_place` opens result below|right on horizontal|vertical split
+    (default opens top|left on horizontal|vertical split)
 - `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
     useful when using unknown certificates
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
