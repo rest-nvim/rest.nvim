@@ -19,8 +19,9 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_string
     local fileimport_line
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string =
-      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
+        :gsub("^%s+", "")
+        :gsub("%s+$", "")
     -- local fileimport_path = path:new(fileimport_string)
     -- if fileimport_path:is_absolute() then
     if path:new(fileimport_string):is_absolute() then
@@ -82,6 +83,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
 
   return body
 end
+
 -- is_request_line checks if the given line is a http request line according to RFC 2616
 local function is_request_line(line)
   local http_methods = { "GET", "POST", "PUT", "PATCH", "DELETE" }
@@ -198,7 +200,13 @@ end
 -- parse_url returns a table with the method of the request and the URL
 -- @param stmt the request statement, e.g., POST http://localhost:3000/foo
 local function parse_url(stmt)
-  local parsed = utils.split(stmt, " ")
+  -- remove HTTP
+  local parsed = utils.split(stmt, " HTTP/")
+  local http_version = nil
+  if parsed[2] ~= nil then
+    http_version = parsed[2]
+  end
+  parsed = utils.split(parsed[1], " ")
   local http_method = parsed[1]
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
@@ -207,6 +215,7 @@ local function parse_url(stmt)
     method = http_method,
     -- Encode URL
     url = utils.encode_url(utils.replace_vars(target_url)),
+    http_version = http_version
   }
 end
 
@@ -227,6 +236,14 @@ M.get_current_request = function()
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
+
+  if headers['host'] ~= nil then
+    headers['host'] = headers['host']:gsub("%s+", "")
+    headers['host'] = string.gsub(headers['host'], "%s+", "")
+    parsed_url.url = headers['host'] .. parsed_url.url
+    headers['host'] = nil
+  end
+
   local body = get_body(
     bufnr,
     body_start,
@@ -243,6 +260,7 @@ M.get_current_request = function()
   return {
     method = parsed_url.method,
     url = parsed_url.url,
+    http_version = parsed_url.http_version,
     headers = headers,
     raw = curl_args,
     body = body,

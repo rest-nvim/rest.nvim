@@ -23,6 +23,8 @@ rest.run = function(verbose)
   Opts = {
     method = result.method:lower(),
     url = result.url,
+    -- plenary.curl can't set http protocol version
+    -- http_version = result.http_version,
     headers = result.headers,
     raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
       or result.raw,
@@ -46,7 +48,7 @@ rest.run = function(verbose)
   if not success_req then
     vim.api.nvim_err_writeln(
       "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
-        .. req_err
+      .. req_err
     )
   end
 end
@@ -67,7 +69,7 @@ rest.last = function()
   if not success_req then
     vim.api.nvim_err_writeln(
       "[rest.nvim] Failed to perform the request.\nMake sure that you have entered the proper URL and the server is running.\n\nTraceback: "
-        .. req_err
+      .. req_err
     )
   end
 end
