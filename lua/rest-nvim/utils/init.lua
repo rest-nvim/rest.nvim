@@ -62,8 +62,7 @@ end
 -- file_exists checks if the provided file exists and returns a boolean
 -- @param file File to check
 M.file_exists = function(file)
-  if vim.fn.filereadable(file) ~= 1 then return false end
-  return true
+  return vim.fn.filereadable(file) == 1
 end
 
 -- read_file Reads all lines from a file and returns the content as a table
