@@ -27,11 +27,7 @@ end
 -- file_exists checks if the provided file exists and returns a boolean
 -- @param file File to check
 M.file_exists = function(file)
-  file = io.open(file, "rb")
-  if file then
-    file:close()
-  end
-  return file ~= nil
+  return vim.fn.filereadable(file) == 1
 end
 
 -- read_file Reads all lines from a file and returns the content as a table
