@@ -92,8 +92,25 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   return body, script_line
 end
 local function get_response_script(bufnr, start_line, stop_line)
-  local lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+  local all_lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+  -- Check if there is a script
+  local script_start_rel
+  for i, line in ipairs(all_lines) do
+    -- stop if a script opening tag is found
+    if line:find("{%%") then
+      script_start_rel = i
+      break
+    end
+  end
 
+  if script_start_rel == nil then
+    return nil
+  end
+
+  -- Convert the relative script line number to the line number of the buffer
+  local script_start = start_line + script_start_rel - 1
+
+  local script_lines = vim.api.nvim_buf_get_lines(bufnr, script_start, stop_line, false)
   local script_str = ""
 
   for _, line in ipairs(lines) do
@@ -103,7 +120,6 @@ local function get_response_script(bufnr, start_line, stop_line)
     end
   end
   return script_str:match("{%%(.-)%%}")
-
 end
 
 -- is_request_line checks if the given line is a http request line according to RFC 2616
