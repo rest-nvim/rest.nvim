@@ -168,8 +168,8 @@ end
 -- GET http://localhost:8081/bar
 -- ````
 -- of the current request and returns the linenumber of the found request variable
--- the current request,
--- variable is defined as the variable that starts with '#@' one line above the request line
+-- the request variable is defined as the variable that starts with '#@'
+-- one line above the request line in the example the variable would be 'foo'
 -- @param url_line The request line
 local function request_var(url_line)
   return vim.fn.search("^#@", "cbn", url_line - 1)

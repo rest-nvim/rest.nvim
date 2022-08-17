@@ -133,8 +133,10 @@ local function create_callback(method, url, req_var)
         }, false, {})
       end
     end
+    -- check if the response is a json
     -- parse the json response and store the data on memory
-    if json_body and req_var ~= "" then
+    if content_type == "json" and req_var ~= "" then
+      print('content_type', content_type)
       local req_var_store = vim.api.nvim_get_var('req_var_store')
       req_var_store[req_var] = vim.json.decode(res.body)
       vim.api.nvim_set_var('req_var_store', req_var_store)
