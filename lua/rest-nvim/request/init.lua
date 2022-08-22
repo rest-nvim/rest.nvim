@@ -18,6 +18,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
   if import_line > 0 then
     local fileimport_string
     local fileimport_line
+    local fileimport_spliced
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
       :gsub("^%s+", "")

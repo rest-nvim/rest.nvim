@@ -15,3 +15,11 @@ Authorization: Bearer {{TOKEN}}
     "job": "leader",
     "id" : "{{$uuid}}"
 }
+
+----
+
+POST {{URL}}
+Content-Type: application/json
+Authorization: Bearer {{TOKEN}}
+
+< {{PAYLOAD]}}
