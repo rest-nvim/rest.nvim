@@ -20,10 +20,9 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_line
     local fileimport_spliced
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string = string.gsub(fileimport_line[1], "<", "", 1)
-      :gsub("^%s+", "")
-      :gsub("%s+$", "")
-	fileimport_spliced = utils.replace_vars(fileimport_string)
+    fileimport_string =
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    fileimport_spliced = utils.replace_vars(fileimport_string)
     if path:new(fileimport_spliced):is_absolute() then
       return fileimport_spliced
     else
