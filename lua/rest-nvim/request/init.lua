@@ -18,13 +18,16 @@ local function get_importfile_name(bufnr, start_line, stop_line)
   if import_line > 0 then
     local fileimport_string
     local fileimport_line
+    local fileimport_spliced
+    local vars = utils.read_variables()
+
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     fileimport_string =
       string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
-    -- local fileimport_path = path:new(fileimport_string)
-    -- if fileimport_path:is_absolute() then
-    if path:new(fileimport_string):is_absolute() then
-      return fileimport_string
+
+    fileimport_spliced = utils.replace_vars(fileimport_string, vars)
+    if path:new(fileimport_spliced):is_absolute() then
+      return fileimport_spliced
     else
       local file_dirname = vim.fn.expand("%:p:h")
       local file_name = path:new(path:new(file_dirname), fileimport_spliced)
@@ -67,7 +70,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   -- which should not be included in the body, stop_line is the last line of the body
   local vars = utils.read_variables()
   for i, line in ipairs(lines) do
-    log.fmt_debug("Line %s", line)
+    -- log.fmt_debug("Line %s", line)
     -- stop if a script opening tag is found 
     if line:find("{%%") then
         print("FOUND a script")
@@ -91,6 +94,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
 
   return body, script_line
 end
+
 local function get_response_script(bufnr, start_line, stop_line)
   local all_lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
   -- Check if there is a script
@@ -113,12 +117,13 @@ local function get_response_script(bufnr, start_line, stop_line)
   local script_lines = vim.api.nvim_buf_get_lines(bufnr, script_start, stop_line, false)
   local script_str = ""
 
-  for _, line in ipairs(lines) do
+  for _, line in ipairs(script_lines) do
     script_str = script_str..line.."\n"
     if line:find("%%}") then
       break
     end
   end
+
   return script_str:match("{%%(.-)%%}")
 end
 
