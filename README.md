@@ -67,6 +67,8 @@ use {
       result_split_in_place = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
+			-- Encode URL before making request
+			encode_url = true,
       -- Highlight request on run
       highlight = {
         enabled = true,
@@ -126,6 +128,7 @@ To run `rest.nvim` you should map the following commands:
     (default opens top|left on horizontal|vertical split)
 - `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
     useful when using unknown certificates
+- `encode_url` flag to encode the URL before making request
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
 - `jump_to_request` moves the cursor to the selected request line when send,
 - `env_file` specifies file name that consist environment variables (default: .env)
