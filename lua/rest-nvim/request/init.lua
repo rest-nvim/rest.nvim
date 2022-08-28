@@ -210,11 +210,11 @@ local function parse_url(stmt)
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
 
-	target_url = utils.replace_vars(target_url)
-	if config.get("encode_url") then
+  target_url = utils.replace_vars(target_url)
+  if config.get("encode_url") then
     -- Encode URL
-		target_url = utils.encode_url(target_url)
-	end
+    target_url = utils.encode_url(target_url)
+  end
 
   return {
     method = http_method,
