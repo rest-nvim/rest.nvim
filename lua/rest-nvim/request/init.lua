@@ -72,10 +72,18 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   end
 
   local is_json, json_body = pcall(vim.fn.json_decode, body)
+
   if is_json then
     if has_json then
+      -- convert entire json body to string.
       return vim.fn.json_encode(json_body)
     else
+      -- convert nested tables to string.
+      for key, val in pairs(json_body) do
+        if type(val) == "table" then
+          json_body[key] = vim.fn.json_encode(val)
+        end
+      end
       return json_body
     end
   end
