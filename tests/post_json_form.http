@@ -10,5 +10,5 @@ POST http://localhost:8080
 	"array":  [1, 2, 3],
 	"json": {
 		"key": "value"
-	
+	}
 }
