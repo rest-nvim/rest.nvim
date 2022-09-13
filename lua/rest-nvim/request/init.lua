@@ -112,8 +112,7 @@ local function get_headers(bufnr, start_line, end_line)
 
   -- Iterate over all buffer lines starting after the request line
   for line_number = start_line + 1, end_line do
-    local line = vim.fn.getbufline(bufnr, line_number)
-    local line_content = line[1]
+    local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
     -- message header and message body are seperated by CRLF (see RFC 2616)
     -- for our purpose also the next request line will stop the header search
@@ -146,11 +145,24 @@ local function get_curl_args(bufnr, headers_end, end_line)
   local body_start = end_line
 
   for line_number = headers_end, end_line do
-    local line = vim.fn.getbufline(bufnr, line_number)
-    local line_content = line[1]
+    local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
     if line_content:find("^ *%-%-?[a-zA-Z%-]+") then
-      table.insert(curl_args, line_content)
+      local lc = vim.split(line_content, " ")
+      local x  = ""
+
+      for i, y in ipairs(lc) do
+        x = x .. y
+
+        if #y:match("\\*$") % 2 == 1 and i ~= #lc then
+          -- insert space if there is an slash at end
+          x = x .. " "
+        else
+          -- insert 'x' into curl_args and reset it
+          table.insert(curl_args, x)
+          x = ""
+        end
+      end
     elseif not line_content:find("^ *$") then
       if line_number ~= end_line then
         body_start = line_number - 1
