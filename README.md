@@ -67,8 +67,8 @@ use {
       result_split_in_place = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
-			-- Encode URL before making request
-			encode_url = true,
+      -- Encode URL before making request
+      encode_url = true,
       -- Highlight request on run
       highlight = {
         enabled = true,
