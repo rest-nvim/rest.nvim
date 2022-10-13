@@ -121,7 +121,7 @@ local function get_headers(bufnr, start_line, end_line)
     local header_name, header_value = line_content:match("^(.-): ?(.*)$")
 
     if not utils.contains_comments(header_name) then
-      headers[header_name:lower()] = utils.replace_vars(header_value)
+      headers[header_name] = utils.replace_vars(header_value)
     end
     ::continue::
   end
