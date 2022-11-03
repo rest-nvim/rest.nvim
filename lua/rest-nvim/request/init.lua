@@ -11,7 +11,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
   local oldpos = vim.fn.getcurpos()
   utils.move_cursor(bufnr, start_line)
 
-  local import_line = vim.fn.search("^<", "n", stop_line)
+  local import_line = vim.fn.search("^<", "cn", stop_line)
   -- restore old cursor position
   utils.move_cursor(bufnr, oldpos[2])
 
@@ -43,10 +43,6 @@ end
 -- @param stop_line Line where body stops
 -- @param has_json True if content-type is set to json
 local function get_body(bufnr, start_line, stop_line, has_json)
-  if start_line >= stop_line then
-    return
-  end
-
   -- first check if the body should be imported from an external file
   local importfile = get_importfile_name(bufnr, start_line, stop_line)
   local lines
@@ -56,7 +52,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
     lines = utils.read_file(importfile)
   else
-    lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
+    lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, stop_line, false)
   end
 
   local body = ""
