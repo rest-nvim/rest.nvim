@@ -19,7 +19,7 @@ A fast Neovim http client written in Lua.
 in `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you don't
 have to leave Neovim!
 
-> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
+> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/rest-nvim/rest.nvim/issues/new)
 
 ## Notices
 
@@ -57,7 +57,7 @@ have to leave Neovim!
 
 ```lua
 use {
-  "NTBBloodbath/rest.nvim",
+  "rest-nvim/rest.nvim",
   requires = { "nvim-lua/plenary.nvim" },
   config = function()
     require("rest-nvim").setup({
@@ -151,7 +151,7 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ## Contribute
 
-1. Fork it (https://github.com/NTBBloodbath/rest.nvim/fork)
+1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
 2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
 3. Commit your changes (<kbd>git commit -am 'Add some feature'</kbd>)
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)

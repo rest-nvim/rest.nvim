@@ -218,7 +218,7 @@ SOFTWARE.
 ===============================================================================
 CONTRIBUTING                                           *rest-nvim-contributing*
 
-    1. Fork it (`github.com/NTBBloodbath/rest.nvim/fork`)
+    1. Fork it (`github.com/rest-nvim/rest.nvim/fork`)
     2. Create your feature branch (`git checkout -b my-new-feature`)
     3. Commit your changes (`git commit -am 'Add some feature'`)
     4. Push to the branch (`git push origin my-new-feature`)
