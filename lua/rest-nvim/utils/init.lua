@@ -43,10 +43,10 @@ M.read_file = function(file)
   return lines
 end
 
--- read_env_file Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration and returns a table with the
--- variables
-M.read_env_file = function()
+-- get_variables Reads the environment variables found in the env_file option
+-- (defualt: .env) specified in configuration or from the files being read
+-- with variables beginning with @ and returns a table with the variables
+M.get_variables = function()
   local variables = {}
 
 	-- If there is a line at the beginning with @ first
@@ -57,7 +57,7 @@ M.read_env_file = function()
 		-- For each line
 		for _, line in pairs(lines) do
 			-- Get all that starts with @
-			if line:match("^@") then
+			if line:match("^@[%w!@#$%^&*-_+?~]+%s*=%s*[^=]+") then
 				-- Read them off
 				local place = M.split(line, '=', 1);
 				-- Remove whitespace around them
@@ -162,7 +162,7 @@ M.read_document_variables = function()
 end
 
 M.read_variables = function()
-  local first = M.read_env_file()
+  local first = M.get_variables()
   local second = M.read_dynamic_variables()
   local third = M.read_document_variables()
 
