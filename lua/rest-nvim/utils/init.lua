@@ -56,10 +56,10 @@ M.get_variables = function()
 
     -- For each line
     for _, line in pairs(lines) do
-      -- Get all that starts with @
+      -- Get the name and value form lines that starts with @
       local name, val = line:match("^@([%w!@#$%^&*-_+?~]+)%s*=%s*([^=]+)");
       if name then
-        -- Add to variables, and remove the @
+        -- Add to variables
         variables[name] = val;
       end
     end
@@ -79,7 +79,7 @@ M.get_variables = function()
   for _, env_file_path in ipairs(env_file_paths) do
     if M.file_exists(env_file_path) then
       for line in io.lines(env_file_path) do
-        local vars = M.split(line, "=", 1)
+        local vars = M.split(line, "%s*=%s*", 1)
         variables[vars[1]] = vars[2]
       end
     end
