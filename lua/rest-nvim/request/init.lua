@@ -299,7 +299,7 @@ M.get_current_request = function()
     string.find(headers["content-type"] or "", "application/[^ ]-json")
   )
   log.fmt_debug("Identified body as:\n %s", body)
-  script_str = get_response_script(bufnr, body_start, end_line)
+  local script_str = get_response_script(bufnr, body_start, end_line)
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)

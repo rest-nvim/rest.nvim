@@ -25,6 +25,8 @@
 
               pkgs.sumneko-lua-language-server
               luaPkgs.luacheck
+              luaPkgs.luarocks
+              luaPkgs.busted
               # luaPkgs.stylua
             ];
           });

@@ -3,3 +3,7 @@ lint:
 
 format:
 	stylua .
+
+test:
+	# 
+	busted tests/test.lua

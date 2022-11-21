@@ -13,7 +13,7 @@ end
 -- run will retrieve the required request information from the current buffer
 -- and then execute curl
 -- @param verbose toggles if only a dry run with preview should be executed (true = preview)
-rest.run = function(verbose)
+rest.run = function(verbose, use_intermediary_files)
   local ok, result = pcall(request.get_current_request)
   if not ok then
     vim.api.nvim_err_writeln("[rest.nvim] Failed to get the current HTTP request: " .. result)
