@@ -15,7 +15,14 @@
             pkgs."lua${luaVersion}Packages".luarocks;
 
 		mkDevShell = luaVersion: let
-		  luaPkgs = pkgs."lua${luaVersion}Packages";
+		  luaPkgs = pkgs."lua${luaVersion}".pkgs;
+          luaEnv = pkgs."lua${luaVersion}".withPackages(lp: with lp; [
+            luacheck
+            luarocks
+            # busted
+            vusted
+            (pkgs.lib.hiPrio plenary-nvim)
+          ]);
 		in
           luaPkgs.luarocks.overrideAttrs(oa: {
             name = "luarocks-dev";
@@ -24,9 +31,11 @@
               # TODO restore
 
               pkgs.sumneko-lua-language-server
-              luaPkgs.luacheck
-              luaPkgs.luarocks
-              luaPkgs.busted
+              luaEnv
+              pkgs.neovim
+              # luaPkgs.luacheck
+              # luaPkgs.luarocks
+              # luaPkgs.busted
               # luaPkgs.stylua
             ];
           });
@@ -36,16 +45,17 @@
 
         packages = {
           default = self.packages.${system}.luarocks-51;
-          luarocks-51 = mkPackage "51";
+          luarocks-51 = mkPackage "5_1";
           luarocks-52 = mkPackage "52";
         };
 
         devShells = {
-          default = self.devShells.${system}.luarocks-51;
-          luarocks-51 = mkDevShell "51";
-          luarocks-52 = mkDevShell "52";
-          luarocks-53 = mkDevShell "53";
-          luarocks-54 = mkDevShell "54";
+          default = self.devShells.${system}.luajit;
+          luajit = mkDevShell "jit";
+          lua-51 = mkDevShell "5_1";
+          lua-52 = mkDevShell "5_2";
+          lua-53 = mkDevShell "5_3";
+          lua-54 = mkDevShell "5_4";
         };
       });
 }
