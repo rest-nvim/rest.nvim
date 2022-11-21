@@ -20,6 +20,12 @@ rest.run = function(verbose)
     return
   end
 
+  return rest.run_request(result, verbose)
+end
+
+rest.run_request = function(req, verbose)
+
+  local result = req
   Opts = {
     method = result.method:lower(),
     url = result.url,
@@ -73,5 +79,7 @@ rest.last = function()
     )
   end
 end
+
+rest.request = request
 
 return rest

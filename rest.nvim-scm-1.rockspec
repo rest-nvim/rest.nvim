@@ -1,4 +1,4 @@
-local MAJOR, REV = "scm", "-1"
+local MAJOR, REV = "0.1", "-2"
 rockspec_format = "3.0"
 package = "rest.nvim"
 version = MAJOR .. REV
@@ -19,7 +19,7 @@ dependencies = {
 }
 
 source = {
-	url = "http://github.com/rest-nvim/rest.nvim/archive/v" .. MAJOR .. ".zip",
+	url = "http://github.com/rest-nvim/rest.nvim/archive/" .. MAJOR .. ".zip",
 	dir = "rest.nvim-" .. MAJOR,
 }
 

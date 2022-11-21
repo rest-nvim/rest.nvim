@@ -197,7 +197,9 @@ end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
--- @param opts curl arguments
+-- @param opts (table) curl arguments:
+--           - yank_dry_run (boolean): displays the command
+--           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
   if opts.dry_run then
     local res = curl[opts.method](opts)

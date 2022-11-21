@@ -157,6 +157,8 @@ request method (e.g. `GET`) and run `rest.nvim`.
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
 5. Create a new Pull Request
 
+To run the tests, enter a nix shell with `nix develop ./contrib`, then run `make
+test`.
 
 ## Related software
 

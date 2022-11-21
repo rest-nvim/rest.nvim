@@ -241,8 +241,12 @@ end
 
 local M = {}
 M.get_current_request = function()
-  local curpos = vim.fn.getcurpos()
-  local bufnr = vim.api.nvim_win_get_buf(0)
+  return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
+end
+
+M.buf_get_request = function(bufnr, curpos)
+  curpos = curpos or vim.fn.getcurpos()
+  bufnr = bufnr or vim.api.nvim_win_get_buf(0)
 
   local start_line = start_request()
   if start_line == 0 then
