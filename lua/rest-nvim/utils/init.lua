@@ -43,11 +43,28 @@ M.read_file = function(file)
   return lines
 end
 
--- read_env_file Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration and returns a table with the
--- variables
-M.read_env_file = function()
+-- get_variables Reads the environment variables found in the env_file option
+-- (defualt: .env) specified in configuration or from the files being read
+-- with variables beginning with @ and returns a table with the variables
+M.get_variables = function()
   local variables = {}
+
+  -- If there is a line at the beginning with @ first
+  if vim.fn.search('^@', 'cn') > 0 then
+    -- Read all lines of the file
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true);
+
+    -- For each line
+    for _, line in pairs(lines) do
+      -- Get the name and value form lines that starts with @
+      local name, val = line:match("^@([%w!@#$%^&*-_+?~]+)%s*=%s*([^=]+)");
+      if name then
+        -- Add to variables
+        variables[name] = val;
+      end
+    end
+  end
+
   local env_file = "/" .. (config.get("env_file") or ".env")
 
   -- Directories to search for env files
@@ -62,8 +79,22 @@ M.read_env_file = function()
   for _, env_file_path in ipairs(env_file_paths) do
     if M.file_exists(env_file_path) then
       for line in io.lines(env_file_path) do
-        local vars = M.split(line, "=", 1)
+        local vars = M.split(line, "%s*=%s*", 1)
         variables[vars[1]] = vars[2]
+      end
+    end
+  end
+
+  -- For each variable name
+  for name, _ in pairs(variables) do
+    -- For each pair of variables
+    for oname, ovalue in pairs(variables) do
+      -- If a variable contains another variable
+      if variables[name]:match(oname) then
+        -- Add that into the variable
+        -- I.E if @url={{path}}:{{port}}/{{source}}
+        -- Substitue in path, port and source
+        variables[name] = variables[name]:gsub('{{' .. oname .. '}}', ovalue);
       end
     end
   end
@@ -124,7 +155,7 @@ M.read_document_variables = function()
 end
 
 M.read_variables = function()
-  local first = M.read_env_file()
+  local first = M.get_variables()
   local second = M.read_dynamic_variables()
   local third = M.read_document_variables()
 
