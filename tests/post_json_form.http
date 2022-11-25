@@ -1,0 +1,14 @@
+# Run:
+# $ python -m http.server 8080
+
+# it should return status code 501
+POST http://localhost:8080
+
+{
+	"string": "foo",
+	"number": 100,
+	"array":  [1, 2, 3],
+	"json": {
+		"key": "value"
+	}
+}
