@@ -244,13 +244,17 @@ M.get_current_request = function()
   return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
 end
 
+-- buf_get_request returns a table with all the request settings
+-- @param bufnr the buffer number
+-- @param curpos the cursor position
+-- @return (boolean, request or string)
 M.buf_get_request = function(bufnr, curpos)
   curpos = curpos or vim.fn.getcurpos()
   bufnr = bufnr or vim.api.nvim_win_get_buf(0)
 
   local start_line = start_request()
   if start_line == 0 then
-    error("No request found")
+    return false, "No request found"
   end
   local end_line = end_request(bufnr)
 
@@ -280,7 +284,7 @@ M.buf_get_request = function(bufnr, curpos)
     utils.move_cursor(bufnr, curpos[2], curpos[3])
   end
 
-  return {
+  return true, {
     method = parsed_url.method,
     url = parsed_url.url,
     http_version = parsed_url.http_version,
