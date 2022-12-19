@@ -14,12 +14,18 @@ end
 -- and then execute curl
 -- @param verbose toggles if only a dry run with preview should be executed (true = preview)
 rest.run = function(verbose)
-  local ok, result = pcall(request.get_current_request)
+  local ok, result = request.get_current_request()
   if not ok then
     vim.api.nvim_err_writeln("[rest.nvim] Failed to get the current HTTP request: " .. result)
     return
   end
 
+  return rest.run_request(result, verbose)
+end
+
+rest.run_request = function(req, verbose)
+
+  local result = req
   Opts = {
     method = result.method:lower(),
     url = result.url,
@@ -73,5 +79,7 @@ rest.last = function()
     )
   end
 end
+
+rest.request = request
 
 return rest
