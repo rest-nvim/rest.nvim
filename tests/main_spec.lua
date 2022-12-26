@@ -1,13 +1,13 @@
-local rest = require('rest-nvim')
-local v = vim
+local rest = require("rest-nvim")
 
 describe("rest testing framework", function()
-
-    it('test create users', function()
-
-      v.api.nvim_cmd({cmd='edit', args =  {'tests/post_create_user.http'}}, {})
-
-      -- first argument is for verbosity
-      rest.run(false)
-    end)
+  it("test create users", function()
+    local opts = { keep_going = true, verbose = true }
+    assert(rest.run_file("tests/basic_get.http", opts) == true)
+    assert(rest.run_file("tests/post_json_form.http", opts) == true)
+    assert(rest.run_file("tests/post_create_user.http", opts) == true)
+    assert(rest.run_file("tests/put_update_user.http", opts) == true)
+    assert(rest.run_file("tests/patch_update_user.http", opts) == true)
+    assert(rest.run_file("tests/delete.http", opts) == true)
+  end)
 end)

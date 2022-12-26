@@ -50,17 +50,17 @@ M.get_variables = function()
   local variables = {}
 
   -- If there is a line at the beginning with @ first
-  if vim.fn.search('^@', 'cn') > 0 then
+  if vim.fn.search("^@", "cn") > 0 then
     -- Read all lines of the file
-    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true);
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
 
     -- For each line
     for _, line in pairs(lines) do
       -- Get the name and value form lines that starts with @
-      local name, val = line:match("^@([%w!@#$%^&*-_+?~]+)%s*=%s*([^=]+)");
+      local name, val = line:match("^@([%w!@#$%^&*-_+?~]+)%s*=%s*([^=]+)")
       if name then
         -- Add to variables
-        variables[name] = val;
+        variables[name] = val
       end
     end
   end
@@ -94,7 +94,7 @@ M.get_variables = function()
         -- Add that into the variable
         -- I.E if @url={{path}}:{{port}}/{{source}}
         -- Substitue in path, port and source
-        variables[name] = variables[name]:gsub('{{' .. oname .. '}}', ovalue);
+        variables[name] = variables[name]:gsub("{{" .. oname .. "}}", ovalue)
       end
     end
   end
