@@ -145,7 +145,7 @@ local function get_curl_args(bufnr, headers_end, end_line)
 
     if line_content:find("^ *%-%-?[a-zA-Z%-]+") then
       local lc = vim.split(line_content, " ")
-      local x  = ""
+      local x = ""
 
       for i, y in ipairs(lc) do
         x = x .. y
@@ -174,17 +174,25 @@ end
 -- of the current request and returns the linenumber of this request line.
 -- The current request is defined as the next request line above the cursor
 -- @param bufnr The buffer nummer of the .http-file
-local function start_request()
-  return vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cbn", 1)
+-- @param linenumber (number) From which line to start looking
+local function start_request(bufnr, linenumber)
+  log.debug("Searching pattern starting from " .. linenumber)
+
+  local oldlinenumber = linenumber
+  utils.move_cursor(bufnr, linenumber)
+
+  local res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn")
+  -- restore cursor position
+  utils.move_cursor(bufnr, oldlinenumber)
+
+  return res
 end
 
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
 -- @param bufnr The buffer nummer of the .http-file
-local function end_request(bufnr)
+local function end_request(bufnr, linenumber)
   -- store old cursor position
-  local curpos = vim.fn.getcurpos()
-  local linenumber = curpos[2]
   local oldlinenumber = linenumber
 
   -- start searching for next request from the next line
@@ -245,18 +253,19 @@ M.get_current_request = function()
 end
 
 -- buf_get_request returns a table with all the request settings
--- @param bufnr the buffer number
+-- @param bufnr (number|nil) the buffer number
 -- @param curpos the cursor position
 -- @return (boolean, request or string)
 M.buf_get_request = function(bufnr, curpos)
   curpos = curpos or vim.fn.getcurpos()
   bufnr = bufnr or vim.api.nvim_win_get_buf(0)
 
-  local start_line = start_request()
+  local start_line = start_request(bufnr, curpos[2])
+
   if start_line == 0 then
     return false, "No request found"
   end
-  local end_line = end_request(bufnr)
+  local end_line = end_request(bufnr, start_line)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
@@ -284,17 +293,28 @@ M.buf_get_request = function(bufnr, curpos)
     utils.move_cursor(bufnr, curpos[2], curpos[3])
   end
 
-  return true, {
-    method = parsed_url.method,
-    url = parsed_url.url,
-    http_version = parsed_url.http_version,
-    headers = headers,
-    raw = curl_args,
-    body = body,
-    bufnr = bufnr,
-    start_line = start_line,
-    end_line = end_line,
-  }
+  return true,
+    {
+      method = parsed_url.method,
+      url = parsed_url.url,
+      http_version = parsed_url.http_version,
+      headers = headers,
+      raw = curl_args,
+      body = body,
+      bufnr = bufnr,
+      start_line = start_line,
+      end_line = end_line,
+    }
+end
+
+M.print_request = function(req)
+  local str = [[
+    version: ]] .. req.url .. [[\n
+    method: ]] .. req.method .. [[\n
+    start_line: ]] .. tostring(req.start_line) .. [[\n
+    end_line: ]] .. tostring(req.end_line) .. [[\n
+  ]]
+  print(str)
 end
 
 local select_ns = vim.api.nvim_create_namespace("rest-nvim")
