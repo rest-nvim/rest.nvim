@@ -1,14 +1,15 @@
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local log = require("plenary.log").new({ plugin = "rest.nvim" })
 
 local rest = {}
 local Opts = {}
 local LastOpts = {}
 
 rest.setup = function(user_configs)
-  config.set(user_configs or {})
+  local test = config.set(user_configs or {})
+  print(vim.inspect(test))
 end
 
 -- run will retrieve the required request information from the current buffer

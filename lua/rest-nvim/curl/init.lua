@@ -1,6 +1,6 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
 
 local M = {}
