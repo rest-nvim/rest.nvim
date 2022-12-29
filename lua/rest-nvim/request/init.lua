@@ -176,7 +176,9 @@ end
 -- @param bufnr The buffer nummer of the .http-file
 -- @param linenumber (number) From which line to start looking
 local function start_request(bufnr, linenumber)
-  log.debug("Searching pattern starting from " .. linenumber)
+  if config.get("debug") then
+    log.debug("Searching pattern starting from " .. linenumber)
+  end
 
   local oldlinenumber = linenumber
   utils.move_cursor(bufnr, linenumber)

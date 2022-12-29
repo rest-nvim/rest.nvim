@@ -36,6 +36,7 @@ local config = {
   env_file = ".env",
   custom_dynamic_variables = {},
   yank_dry_run = true,
+  debug = false,
 }
 
 --- Get a configuration value

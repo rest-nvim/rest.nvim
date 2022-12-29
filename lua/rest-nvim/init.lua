@@ -21,7 +21,7 @@ rest.run = function(verbose)
     return
   end
 
-  return rest.run_request(result, verbose)
+  return rest.run_request(result, {verbose = verbose})
 end
 
 -- run will retrieve the required request information from the current buffer
