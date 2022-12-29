@@ -16,6 +16,10 @@ local config = {
     formatters = {
       json = "jq",
       html = function(body)
+        if vim.fn.executable("tidy") == 0 then
+          return body
+        end
+
         -- stylua: ignore
         return vim.fn.system({
           "tidy", "-i", "-q",
