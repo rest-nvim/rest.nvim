@@ -8,8 +8,7 @@ local Opts = {}
 local LastOpts = {}
 
 rest.setup = function(user_configs)
-  local test = config.set(user_configs or {})
-  print(vim.inspect(test))
+  config.set(user_configs or {})
 end
 
 -- run will retrieve the required request information from the current buffer
