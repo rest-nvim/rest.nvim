@@ -41,8 +41,7 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
--- @param has_json True if content-type is set to json
-local function get_body(bufnr, start_line, stop_line, has_json)
+local function get_body(bufnr, start_line, stop_line)
   -- first check if the body should be imported from an external file
   local importfile = get_importfile_name(bufnr, start_line, stop_line)
   local lines
@@ -64,23 +63,6 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     -- Ignore commented lines with and without indent
     if not utils.contains_comments(line) then
       body = body .. utils.replace_vars(line)
-    end
-  end
-
-  local is_json, json_body = pcall(vim.fn.json_decode, body)
-
-  if is_json then
-    if has_json then
-      -- convert entire json body to string.
-      return vim.fn.json_encode(json_body)
-    else
-      -- convert nested tables to string.
-      for key, val in pairs(json_body) do
-        if type(val) == "table" then
-          json_body[key] = vim.fn.json_encode(val)
-        end
-      end
-      return json_body
     end
   end
 
