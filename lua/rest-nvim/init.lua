@@ -55,6 +55,12 @@ end
 
 rest.run_request = function(req, opts)
   local result = req
+  opts = vim.tbl_deep_extend(
+    "force",  -- use value from rightmost map
+    {verbose = false},  -- defaults
+    opts or {}
+  )
+
   Opts = {
     method = result.method:lower(),
     url = result.url,
