@@ -247,6 +247,20 @@ local function parse_url(stmt)
   }
 end
 
+-- case insensitive search for a given header name in the list of headers
+-- @param headers the table of available headers
+-- @param name the name of the header to look for
+local function find_header(headers, name)
+  local header_value = nil
+  for header, value in next, headers, nil do
+    if string.lower(header):find(name) then
+      header_value = value
+      break
+    end
+  end
+  return header_value
+end
+
 local M = {}
 M.get_current_request = function()
   return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
@@ -273,18 +287,20 @@ M.buf_get_request = function(bufnr, curpos)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  if headers["host"] ~= nil then
-    headers["host"] = headers["host"]:gsub("%s+", "")
-    headers["host"] = string.gsub(headers["host"], "%s+", "")
-    parsed_url.url = headers["host"] .. parsed_url.url
+  local host_header = find_header(headers, "host")
+  if host_header ~= nil then
+    local host_value = string.gsub(host_header, "%s+", "")
+    parsed_url.url = host_value .. parsed_url.url
+    headers["Host"] = nil
     headers["host"] = nil
   end
 
+  local content_type_header = find_header(headers, "content-type") or ""
   local body = get_body(
     bufnr,
     body_start,
     end_line,
-    string.find(headers["content-type"] or "", "application/[^ ]-json")
+    string.find(content_type_header, "application/[^ ]-json")
   )
 
   if config.get("jump_to_request") then
