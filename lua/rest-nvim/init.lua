@@ -1,7 +1,7 @@
 local request = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local log = require("plenary.log").new({ plugin = "rest.nvim" })
 
 local rest = {}
 local Opts = {}
@@ -21,7 +21,7 @@ rest.run = function(verbose)
     return
   end
 
-  return rest.run_request(result, {verbose = verbose})
+  return rest.run_request(result, { verbose = verbose })
 end
 
 -- run will retrieve the required request information from the current buffer
@@ -64,7 +64,7 @@ rest.run_request = function(req, opts)
     raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
       or result.raw,
     body = result.body,
-    dry_run = opts.verbose or false,
+    dry_run = opts.verbose,
     bufnr = result.bufnr,
     start_line = result.start_line,
     end_line = result.end_line,
