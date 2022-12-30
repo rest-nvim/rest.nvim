@@ -80,7 +80,7 @@ use {
         show_http_info = true,
         show_headers = true,
         -- executables or functions for formatting response body [optional]
-        -- set them to nil if you want to disable them
+        -- set them to false if you want to disable them
         formatters = {
           json = "jq",
           html = function(body)
