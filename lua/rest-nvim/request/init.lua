@@ -67,7 +67,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
   end
 
-  local is_json, json_body = pcall(vim.fn.json_decode, body)
+  local is_json, json_body = pcall(vim.json.decode, body)
 
   if is_json then
     if has_json then
@@ -280,11 +280,20 @@ M.buf_get_request = function(bufnr, curpos)
     headers["host"] = nil
   end
 
+  local content_type = ""
+
+  for key, val in pairs(headers) do
+    if string.lower(key) == "content-type" then
+      content_type = val
+      break
+    end
+  end
+
   local body = get_body(
     bufnr,
     body_start,
     end_line,
-    string.find(headers["content-type"] or "", "application/[^ ]-json")
+    content_type:find("application/[^ ]*json")
   )
 
   if config.get("jump_to_request") then
