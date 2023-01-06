@@ -3,6 +3,11 @@ local path = require("plenary.path")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
 
+local ts = vim.treesitter
+local ts_utils = require 'nvim-treesitter.ts_utils'
+
+local parser_name = "http"
+
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
@@ -286,6 +291,51 @@ local function parse_url(stmt)
 end
 
 local M = {}
+
+local function print_node(title, node)
+    print(string.format("%s: type '%s' isNamed '%s'", title, node:type(), node:named()))
+    print("type", node:type())
+
+end
+
+-- TODO convert ts requests
+M.get_requests = function (bufnr)
+  -- todo we'll need node.get_node_text
+end
+
+M.ts_get_requests = function (bufnr)
+  bufnr = bufnr or 0
+
+  print("GET REQUESTS")
+  local parser = ts.get_parser(bufnr, "http")
+  print("PARSER", parser)
+  local query = [[
+      (request)
+  ]]
+  -- parse returns a list of ts trees
+  -- root is a node
+  local root = parser:parse()[1]:root()
+  local start_row, _, end_row, _ = root:range()
+
+  local start_node = root
+  -- local start_node = ts_utils.get_node_at_cursor()
+  -- print_node("Node at cursor", start_node)
+  -- print("sexpr: " .. start_node:sexpr())
+  local parsed_query = ts.parse_query(parser_name, query)
+  print("start row", start_row, "end row", end_row)
+  print_node("root", root)
+  local requests = {}
+  for id, node in parsed_query:iter_captures(start_node, bufnr, start_row, end_row) do
+      -- local name = parsed_query.captures[id] -- name of the capture in the query
+      print("id", id , "isNamed" .. node:named())
+      print("too")
+      print_node(string.format("- capture node id(%s)", id), node)
+  end
+
+  return requests
+end
+
+
 M.get_current_request = function()
   return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
 end
