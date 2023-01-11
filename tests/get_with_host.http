@@ -1,7 +1,6 @@
 ###
 
-GET /api/users?page=5
-Host: https://reqres.in
+GET https://reqres.in/api/users?page=5
 
 ###
 

@@ -8,6 +8,29 @@ local ts_utils = require 'nvim-treesitter.ts_utils'
 
 local parser_name = "http"
 
+local M = {}
+
+-- | validate dict is conform to what is expected in an array
+-- in absence of types, that's what we can do best
+M.validate_request = function (request)
+
+  return vim.validate({ user_configs = { request, "table" } })
+  -- check keys/values ?
+
+  -- return {
+  --     method = parsed_url.method,
+  --     url = parsed_url.url,
+  --     http_version = parsed_url.http_version,
+  --     headers = headers,
+  --     raw = curl_args,
+  --     body = body,
+  --     bufnr = bufnr,
+  --     start_line = start_line,
+  --     end_line = end_line,
+  --     script_str = script_str
+  --   }
+end
+
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
@@ -290,7 +313,6 @@ local function parse_url(stmt)
   }
 end
 
-local M = {}
 
 local function print_node(title, node)
     print(string.format("%s: type '%s' isNamed '%s'", title, node:type(), node:named()))
@@ -299,18 +321,81 @@ local function print_node(title, node)
 end
 
 -- TODO convert ts requests
+-- TODO g
 M.get_requests = function (bufnr)
   -- todo we'll need node.get_node_text
+  return M.ts_get_requests(bufnr)
+end
+
+-- Build a rest.nvim request from a treesitter query
+-- @param node a treeitter node of type "query"
+-- @param bufnr
+local build_request_from_node = function (tsnode, bufnr)
+
+  print('building request_from_node')
+  -- named_child(0)
+  local reqnode = tsnode:child(0)
+  local id = "toto"
+  print_node("reqnode", reqnode)
+
+  -- :field("method")[1]
+  -- print("id", id , "isNamed" .. tostring(tsnode:named()))
+  print_node(string.format("- capture node id(%s)", id), tsnode)
+  print("node count ", tsnode:named_child_count())
+
+  print("node method ", tsnode:field("url"))
+  -- tsnode:field({name})
+  -- Returns a table of the nodes corresponding to the {name} field.
+  local methodfields = tsnode:field("request")
+  -- :field("method")
+  print("number of request fields ? ", #methodfields)
+  print("first request field ? ", methodfields[1])
+  local methodnode = methodfields[1]:field("method")[1]
+  local start_line = vim.treesitter.query.get_node_text(methodnode, bufnr)
+  print("parsing start_line: ", start_line)
+  -- TODO could parse just the URL since the method is already given by ts
+  local parsed_url = parse_url(start_line)
+  -- vim.treesitter.query.get_node_text(methodnode, bufnr)
+  -- print("first method field ? ", vim.treesitter.query.get_node_text(methodnode, bufnr))
+  -- print("request field ? ", methodnode)
+  -- print("node text ", vim.treesitter.query.get_node_text(methodfield, bufnr))
+
+  -- display query request/ method / url
+  -- for cid, cnode in ipairs(tsnode:iter_children()):
+  -- for c, _ in tsnode:iter_children() do
+  --   -- print("type: ", c:type())
+  --   if c:named() and c:type() == "method" then
+  --     return c
+  --   end
+  -- end
+
+    return {
+      method = methodnode:field('method')[1],
+      url = methodnode:field('url')[1],
+      -- TODO found from parse_url but should use ts as well:
+      -- methodnode:field('http_version')[1],
+      http_version = parsed_url.http_version,
+      headers = nil,
+      -- TODO build curl_args from 'headers'
+      raw = nil,
+      -- TODO check if body is full string ?
+      body = nil,
+      bufnr = bufnr,
+      start_line = tsnode:start(),
+      end_line = tsnode:end_(),
+      -- todo
+      script_str = ""
+    }
 end
 
 M.ts_get_requests = function (bufnr)
   bufnr = bufnr or 0
 
-  print("GET REQUESTS")
+  print("GET REQUESTS for buffer ", bufnr)
   local parser = ts.get_parser(bufnr, "http")
-  print("PARSER", parser)
+  -- print("PARSER", parser)
   local query = [[
-      (request)
+      (query) @queries
   ]]
   -- parse returns a list of ts trees
   -- root is a node
@@ -322,14 +407,15 @@ M.ts_get_requests = function (bufnr)
   -- print_node("Node at cursor", start_node)
   -- print("sexpr: " .. start_node:sexpr())
   local parsed_query = ts.parse_query(parser_name, query)
+  -- print(vim.inspect(parsed_query))
   print("start row", start_row, "end row", end_row)
   print_node("root", root)
   local requests = {}
-  for id, node in parsed_query:iter_captures(start_node, bufnr, start_row, end_row) do
+  -- , start_row, end_row
+  for _id, tsnode, _metadata in parsed_query:iter_captures(start_node, bufnr) do
       -- local name = parsed_query.captures[id] -- name of the capture in the query
-      print("id", id , "isNamed" .. node:named())
-      print("too")
-      print_node(string.format("- capture node id(%s)", id), node)
+
+      requests[#requests] = build_request_from_node(tsnode, bufnr)
   end
 
   return requests
@@ -348,6 +434,7 @@ M.buf_get_request = function(bufnr, curpos)
   curpos = curpos or vim.fn.getcurpos()
   bufnr = bufnr or vim.api.nvim_win_get_buf(0)
 
+  -- TODO use M.ts_get_requests with a cursor pos ?
   local start_line = start_request(bufnr, curpos[2])
 
   if start_line == 0 then
@@ -410,7 +497,8 @@ end
 
 M.print_request = function(req)
   local str = [[
-    version: ]] .. req.url .. [[\n
+    url: ]] .. req.url .. [[\n
+    http_version: ]] .. req.http_version .. [[\n
     method: ]] .. req.method .. [[\n
     start_line: ]] .. tostring(req.start_line) .. [[\n
     end_line: ]] .. tostring(req.end_line) .. [[\n

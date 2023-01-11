@@ -27,6 +27,7 @@ end
 M.set_env = function(key, value)
   local variables = M.get_env_variables()
   variables[key] = value
+  -- let's not update the file for now
   M.write_env_file(variables)
 end
 
@@ -50,7 +51,8 @@ M.write_env_file = function(variables)
           file:write(vim.fn.json_encode(variables))
         else
           for key, value in pairs(variables) do
-            file:write(key .. "=" .. value .. "\n")
+            print("SERIALIZE ", value)
+            file:write(key .. "=" .. tostring(value) .. "\n")
           end
         end
         file:close()
@@ -142,7 +144,7 @@ M.get_env_variables = function()
 end
 
 -- get_variables Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration or from the files being read
+-- (default: .env) specified in configuration or from the files being read
 -- with variables beginning with @ and returns a table with the variables
 M.get_variables = function()
   local variables = {}
