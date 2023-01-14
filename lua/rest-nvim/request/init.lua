@@ -52,7 +52,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
     lines = utils.read_file(importfile)
   else
-    lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, stop_line, false)
+    lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
   end
 
   local body = ""
@@ -291,6 +291,8 @@ M.get_current_request = function()
   return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
 end
 
+local methods_with_body = {"POST", "PUT", "PATCH", "DELETE"}
+
 -- buf_get_request returns a table with all the request settings
 -- @param bufnr (number|nil) the buffer number
 -- @param curpos the cursor position
@@ -328,12 +330,15 @@ M.buf_get_request = function(bufnr, curpos)
     end
   end
 
-  local body = get_body(
-    bufnr,
-    body_start,
-    end_line,
-    content_type:find("application/[^ ]*json")
-  )
+  local body;
+  if utils.has_value(methods_with_body, parsed_url.method) then
+    body = get_body(
+      bufnr,
+      body_start,
+      end_line,
+      content_type:find("application/[^ ]*json")
+    )
+  end
 
   local script_str = get_response_script(bufnr, headers_end, end_line)
 
