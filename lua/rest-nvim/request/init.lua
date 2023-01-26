@@ -67,10 +67,11 @@ end
 -- Plenary.curl allows a table or a raw string as body and can distinguish
 -- between strings with filenames and strings with the raw body
 -- @param bufnr Buffer number, a.k.a id
+-- @param vars Session variables
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
 -- @param has_json True if content-type is set to json
-local function get_body(bufnr, start_line, stop_line, has_json)
+local function get_body(bufnr, vars, start_line, stop_line, has_json)
   -- first check if the body should be imported from an external file
   local importfile = get_importfile_name(bufnr, start_line, stop_line)
   local lines
@@ -84,7 +85,6 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   end
 
   local body = ""
-  local vars = utils.read_variables()
   -- nvim_buf_get_lines is zero based and end-exclusive
   -- but start_line and stop_line are one-based and inclusive
   -- magically, this fits :-) start_line is the CRLF between header and body
@@ -170,6 +170,8 @@ end
 local function get_headers(bufnr, start_line, end_line)
   local headers = {}
   local headers_end = end_line
+
+  error("TO REMOVE")
 
   -- Iterate over all buffer lines starting after the request line
   for line_number = start_line + 1, end_line do
@@ -288,7 +290,8 @@ end
 
 -- parse_url returns a table with the method of the request and the URL
 -- @param stmt the request statement, e.g., POST http://localhost:3000/foo
-local function parse_url(stmt)
+-- @param vars session variables
+local function parse_url(stmt, vars)
   -- remove HTTP
   local parsed = utils.split(stmt, " HTTP/")
   local http_version = nil
@@ -300,7 +303,7 @@ local function parse_url(stmt)
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
 
-  target_url = utils.replace_vars(target_url)
+  target_url = utils.replace_vars(target_url, vars)
   if config.get("encode_url") then
     -- Encode URL
     target_url = utils.encode_url(target_url)
@@ -317,6 +320,7 @@ end
 local function print_node(title, node)
     print(string.format("%s: type '%s' isNamed '%s'", title, node:type(), node:named()))
     print("type", node:type())
+    print("child count", node:child_count())
 
 end
 
@@ -328,11 +332,13 @@ M.get_requests = function (bufnr)
 end
 
 -- Build a rest.nvim request from a treesitter query
--- @param node a treeitter node of type "query"
+-- @param node a treeitter node of type "query" TODO assert/check
 -- @param bufnr
-local build_request_from_node = function (tsnode, bufnr)
+M.ts_build_request_from_node = function (tsnode, bufnr)
 
   print('building request_from_node')
+  local vars = utils.read_variables()
+
   -- named_child(0)
   local reqnode = tsnode:child(0)
   local id = "toto"
@@ -341,51 +347,113 @@ local build_request_from_node = function (tsnode, bufnr)
   -- :field("method")[1]
   -- print("id", id , "isNamed" .. tostring(tsnode:named()))
   print_node(string.format("- capture node id(%s)", id), tsnode)
-  print("node count ", tsnode:named_child_count())
+  -- print("node count ", tsnode:named_child_count())
 
-  print("node method ", tsnode:field("url"))
+  -- print("node method ", tsnode:field("url"))
   -- tsnode:field({name})
   -- Returns a table of the nodes corresponding to the {name} field.
   local methodfields = tsnode:field("request")
   -- :field("method")
-  print("number of request fields ? ", #methodfields)
-  print("first request field ? ", methodfields[1])
+  -- print("number of request fields ? ", #methodfields)
+  -- print("first request field ? ", methodfields[1])
   local methodnode = methodfields[1]:field("method")[1]
+  local urlnode = methodfields[1]:field('url')[1]
+  -- print("methodnode", methodnode:field('method')[1])
+  -- print("urlnode", methodfields[2])
+  print("url content ?", vim.treesitter.query.get_node_text(urlnode, bufnr))
   local start_line = vim.treesitter.query.get_node_text(methodnode, bufnr)
   print("parsing start_line: ", start_line)
   -- TODO could parse just the URL since the method is already given by ts
-  local parsed_url = parse_url(start_line)
-  -- vim.treesitter.query.get_node_text(methodnode, bufnr)
-  -- print("first method field ? ", vim.treesitter.query.get_node_text(methodnode, bufnr))
-  -- print("request field ? ", methodnode)
-  -- print("node text ", vim.treesitter.query.get_node_text(methodfield, bufnr))
 
-  -- display query request/ method / url
-  -- for cid, cnode in ipairs(tsnode:iter_children()):
-  -- for c, _ in tsnode:iter_children() do
-  --   -- print("type: ", c:type())
-  --   if c:named() and c:type() == "method" then
-  --     return c
-  --   end
+  -- local parsed_url = parse_url(start_line)
+  local url = vim.treesitter.query.get_node_text(urlnode, bufnr)
+  url = utils.replace_vars(url, vars)
+
+
+  -- TODO splice header variables/pass variables
+  local headers = M.ts_get_headers(tsnode, bufnr)
+
+  -- if not utils.contains_comments(header_name) then
+  --   headers[header_name] = utils.replace_vars(header_value)
   -- end
 
+  -- HACK !!!
+  -- Because we have trouble catching the body through tree-sitter
+  -- we just look set the end_line to the (beginning -1) line of the next request 
+  -- or the last line if there are no other requests
+  local end_line = vim.fn.line("$")
+  local nextreq = tsnode:next_sibling()
+  print_node("next query", nextreq)
+  if nextreq then
+    end_line = nextreq:end_()
+  end
+
+  --
+  -- local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
+
+  local body = get_body(
+    bufnr,
+    vars,
+    tsnode:end_()+1,
+    end_line,
+    true -- assume json for now
+    -- content_type:find("application/[^ ]*json")
+  )
+
+  local script_str = get_response_script(bufnr,tsnode:end_()+1, end_line)
+
     return {
-      method = methodnode:field('method')[1],
-      url = methodnode:field('url')[1],
+      method = vim.treesitter.query.get_node_text(methodnode, bufnr),
+      url = url,
       -- TODO found from parse_url but should use ts as well:
       -- methodnode:field('http_version')[1],
-      http_version = parsed_url.http_version,
-      headers = nil,
+      http_version = nil,
+      headers = headers,
       -- TODO build curl_args from 'headers'
+      -- I dont really care about that so I left it 
       raw = nil,
       -- TODO check if body is full string ?
-      body = nil,
+      body = body,
       bufnr = bufnr,
       start_line = tsnode:start(),
-      end_line = tsnode:end_(),
+      -- le end line is computed
+      end_line = end_line,
       -- todo
-      script_str = ""
+      script_str = script_str
+
     }
+end
+
+-- TODO we should return headers for query
+M.ts_get_headers = function (qnode, bufnr)
+  -- local parser = ts.get_parser(bufnr, "http")
+  -- print("PARSER", parser)
+  local query = [[
+      (header) @headers
+  ]]
+
+  local parsed_query = ts.parse_query(parser_name, query)
+  -- print(vim.inspect(parsed_query))
+  local start_row, _, end_row, _ = qnode:range()
+  print("start row", start_row, "end row", end_row)
+
+  local headers = {}
+  for _id, headernode, _metadata in parsed_query:iter_captures(qnode, bufnr) do
+      -- local name = parsed_query.captures[id] -- name of the capture in the query
+      -- M.ts_build_request_from_node(tsnode, bufnr)
+      print_node("header node", headernode)
+      -- Returns a table of the nodes corresponding to the {name} field.
+
+      local hnamenode = headernode:field("name")[1]
+      local hname = vim.treesitter.query.get_node_text(hnamenode, bufnr)
+      print("inspect hname", vim.inspect(hname))
+      local valuenode = headernode:field("value")[1]
+      local value = vim.treesitter.query.get_node_text(valuenode, bufnr)
+      print("Header name: ", hname, " = ", value)
+      -- TODO splice value variables !
+      headers[hname] = value
+  end
+  return headers
 end
 
 M.ts_get_requests = function (bufnr)
@@ -402,8 +470,8 @@ M.ts_get_requests = function (bufnr)
   local root = parser:parse()[1]:root()
   local start_row, _, end_row, _ = root:range()
 
-  local start_node = root
-  -- local start_node = ts_utils.get_node_at_cursor()
+  -- local start_node = root
+  local start_node = ts_utils.get_node_at_cursor()
   -- print_node("Node at cursor", start_node)
   -- print("sexpr: " .. start_node:sexpr())
   local parsed_query = ts.parse_query(parser_name, query)
@@ -415,15 +483,37 @@ M.ts_get_requests = function (bufnr)
   for _id, tsnode, _metadata in parsed_query:iter_captures(start_node, bufnr) do
       -- local name = parsed_query.captures[id] -- name of the capture in the query
 
-      requests[#requests] = build_request_from_node(tsnode, bufnr)
+      requests[#requests] = M.ts_build_request_from_node(tsnode, bufnr)
   end
 
   return requests
 end
 
-
 M.get_current_request = function()
-  return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
+  -- old implementation
+  -- return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
+  local query_node = M.ts_get_current_request()
+  assert(query_node:type() == "query")
+  local result = M.ts_build_request_from_node(query_node, 0)
+  M.print_request(result)
+  return true, result
+end
+
+M.ts_get_current_request = function()
+  local parser = ts.get_parser(0, "http")
+  local root = parser:parse()[1]:root()
+  local start_node = ts_utils.get_node_at_cursor()
+  print("start node", start_node:type())
+  local node = start_node
+  while node:type() ~= "query" and node ~= root do
+    -- print("node before", node:type())
+    node = node:parent()
+
+    -- node = ts_utils.get_previous_node(node, true, true)
+    -- print("node after", node:type())
+  end
+  print("out of loop node", node:type())
+  return node
 end
 
 -- buf_get_request returns a table with all the request settings
@@ -434,6 +524,11 @@ M.buf_get_request = function(bufnr, curpos)
   curpos = curpos or vim.fn.getcurpos()
   bufnr = bufnr or vim.api.nvim_win_get_buf(0)
 
+  error("SHOULD NOT BE USED ANYMORE")
+
+  -- todo load from file and merge with session variable
+  local vars = utils.read_variables()
+
   -- TODO use M.ts_get_requests with a cursor pos ?
   local start_line = start_request(bufnr, curpos[2])
 
@@ -442,7 +537,7 @@ M.buf_get_request = function(bufnr, curpos)
   end
   local end_line = end_request(bufnr, start_line)
 
-  local parsed_url = parse_url(vim.fn.getline(start_line))
+  local parsed_url = parse_url(vim.fn.getline(start_line), vars)
 
   local headers, headers_end = get_headers(bufnr, start_line, end_line)
 
@@ -464,8 +559,10 @@ M.buf_get_request = function(bufnr, curpos)
     end
   end
 
+
   local body = get_body(
     bufnr,
+    vars,
     body_start,
     end_line,
     content_type:find("application/[^ ]*json")
@@ -498,11 +595,13 @@ end
 M.print_request = function(req)
   local str = [[
     url: ]] .. req.url .. [[\n
-    http_version: ]] .. req.http_version .. [[\n
     method: ]] .. req.method .. [[\n
     start_line: ]] .. tostring(req.start_line) .. [[\n
     end_line: ]] .. tostring(req.end_line) .. [[\n
   ]]
+  if req.http_version then
+    str = "http_version: ".. req.http_version .. "\n"
+  end
   print(str)
 end
 

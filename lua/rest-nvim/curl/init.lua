@@ -2,6 +2,7 @@ local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
+local session = require("rest-nvim.session")
 
 local M = {}
 -- checks if 'x' can be executed by system()
@@ -90,7 +91,7 @@ local function create_callback(curl_cmd, method, url, script_str)
         result = res,
         pretty_print = vim.pretty_print,
         json_decode = vim.fn.json_decode,
-        set_env = utils.set_env,
+        set_env = session.set_env,
       }
       local env = { context = context }
       setmetatable(env, { __index = _G })
