@@ -113,6 +113,7 @@ M.get_file_variables = function()
   end
   return variables
 end
+
 -- Gets the variables from the currently selected env_file
 M.get_env_variables = function()
   local variables = {}
