@@ -391,16 +391,17 @@ M.ts_build_request_from_node = function (tsnode, bufnr)
   --
   -- local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
+  local headers_end = tsnode:end_()+1
   local body = get_body(
     bufnr,
     vars,
-    tsnode:end_()+1,
+    headers_end,
     end_line,
     true -- assume json for now
     -- content_type:find("application/[^ ]*json")
   )
 
-  local script_str = get_response_script(bufnr,tsnode:end_()+1, end_line)
+  local script_str = get_response_script(bufnr,headers_end, end_line)
 
     return {
       method = vim.treesitter.query.get_node_text(methodnode, bufnr),
@@ -592,7 +593,13 @@ M.buf_get_request = function(bufnr, curpos)
       }
 end
 
+-- to remove
 M.print_request = function(req)
+  print(M.stringify_request(req))
+end
+
+-- converts request into string, helpful for debug
+M.stringify_request = function(req)
   local str = [[
     url: ]] .. req.url .. [[\n
     method: ]] .. req.method .. [[\n
@@ -600,8 +607,14 @@ M.print_request = function(req)
     end_line: ]] .. tostring(req.end_line) .. [[\n
   ]]
   if req.http_version then
-    str = "http_version: ".. req.http_version .. "\n"
+    str = str.."\nhttp_version: ".. req.http_version .. "\n"
   end
+
+  if req.body then
+    str = str.."body: "..req.body.."\n"
+  end
+
+  -- here we should just display the beginning of the request
   print(str)
 end
 

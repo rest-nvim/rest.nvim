@@ -96,7 +96,16 @@ rest.run_request = function(req, opts)
     request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
+  log.debug(request.stringify_request(req))
   local success_req, req_err = pcall(curl.curl_cmd, Opts)
+
+
+  -- TODO if it was successful we could move to next request
+  -- if config.get("jump_to_request") then
+  --   utils.move_cursor(bufnr, start_line)
+  -- else
+  --   utils.move_cursor(bufnr, curpos[2], curpos[3])
+  -- end
 
   if not success_req then
     vim.api.nvim_err_writeln(
