@@ -524,19 +524,26 @@ M.buf_get_current_request = function(bufnr)
   -- old implementation
   -- return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
   local query_node = M.buf_get_request_at_node(bufnr, ts_utils.get_node_at_cursor())
+  print("buf_get_current_request", query_node:type())
+  if not query_node then
+    local msg = "Could not find any query"
+    vim.notify(msg)
+    log.warn(msg)
+  end
   local result = M.ts_build_request_from_node(query_node, 0)
   M.print_request(result)
   return true, result
 end
 
 M.buf_get_request_at_node = function(_bufnr, start_node)
-  local parser = ts.get_parser(0, "http")
-  local root = parser:parse()[1]:root()
-  -- local start_node = ts_utils.get_node_at_cursor()
-  -- print("start node type", start_node:type())
+  log.debug("buf_get_request_at_node")
+  -- local parser = ts.get_parser(0, "http")
+  -- local root = parser:parse()[1]:root()
+
+  print("start node type", start_node:type())
   local node = start_node
-  while node:type() ~= "query" and node ~= root do
-    -- print("node before", node:type())
+  while node ~= nil and node:type() ~= "query" do
+    print("node before", node:type())
     node = node:parent()
 
     -- node = ts_utils.get_previous_node(node, true, true)
