@@ -69,6 +69,7 @@ rest.run_request = function(req, opts)
     headers = result.headers,
     raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
       or result.raw,
+    form = result.form,
     body = result.body,
     dry_run = opts.verbose,
     bufnr = result.bufnr,
