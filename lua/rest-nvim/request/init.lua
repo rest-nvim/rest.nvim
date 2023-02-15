@@ -21,7 +21,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_spliced
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     fileimport_string =
-    string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     fileimport_spliced = utils.replace_vars(fileimport_string)
     if path:new(fileimport_spliced):is_absolute() then
       return fileimport_spliced
@@ -66,8 +66,8 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     if line:find("{%%") then
       break
     end
-    -- Ignore commented lines with and without indent
-    if not utils.contains_comments(line) then
+    -- Ignore commented lines with and without indent and Ignore forms
+    if not utils.contains_comments(line) and not line:find("^-F .+") then
       body = body .. utils.replace_vars(line, vars)
     end
   end
@@ -88,7 +88,6 @@ local function get_body(bufnr, start_line, stop_line, has_json)
       return vim.fn.json_encode(json_body)
     end
   end
-
 
   return body
 end
@@ -176,25 +175,35 @@ end
 -- @param end_line Line where the request ends
 local function get_curl_args(bufnr, headers_end, end_line)
   local curl_args = {}
+  local form = {}
   local body_start = end_line
 
   for line_number = headers_end, end_line do
     local line_content = vim.fn.getbufline(bufnr, line_number)[1]
-
     if line_content:find("^ *%-%-?[a-zA-Z%-]+") then
-      local lc = vim.split(line_content, " ")
-      local x = ""
+      -- if it begins with -F then is a form
+      if line_content:find("^-F .+") then
+        local line_content_no_quotes = line_content:gsub('"', ""):gsub("'", "")
+        local form_table = vim.split(vim.split(line_content_no_quotes, " ")[2], "=")
+        form[form_table[1]] = form_table[2]
+        if line_number ~= end_line then
+          body_start = line_number - 1
+        end
+      else
+        local lc = vim.split(line_content, " ")
+        local x = ""
 
-      for i, y in ipairs(lc) do
-        x = x .. y
+        for i, y in ipairs(lc) do
+          x = x .. y
 
-        if #y:match("\\*$") % 2 == 1 and i ~= #lc then
-          -- insert space if there is an slash at end
-          x = x .. " "
-        else
-          -- insert 'x' into curl_args and reset it
-          table.insert(curl_args, x)
-          x = ""
+          if #y:match("\\*$") % 2 == 1 and i ~= #lc then
+            -- insert space if there is an slash at end
+            x = x .. " "
+          else
+            -- insert 'x' into curl_args and reset it
+            table.insert(curl_args, x)
+            x = ""
+          end
         end
       end
     elseif not line_content:find("^ *$") then
@@ -204,8 +213,7 @@ local function get_curl_args(bufnr, headers_end, end_line)
       break
     end
   end
-
-  return curl_args, body_start
+  return curl_args, body_start, form
 end
 
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
@@ -240,8 +248,8 @@ local function end_request(bufnr, linenumber)
   end
   utils.move_cursor(bufnr, linenumber)
 
-  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\^###\\", "cn",
-    vim.fn.line("$"))
+  local next =
+    vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\^###\\", "cn", vim.fn.line("$"))
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
@@ -310,7 +318,7 @@ M.buf_get_request = function(bufnr, curpos)
 
   local headers, headers_end = get_headers(bufnr, start_line, end_line)
 
-  local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
+  local curl_args, body_start, form = get_curl_args(bufnr, headers_end, end_line)
 
   if headers["host"] ~= nil then
     headers["host"] = headers["host"]:gsub("%s+", "")
@@ -328,15 +336,15 @@ M.buf_get_request = function(bufnr, curpos)
     end
   end
 
-  local body = get_body(
-    bufnr,
-    body_start,
-    end_line,
-    content_type:find("application/[^ ]*json")
-  )
+  local body
+  body = get_body(bufnr, body_start, end_line, content_type:find("application/[^ ]*json"))
+
+  -- if there's a form, there shouldn't be a body
+  if next(form) ~= nil then
+    body = nil
+  end
 
   local script_str = get_response_script(bufnr, headers_end, end_line)
-
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
@@ -345,18 +353,19 @@ M.buf_get_request = function(bufnr, curpos)
   end
 
   return true,
-      {
-        method = parsed_url.method,
-        url = parsed_url.url,
-        http_version = parsed_url.http_version,
-        headers = headers,
-        raw = curl_args,
-        body = body,
-        bufnr = bufnr,
-        start_line = start_line,
-        end_line = end_line,
-        script_str = script_str
-      }
+    {
+      method = parsed_url.method,
+      url = parsed_url.url,
+      http_version = parsed_url.http_version,
+      headers = headers,
+      raw = curl_args,
+      form = form,
+      body = body,
+      bufnr = bufnr,
+      start_line = start_line,
+      end_line = end_line,
+      script_str = script_str,
+    }
 end
 
 M.print_request = function(req)

@@ -1,0 +1,4 @@
+POST /api/users
+Content-Type: application/x-www-form-urlencoded
+
+-F "user=@user.json"
