@@ -172,11 +172,15 @@ response script. The context table can be used to read the response and set
 environment variables. 
 
 The context table:
-`{`
-`  result = res,`
-`  pretty_print = vim.pretty_print,`
-`  json_decode = vim.fn.json_decode,`
-`  set_env = utils.set_env,`
+`local context = {`
+  `result = res,`
+  `pretty_print = vim.pretty_print,`
+  `json_decode = vim.fn.json_decode,`
+  `json_encode = vim.fn.json_encode,`
+  `set_env = variables.set_env,`
+  `get_env = variables.get_variables,`
+  `get_buffer_variables = variables.get_buffer_variables,`
+  `set_buffer_variable = variables.set_buffer_variable,`
 `}`
 
 Now environment variables can be set like so:
@@ -186,9 +190,20 @@ Now environment variables can be set like so:
 `{%` 
 ` `
 `local body = context.json_decode(context.result.body)`
-`context.set_env("postId", body.id)`
+`context.set_env("postId", body.id, { persist = true })`
 ` `
 `%}`
+
+There are 2 utility functions for manipulating variables. 
+
+The `set_env` function sets global variables. If persist is set to true then the
+value will be written to the currently selected env file. If persist is false
+or no table is passed then the variable is set in memory and is available
+across http files until the editor is closed.
+
+The `set_buffer_variable` function sets a variable for the current buffer
+only. 
+
 
 ===============================================================================
 DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
