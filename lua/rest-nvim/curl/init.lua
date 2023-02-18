@@ -2,6 +2,7 @@ local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
+local variables = require("rest-nvim.variables")
 
 local M = {}
 -- checks if 'x' can be executed by system()
@@ -73,7 +74,11 @@ local function create_callback(method, url, script_str)
         result = res,
         pretty_print = vim.pretty_print,
         json_decode = vim.fn.json_decode,
-        set_env = utils.set_env,
+        json_encode = vim.fn.json_encode,
+        set_env = variables.set_env,
+        get_env = variables.get_variables,
+        get_buffer_variables = variables.get_buffer_variables,
+        set_buffer_variable = variables.set_buffer_variable,
       }
       local env = { context = context }
       setmetatable(env, { __index = _G })
@@ -186,7 +191,7 @@ local function create_callback(method, url, script_str)
         syn region %sBody matchgroup=Comment start=+\v^#\+RESPONSE$+ end=+\v^#\+END$+ contains=@%s
 
         let b:current_syntax = "httpResult"
-      ]],
+      ]] ,
         "%%s",
         content_type
       ))

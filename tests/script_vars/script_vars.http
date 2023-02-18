@@ -1,15 +1,56 @@
 # Should write the returned variables to the env file.
 # Then the second request can be run
-GET https://jsonplaceholder.typicode.com/posts/3
+#
+# Setting the env without persistence will set the variable for the whole session 
+# across all files
+#
+# If the persist flag is set to true, the variables will be written to the env file
+GET https://jsonplaceholder.typicode.com/posts/99
 
 {% 
 
 local body = context.json_decode(context.result.body)
 
+context.set_env("postTitle", context.json_encode(body.title), { persist=true })
 context.set_env("userId", body.userId)
-context.set_env("postId", body.id)
 
 %}
 
 ###
+GET https://jsonplaceholder.typicode.com/users/{{userId}}
+
+
+
+###
+# Should be able to set buffer only variables
+GET https://jsonplaceholder.typicode.com/posts/22
+
+{% 
+
+local body = context.json_decode(context.result.body)
+
+context.set_buffer_variable("postId", body.id)
+
+%}
+
+###
+# This would fail in a different buffer
 GET https://jsonplaceholder.typicode.com/posts/{{postId}}
+
+
+###
+# Can set tables as buffer variables and variables
+GET https://jsonplaceholder.typicode.com/posts/22
+
+{% 
+
+local body = context.json_decode(context.result.body)
+
+context.set_buffer_variable("response", body)
+context.set_env("response", body)
+
+
+context.pretty_print(context.get_env("response"))
+context.pretty_print(context.get_buffer_variables("response"))
+
+%}
