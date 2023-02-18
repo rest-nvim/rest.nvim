@@ -1,5 +1,3 @@
-local config = require("rest-nvim.config")
-
 local random = math.random
 math.randomseed(os.time())
 

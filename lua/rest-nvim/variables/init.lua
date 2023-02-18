@@ -18,7 +18,7 @@ M.set_env = function(key, value, opts)
   end
 end
 
-M.set_buffer_variable = function(key, value, bufnr)
+M.set_buffer_variable = function(key, value)
   local buf_vars = M.get_buffer_variables()
   buf_vars[key] = value
   vim.api.nvim_buf_set_var(0, "rest-nvim", buf_vars)
