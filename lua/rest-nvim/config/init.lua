@@ -4,6 +4,7 @@ local config = {
   result_split_horizontal = false,
   result_split_in_place = false,
   skip_ssl_verification = false,
+  encode_url = true,
   highlight = {
     enabled = true,
     timeout = 150,
@@ -15,22 +16,18 @@ local config = {
     formatters = {
       json = "jq",
       html = function(body)
-        return vim.fn
-          .system({
-            "tidy",
-            "-i",
-            "-q",
-            "--tidy-mark",
-            "no",
-            "--show-body-only",
-            "auto",
-            "--show-errors",
-            "0",
-            "--show-warnings",
-            "0",
-            "-",
-          }, body)
-          :gsub("\n$", "")
+        if vim.fn.executable("tidy") == 0 then
+          return body
+        end
+        -- stylua: ignore
+        return vim.fn.system({
+          "tidy", "-i", "-q",
+          "--tidy-mark",      "no",
+          "--show-body-only", "auto",
+          "--show-errors",    "0",
+          "--show-warnings",  "0",
+          "-",
+        }, body):gsub("\n$", "")
       end,
     },
   },

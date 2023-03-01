@@ -1,6 +1,6 @@
 local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
-local log = require("plenary.log").new({ plugin = "rest.nvim", level = "debug" })
+local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
 
 local M = {}
@@ -51,7 +51,7 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(method, url, req_var)
+local function create_callback(method, url, script_str, req_var)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
@@ -65,6 +65,21 @@ local function create_callback(method, url, req_var)
       if string.lower(header):find("^content%-type") then
         content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
         break
+      end
+    end
+
+    if script_str ~= nil then
+      local context = {
+        result = res,
+        pretty_print = vim.pretty_print,
+        json_decode = vim.fn.json_decode,
+        set_env = utils.set_env,
+      }
+      local env = { context = context }
+      setmetatable(env, { __index = _G })
+      local f = load(script_str, nil, "bt", env)
+      if f ~= nil then
+        f()
       end
     end
 
@@ -136,9 +151,9 @@ local function create_callback(method, url, req_var)
     -- check if the response is a json
     -- parse the json response and store the data on memory
     if content_type == "json" and req_var ~= "" then
-      local req_var_store = vim.api.nvim_get_var('req_var_store')
+      local req_var_store = vim.api.nvim_get_var("req_var_store")
       req_var_store[req_var] = vim.json.decode(res.body)
-      vim.api.nvim_set_var('req_var_store', req_var_store)
+      vim.api.nvim_set_var("req_var_store", req_var_store)
     end
 
     -- append response container
@@ -204,7 +219,9 @@ end
 
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
--- @param opts curl arguments
+-- @param opts (table) curl arguments:
+--           - yank_dry_run (boolean): displays the command
+--           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
   if opts.dry_run then
     local res = curl[opts.method](opts)
@@ -217,7 +234,8 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url, opts.req_var))
+    opts.callback =
+      vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str, opts.req_var))
     curl[opts.method](opts)
   end
 end

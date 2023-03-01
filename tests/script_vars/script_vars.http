@@ -1,0 +1,15 @@
+# Should write the returned variables to the env file.
+# Then the second request can be run
+GET https://jsonplaceholder.typicode.com/posts/3
+
+{% 
+
+local body = context.json_decode(context.result.body)
+
+context.set_env("userId", body.userId)
+context.set_env("postId", body.id)
+
+%}
+
+###
+GET https://jsonplaceholder.typicode.com/posts/{{postId}}

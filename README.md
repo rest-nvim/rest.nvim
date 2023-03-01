@@ -19,7 +19,7 @@ A fast Neovim http client written in Lua.
 in `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you don't
 have to leave Neovim!
 
-> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/NTBBloodbath/rest.nvim/issues/new)
+> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/rest-nvim/rest.nvim/issues/new)
 
 ## Notices
 
@@ -57,7 +57,7 @@ have to leave Neovim!
 
 ```lua
 use {
-  "NTBBloodbath/rest.nvim",
+  "rest-nvim/rest.nvim",
   requires = { "nvim-lua/plenary.nvim" },
   config = function()
     require("rest-nvim").setup({
@@ -67,6 +67,8 @@ use {
       result_split_in_place = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
+      -- Encode URL before making request
+      encode_url = true,
       -- Highlight request on run
       highlight = {
         enabled = true,
@@ -78,7 +80,7 @@ use {
         show_http_info = true,
         show_headers = true,
         -- executables or functions for formatting response body [optional]
-        -- set them to nil if you want to disable them
+        -- set them to false if you want to disable them
         formatters = {
           json = "jq",
           html = function(body)
@@ -126,6 +128,7 @@ To run `rest.nvim` you should map the following commands:
     (default opens top|left on horizontal|vertical split)
 - `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
     useful when using unknown certificates
+- `encode_url` flag to encode the URL before making request
 - `highlight` allows to enable and configure the highlighting of the selected request when send,
 - `jump_to_request` moves the cursor to the selected request line when send,
 - `env_file` specifies file name that consist environment variables (default: .env)
@@ -148,11 +151,20 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ## Contribute
 
-1. Fork it (https://github.com/NTBBloodbath/rest.nvim/fork)
+1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
 2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
 3. Commit your changes (<kbd>git commit -am 'Add some feature'</kbd>)
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
 5. Create a new Pull Request
+
+To run the tests, enter a nix shell with `nix develop ./contrib`, then run `make
+test`.
+
+## Related software
+
+- [Hurl](https://hurl.dev/)
+- [HTTPie](https://httpie.io/)
+- [httpYac](https://httpyac.github.io/)
 
 ## License
 
