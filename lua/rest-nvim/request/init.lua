@@ -253,7 +253,7 @@ local function end_request(bufnr, linenumber)
   utils.move_cursor(bufnr, linenumber)
 
   local next =
-    vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\^###\\", "cn", vim.fn.line("$"))
+    vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn", vim.fn.line("$"))
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
