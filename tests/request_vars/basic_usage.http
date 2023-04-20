@@ -1,14 +1,17 @@
 page: {{response.page}}
 url: {{response.support.url}}
+userid: {{response.data.0.id}}
 
 # normal var
 foo: 4
 
 #@response
-GET https://reqres.in/api/users?page=5
+GET https://reqres.in/api/users?page=2
 
 GET https://reqres.in/api/users?page={{foo}}
 
 GET https://reqres.in/api/users?page={{page}}
 
 GET {{url}}
+
+GET https://reqres.in/api/users/{{userid}}

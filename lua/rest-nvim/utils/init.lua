@@ -245,10 +245,15 @@ M.replace_req_varibles = function(value_str)
   -- split the value_str, e.g. 'foo.bar.baz' -> {'foo', 'bar', 'baz'}
   local splitted_values = {}
   for var in match:gmatch("([^.]+)") do
+    -- try to parse 'var' as number
+    local x = tonumber(var)
+    if x then
+      var = x + 1
+    end
     table.insert(splitted_values, var)
   end
 
-  local result = vim.api.nvim_get_var('req_var_store')
+  local result = vim.api.nvim_get_var("req_var_store")
   if not result.__loaded then
     error(
       string.format(
