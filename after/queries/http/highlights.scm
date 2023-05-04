@@ -1,6 +1,6 @@
 ; Keywords
 
-(scheme) @constant
+(scheme) @namespace
 
 ; Methods
 
@@ -9,9 +9,6 @@
 ; Constants
 
 (const_spec) @constant
-
-; URL
-(host) @text.uri
 
 ; Headers
 
@@ -25,6 +22,11 @@
 ; Fields
 
 (pair name: (identifier) @field)
+
+; URL / Host
+(host) @text.uri
+(host (identifier) @text.uri)
+(path (identifier) @text.uri)
 
 ; Parameters
 
