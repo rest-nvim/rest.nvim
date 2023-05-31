@@ -15,6 +15,7 @@
           let
             # luaPkgs = pkgs."lua${luaVersion}".pkgs;
             luaEnv = pkgs."lua${luaVersion}".withPackages (lp: with lp; [
+              busted
               luacheck
               luarocks
             ]);
@@ -73,6 +74,7 @@
               packDirArgs.myNeovimPackages = myVimPackage;
             in 
               ''
+                export DEBUG_PLENARY="debug"
                 cat <<-EOF > minimal.vim
                   set rtp+=.
                   set packpath^=${pkgs.vimUtils.packDir packDirArgs}
