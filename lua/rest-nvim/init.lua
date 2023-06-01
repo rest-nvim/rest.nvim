@@ -7,6 +7,7 @@ local rest = {}
 local Opts = {}
 local LastOpts = {}
 
+vim.api.nvim_set_var("req_var_store", { __loaded = true })
 rest.setup = function(user_configs)
   config.set(user_configs or {})
 end
@@ -74,6 +75,7 @@ rest.run_request = function(req, opts)
     bufnr = result.bufnr,
     start_line = result.start_line,
     end_line = result.end_line,
+    req_var = result.req_var,
     script_str = result.script_str,
   }
 

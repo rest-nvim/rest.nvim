@@ -21,7 +21,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_spliced
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     fileimport_string =
-    string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     fileimport_spliced = utils.replace_vars(fileimport_string)
     if path:new(fileimport_spliced):is_absolute() then
       return fileimport_spliced
@@ -88,7 +88,6 @@ local function get_body(bufnr, start_line, stop_line, has_json)
       return vim.fn.json_encode(json_body)
     end
   end
-
 
   return body
 end
@@ -226,6 +225,19 @@ local function start_request(bufnr, linenumber)
   return res
 end
 
+-- request_var will find the request variable if it exists, e.g.
+-- ```
+-- #@foo
+-- GET http://localhost:8081/bar
+-- ````
+-- of the current request and returns the linenumber of the found request variable
+-- the request variable is defined as the variable that starts with '#@'
+-- one line above the request line in the example the variable would be 'foo'
+-- @param url_line The request line
+local function request_var(url_line)
+  return vim.fn.search("^#@", "cbn", url_line - 1)
+end
+
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
 -- @param bufnr The buffer nummer of the .http-file
@@ -240,8 +252,8 @@ local function end_request(bufnr, linenumber)
   end
   utils.move_cursor(bufnr, linenumber)
 
-  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn",
-    vim.fn.line("$"))
+  local next =
+    vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn", vim.fn.line("$"))
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
@@ -286,6 +298,14 @@ local function parse_url(stmt)
   }
 end
 
+-- parse_req_var returns a string with the name of the request variable, e.g.
+-- #@foo -> parse_req_var -> foo
+-- @param stmt the request variable (#@foo)
+local function parse_req_var(stmt)
+  local parsed = stmt:sub(3)
+  return parsed
+end
+
 local M = {}
 M.get_current_request = function()
   return M.buf_get_request(vim.api.nvim_win_get_buf(0), vim.fn.getcurpos())
@@ -308,6 +328,12 @@ M.buf_get_request = function(bufnr, curpos)
 
   local parsed_url = parse_url(vim.fn.getline(start_line))
 
+  local req_var_line = request_var(start_line)
+  local parsed_req_var_str = ""
+  if req_var_line ~= 0 then
+    parsed_req_var_str = parse_req_var(vim.fn.getline(req_var_line))
+  end
+
   local headers, headers_end = get_headers(bufnr, start_line, end_line)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
@@ -328,15 +354,9 @@ M.buf_get_request = function(bufnr, curpos)
     end
   end
 
-  local body = get_body(
-    bufnr,
-    body_start,
-    end_line,
-    content_type:find("application/[^ ]*json")
-  )
+  local body = get_body(bufnr, body_start, end_line, content_type:find("application/[^ ]*json"))
 
   local script_str = get_response_script(bufnr, headers_end, end_line)
-
 
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
@@ -345,18 +365,19 @@ M.buf_get_request = function(bufnr, curpos)
   end
 
   return true,
-      {
-        method = parsed_url.method,
-        url = parsed_url.url,
-        http_version = parsed_url.http_version,
-        headers = headers,
-        raw = curl_args,
-        body = body,
-        bufnr = bufnr,
-        start_line = start_line,
-        end_line = end_line,
-        script_str = script_str
-      }
+    {
+      method = parsed_url.method,
+      url = parsed_url.url,
+      http_version = parsed_url.http_version,
+      headers = headers,
+      raw = curl_args,
+      body = body,
+      bufnr = bufnr,
+      start_line = start_line,
+      end_line = end_line,
+      script_str = script_str,
+      req_var = parsed_req_var_str,
+    }
 end
 
 M.print_request = function(req)

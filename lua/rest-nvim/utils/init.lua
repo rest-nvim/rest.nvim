@@ -207,10 +207,13 @@ M.read_document_variables = function()
 
   for node in root:iter_children() do
     local type = node:type()
+
     if type == "header" then
       local name = node:named_child(0)
       local value = node:named_child(1)
-      variables[M.get_node_value(name, bufnr)] = M.get_node_value(value, bufnr)
+      -- check if variable has assigned other variable, e.g. foo: {{bar}}
+      local value_processed = M.replace_req_varibles(M.get_node_value(value, bufnr))
+      variables[M.get_node_value(name, bufnr)] = value_processed
     elseif type ~= "comment" then
       break
     end
@@ -224,6 +227,51 @@ M.read_variables = function()
   local third = M.read_document_variables()
 
   return vim.tbl_extend("force", first, second, third)
+end
+
+-- replaces the variables that have assigned another variable, e.g. foo: {{bar}} or foo: {{bar.baz}}
+-- if so, then replace {{bar}} or {{bar.baz}} with the proper value else return the same string
+-- only works if `bar` is a key in req_var_store
+-- @param value_str the value to evaluate
+M.replace_req_varibles = function(value_str)
+  -- first check if 'value_str' has the form {{bar}} if not then return them as is
+  local match = string.match(value_str, "{{[^}]+}}")
+  if match == nil then
+    return value_str
+  end
+
+  match = match:gsub("{", ""):gsub("}", "")
+
+  -- split the value_str, e.g. 'foo.bar.baz' -> {'foo', 'bar', 'baz'}
+  local splitted_values = {}
+  for var in match:gmatch("([^.]+)") do
+    -- try to parse 'var' as number
+    local x = tonumber(var)
+    if x then
+      var = x + 1
+    end
+    table.insert(splitted_values, var)
+  end
+
+  local result = vim.api.nvim_get_var("req_var_store")
+  if not result.__loaded then
+    error(
+      string.format(
+        "rest-nvim's global JSON variable has been unset, it is needed to get %s from there",
+        match
+      )
+    )
+  end
+  for _, val in pairs(splitted_values) do
+    if result[val] then
+      result = result[val]
+    else
+      result = ""
+      break
+    end
+  end
+
+  return result
 end
 
 -- replace_vars replaces the env variables fields in the provided string

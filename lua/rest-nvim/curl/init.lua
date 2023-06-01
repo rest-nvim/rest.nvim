@@ -51,7 +51,7 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(method, url, script_str)
+local function create_callback(method, url, script_str, req_var)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
@@ -148,6 +148,13 @@ local function create_callback(method, url, script_str)
         }, false, {})
       end
     end
+    -- check if the response is a json
+    -- parse the json response and store the data on memory
+    if content_type == "json" and req_var ~= "" then
+      local req_var_store = vim.api.nvim_get_var("req_var_store")
+      req_var_store[req_var] = vim.json.decode(res.body)
+      vim.api.nvim_set_var("req_var_store", req_var_store)
+    end
 
     -- append response container
     res.body = "#+RESPONSE\n" .. res.body .. "\n#+END"
@@ -227,7 +234,8 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str))
+    opts.callback =
+      vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str, opts.req_var))
     curl[opts.method](opts)
   end
 end
