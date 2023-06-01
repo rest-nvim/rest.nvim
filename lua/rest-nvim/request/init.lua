@@ -2,6 +2,7 @@ local utils = require("rest-nvim.utils")
 local path = require("plenary.path")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
+local variables = require("rest-nvim.variables")
 
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
@@ -22,7 +23,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     fileimport_string =
     string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
-    fileimport_spliced = utils.replace_vars(fileimport_string)
+    fileimport_spliced = variables.replace_vars(fileimport_string)
     if path:new(fileimport_spliced):is_absolute() then
       return fileimport_spliced
     else
@@ -56,7 +57,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
   end
 
   local body = ""
-  local vars = utils.read_variables()
+  local vars = variables.read_variables()
   -- nvim_buf_get_lines is zero based and end-exclusive
   -- but start_line and stop_line are one-based and inclusive
   -- magically, this fits :-) start_line is the CRLF between header and body
@@ -68,7 +69,7 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
     -- Ignore commented lines with and without indent
     if not utils.contains_comments(line) then
-      body = body .. utils.replace_vars(line, vars)
+      body = body .. variables.replace_vars(line, vars)
     end
   end
 
@@ -162,7 +163,7 @@ local function get_headers(bufnr, start_line, end_line)
     local header_name, header_value = line_content:match("^(.-): ?(.*)$")
 
     if not utils.contains_comments(header_name) then
-      headers[header_name] = utils.replace_vars(header_value)
+      headers[header_name] = variables.replace_vars(header_value)
     end
     ::continue::
   end
@@ -273,7 +274,7 @@ local function parse_url(stmt)
   table.remove(parsed, 1)
   local target_url = table.concat(parsed, " ")
 
-  target_url = utils.replace_vars(target_url)
+  target_url = variables.replace_vars(target_url)
   if config.get("encode_url") then
     -- Encode URL
     target_url = utils.encode_url(target_url)

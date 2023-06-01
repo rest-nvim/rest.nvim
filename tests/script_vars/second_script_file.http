@@ -1,0 +1,3 @@
+###
+# This should fail after running script_vars.http as the postId is set to the buffer variable
+GET https://jsonplaceholder.typicode.com/posts/{{postId}}
