@@ -5,6 +5,14 @@ math.randomseed(os.time())
 
 local M = {}
 
+M.binary_content_types = {
+  "octet-stream",
+}
+
+M.is_binary_content_type = function(content_type)
+  return vim.tbl_contains(M.binary_content_types, content_type)
+end
+
 -- move_cursor moves the cursor to the desired position in the provided buffer
 -- @param bufnr Buffer number, a.k.a id
 -- @param line the desired line

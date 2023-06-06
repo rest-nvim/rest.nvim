@@ -63,7 +63,7 @@ local function create_callback(method, url, script_str)
     -- get content type
     for _, header in ipairs(res.headers) do
       if string.lower(header):find("^content%-type") then
-        content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
+        content_type = header:match("application/([-a-z]+)") or header:match("text/(%l+)")
         break
       end
     end
@@ -150,9 +150,15 @@ local function create_callback(method, url, script_str)
     end
 
     -- append response container
-    res.body = "#+RESPONSE\n" .. res.body .. "\n#+END"
+    local buf_content = "#+RESPONSE\n"
+    if utils.is_binary_content_type(content_type) then
+      buf_content = buf_content .. "Binary answer"
+    else
+      buf_content = buf_content .. res.body
+    end
+    buf_content = buf_content .. "\n#+END"
 
-    local lines = utils.split(res.body, "\n")
+    local lines = utils.split(buf_content, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
 
