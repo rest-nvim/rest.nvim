@@ -15,6 +15,23 @@ local function is_executable(x)
   return false
 end
 
+local function format_curl_cmd(res)
+  local cmd = "curl"
+
+  for _, value in pairs(res) do
+    if string.sub(value, 1, 1) == "-" then
+      cmd = cmd .. " " .. value
+    else
+      cmd = cmd .. " '" .. value .. "'"
+    end
+  end
+
+  -- remote -D option
+  cmd = string.gsub(cmd, "-D '%S+' ", "")
+  return cmd
+end
+
+
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -51,7 +68,7 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(method, url, script_str)
+local function create_callback(curl_cmd, method, url, script_str)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
@@ -81,6 +98,11 @@ local function create_callback(method, url, script_str)
       if f ~= nil then
         f()
       end
+    end
+
+    -- This can be quite verbose so let user control it
+    if config.get("result").show_curl_command then
+      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { "Command :" .. curl_cmd })
     end
 
     if config.get("result").show_url then
@@ -200,32 +222,19 @@ local function create_callback(method, url, script_str)
   end
 end
 
-local function format_curl_cmd(res)
-  local cmd = "curl"
-
-  for _, value in pairs(res) do
-    if string.sub(value, 1, 1) == "-" then
-      cmd = cmd .. " " .. value
-    else
-      cmd = cmd .. " '" .. value .. "'"
-    end
-  end
-
-  -- remote -D option
-  cmd = string.gsub(cmd, "-D '%S+' ", "")
-  return cmd
-end
-
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts (table) curl arguments:
 --           - yank_dry_run (boolean): displays the command
 --           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
-  if opts.dry_run then
-    local res = curl[opts.method](opts)
-    local curl_cmd = format_curl_cmd(res)
+  -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
+  -- otherwise it starts the request :/
+  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true } )
+  local res = curl[opts.method](dry_run_opts)
+  local curl_cmd = format_curl_cmd(res)
 
+  if opts.dry_run then
     if config.get("yank_dry_run") then
       vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
@@ -233,7 +242,7 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str))
+    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str))
     curl[opts.method](opts)
   end
 end
