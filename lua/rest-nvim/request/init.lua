@@ -359,13 +359,44 @@ M.buf_get_request = function(bufnr, curpos)
 end
 
 M.print_request = function(req)
+  print(M.stringify_request(req))
+end
+
+-- converts request into string, helpful for debug
+-- full_body boolean
+M.stringify_request = function(req, opts)
+  opts = vim.tbl_deep_extend(
+    "force", -- use value from rightmost map
+    { full_body = false,
+      headers = true
+    }, -- defaults
+    opts or {}
+  )
   local str = [[
-    version: ]] .. req.url .. [[\n
+    url   : ]] .. req.url .. [[\n
     method: ]] .. req.method .. [[\n
-    start_line: ]] .. tostring(req.start_line) .. [[\n
-    end_line: ]] .. tostring(req.end_line) .. [[\n
-  ]]
-  print(str)
+    range : ]] .. tostring(req.start_line) .. [[ -> ]] .. tostring(req.end_line) .. [[\n
+    ]]
+
+  if req.http_version then
+    str = str .. "\nhttp_version: " .. req.http_version .. "\n"
+  end
+
+  if opts.headers then
+    for name, value in pairs(req.headers) do
+      str = str .. "header '" .. name .. "'=" .. value .. "\n"
+    end
+  end
+
+  if opts.full_body then
+    if req.body then
+      local res = req.body
+      str = str .. "body: " .. res .. "\n"
+    end
+  end
+
+  -- here we should just display the beginning of the request
+  return (str)
 end
 
 local select_ns = vim.api.nvim_create_namespace("rest-nvim")
