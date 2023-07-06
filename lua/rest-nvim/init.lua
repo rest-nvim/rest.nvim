@@ -17,6 +17,8 @@ end
 rest.run = function(verbose)
   local ok, result = request.get_current_request()
   if not ok then
+    log.error("Failed to run the http request:")
+    log.error(result)
     vim.api.nvim_err_writeln("[rest.nvim] Failed to get the current HTTP request: " .. result)
     return
   end
