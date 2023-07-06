@@ -2,6 +2,7 @@ local utils = require("rest-nvim.utils")
 local curl = require("plenary.curl")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
+local session = require("rest-nvim.session")
 
 local M = {}
 -- checks if 'x' can be executed by system()
@@ -71,7 +72,7 @@ end
 local function create_callback(curl_cmd, method, url, script_str)
   return function(res)
     if res.exit ~= 0 then
-      log.error("[rest.nvim] " .. utils.curl_error(res.exit))
+      log.error(utils.curl_error(res.exit))
       return
     end
     local res_bufnr = M.get_or_create_buf()
@@ -90,8 +91,12 @@ local function create_callback(curl_cmd, method, url, script_str)
         result = res,
         pretty_print = vim.pretty_print,
         json_decode = vim.fn.json_decode,
-        set_env = utils.set_env,
+        set_env = session.set_env,
+        -- TODO but one can set them
+        -- variables = utils.get_env_variables(),
       }
+      -- TODO should look into utils.get_env_variables for unknown variables
+      -- setmetatable(context, { __index = _G })
       local env = { context = context }
       setmetatable(env, { __index = _G })
       local f = load(script_str, nil, "bt", env)

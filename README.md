@@ -154,14 +154,11 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ## Contribute
 
-1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
-2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
-3. Commit your changes (<kbd>git commit -am 'Add some feature'</kbd>)
-4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
-5. Create a new Pull Request
+You can get into a development shell via `nix develop ./contrib`.
+To enable debug, `export DEBUG_PLENARY="debug"`
 
-To run the tests, enter a nix shell with `nix develop ./contrib`, then run `make
-test`.
+
+To run the tests, enter a nix shell with `nix run ./contrib#tests`.
 
 ## Related software
 
