@@ -17,6 +17,8 @@ end
 rest.run = function(verbose)
   local ok, result = request.get_current_request()
   if not ok then
+    log.error("Failed to run the http request:")
+    log.error(result)
     vim.api.nvim_err_writeln("[rest.nvim] Failed to get the current HTTP request: " .. result)
     return
   end
@@ -53,11 +55,19 @@ rest.run_file = function(filename, opts)
   return true
 end
 
+
+-- run will retrieve the required request information from the current buffer
+-- and then execute curl
+-- @param req table see validate_request to check the expected format
+-- @param opts table
+--           1. keep_going boolean keep running even when last request failed
 rest.run_request = function(req, opts)
   local result = req
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
-    { verbose = false }, -- defaults
+    { verbose = false,
+      highlight = false
+    }, -- defaults
     opts or {}
   )
 
@@ -81,7 +91,7 @@ rest.run_request = function(req, opts)
     LastOpts = Opts
   end
 
-  if config.get("highlight").enabled then
+  if opts.highlight then
     request.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
