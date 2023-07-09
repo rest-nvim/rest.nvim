@@ -165,6 +165,7 @@ test`.
 
 ## Related software
 
+- [vim-rest-console](https://github.com/diepm/vim-rest-console)
 - [Hurl](https://hurl.dev/)
 - [HTTPie](https://httpie.io/)
 - [httpYac](https://httpyac.github.io/)
