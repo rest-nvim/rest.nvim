@@ -5,6 +5,7 @@ local config = require("rest-nvim.config")
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
+-- @return tuple filename and whether we should inline it when invoking curl
 local function get_importfile_name(bufnr, start_line, stop_line)
   -- store old cursor position
   local oldpos = vim.fn.getcurpos()
@@ -17,10 +18,13 @@ local function get_importfile_name(bufnr, start_line, stop_line)
   if import_line > 0 then
     local fileimport_string
     local fileimport_line
+    local fileimport_inlined
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string =
-      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
-    return fileimport_string
+    -- check second char against '@' (meaning "dont inline")
+    fileimport_inlined = string.sub(fileimport_line[1], 2, 2) ~= '@'
+    fileimport_string = string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    return fileimport_inlined, fileimport_string
+
   end
   return nil
 end
@@ -35,10 +39,10 @@ end
 -- @return table { external = bool; filename_tpl or body_tpl; }
 local function get_body(bufnr, start_line, stop_line)
   -- first check if the body should be imported from an external file
-  local importfile = get_importfile_name(bufnr, start_line, stop_line)
+  local inline, importfile = get_importfile_name(bufnr, start_line, stop_line)
   local lines -- an array of strings
   if importfile ~= nil then
-    return { external = true, filename_tpl = importfile }
+    return { external = true; inline = inline; filename_tpl = importfile }
   else
     lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
   end
@@ -59,7 +63,7 @@ local function get_body(bufnr, start_line, stop_line)
     end
   end
 
-  return { external = false, body_tpl = lines2 }
+  return { external = false; inline = false; body_tpl = lines2 }
 end
 
 local function get_response_script(bufnr, start_line, stop_line)

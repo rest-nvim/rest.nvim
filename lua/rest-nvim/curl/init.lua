@@ -102,7 +102,7 @@ local function create_callback(curl_cmd, method, url, script_str)
 
     -- This can be quite verbose so let user control it
     if config.get("result").show_curl_command then
-      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { "Command :" .. curl_cmd })
+      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { "Command: " .. curl_cmd })
     end
 
     if config.get("result").show_url then
