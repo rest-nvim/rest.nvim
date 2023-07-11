@@ -1,21 +1,27 @@
-local request = require("rest-nvim.request")
+local backend = require("rest-nvim.request")
 local config = require("rest-nvim.config")
 local curl = require("rest-nvim.curl")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 
 local rest = {}
 local Opts = {}
-local LastOpts = {}
+local defaultRequestOpts = {
+    verbose = false,
+    highlight = false,
+    engine = 'classic'
+  }
 
+local LastOpts = {}
 rest.setup = function(user_configs)
   config.set(user_configs or {})
+
 end
 
 -- run will retrieve the required request information from the current buffer
 -- and then execute curl
 -- @param verbose toggles if only a dry run with preview should be executed (true = preview)
 rest.run = function(verbose)
-  local ok, result = request.get_current_request()
+  local ok, result = backend.get_current_request()
   if not ok then
     log.error("Failed to run the http request:")
     log.error(result)
@@ -31,27 +37,28 @@ end
 -- @param string filename to load
 -- @param opts table
 --           1. keep_going boolean keep running even when last request failed
+--           2. verbose boolean 
 rest.run_file = function(filename, opts)
   log.info("Running file :" .. filename)
-  local new_buf = vim.api.nvim_create_buf(false, false)
+  opts = vim.tbl_deep_extend(
+    "force", -- use value from rightmost map
+    defaultRequestOpts,
+    opts or {}
+  )
+
+  -- 0 on error or buffer handle
+  local new_buf = vim.api.nvim_create_buf(true, false)
 
   vim.api.nvim_win_set_buf(0, new_buf)
   vim.cmd.edit(filename)
-  local last_line = vim.fn.line("$")
 
-  -- reset cursor position
-  vim.fn.cursor(1, 1)
-  local curpos = vim.fn.getcurpos()
-  while curpos[2] <= last_line do
-    local ok, req = request.buf_get_request(new_buf, curpos)
-    if ok then
-      -- request.print_request(req)
-      curpos[2] = req.end_line + 1
-      rest.run_request(req, opts)
-    else
-      return false, req
-    end
+  local requests = backend.buf_list_requests(new_buf)
+  for _, req in pairs(requests) do
+    vim.pretty_print("Request:")
+    vim.pretty_print(req)
+    rest.run_request(req, opts)
   end
+
   return true
 end
 
@@ -62,12 +69,11 @@ end
 -- @param opts table
 --           1. keep_going boolean keep running even when last request failed
 rest.run_request = function(req, opts)
+  -- TODO rename result to req
   local result = req
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
-    { verbose = false,
-      highlight = false
-    }, -- defaults
+    defaultRequestOpts,
     opts or {}
   )
 
@@ -92,7 +98,7 @@ rest.run_request = function(req, opts)
   end
 
   if opts.highlight then
-    request.highlight(result.bufnr, result.start_line, result.end_line)
+    backend.highlight(result.bufnr, result.start_line, result.end_line)
   end
 
   local request_id = vim.loop.now()
@@ -127,7 +133,7 @@ rest.last = function()
   end
 
   if config.get("highlight").enabled then
-    request.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
+    backend.highlight(LastOpts.bufnr, LastOpts.start_line, LastOpts.end_line)
   end
 
   local success_req, req_err = pcall(curl.curl_cmd, LastOpts)
@@ -140,7 +146,7 @@ rest.last = function()
   end
 end
 
-rest.request = request
+rest.request = backend
 
 rest.select_env = function(path)
   if path ~= nil then

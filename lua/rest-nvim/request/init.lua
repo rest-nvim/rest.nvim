@@ -177,6 +177,7 @@ local function get_curl_args(bufnr, headers_end, end_line)
   local curl_args = {}
   local body_start = end_line
 
+  log.debug("Getting curl args between lines", headers_end, " and ", end_line)
   for line_number = headers_end, end_line do
     local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
@@ -397,6 +398,27 @@ M.stringify_request = function(req, opts)
 
   -- here we should just display the beginning of the request
   return (str)
+end
+
+M.buf_list_requests = function(buf, _opts)
+  local last_line = vim.fn.line("$")
+  local requests = {}
+
+  -- reset cursor position
+  vim.fn.cursor({1, 1})
+  local curpos = vim.fn.getcurpos()
+  log.debug("Listing requests for buf ", buf)
+  while curpos[2] <= last_line do
+    local ok, req = M.buf_get_request(buf, curpos)
+    if ok then
+      curpos[2] = req.end_line + 1
+      requests[#requests + 1] = req
+    else
+      break
+    end
+  end
+  -- log.debug("found " , #requests , "requests")
+  return requests
 end
 
 local select_ns = vim.api.nvim_create_namespace("rest-nvim")
