@@ -120,6 +120,9 @@ COMMANDS                                             *rest-nvim-usage-commands*
   Same as `RestNvim` but it returns the cURL command without executing the
   request. Intended for debugging purposes.
 
+- `:RestLog`
+  Shows `rest.nvim` logs (export DEBUG_PLENARY=debug for more logs).
+
 - `:RestSelectEnv path/to/env`
   Set the path to an env file.
 
