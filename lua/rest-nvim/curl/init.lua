@@ -1,4 +1,5 @@
 local utils = require("rest-nvim.utils")
+local spinner = require("rest-nvim.utils.spinner")
 local curl = require("plenary.curl")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
@@ -68,10 +69,11 @@ M.get_or_create_buf = function()
   return new_bufnr
 end
 
-local function create_callback(curl_cmd, method, url, script_str)
+local function create_callback(curl_cmd, method, url, script_str, stop_spinner)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
+      stop_spinner(true)
       return
     end
     local res_bufnr = M.get_or_create_buf()
@@ -219,6 +221,7 @@ local function create_callback(curl_cmd, method, url, script_str)
         content_type
       ))
     end
+    stop_spinner()
   end
 end
 
@@ -230,7 +233,7 @@ end
 M.curl_cmd = function(opts)
   -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
   -- otherwise it starts the request :/
-  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true } )
+  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true })
   local res = curl[opts.method](dry_run_opts)
   local curl_cmd = format_curl_cmd(res)
 
@@ -240,9 +243,13 @@ M.curl_cmd = function(opts)
     end
 
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
-    return
   else
-    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str))
+    local stop_spinner = spinner.start_spinner(opts.bufnr, opts.start_line - 1)
+    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str, stop_spinner))
+    opts.on_error = function(err)
+      vim.schedule(function() stop_spinner(true) end)
+      error(err.message)
+    end
     curl[opts.method](opts)
   end
 end
