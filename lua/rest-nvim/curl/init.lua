@@ -31,7 +31,6 @@ local function format_curl_cmd(res)
   return cmd
 end
 
-
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -230,7 +229,7 @@ end
 M.curl_cmd = function(opts)
   -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
   -- otherwise it starts the request :/
-  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true } )
+  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true })
   local res = curl[opts.method](dry_run_opts)
   local curl_cmd = format_curl_cmd(res)
 
@@ -242,7 +241,8 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str))
+    opts.callback =
+      vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str))
     curl[opts.method](opts)
   end
 end
