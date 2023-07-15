@@ -23,6 +23,7 @@ have to leave Neovim!
 
 ## Notices
 
+- **2023-07-12**: tagged 0.2 release before changes for 0.10 compatibility
 - **2021-11-04**: HTTP Tree-Sitter parser now depends on JSON parser for the JSON bodies detection,
   please install it too.
 - **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,

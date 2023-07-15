@@ -40,9 +40,9 @@ M.get_or_create_buf = function()
   local existing_bufnr = vim.fn.bufnr(tmp_name)
   if existing_bufnr ~= -1 then
     -- Set modifiable
-    vim.api.nvim_buf_set_option(existing_bufnr, "modifiable", true)
+    vim.api.nvim_set_option_value(existing_bufnr, "modifiable", true)
     -- Prevent modified flag
-    vim.api.nvim_buf_set_option(existing_bufnr, "buftype", "nofile")
+    vim.api.nvim_set_option_value(existing_bufnr, "buftype", "nofile")
     -- Delete buffer content
     vim.api.nvim_buf_set_lines(
       existing_bufnr,
@@ -53,7 +53,7 @@ M.get_or_create_buf = function()
     )
 
     -- Make sure the filetype of the buffer is httpResult so it will be highlighted
-    vim.api.nvim_buf_set_option(existing_bufnr, "ft", "httpResult")
+    vim.api.nvim_set_option_value("ft", "httpResult", { buf = existing_bufnr } )
 
     return existing_bufnr
   end
@@ -61,8 +61,9 @@ M.get_or_create_buf = function()
   -- Create new buffer
   local new_bufnr = vim.api.nvim_create_buf(false, "nomodeline")
   vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
-  vim.api.nvim_buf_set_option(new_bufnr, "ft", "httpResult")
-  vim.api.nvim_buf_set_option(new_bufnr, "buftype", "nofile")
+  vim.api.nvim_set_option_value("ft", "httpResult", { buf = new_bufnr })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
+
 
   return new_bufnr
 end
@@ -194,7 +195,7 @@ local function create_callback(curl_cmd, method, url, script_str)
       end
       vim.cmd(cmd_split .. res_bufnr)
       -- Set unmodifiable state
-      vim.api.nvim_buf_set_option(res_bufnr, "modifiable", false)
+      vim.api.nvim_set_option_value("modifiable", false, { buf = res_bufnr })
     end
 
     -- Send cursor in response buffer to start
