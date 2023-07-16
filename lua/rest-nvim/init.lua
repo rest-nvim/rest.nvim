@@ -18,6 +18,7 @@ rest.setup = function(user_configs)
   config.set(user_configs or {})
 end
 
+
 -- run will retrieve the required request information from the current buffer
 -- and then execute curl
 -- @param verbose toggles if only a dry run with preview should be executed (true = preview)
@@ -145,13 +146,22 @@ end
 rest.run_request = function(req, opts)
   -- TODO rename result to request
   local result = req
+  local curl_raw_args = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
+      or result.raw
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
     defaultRequestOpts,
     opts or {}
   )
 
-  -- body =
+  -- if we want to pass as a file, we pass nothing to plenary
+  local spliced_body = nil
+  if not req.body.inline and req.body.filename_tpl then
+    curl_raw_args = vim.tbl_extend("force", curl_raw_args, {
+      '--data-binary', '@'..load_external_payload(req.body.filename_tpl)})
+  else
+    spliced_body = splice_body(result.headers, result.body)
+  end
 
   Opts = {
     method = result.method:lower(),
@@ -159,9 +169,8 @@ rest.run_request = function(req, opts)
     -- plenary.curl can't set http protocol version
     -- http_version = result.http_version,
     headers = splice_headers(result.headers),
-    raw = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
-      or result.raw,
-    body = splice_body(result.headers, result.body),
+    raw = curl_raw_args,
+    body = spliced_body,
     dry_run = opts.verbose,
     bufnr = result.bufnr,
     start_line = result.start_line,

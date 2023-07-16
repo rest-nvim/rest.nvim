@@ -153,6 +153,13 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ---
 
+### Debug
+
+
+Run `export DEBUG_PLENARY="debug"` before starting nvim. Logs will appear most
+likely in ~/.cache/nvim/rest.nvim.log
+
+
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
