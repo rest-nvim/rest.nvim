@@ -397,8 +397,7 @@ M.highlight = function(bufnr, start_line, end_line)
     higroup,
     { start_line - 1, 0 },
     { end_line - 1, end_column },
-    "c",
-    false
+    { regtype = "c"; inclusive = false }
   )
 
   vim.defer_fn(function()

@@ -40,9 +40,9 @@ M.get_or_create_buf = function()
   local existing_bufnr = vim.fn.bufnr(tmp_name)
   if existing_bufnr ~= -1 then
     -- Set modifiable
-    vim.api.nvim_set_option_value(existing_bufnr, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = existing_bufnr})
     -- Prevent modified flag
-    vim.api.nvim_set_option_value(existing_bufnr, "buftype", "nofile")
+    vim.api.nvim_set_option_value("buftype", "nofile", { buf = existing_bufnr})
     -- Delete buffer content
     vim.api.nvim_buf_set_lines(
       existing_bufnr,
@@ -59,7 +59,7 @@ M.get_or_create_buf = function()
   end
 
   -- Create new buffer
-  local new_bufnr = vim.api.nvim_create_buf(false, "nomodeline")
+  local new_bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
   vim.api.nvim_set_option_value("ft", "httpResult", { buf = new_bufnr })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
