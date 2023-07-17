@@ -15,6 +15,22 @@ local function is_executable(x)
   return false
 end
 
+local function format_curl_cmd(res)
+  local cmd = "curl"
+
+  for _, value in pairs(res) do
+    if string.sub(value, 1, 1) == "-" then
+      cmd = cmd .. " " .. value
+    else
+      cmd = cmd .. " '" .. value .. "'"
+    end
+  end
+
+  -- remote -D option
+  cmd = string.gsub(cmd, "-D '%S+' ", "")
+  return cmd
+end
+
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -24,9 +40,9 @@ M.get_or_create_buf = function()
   local existing_bufnr = vim.fn.bufnr(tmp_name)
   if existing_bufnr ~= -1 then
     -- Set modifiable
-    vim.api.nvim_buf_set_option(existing_bufnr, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = existing_bufnr })
     -- Prevent modified flag
-    vim.api.nvim_buf_set_option(existing_bufnr, "buftype", "nofile")
+    vim.api.nvim_set_option_value("buftype", "nofile", { buf = existing_bufnr })
     -- Delete buffer content
     vim.api.nvim_buf_set_lines(
       existing_bufnr,
@@ -37,21 +53,21 @@ M.get_or_create_buf = function()
     )
 
     -- Make sure the filetype of the buffer is httpResult so it will be highlighted
-    vim.api.nvim_buf_set_option(existing_bufnr, "ft", "httpResult")
+    vim.api.nvim_set_option_value("ft", "httpResult", { buf = existing_bufnr })
 
     return existing_bufnr
   end
 
   -- Create new buffer
-  local new_bufnr = vim.api.nvim_create_buf(false, "nomodeline")
+  local new_bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
-  vim.api.nvim_buf_set_option(new_bufnr, "ft", "httpResult")
-  vim.api.nvim_buf_set_option(new_bufnr, "buftype", "nofile")
+  vim.api.nvim_set_option_value("ft", "httpResult", { buf = new_bufnr })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
 
   return new_bufnr
 end
 
-local function create_callback(method, url, script_str, req_var)
+local function create_callback(curl_cmd, method, url, script_str, req_var)
   return function(res)
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
@@ -63,7 +79,7 @@ local function create_callback(method, url, script_str, req_var)
     -- get content type
     for _, header in ipairs(res.headers) do
       if string.lower(header):find("^content%-type") then
-        content_type = header:match("application/(%l+)") or header:match("text/(%l+)")
+        content_type = header:match("application/([-a-z]+)") or header:match("text/(%l+)")
         break
       end
     end
@@ -81,6 +97,11 @@ local function create_callback(method, url, script_str, req_var)
       if f ~= nil then
         f()
       end
+    end
+
+    -- This can be quite verbose so let user control it
+    if config.get("result").show_curl_command then
+      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { "Command: " .. curl_cmd })
     end
 
     if config.get("result").show_url then
@@ -157,9 +178,15 @@ local function create_callback(method, url, script_str, req_var)
     end
 
     -- append response container
-    res.body = "#+RESPONSE\n" .. res.body .. "\n#+END"
+    local buf_content = "#+RESPONSE\n"
+    if utils.is_binary_content_type(content_type) then
+      buf_content = buf_content .. "Binary answer"
+    else
+      buf_content = buf_content .. res.body
+    end
+    buf_content = buf_content .. "\n#+END"
 
-    local lines = utils.split(res.body, "\n")
+    local lines = utils.split(buf_content, "\n")
     local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
     vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
 
@@ -174,7 +201,7 @@ local function create_callback(method, url, script_str, req_var)
       end
       vim.cmd(cmd_split .. res_bufnr)
       -- Set unmodifiable state
-      vim.api.nvim_buf_set_option(res_bufnr, "modifiable", false)
+      vim.api.nvim_set_option_value("modifiable", false, { buf = res_bufnr })
     end
 
     -- Send cursor in response buffer to start
@@ -201,32 +228,19 @@ local function create_callback(method, url, script_str, req_var)
   end
 end
 
-local function format_curl_cmd(res)
-  local cmd = "curl"
-
-  for _, value in pairs(res) do
-    if string.sub(value, 1, 1) == "-" then
-      cmd = cmd .. " " .. value
-    else
-      cmd = cmd .. " '" .. value .. "'"
-    end
-  end
-
-  -- remote -D option
-  cmd = string.gsub(cmd, "-D '%S+' ", "")
-  return cmd
-end
-
 -- curl_cmd runs curl with the passed options, gets or creates a new buffer
 -- and then the results are printed to the recently obtained/created buffer
 -- @param opts (table) curl arguments:
 --           - yank_dry_run (boolean): displays the command
 --           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
-  if opts.dry_run then
-    local res = curl[opts.method](opts)
-    local curl_cmd = format_curl_cmd(res)
+  -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
+  -- otherwise it starts the request :/
+  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true })
+  local res = curl[opts.method](dry_run_opts)
+  local curl_cmd = format_curl_cmd(res)
 
+  if opts.dry_run then
     if config.get("yank_dry_run") then
       vim.cmd("let @+=" .. string.format("%q", curl_cmd))
     end
@@ -234,8 +248,9 @@ M.curl_cmd = function(opts)
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
     return
   else
-    opts.callback =
-      vim.schedule_wrap(create_callback(opts.method, opts.url, opts.script_str, opts.req_var))
+    opts.callback = vim.schedule_wrap(
+      create_callback(curl_cmd, opts.method, opts.url, opts.script_str, opts.req_var)
+    )
     curl[opts.method](opts)
   end
 end

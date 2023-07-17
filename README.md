@@ -23,6 +23,7 @@ have to leave Neovim!
 
 ## Notices
 
+- **2023-07-12**: tagged 0.2 release before changes for 0.10 compatibility
 - **2021-11-04**: HTTP Tree-Sitter parser now depends on JSON parser for the JSON bodies detection,
   please install it too.
 - **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,
@@ -77,6 +78,9 @@ use {
       result = {
         -- toggle showing URL, HTTP info, headers at top the of result window
         show_url = true,
+        -- show the generated curl command in case you want to launch
+        -- the same request via the terminal (can be verbose)
+        show_curl_command = false,
         show_http_info = true,
         show_headers = true,
         -- executables or functions for formatting response body [optional]
@@ -149,6 +153,13 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ---
 
+### Debug
+
+
+Run `export DEBUG_PLENARY="debug"` before starting nvim. Logs will appear most
+likely in ~/.cache/nvim/rest.nvim.log
+
+
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
@@ -162,6 +173,7 @@ test`.
 
 ## Related software
 
+- [vim-rest-console](https://github.com/diepm/vim-rest-console)
 - [Hurl](https://hurl.dev/)
 - [HTTPie](https://httpie.io/)
 - [httpYac](https://httpyac.github.io/)

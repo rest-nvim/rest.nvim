@@ -21,6 +21,7 @@ CONTENTS                                                   *rest-nvim-contents*
         3. Import body from external file......|rest-nvim-usage-external-files|
         4. Environment Variables........|rest-nvim-usage-environment-variables|
         5. Dynamic Variables................|rest-nvim-usage-dynamic-variables|
+        6. Callbacks................................|rest-nvim-usage-callbacks|
     5. Known issues..........................................|rest-nvim-issues|
     6. License..............................................|rest-nvim-license|
     7. Contributing....................................|rest-nvim-contributing|
@@ -118,6 +119,9 @@ COMMANDS                                             *rest-nvim-usage-commands*
 - `<Plug>RestNvimPreview`
   Same as `RestNvim` but it returns the cURL command without executing the
   request. Intended for debugging purposes.
+
+- `:RestLog`
+  Shows `rest.nvim` logs (export DEBUG_PLENARY=debug for more logs).
 
 - `:RestSelectEnv path/to/env`
   Set the path to an env file.
@@ -219,6 +223,22 @@ You can extend or overwrite built-in dynamic variables, with the config key
 `    end,`
 `  },`
 `})`
+
+===============================================================================
+CALLBACKS                                             *rest-nvim-usage-callbacks*
+
+rest.nvim fires different events upon requests:
+   - a User RestStartRequest event when launching the request
+   - a User RestStopRequest event when the requests finishes or errors out
+
+vim.api.nvim_create_autocmd("User", {
+pattern = "RestStartRequest",
+once = true,
+  callback = function(opts)
+     print("IT STARTED")
+     vim.pretty_print(opts)
+  end,
+})
 
 
 ===============================================================================

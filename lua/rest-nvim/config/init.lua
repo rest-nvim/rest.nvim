@@ -10,6 +10,7 @@ local config = {
     timeout = 150,
   },
   result = {
+    show_curl_command = true,
     show_url = true,
     show_http_info = true,
     show_headers = true,
