@@ -163,7 +163,7 @@ rest.run_request = function(req, opts)
   end
 
   Opts = {
-    request_id = vim.loop.now(), --random request id used to correlate RestStartRequest and RestStopRequest events
+    request_id = vim.loop.now(), -- request id used to correlate RestStartRequest and RestStopRequest events
     method = result.method:lower(),
     url = result.url,
     -- plenary.curl can't set http protocol version

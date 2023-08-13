@@ -50,7 +50,7 @@ end
 local function create_error_handler(opts)
   return function(err)
     send_curl_stop_event(vim.tbl_extend("keep", { err = err }, opts))
-    vim.notify(vim.inspect(err.message), vim.log.levels.ERROR)
+    error(err.message)
   end
 end
 
