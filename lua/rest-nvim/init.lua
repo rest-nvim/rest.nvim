@@ -45,6 +45,7 @@ rest.run_file = function(filename, opts)
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
     defaultRequestOpts,
+    { highlight = config.get("highlight").enabled },
     opts or {}
   )
 
@@ -151,6 +152,7 @@ rest.run_request = function(req, opts)
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
     defaultRequestOpts,
+    { highlight = config.get("highlight").enabled },
     opts or {}
   )
 
