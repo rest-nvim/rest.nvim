@@ -75,14 +75,9 @@ local function create_callback(curl_cmd, method, url, script_str)
       return
     end
     local res_bufnr = M.get_or_create_buf()
-    local content_type = nil
-
-    -- get content type
-    for _, header in ipairs(res.headers) do
-      if string.lower(header):find("^content%-type") then
-        content_type = header:match("application/([-a-z]+)") or header:match("text/(%l+)")
-        break
-      end
+    local content_type = res.headers[utils.key(res.headers,'content-type')]
+    if content_type then
+      content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
     end
 
     if script_str ~= nil then

@@ -107,6 +107,7 @@ M.get_file_variables = function()
   end
   return variables
 end
+
 -- Gets the variables from the currently selected env_file
 M.get_env_variables = function()
   local variables = {}
@@ -284,6 +285,19 @@ M.has_value = function(tbl, str)
     end
   end
   return false
+end
+
+-- key returns the provided table's key that matches the given case-insensitive pattern.
+-- if not found, return the given key.
+-- @param tbl Table to iterate over
+-- @param key The key to be searched in the table
+M.key = function(tbl, key)
+  for tbl_key, _ in pairs(tbl) do
+    if string.lower(tbl_key) == string.lower(key) then
+      return tbl_key
+    end
+  end
+  return key
 end
 
 -- tbl_to_str recursively converts the provided table into a json string
