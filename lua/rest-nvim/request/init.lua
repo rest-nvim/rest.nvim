@@ -121,7 +121,7 @@ local function get_headers(bufnr, start_line, end_line)
   for line_number = start_line + 1, end_line do
     local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
-    -- message header and message body are seperated by CRLF (see RFC 2616)
+    -- message header and message body are separated by CRLF (see RFC 2616)
     -- for our purpose also the next request line will stop the header search
     if is_request_line(line_content) or line_content == "" then
       headers_end = line_number
@@ -185,7 +185,7 @@ end
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
 -- of the current request and returns the linenumber of this request line.
 -- The current request is defined as the next request line above the cursor
--- @param bufnr The buffer nummer of the .http-file
+-- @param bufnr The buffer number of the .http-file
 -- @param linenumber (number) From which line to start looking
 local function start_request(bufnr, linenumber)
   log.debug("Searching pattern starting from " .. linenumber)
@@ -202,7 +202,7 @@ end
 
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
--- @param bufnr The buffer nummer of the .http-file
+-- @param bufnr The buffer number of the .http-file
 local function end_request(bufnr, linenumber)
   -- store old cursor position
   local oldlinenumber = linenumber
