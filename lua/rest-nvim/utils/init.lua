@@ -4,6 +4,7 @@ local random = math.random
 math.randomseed(os.time())
 
 local M = {}
+local contexts = {}
 
 M.binary_content_types = {
   "octet-stream",
@@ -28,6 +29,16 @@ M.set_env = function(key, value)
   local variables = M.get_env_variables()
   variables[key] = value
   M.write_env_file(variables)
+end
+
+-- set_context sets a context variable for the current file
+-- @param key The key to set
+-- @param value The value to set
+M.set_context = function(key, value)
+  local env_file = "/" .. (config.get("env_file") or ".env")
+  local context = contexts[env_file] or {}
+  context[key] = value
+  contexts[env_file] = context
 end
 
 M.write_env_file = function(variables)
@@ -141,6 +152,11 @@ M.get_env_variables = function()
   return variables
 end
 
+M.get_context_variables = function()
+  local env_file = "/" .. (config.get("env_file") or ".env")
+  return contexts[env_file] or {}
+end
+
 -- get_variables Reads the environment variables found in the env_file option
 -- (defualt: .env) specified in configuration or from the files being read
 -- with variables beginning with @ and returns a table with the variables
@@ -228,10 +244,11 @@ end
 
 M.read_variables = function()
   local first = M.get_variables()
-  local second = M.read_dynamic_variables()
-  local third = M.read_document_variables()
+  local second = M.get_context_variables()
+  local third = M.read_dynamic_variables()
+  local fourth = M.read_document_variables()
 
-  return vim.tbl_extend("force", first, second, third)
+  return vim.tbl_extend("force", first, second, third, fourth)
 end
 
 -- replace_vars replaces the env variables fields in the provided string

@@ -91,6 +91,7 @@ local function create_callback(curl_cmd, method, url, script_str)
         pretty_print = vim.pretty_print,
         json_decode = vim.fn.json_decode,
         set_env = utils.set_env,
+        set = utils.set_context,
       }
       local env = { context = context }
       setmetatable(env, { __index = _G })
