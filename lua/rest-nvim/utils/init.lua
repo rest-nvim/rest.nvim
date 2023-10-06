@@ -158,7 +158,7 @@ M.get_context_variables = function()
 end
 
 -- get_variables Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration or from the files being read
+-- (default: .env) specified in configuration or from the files being read
 -- with variables beginning with @ and returns a table with the variables
 M.get_variables = function()
   local variables = {}
@@ -418,7 +418,7 @@ M.http_status = function(code)
     [200] = "OK",
     [201] = "Created",
     [202] = "Accepted",
-    [203] = "Non-authorative Information",
+    [203] = "Non-authoritative Information",
     [204] = "No Content",
     [205] = "Reset Content",
     [206] = "Partial Content",
@@ -552,7 +552,7 @@ M.curl_error = function(code)
     [63] = "Maximum file size exceeded.",
     [64] = "Requested FTP SSL level failed.",
     [65] = "Sending the data requires a rewind that failed.",
-    [66] = "Failed to initialise SSL Engine.",
+    [66] = "Failed to initialize SSL Engine.",
     [67] = "The user name, password, or similar was not accepted and curl failed to log in.",
     [68] = "File not found on TFTP server.",
     [69] = "Permission problem on TFTP server.",

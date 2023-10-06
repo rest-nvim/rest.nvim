@@ -199,7 +199,7 @@ DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
 
 `rest.nvim` allows the use of dynamic variables in requests.
 
-The following dynamic variables are currenty supported:
+The following dynamic variables are currently supported:
     - $uuid: generates a universally unique identifier (UUID-v4)
     - $timestamp: generates the current UNIX timestamp (seconds since epoch)
     - $randomInt: generates a random integer between 0 and 1000
