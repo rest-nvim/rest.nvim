@@ -51,44 +51,44 @@ FEATURES                                                   *rest-nvim-features*
 QUICK START                                             *rest-nvim-quick-start*
 
 After installing `rest.nvim` you will need to configure it using a `setup`
-function, it looks like this by default:
+function, it looks like this by default: >lua
 
-`require("rest-nvim").setup({`
-`  -- Open request results in a horizontal split`
-`  result_split_horizontal = false,`
-` -- Keep the http file buffer above|left when split horizontal|vertical
-` result_split_in_place = false,
-`  -- Skip SSL verification, useful for unknown certificates`
-`  skip_ssl_verification = false,`
-`  -- Highlight request on run`
-`  highlight = {`
-`      enabled = true,`
-`      timeout = 150,`
-`  },`
-`  -- Jump to request line on run`
-`  jump_to_request = false,`
-`  env_file = '.env',`
-`  yank_dry_run = true,`
-`})`
+    require("rest-nvim").setup({
+      -- Open request results in a horizontal split
+      result_split_horizontal = false,
+     -- Keep the http file buffer above|left when split horizontal|vertical
+     result_split_in_place = false,
+      -- Skip SSL verification, useful for unknown certificates
+      skip_ssl_verification = false,
+      -- Highlight request on run
+      highlight = {
+	  enabled = true,
+	  timeout = 150,
+      },
+      -- Jump to request line on run
+      jump_to_request = false,
+      env_file = '.env',
+      yank_dry_run = true,
+    })
 
 In this section we will be using `https://reqres.in/` for requests.
 
 Let's say we want to create a new user and send our body as a JSON, so we
 will do the following:
 
-    1. We declare the HTTP method to use followed by the URL.
-       `POST https://reqres.in/api/users`
-
+    1. We declare the HTTP method to use followed by the URL. >lua
+       POST https://reqres.in/api/users
+<
     2. Since we want to send our body as a JSON object, we set the
-       Content-Type header.
-       `Content-Type: application/json`
-
-    3. Now, we set the body of our request.
-       `{`
-       `    "name": "morpheus",`
-       `    "job": "leader"`
-       `}`
-
+       Content-Type header. >http
+       Content-Type: application/json
+<
+    3. Now, we set the body of our request. >json
+       {
+           "name": "morpheus",
+           "job": "leader"
+       }
+<
     4. Finally, we place the cursor over or below the method of our request 
        and call `rest.nvim` with `:lua require('rest-nvim').run()`.
 
@@ -175,25 +175,25 @@ the body and wrapped in {% script %}. A context table is avaliable in the
 response script. The context table can be used to read the response and set
 environment variables. 
 
-The context table:
-`{`
-`  result = res,`
-`  pretty_print = vim.pretty_print,`
-`  json_decode = vim.fn.json_decode,`
-`  set_env = utils.set_env,`
-`}`
-
+The context table: >lua
+    {
+      result = res,
+      pretty_print = vim.pretty_print,
+      json_decode = vim.fn.json_decode,
+      set_env = utils.set_env,
+    }
+<
 Now environment variables can be set like so:
- 
-`GET https://jsonplaceholder.typicode.com/posts/3`
-` `
-`{%` 
-` `
-`local body = context.json_decode(context.result.body)`
-`context.set_env("postId", body.id)`
-` `
-`%}`
-
+>
+    GET https://jsonplaceholder.typicode.com/posts/3
+     
+    {% 
+     
+    local body = context.json_decode(context.result.body)
+    context.set_env("postId", body.id)
+     
+    %}
+<
 ===============================================================================
 DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
 
@@ -207,40 +207,39 @@ The following dynamic variables are currently supported:
 To use dynamic variables, the following syntax is used: `{{DYNAMIC_VARIABLE}}`, 
 e.g. `{{$uuid}}`
 
-You can extend or overwrite built-in dynamic variables, with the config key
-`custom_dynamic_variables`:
+You can extend or overwrite built-in dynamic variables, with the config key >lua
 
-`require("rest-nvim").setup({`
-`  custom_dynamic_variables = {`
-`    -- overwrite built-in`
-`    ['$uuid'] = function()`
-`      return "{{$uuid}}"`
-`    end,`
-`    -- add new dynamic variable function`
-`    ["$date"] = function()`
-`      local os_date = os.date('%Y-%m-%d')`
-`      return os_date`
-`    end,`
-`  },`
-`})`
+    -- custom_dynamic_variables:
+    require("rest-nvim").setup({
+      custom_dynamic_variables = {
+        -- overwrite built-in
+        ['$uuid'] = function()
+          return "{{$uuid}}"
+        end,
+        -- add new dynamic variable function
+        ["$date"] = function()
+          local os_date = os.date('%Y-%m-%d')
+          return os_date
+        end,
+      },
+    })
 
 ===============================================================================
 CALLBACKS                                             *rest-nvim-usage-callbacks*
 
 rest.nvim fires different events upon requests:
    - a User RestStartRequest event when launching the request
-   - a User RestStopRequest event when the requests finishes or errors out
+   - a User RestStopRequest event when the requests finishes or errors out >lua
 
-vim.api.nvim_create_autocmd("User", {
-pattern = "RestStartRequest",
-once = true,
-  callback = function(opts)
-     print("IT STARTED")
-     vim.pretty_print(opts)
-  end,
-})
-
-
+    vim.api.nvim_create_autocmd("User", {
+    pattern = "RestStartRequest",
+    once = true,
+      callback = function(opts)
+	 print("IT STARTED")
+	 vim.pretty_print(opts)
+      end,
+    })
+<
 ===============================================================================
 KNOWN ISSUES                                                 *rest-nvim-issues*
 
