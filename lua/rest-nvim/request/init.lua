@@ -286,12 +286,9 @@ M.buf_get_request = function(bufnr, curpos)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  if headers["host"] ~= nil then
-    headers["host"] = headers["host"]:gsub("%s+", "")
-    headers["host"] = string.gsub(headers["host"], "%s+", "")
-    parsed_url.url = headers["host"] .. parsed_url.url
-    headers["host"] = nil
-  end
+  local host = headers[utils.key(headers,"host")] or ""
+  parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
+  headers[utils.key(headers,"host")] = nil
 
   local body = get_body(bufnr, body_start, end_line)
 

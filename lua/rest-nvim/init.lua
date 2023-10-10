@@ -101,13 +101,7 @@ local function splice_body(headers, payload)
   else
     lines = payload.body_tpl
   end
-  local content_type = ""
-  for key, val in pairs(headers) do
-    if string.lower(key) == "content-type" then
-      content_type = val
-      break
-    end
-  end
+  local content_type = headers[utils.key(headers,"content-type")] or ""
   local has_json = content_type:find("application/[^ ]*json")
 
   local body = ""
