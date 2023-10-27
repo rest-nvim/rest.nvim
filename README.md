@@ -102,6 +102,21 @@ use {
 }
 ```
 
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+-- plugins/rest.lua
+return {
+   "rest-nvim/rest.nvim",
+   dependencies = { { "nvim-lua/plenary.nvim" } },
+   config = function()
+     require("rest-nvim").setup({
+       --- Get the same options from Packer setup
+    })
+  end
+}
+```
+
 ### Tree-Sitter parser
 
 We are using a Tree-Sitter parser for our HTTP files, in order to get the correct syntax highlighting
