@@ -193,7 +193,7 @@ local function start_request(bufnr, linenumber)
   local oldlinenumber = linenumber
   utils.move_cursor(bufnr, linenumber)
 
-  local res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn")
+  local res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "bcnW")
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
 
@@ -206,20 +206,19 @@ end
 local function end_request(bufnr, linenumber)
   -- store old cursor position
   local oldlinenumber = linenumber
+  local last_line = vim.fn.line("$")
 
   -- start searching for next request from the next line
   -- as the current line does contain the current, not the next request
-  if linenumber < vim.fn.line("$") then
+  if linenumber < last_line then
     linenumber = linenumber + 1
   end
   utils.move_cursor(bufnr, linenumber)
 
-  local next =
-    vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn", vim.fn.line("$"))
+  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cnW")
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
-  local last_line = vim.fn.line("$")
 
   if next == 0 or (oldlinenumber == last_line) then
     return last_line
