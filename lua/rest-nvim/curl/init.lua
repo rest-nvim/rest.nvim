@@ -241,7 +241,11 @@ local function create_callback(curl_cmd, opts)
       if config.get("result_split_in_place") then
         cmd_split = [[bel ]] .. cmd_split
       end
-      vim.cmd(cmd_split .. res_bufnr)
+      if config.get("stay_in_current_window_after_split") then
+        vim.cmd(cmd_split .. res_bufnr .. " | wincmd p")
+      else
+        vim.cmd(cmd_split .. res_bufnr)
+      end
       -- Set unmodifiable state
       vim.api.nvim_set_option_value("modifiable", false, { buf = res_bufnr })
     end

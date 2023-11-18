@@ -3,6 +3,7 @@ local M = {}
 local config = {
   result_split_horizontal = false,
   result_split_in_place = false,
+  stay_in_current_window_after_split = false,
   skip_ssl_verification = false,
   encode_url = true,
   highlight = {
