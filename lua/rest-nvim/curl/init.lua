@@ -54,6 +54,19 @@ local function create_error_handler(opts)
   end
 end
 
+local function parse_headers(headers)
+  local parsed = {}
+  for _, header in ipairs(headers) do
+    if header ~= "" then
+      local key, value = header:match("([^:]+):%s*(.*)")
+      if key then
+        parsed[key] = value or ""
+      end
+    end
+  end
+  return parsed
+end
+
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
@@ -103,6 +116,8 @@ local function create_callback(curl_cmd, opts)
       return
     end
     local res_bufnr = M.get_or_create_buf()
+    local header_lines = res.headers
+    res.headers = parse_headers(res.headers)
     local content_type = res.headers[utils.key(res.headers,'content-type')]
     if content_type then
       content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
@@ -154,9 +169,9 @@ local function create_callback(curl_cmd, opts)
       vim.api.nvim_buf_set_lines(
         res_bufnr,
         line_count + 1,
-        line_count + 1 + #res.headers,
+        line_count + 1 + #header_lines,
         false,
-        res.headers
+        header_lines
       )
     end
 
