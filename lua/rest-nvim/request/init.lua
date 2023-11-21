@@ -21,10 +21,10 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     local fileimport_inlined
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     -- check second char against '@' (meaning "dont inline")
-    fileimport_inlined = string.sub(fileimport_line[1], 2, 2) ~= '@'
-    fileimport_string = string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    fileimport_inlined = string.sub(fileimport_line[1], 2, 2) ~= "@"
+    fileimport_string =
+      string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     return fileimport_inlined, fileimport_string
-
   end
   return nil
 end
@@ -42,7 +42,7 @@ local function get_body(bufnr, start_line, stop_line)
   local inline, importfile = get_importfile_name(bufnr, start_line, stop_line)
   local lines -- an array of strings
   if importfile ~= nil then
-    return { external = true; inline = inline; filename_tpl = importfile }
+    return { external = true, inline = inline, filename_tpl = importfile }
   else
     lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
   end
@@ -63,7 +63,7 @@ local function get_body(bufnr, start_line, stop_line)
     end
   end
 
-  return { external = false; inline = false; body_tpl = lines2 }
+  return { external = false, inline = false, body_tpl = lines2 }
 end
 
 local function get_response_script(bufnr, start_line, stop_line)
@@ -285,9 +285,9 @@ M.buf_get_request = function(bufnr, curpos)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  local host = headers[utils.key(headers,"host")] or ""
+  local host = utils.get_value(headers, "host") or ""
   parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
-  headers[utils.key(headers,"host")] = nil
+  headers[utils.key(headers, "host")] = nil
 
   local body = get_body(bufnr, body_start, end_line)
 
@@ -302,17 +302,17 @@ M.buf_get_request = function(bufnr, curpos)
   end
 
   local req = {
-      method = parsed_url.method,
-      url = parsed_url.url,
-      http_version = parsed_url.http_version,
-      headers = headers,
-      raw = curl_args,
-      body = body,
-      bufnr = bufnr,
-      start_line = start_line,
-      end_line = end_line,
-      script_str = script_str,
-    }
+    method = parsed_url.method,
+    url = parsed_url.url,
+    http_version = parsed_url.http_version,
+    headers = headers,
+    raw = curl_args,
+    body = body,
+    bufnr = bufnr,
+    start_line = start_line,
+    end_line = end_line,
+    script_str = script_str,
+  }
 
   return true, req
 end
@@ -393,7 +393,7 @@ M.highlight = function(bufnr, start_line, end_line)
     higroup,
     { start_line - 1, 0 },
     { end_line - 1, end_column },
-    { regtype = "c"; inclusive = false }
+    { regtype = "c", inclusive = false }
   )
 
   vim.defer_fn(function()

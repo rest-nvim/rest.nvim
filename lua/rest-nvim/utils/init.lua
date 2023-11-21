@@ -182,7 +182,7 @@ M.get_variables = function()
       if variables[name]:match(oname) then
         -- Add that into the variable
         -- I.E if @url={{path}}:{{port}}/{{source}}
-        -- Substitue in path, port and source
+        -- Substitute in path, port and source
         variables[name] = variables[name]:gsub("{{" .. oname .. "}}", ovalue)
       end
     end
@@ -317,6 +317,16 @@ M.key = function(tbl, key)
   return key
 end
 
+--- Get the table value or nil if not found
+---
+--- @param tbl (table) Table to iterate over
+--- @param key (string) The key to the value case insensitive
+---
+--- @return any
+M.get_value = function(tbl, key)
+  return tbl[M.key(tbl, key)]
+end
+
 -- tbl_to_str recursively converts the provided table into a json string
 -- @param tbl Table to convert into a String
 -- @param json If the string should use a key:value syntax
@@ -415,6 +425,97 @@ end
 -- @return number
 M.contains_comments = function(str)
   return str:find("^#") or str:find("^%s+#")
+end
+
+--- Filter a table and return filtered copy
+---
+--- @param tbl table The table to filter
+--- @param filter function The filtering function, parameters are value, key and table
+--- @param preserve_keys boolean? Should the copied table preserve keys or not, default true
+---
+--- @return List|table
+M.filter = function(tbl, filter, preserve_keys)
+  local out = {}
+
+  preserve_keys = preserve_keys and true
+
+  for key, val in ipairs(tbl) do
+    if filter(val, key, tbl) then
+      if preserve_keys then
+        out[key] = val
+      else
+        table.insert(out, val)
+      end
+    end
+  end
+
+  return out
+end
+
+--- Make a copy of the table applying the transformation function to each element.
+--- Does not preserve the keys of the original table.
+---
+--- @param tbl table The table to filter
+--- @param transform function The transformation function, parameters are value, key and table
+---
+--- @return List
+M.map = function(tbl, transform)
+  local out = {}
+
+  for key, val in ipairs(tbl) do
+    table.insert(out, transform(val, key, tbl))
+  end
+
+  return out
+end
+
+--- Wrapper around nvim_buf_set_lines
+---
+--- @param buffer integer The target buffer
+--- @param block List The list of lines to write
+--- @param newline boolean? Add a newline to the end, default false
+---
+--- @return nil
+M.write_block = function(buffer, block, newline)
+  local content = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+  local first_line = false
+
+  if #content == 1 and content[1] == "" then
+    first_line = true
+  end
+
+  vim.api.nvim_buf_set_lines(buffer, first_line and 0 or -1, -1, false, block)
+
+  if newline then
+    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, { "" })
+  end
+end
+
+--- Split table on the elements where the function returns true
+---
+--- @param tbl List
+--- @param index function
+--- @param inclusive boolean? If true the split value is in the first table, default false
+---
+--- @return List[]
+M.split_list = function(tbl, index, inclusive)
+  local out = { {} }
+
+  for key, val in ipairs(tbl) do
+    if index(val, key, tbl) then
+      table.insert(out, {})
+
+      if inclusive then
+        table.insert(out[#out - 1], val)
+      else
+        table.insert(out[#out], val)
+      end
+    else
+      table.insert(out[#out], val)
+    end
+  end
+
+  return out
 end
 
 -- http_status returns the status code and the meaning, e.g. 200 OK
