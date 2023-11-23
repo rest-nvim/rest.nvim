@@ -100,7 +100,7 @@ local function splice_body(headers, payload)
   else
     lines = payload.body_tpl
   end
-  local content_type = utils.get_value(headers, "content-type") or ""
+  local content_type = headers[utils.key(headers, "content-type")] or ""
   local has_json = content_type:find("application/[^ ]*json")
 
   local body = ""
@@ -139,9 +139,8 @@ end
 rest.run_request = function(req, opts)
   -- TODO rename result to request
   local result = req
-  local curl_raw_args = config.get("skip_ssl_verification")
-      and vim.list_extend(result.raw, { "-k" })
-    or result.raw
+  local curl_raw_args = config.get("skip_ssl_verification") and vim.list_extend(result.raw, { "-k" })
+      or result.raw
   opts = vim.tbl_deep_extend(
     "force", -- use value from rightmost map
     defaultRequestOpts,
@@ -153,8 +152,7 @@ rest.run_request = function(req, opts)
   local spliced_body = nil
   if not req.body.inline and req.body.filename_tpl then
     curl_raw_args = vim.tbl_extend("force", curl_raw_args, {
-      "--data-binary",
-      "@" .. load_external_payload(req.body.filename_tpl),
+      "--data-binary", "@" .. load_external_payload(req.body.filename_tpl),
     })
   else
     spliced_body = splice_body(result.headers, result.body)

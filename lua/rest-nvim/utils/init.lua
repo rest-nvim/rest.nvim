@@ -317,16 +317,6 @@ M.key = function(tbl, key)
   return key
 end
 
---- Get the table value or nil if not found
----
---- @param tbl (table) Table to iterate over
---- @param key (string) The key to the value case insensitive
----
---- @return any
-M.get_value = function(tbl, key)
-  return tbl[M.key(tbl, key)]
-end
-
 -- tbl_to_str recursively converts the provided table into a json string
 -- @param tbl Table to convert into a String
 -- @param json If the string should use a key:value syntax

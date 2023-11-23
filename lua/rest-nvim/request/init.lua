@@ -22,8 +22,7 @@ local function get_importfile_name(bufnr, start_line, stop_line)
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
     -- check second char against '@' (meaning "dont inline")
     fileimport_inlined = string.sub(fileimport_line[1], 2, 2) ~= "@"
-    fileimport_string =
-      string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    fileimport_string = string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
     return fileimport_inlined, fileimport_string
   end
   return nil
@@ -285,7 +284,7 @@ M.buf_get_request = function(bufnr, curpos)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  local host = utils.get_value(headers, "host") or ""
+  local host = headers[utils.key(headers, "host")] or ""
   parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
   headers[utils.key(headers, "host")] = nil
 

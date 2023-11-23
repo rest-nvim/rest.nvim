@@ -117,7 +117,6 @@ local function create_callback(curl_cmd, opts)
 
     headers = utils.map(headers, function(value)
       local _, _, http, status = string.find(value, "^(HTTP.*)%s+(%d+)%s*$")
-      vim.print(value, http, status)
 
       if http and status then
         return http .. " " .. utils.http_status(tonumber(status))
@@ -132,7 +131,7 @@ local function create_callback(curl_cmd, opts)
 
     res.headers = parse_headers(res.headers)
 
-    local content_type = utils.get_value(res.headers, "content-type")
+    local content_type = res.headers[utils.key(res.headers, "content-type")]
     if content_type then
       content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
     end
