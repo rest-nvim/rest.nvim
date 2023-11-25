@@ -508,6 +508,106 @@ M.split_list = function(tbl, index, inclusive)
   return out
 end
 
+--- Default transformers for statistics
+local transform = {
+  time = function(time)
+    time = tonumber(time)
+
+    if time >= 60 then
+      time = string.format("%.2f", time / 60)
+
+      return time .. " min"
+    end
+
+    local units = { "s", "ms", "µs", "ns" }
+    local unit = 1
+
+    while time < 1 and unit <= #units do
+      time = time * 1000
+      unit = unit + 1
+    end
+
+    time = string.format("%.2f", time)
+
+    return time .. " " .. units[unit]
+  end,
+
+  byte = function(bytes)
+    bytes = tonumber(bytes)
+
+    local units = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" }
+    local unit = 1
+
+    while bytes >= 1024 and unit <= #units do
+      bytes = bytes / 1024
+      unit = unit + 1
+    end
+
+    bytes = string.format("%.2f", bytes)
+
+    return bytes .. " " .. units[unit]
+  end,
+}
+
+--- Parse statistics line to a table with key, value pairs
+---
+--- @param statistics_line string The statistics line from body
+---
+--- @return string[] statistics
+local get_parsed_statistics = function(statistics_line)
+  local out = {}
+
+  for _, statistics_pair in ipairs(M.split(statistics_line, "&")) do
+    local value = M.split(statistics_pair, "=", 1)
+
+    if #value == 1 then
+      table.insert(out, value[1])
+    else
+      out[value[1]] = value[2]
+    end
+  end
+
+  return out
+end
+
+--- Parse and transform statistics line to a table of strings to be output.
+--- Returns the body without statistics line and a table of statistics lines.
+---
+--- @param body string Response body
+---
+--- @return string body, string[] statistics
+M.parse_statistics = function(body)
+  local _, _, statistics = string.find(body, "[%c%s]+([^%c]*)$")
+  local config_statistics = config.get("result").show_statistics
+
+  body = string.gsub(body, "[%c%s]+([^%c]*)$", "")
+  local out = {}
+
+  statistics = get_parsed_statistics(statistics)
+
+  for _, tbl in ipairs(config_statistics) do
+    if type(tbl) == "string" then
+      tbl = { tbl }
+    end
+
+    local value = statistics[tbl[1]]
+
+    if tbl.type then
+      if type(tbl.type) == "string" then
+        value = transform[tbl.type](value)
+      end
+
+      if type(tbl.type) == "function" then
+        value = tbl.type(value)
+      end
+    end
+
+    table.insert(out, (tbl.title or (tbl[1] .. " ")) .. value)
+  end
+
+  return body, out
+end
+
 -- http_status returns the status code and the meaning, e.g. 200 OK
 -- see https://httpstatuses.com/ for reference
 -- @param code The request status code
