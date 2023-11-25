@@ -159,13 +159,11 @@ To run `rest.nvim` you should map the following commands:
 
 ### Statistics Spec
 
-| Property | Type            | Description                                            |
-| :------- | :-------------- | :----------------------------------------------------- |
-| [1]      | string          | `--write-out` variable name, see `man curl`. Required. |
-| title    | string          | Replaces the variable name in the output if defined.   |
-| type     | string|function | Specifies type transformation for the output value.
-Default transformers are `time` and `byte`. Can also be a function which takes the
-value as a parameter and returns a string. |
+| Property | Type               | Description                                            |
+| :------- | :----------------- | :----------------------------------------------------- |
+| [1]      | string             | `--write-out` variable name, see `man curl`. Required. |
+| title    | string             | Replaces the variable name in the output if defined.   |
+| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `byte`. Can also be a function which takes the value as a parameter and returns a string. |
 
 ## Usage
 
