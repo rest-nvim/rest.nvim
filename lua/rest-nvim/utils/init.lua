@@ -532,7 +532,7 @@ local transform = {
     return time .. " " .. units[unit]
   end,
 
-  byte = function(bytes)
+  size = function(bytes)
     bytes = tonumber(bytes)
 
     local units = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" }
@@ -599,6 +599,12 @@ M.parse_statistics = function(body)
 
       if type(tbl.type) == "function" then
         value = tbl.type(value)
+      end
+    else
+      for key, fun in pairs(transform) do
+        if string.match(tbl[1], "^" .. key) then
+          value = fun(value)
+        end
       end
     end
 
