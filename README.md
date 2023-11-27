@@ -163,7 +163,7 @@ To run `rest.nvim` you should map the following commands:
 | :------- | :----------------- | :----------------------------------------------------- |
 | [1]      | string             | `--write-out` variable name, see `man curl`. Required. |
 | title    | string             | Replaces the variable name in the output if defined.   |
-| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `byte`. Can also be a function which takes the value as a parameter and returns a string. |
+| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `size`. Can also be a function which takes the value as a parameter and returns a string. |
 
 ## Usage
 
