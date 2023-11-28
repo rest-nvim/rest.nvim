@@ -208,11 +208,7 @@ local function create_callback(curl_cmd, opts)
       else
         vim.api.nvim_echo({
           {
-            string.format(
-              "Error running formatter %s on response body:\n%s",
-              vim.inspect(formatter),
-              stdout
-            ),
+            string.format("Error running formatter %s on response body:\n%s", vim.inspect(formatter), stdout),
             "Error",
           },
         }, false, {})
