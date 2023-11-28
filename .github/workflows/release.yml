@@ -1,17 +1,20 @@
-name: Luarocks release
+name: Release Please Automatic Semver
+
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  luarocks-release:
+  release:
+    name: release
     runs-on: ubuntu-latest
-    name: Luarocks upload
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Luarocks Upload
-        uses: mrcjkb/luarocks-tag-release@master
-        env:
-          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: simple
+          package-name: rest.nvim

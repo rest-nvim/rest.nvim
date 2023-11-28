@@ -1,4 +1,4 @@
-name: default
+name: test
 
 on: [push, pull_request]
 
