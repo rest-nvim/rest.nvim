@@ -16,6 +16,7 @@ jobs:
         uses: JohnnyMorganz/stylua-action@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version: v0.19.1
           args: --config-path=stylua.toml .
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
