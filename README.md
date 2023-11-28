@@ -49,7 +49,7 @@ have to leave Neovim!
 
 - System-wide
   - curl
-- Optional [can be changed, see config bellow]
+- Optional [can be changed, see config below]
   - jq   (to format JSON output)
   - tidy (to format HTML output)
 - Other plugins
@@ -84,6 +84,9 @@ use {
         show_curl_command = false,
         show_http_info = true,
         show_headers = true,
+        -- table of curl `--write-out` variables or false if disabled
+        -- for more granular control see Statistics Spec
+        show_statistics = false,
         -- executables or functions for formatting response body [optional]
         -- set them to false if you want to disable them
         formatters = {
@@ -154,6 +157,14 @@ To run `rest.nvim` you should map the following commands:
 - `env_file` specifies file name that consist environment variables (default: .env)
 - `custom_dynamic_variables` allows to extend or overwrite built-in dynamic variable functions
     (default: {})
+
+### Statistics Spec
+
+| Property | Type               | Description                                            |
+| :------- | :----------------- | :----------------------------------------------------- |
+| [1]      | string             | `--write-out` variable name, see `man curl`. Required. |
+| title    | string             | Replaces the variable name in the output if defined.   |
+| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `size`. Can also be a function which takes the value as a parameter and returns a string. |
 
 ## Usage
 
