@@ -14,6 +14,7 @@ local config = {
     show_url = true,
     show_http_info = true,
     show_headers = true,
+    show_statistics = false,
     formatters = {
       json = "jq",
       html = function(body)

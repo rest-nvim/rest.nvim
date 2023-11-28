@@ -175,6 +175,15 @@ local function create_callback(curl_cmd, opts)
       end
     end
 
+    if config.get("result").show_statistics then
+      -- Statistics, e.g. Total Time: 123.4 ms
+      local statistics
+
+      res.body, statistics = utils.parse_statistics(res.body)
+
+      utils.write_block(res_bufnr, statistics, true)
+    end
+
     --- Add the curl command results into the created buffer
     local formatter = config.get("result").formatters[content_type]
     -- format response body

@@ -158,6 +158,23 @@ rest.run_request = function(req, opts)
     spliced_body = splice_body(result.headers, result.body)
   end
 
+  if config.get("result").show_statistics then
+    local statistics_line = {}
+
+    for _, tbl in ipairs(config.get("result").show_statistics) do
+      if type(tbl) == "string" then
+        tbl = { tbl }
+      end
+
+      table.insert(statistics_line, tbl[1] .. "=%{" .. tbl[1] .. "}")
+    end
+
+    curl_raw_args = vim.tbl_extend("force", curl_raw_args, {
+      "--write-out",
+      "\\n" .. table.concat(statistics_line, "&"),
+    })
+  end
+
   Opts = {
     request_id = vim.loop.now(), -- request id used to correlate RestStartRequest and RestStopRequest events
     method = result.method:lower(),
