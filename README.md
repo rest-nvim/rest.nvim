@@ -3,7 +3,8 @@
 # rest.nvim
 
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
-![Neovim version](https://img.shields.io/badge/Neovim-0.5-57A143?style=for-the-badge&logo=neovim)
+![Neovim version](https://img.shields.io/badge/Neovim-0.5-5ba246?style=for-the-badge&logo=neovim)
+![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
