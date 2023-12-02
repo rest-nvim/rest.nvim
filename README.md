@@ -103,6 +103,7 @@ use {
       env_file = '.env',
       custom_dynamic_variables = {},
       yank_dry_run = true,
+      search_back = true,
     })
   end
 }
