@@ -192,7 +192,12 @@ local function start_request(bufnr, linenumber)
   local oldlinenumber = linenumber
   utils.move_cursor(bufnr, linenumber)
 
-  local res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "bcnW")
+  local res
+  if config.get("search_back") then
+    res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cb")
+  else
+    res = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE", "cn")
+  end
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
 
