@@ -3,7 +3,8 @@
 # rest.nvim
 
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
-![Neovim version](https://img.shields.io/badge/Neovim-0.5-57A143?style=for-the-badge&logo=neovim)
+![Neovim version](https://img.shields.io/badge/Neovim-0.5-5ba246?style=for-the-badge&logo=neovim)
+![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
@@ -23,6 +24,7 @@ have to leave Neovim!
 
 ## Notices
 
+- **2023-07-12**: tagged 0.2 release before changes for 0.10 compatibility
 - **2021-11-04**: HTTP Tree-Sitter parser now depends on JSON parser for the JSON bodies detection,
   please install it too.
 - **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,
@@ -47,7 +49,7 @@ have to leave Neovim!
 
 - System-wide
   - curl
-- Optional [can be changed, see config bellow]
+- Optional [can be changed, see config below]
   - jq   (to format JSON output)
   - tidy (to format HTML output)
 - Other plugins
@@ -65,6 +67,8 @@ use {
       result_split_horizontal = false,
       -- Keep the http file buffer above|left when split horizontal|vertical
       result_split_in_place = false,
+      -- stay in current windows (.http file) or change to results window (default)
+      stay_in_current_window_after_split = false,
       -- Skip SSL verification, useful for unknown certificates
       skip_ssl_verification = false,
       -- Encode URL before making request
@@ -82,6 +86,9 @@ use {
         show_curl_command = false,
         show_http_info = true,
         show_headers = true,
+        -- table of curl `--write-out` variables or false if disabled
+        -- for more granular control see Statistics Spec
+        show_statistics = false,
         -- executables or functions for formatting response body [optional]
         -- set them to false if you want to disable them
         formatters = {
@@ -96,6 +103,21 @@ use {
       env_file = '.env',
       custom_dynamic_variables = {},
       yank_dry_run = true,
+    })
+  end
+}
+```
+
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+-- plugins/rest.lua
+return {
+   "rest-nvim/rest.nvim",
+   dependencies = { { "nvim-lua/plenary.nvim" } },
+   config = function()
+     require("rest-nvim").setup({
+       --- Get the same options from Packer setup
     })
   end
 }
@@ -138,6 +160,14 @@ To run `rest.nvim` you should map the following commands:
 - `custom_dynamic_variables` allows to extend or overwrite built-in dynamic variable functions
     (default: {})
 
+### Statistics Spec
+
+| Property | Type               | Description                                            |
+| :------- | :----------------- | :----------------------------------------------------- |
+| [1]      | string             | `--write-out` variable name, see `man curl`. Required. |
+| title    | string             | Replaces the variable name in the output if defined.   |
+| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `size`. Can also be a function which takes the value as a parameter and returns a string. |
+
 ## Usage
 
 Create a new http file or open an existing one and place the cursor over the
@@ -152,6 +182,13 @@ request method (e.g. `GET`) and run `rest.nvim`.
 
 ---
 
+### Debug
+
+
+Run `export DEBUG_PLENARY="debug"` before starting nvim. Logs will appear most
+likely in ~/.cache/nvim/rest.nvim.log
+
+
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
@@ -165,6 +202,7 @@ test`.
 
 ## Related software
 
+- [vim-rest-console](https://github.com/diepm/vim-rest-console)
 - [Hurl](https://hurl.dev/)
 - [HTTPie](https://httpie.io/)
 - [httpYac](https://httpyac.github.io/)

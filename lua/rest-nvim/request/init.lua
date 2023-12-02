@@ -1,11 +1,11 @@
 local utils = require("rest-nvim.utils")
-local path = require("plenary.path")
 local log = require("plenary.log").new({ plugin = "rest.nvim" })
 local config = require("rest-nvim.config")
 
 -- get_importfile returns in case of an imported file the absolute filename
 -- @param bufnr Buffer number, a.k.a id
 -- @param stop_line Line to stop searching
+-- @return tuple filename and whether we should inline it when invoking curl
 local function get_importfile_name(bufnr, start_line, stop_line)
   -- store old cursor position
   local oldpos = vim.fn.getcurpos()
@@ -18,18 +18,12 @@ local function get_importfile_name(bufnr, start_line, stop_line)
   if import_line > 0 then
     local fileimport_string
     local fileimport_line
-    local fileimport_spliced
+    local fileimport_inlined
     fileimport_line = vim.api.nvim_buf_get_lines(bufnr, import_line - 1, import_line, false)
-    fileimport_string =
-      string.gsub(fileimport_line[1], "<", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
-    fileimport_spliced = utils.replace_vars(fileimport_string)
-    if path:new(fileimport_spliced):is_absolute() then
-      return fileimport_spliced
-    else
-      local file_dirname = vim.fn.expand("%:p:h")
-      local file_name = path:new(path:new(file_dirname), fileimport_spliced)
-      return file_name:absolute()
-    end
+    -- check second char against '@' (meaning "dont inline")
+    fileimport_inlined = string.sub(fileimport_line[1], 2, 2) ~= "@"
+    fileimport_string = string.gsub(fileimport_line[1], "<@?", "", 1):gsub("^%s+", ""):gsub("%s+$", "")
+    return fileimport_inlined, fileimport_string
   end
   return nil
 end
@@ -41,26 +35,22 @@ end
 -- @param bufnr Buffer number, a.k.a id
 -- @param start_line Line where body starts
 -- @param stop_line Line where body stops
--- @param has_json True if content-type is set to json
-local function get_body(bufnr, start_line, stop_line, has_json)
+-- @return table { external = bool; filename_tpl or body_tpl; }
+local function get_body(bufnr, start_line, stop_line)
   -- first check if the body should be imported from an external file
-  local importfile = get_importfile_name(bufnr, start_line, stop_line)
-  local lines
+  local inline, importfile = get_importfile_name(bufnr, start_line, stop_line)
+  local lines -- an array of strings
   if importfile ~= nil then
-    if not utils.file_exists(importfile) then
-      error("import file " .. importfile .. " not found")
-    end
-    lines = utils.read_file(importfile)
+    return { external = true, inline = inline, filename_tpl = importfile }
   else
-    lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, stop_line, false)
+    lines = vim.api.nvim_buf_get_lines(bufnr, start_line, stop_line, false)
   end
 
-  local body = ""
-  local vars = utils.read_variables()
   -- nvim_buf_get_lines is zero based and end-exclusive
   -- but start_line and stop_line are one-based and inclusive
   -- magically, this fits :-) start_line is the CRLF between header and body
   -- which should not be included in the body, stop_line is the last line of the body
+  local lines2 = {}
   for _, line in ipairs(lines) do
     -- stop if a script opening tag is found
     if line:find("{%%") then
@@ -68,28 +58,11 @@ local function get_body(bufnr, start_line, stop_line, has_json)
     end
     -- Ignore commented lines with and without indent
     if not utils.contains_comments(line) then
-      body = body .. utils.replace_vars(line, vars)
+      lines2[#lines2 + 1] = line
     end
   end
 
-  local is_json, json_body = pcall(vim.json.decode, body)
-
-  if is_json then
-    if has_json then
-      -- convert entire json body to string.
-      return vim.fn.json_encode(json_body)
-    else
-      -- convert nested tables to string.
-      for key, val in pairs(json_body) do
-        if type(val) == "table" then
-          json_body[key] = vim.fn.json_encode(val)
-        end
-      end
-      return vim.fn.json_encode(json_body)
-    end
-  end
-
-  return body
+  return { external = false, inline = false, body_tpl = lines2 }
 end
 
 local function get_response_script(bufnr, start_line, stop_line)
@@ -147,7 +120,7 @@ local function get_headers(bufnr, start_line, end_line)
   for line_number = start_line + 1, end_line do
     local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
-    -- message header and message body are seperated by CRLF (see RFC 2616)
+    -- message header and message body are separated by CRLF (see RFC 2616)
     -- for our purpose also the next request line will stop the header search
     if is_request_line(line_content) or line_content == "" then
       headers_end = line_number
@@ -161,7 +134,7 @@ local function get_headers(bufnr, start_line, end_line)
     local header_name, header_value = line_content:match("^(.-): ?(.*)$")
 
     if not utils.contains_comments(header_name) then
-      headers[header_name] = utils.replace_vars(header_value)
+      headers[header_name] = header_value
     end
     ::continue::
   end
@@ -177,6 +150,7 @@ local function get_curl_args(bufnr, headers_end, end_line)
   local curl_args = {}
   local body_start = end_line
 
+  log.debug("Getting curl args between lines", headers_end, " and ", end_line)
   for line_number = headers_end, end_line do
     local line_content = vim.fn.getbufline(bufnr, line_number)[1]
 
@@ -210,7 +184,7 @@ end
 -- start_request will find the request line (e.g. POST http://localhost:8081/foo)
 -- of the current request and returns the linenumber of this request line.
 -- The current request is defined as the next request line above the cursor
--- @param bufnr The buffer nummer of the .http-file
+-- @param bufnr The buffer number of the .http-file
 -- @param linenumber (number) From which line to start looking
 local function start_request(bufnr, linenumber)
   log.debug("Searching pattern starting from " .. linenumber)
@@ -232,24 +206,23 @@ end
 
 -- end_request will find the next request line (e.g. POST http://localhost:8081/foo)
 -- and returns the linenumber before this request line or the end of the buffer
--- @param bufnr The buffer nummer of the .http-file
+-- @param bufnr The buffer number of the .http-file
 local function end_request(bufnr, linenumber)
   -- store old cursor position
   local oldlinenumber = linenumber
+  local last_line = vim.fn.line("$")
 
   -- start searching for next request from the next line
   -- as the current line does contain the current, not the next request
-  if linenumber < vim.fn.line("$") then
+  if linenumber < last_line then
     linenumber = linenumber + 1
   end
   utils.move_cursor(bufnr, linenumber)
 
-  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cn",
-    vim.fn.line("$"))
+  local next = vim.fn.search("^GET\\|^POST\\|^PUT\\|^PATCH\\|^DELETE\\|^###\\", "cnW")
 
   -- restore cursor position
   utils.move_cursor(bufnr, oldlinenumber)
-  local last_line = vim.fn.line("$")
 
   if next == 0 or (oldlinenumber == last_line) then
     return last_line
@@ -316,61 +289,96 @@ M.buf_get_request = function(bufnr, curpos)
 
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
-  if headers["host"] ~= nil then
-    headers["host"] = headers["host"]:gsub("%s+", "")
-    headers["host"] = string.gsub(headers["host"], "%s+", "")
-    parsed_url.url = headers["host"] .. parsed_url.url
-    headers["host"] = nil
-  end
+  local host = headers[utils.key(headers, "host")] or ""
+  parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
+  headers[utils.key(headers, "host")] = nil
 
-  local content_type = ""
-
-  for key, val in pairs(headers) do
-    if string.lower(key) == "content-type" then
-      content_type = val
-      break
-    end
-  end
-
-  local body = get_body(
-    bufnr,
-    body_start,
-    end_line,
-    content_type:find("application/[^ ]*json")
-  )
+  local body = get_body(bufnr, body_start, end_line)
 
   local script_str = get_response_script(bufnr, headers_end, end_line)
 
-
+  -- TODO this should just parse the request without modifying external state
+  -- eg move to run_request
   if config.get("jump_to_request") then
     utils.move_cursor(bufnr, start_line)
   else
     utils.move_cursor(bufnr, curpos[2], curpos[3])
   end
 
-  return true,
-      {
-        method = parsed_url.method,
-        url = parsed_url.url,
-        http_version = parsed_url.http_version,
-        headers = headers,
-        raw = curl_args,
-        body = body,
-        bufnr = bufnr,
-        start_line = start_line,
-        end_line = end_line,
-        script_str = script_str
-      }
+  local req = {
+    method = parsed_url.method,
+    url = parsed_url.url,
+    http_version = parsed_url.http_version,
+    headers = headers,
+    raw = curl_args,
+    body = body,
+    bufnr = bufnr,
+    start_line = start_line,
+    end_line = end_line,
+    script_str = script_str,
+  }
+
+  return true, req
 end
 
 M.print_request = function(req)
+  print(M.stringify_request(req))
+end
+
+-- converts request into string, helpful for debug
+-- full_body boolean
+M.stringify_request = function(req, opts)
+  opts = vim.tbl_deep_extend(
+    "force", -- use value from rightmost map
+    { full_body = false, headers = true }, -- defaults
+    opts or {}
+  )
   local str = [[
-    version: ]] .. req.url .. [[\n
+    url   : ]] .. req.url .. [[\n
     method: ]] .. req.method .. [[\n
-    start_line: ]] .. tostring(req.start_line) .. [[\n
-    end_line: ]] .. tostring(req.end_line) .. [[\n
-  ]]
-  print(str)
+    range : ]] .. tostring(req.start_line) .. [[ -> ]] .. tostring(req.end_line) .. [[\n
+    ]]
+
+  if req.http_version then
+    str = str .. "\nhttp_version: " .. req.http_version .. "\n"
+  end
+
+  if opts.headers then
+    for name, value in pairs(req.headers) do
+      str = str .. "header '" .. name .. "'=" .. value .. "\n"
+    end
+  end
+
+  if opts.full_body then
+    if req.body then
+      local res = req.body
+      str = str .. "body: " .. res .. "\n"
+    end
+  end
+
+  -- here we should just display the beginning of the request
+  return str
+end
+
+M.buf_list_requests = function(buf, _opts)
+  local last_line = vim.fn.line("$")
+  local requests = {}
+
+  -- reset cursor position
+  vim.fn.cursor({ 1, 1 })
+  local curpos = vim.fn.getcurpos()
+  log.debug("Listing requests for buf ", buf)
+  while curpos[2] <= last_line do
+    local ok, req = M.buf_get_request(buf, curpos)
+    if ok then
+      curpos[2] = req.end_line + 1
+      requests[#requests + 1] = req
+    else
+      break
+    end
+  end
+  -- log.debug("found " , #requests , "requests")
+  return requests
 end
 
 local select_ns = vim.api.nvim_create_namespace("rest-nvim")
@@ -389,8 +397,7 @@ M.highlight = function(bufnr, start_line, end_line)
     higroup,
     { start_line - 1, 0 },
     { end_line - 1, end_column },
-    "c",
-    false
+    { regtype = "c", inclusive = false }
   )
 
   vim.defer_fn(function()

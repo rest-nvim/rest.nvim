@@ -31,6 +31,41 @@ local function format_curl_cmd(res)
   return cmd
 end
 
+local function send_curl_start_event(data)
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "RestStartRequest",
+    modeline = false,
+    data = data,
+  })
+end
+
+local function send_curl_stop_event(data)
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "RestStopRequest",
+    modeline = false,
+    data = data,
+  })
+end
+
+local function create_error_handler(opts)
+  return function(err)
+    send_curl_stop_event(vim.tbl_extend("keep", { err = err }, opts))
+    error(err.message)
+  end
+end
+
+local function parse_headers(headers)
+  local parsed = {}
+  for _, header in ipairs(headers) do
+    if header ~= "" then
+      local key, value = header:match("([^:]+):%s*(.*)")
+      if key then
+        parsed[key] = value or ""
+      end
+    end
+  end
+  return parsed
+end
 
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
@@ -41,48 +76,64 @@ M.get_or_create_buf = function()
   local existing_bufnr = vim.fn.bufnr(tmp_name)
   if existing_bufnr ~= -1 then
     -- Set modifiable
-    vim.api.nvim_buf_set_option(existing_bufnr, "modifiable", true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = existing_bufnr })
     -- Prevent modified flag
-    vim.api.nvim_buf_set_option(existing_bufnr, "buftype", "nofile")
+    vim.api.nvim_set_option_value("buftype", "nofile", { buf = existing_bufnr })
     -- Delete buffer content
-    vim.api.nvim_buf_set_lines(
-      existing_bufnr,
-      0,
-      vim.api.nvim_buf_line_count(existing_bufnr) - 1,
-      false,
-      {}
-    )
+    vim.api.nvim_buf_set_lines(existing_bufnr, 0, -1, false, {})
 
     -- Make sure the filetype of the buffer is httpResult so it will be highlighted
-    vim.api.nvim_buf_set_option(existing_bufnr, "ft", "httpResult")
+    vim.api.nvim_set_option_value("ft", "httpResult", { buf = existing_bufnr })
 
     return existing_bufnr
   end
 
   -- Create new buffer
-  local new_bufnr = vim.api.nvim_create_buf(false, "nomodeline")
+  local new_bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
-  vim.api.nvim_buf_set_option(new_bufnr, "ft", "httpResult")
-  vim.api.nvim_buf_set_option(new_bufnr, "buftype", "nofile")
+  vim.api.nvim_set_option_value("ft", "httpResult", { buf = new_bufnr })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
 
   return new_bufnr
 end
 
-local function create_callback(curl_cmd, method, url, script_str)
+local function create_callback(curl_cmd, opts)
+  local method = opts.method
+  local url = opts.url
+  local script_str = opts.script_str
+
   return function(res)
+    send_curl_stop_event(vim.tbl_extend("keep", { res = res }, opts))
+
     if res.exit ~= 0 then
       log.error("[rest.nvim] " .. utils.curl_error(res.exit))
       return
     end
     local res_bufnr = M.get_or_create_buf()
-    local content_type = nil
 
-    -- get content type
-    for _, header in ipairs(res.headers) do
-      if string.lower(header):find("^content%-type") then
-        content_type = header:match("application/([-a-z]+)") or header:match("text/(%l+)")
-        break
+    local headers = utils.filter(res.headers, function(value)
+      return value ~= ""
+    end, false)
+
+    headers = utils.map(headers, function(value)
+      local _, _, http, status = string.find(value, "^(HTTP.*)%s+(%d+)%s*$")
+
+      if http and status then
+        return http .. " " .. utils.http_status(tonumber(status))
       end
+
+      return value
+    end)
+
+    headers = utils.split_list(headers, function(value)
+      return string.find(value, "^HTTP.*$")
+    end)
+
+    res.headers = parse_headers(res.headers)
+
+    local content_type = res.headers[utils.key(res.headers, "content-type")]
+    if content_type then
+      content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
     end
 
     if script_str ~= nil then
@@ -91,6 +142,7 @@ local function create_callback(curl_cmd, method, url, script_str)
         pretty_print = vim.pretty_print,
         json_decode = vim.fn.json_decode,
         set_env = utils.set_env,
+        set = utils.set_context,
       }
       local env = { context = context }
       setmetatable(env, { __index = _G })
@@ -100,45 +152,41 @@ local function create_callback(curl_cmd, method, url, script_str)
       end
     end
 
-    -- This can be quite verbose so let user control it
-    if config.get("result").show_curl_command then
-      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { "Command :" .. curl_cmd })
-    end
-
     if config.get("result").show_url then
       --- Add metadata into the created buffer (status code, date, etc)
       -- Request statement (METHOD URL)
-      vim.api.nvim_buf_set_lines(res_bufnr, 0, 0, false, { method:upper() .. " " .. url })
+      utils.write_block(res_bufnr, { method:upper() .. " " .. url }, false)
+    end
+
+    -- This can be quite verbose so let user control it
+    if config.get("result").show_curl_command then
+      utils.write_block(res_bufnr, { "Command: " .. curl_cmd }, true)
     end
 
     if config.get("result").show_http_info then
-      local line_count = vim.api.nvim_buf_line_count(res_bufnr)
-      local separator = config.get("result").show_url and 0 or 1
       -- HTTP version, status code and its meaning, e.g. HTTP/1.1 200 OK
-      vim.api.nvim_buf_set_lines(
-        res_bufnr,
-        line_count - separator,
-        line_count - separator,
-        false,
-        { "HTTP/1.1 " .. utils.http_status(res.status) }
-      )
+      utils.write_block(res_bufnr, { "HTTP/1.1 " .. utils.http_status(res.status) }, false)
     end
 
     if config.get("result").show_headers then
-      local line_count = vim.api.nvim_buf_line_count(res_bufnr)
       -- Headers, e.g. Content-Type: application/json
-      vim.api.nvim_buf_set_lines(
-        res_bufnr,
-        line_count + 1,
-        line_count + 1 + #res.headers,
-        false,
-        res.headers
-      )
+      for _, header_block in ipairs(headers) do
+        utils.write_block(res_bufnr, header_block, true)
+      end
+    end
+
+    if config.get("result").show_statistics then
+      -- Statistics, e.g. Total Time: 123.4 ms
+      local statistics
+
+      res.body, statistics = utils.parse_statistics(res.body)
+
+      utils.write_block(res_bufnr, statistics, true)
     end
 
     --- Add the curl command results into the created buffer
     local formatter = config.get("result").formatters[content_type]
-    -- formate response body
+    -- format response body
     if type(formatter) == "function" then
       local ok, out = pcall(formatter, res.body)
       -- check if formatter ran successfully
@@ -160,11 +208,7 @@ local function create_callback(curl_cmd, method, url, script_str)
       else
         vim.api.nvim_echo({
           {
-            string.format(
-              "Error running formatter %s on response body:\n%s",
-              vim.inspect(formatter),
-              stdout
-            ),
+            string.format("Error running formatter %s on response body:\n%s", vim.inspect(formatter), stdout),
             "Error",
           },
         }, false, {})
@@ -181,8 +225,8 @@ local function create_callback(curl_cmd, method, url, script_str)
     buf_content = buf_content .. "\n#+END"
 
     local lines = utils.split(buf_content, "\n")
-    local line_count = vim.api.nvim_buf_line_count(res_bufnr) - 1
-    vim.api.nvim_buf_set_lines(res_bufnr, line_count, line_count + #lines, false, lines)
+
+    utils.write_block(res_bufnr, lines)
 
     -- Only open a new split if the buffer is not loaded into the current window
     if vim.fn.bufwinnr(res_bufnr) == -1 then
@@ -193,9 +237,13 @@ local function create_callback(curl_cmd, method, url, script_str)
       if config.get("result_split_in_place") then
         cmd_split = [[bel ]] .. cmd_split
       end
-      vim.cmd(cmd_split .. res_bufnr)
+      if config.get("stay_in_current_window_after_split") then
+        vim.cmd(cmd_split .. res_bufnr .. " | wincmd p")
+      else
+        vim.cmd(cmd_split .. res_bufnr)
+      end
       -- Set unmodifiable state
-      vim.api.nvim_buf_set_option(res_bufnr, "modifiable", false)
+      vim.api.nvim_set_option_value("modifiable", false, { buf = res_bufnr })
     end
 
     -- Send cursor in response buffer to start
@@ -230,9 +278,11 @@ end
 M.curl_cmd = function(opts)
   -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
   -- otherwise it starts the request :/
-  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true } )
+  local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true })
   local res = curl[opts.method](dry_run_opts)
   local curl_cmd = format_curl_cmd(res)
+
+  send_curl_start_event(opts)
 
   if opts.dry_run then
     if config.get("yank_dry_run") then
@@ -240,9 +290,12 @@ M.curl_cmd = function(opts)
     end
 
     vim.api.nvim_echo({ { "[rest.nvim] Request preview:\n", "Comment" }, { curl_cmd } }, false, {})
+
+    send_curl_stop_event(opts)
     return
   else
-    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts.method, opts.url, opts.script_str))
+    opts.callback = vim.schedule_wrap(create_callback(curl_cmd, opts))
+    opts.on_error = vim.schedule_wrap(create_error_handler(opts))
     curl[opts.method](opts)
   end
 end

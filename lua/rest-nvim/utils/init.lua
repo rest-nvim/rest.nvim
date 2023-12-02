@@ -4,6 +4,7 @@ local random = math.random
 math.randomseed(os.time())
 
 local M = {}
+local contexts = {}
 
 M.binary_content_types = {
   "octet-stream",
@@ -28,6 +29,16 @@ M.set_env = function(key, value)
   local variables = M.get_env_variables()
   variables[key] = value
   M.write_env_file(variables)
+end
+
+-- set_context sets a context variable for the current file
+-- @param key The key to set
+-- @param value The value to set
+M.set_context = function(key, value)
+  local env_file = "/" .. (config.get("env_file") or ".env")
+  local context = contexts[env_file] or {}
+  context[key] = value
+  contexts[env_file] = context
 end
 
 M.write_env_file = function(variables)
@@ -107,6 +118,7 @@ M.get_file_variables = function()
   end
   return variables
 end
+
 -- Gets the variables from the currently selected env_file
 M.get_env_variables = function()
   local variables = {}
@@ -141,8 +153,13 @@ M.get_env_variables = function()
   return variables
 end
 
+M.get_context_variables = function()
+  local env_file = "/" .. (config.get("env_file") or ".env")
+  return contexts[env_file] or {}
+end
+
 -- get_variables Reads the environment variables found in the env_file option
--- (defualt: .env) specified in configuration or from the files being read
+-- (default: .env) specified in configuration or from the files being read
 -- with variables beginning with @ and returns a table with the variables
 M.get_variables = function()
   local variables = {}
@@ -165,7 +182,7 @@ M.get_variables = function()
       if variables[name]:match(oname) then
         -- Add that into the variable
         -- I.E if @url={{path}}:{{port}}/{{source}}
-        -- Substitue in path, port and source
+        -- Substitute in path, port and source
         variables[name] = variables[name]:gsub("{{" .. oname .. "}}", ovalue)
       end
     end
@@ -228,10 +245,11 @@ end
 
 M.read_variables = function()
   local first = M.get_variables()
-  local second = M.read_dynamic_variables()
-  local third = M.read_document_variables()
+  local second = M.get_context_variables()
+  local third = M.read_dynamic_variables()
+  local fourth = M.read_document_variables()
 
-  return vim.tbl_extend("force", first, second, third)
+  return vim.tbl_extend("force", first, second, third, fourth)
 end
 
 -- replace_vars replaces the env variables fields in the provided string
@@ -284,6 +302,19 @@ M.has_value = function(tbl, str)
     end
   end
   return false
+end
+
+-- key returns the provided table's key that matches the given case-insensitive pattern.
+-- if not found, return the given key.
+-- @param tbl Table to iterate over
+-- @param key The key to be searched in the table
+M.key = function(tbl, key)
+  for tbl_key, _ in pairs(tbl) do
+    if string.lower(tbl_key) == string.lower(key) then
+      return tbl_key
+    end
+  end
+  return key
 end
 
 -- tbl_to_str recursively converts the provided table into a json string
@@ -386,6 +417,203 @@ M.contains_comments = function(str)
   return str:find("^#") or str:find("^%s+#")
 end
 
+--- Filter a table and return filtered copy
+---
+--- @param tbl table The table to filter
+--- @param filter function The filtering function, parameters are value, key and table
+--- @param preserve_keys boolean? Should the copied table preserve keys or not, default true
+---
+--- @return List|table
+M.filter = function(tbl, filter, preserve_keys)
+  local out = {}
+
+  preserve_keys = preserve_keys and true
+
+  for key, val in ipairs(tbl) do
+    if filter(val, key, tbl) then
+      if preserve_keys then
+        out[key] = val
+      else
+        table.insert(out, val)
+      end
+    end
+  end
+
+  return out
+end
+
+--- Make a copy of the table applying the transformation function to each element.
+--- Does not preserve the keys of the original table.
+---
+--- @param tbl table The table to filter
+--- @param transform function The transformation function, parameters are value, key and table
+---
+--- @return List
+M.map = function(tbl, transform)
+  local out = {}
+
+  for key, val in ipairs(tbl) do
+    table.insert(out, transform(val, key, tbl))
+  end
+
+  return out
+end
+
+--- Wrapper around nvim_buf_set_lines
+---
+--- @param buffer integer The target buffer
+--- @param block List The list of lines to write
+--- @param newline boolean? Add a newline to the end, default false
+---
+--- @return nil
+M.write_block = function(buffer, block, newline)
+  local content = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+  local first_line = false
+
+  if #content == 1 and content[1] == "" then
+    first_line = true
+  end
+
+  vim.api.nvim_buf_set_lines(buffer, first_line and 0 or -1, -1, false, block)
+
+  if newline then
+    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, { "" })
+  end
+end
+
+--- Split table on the elements where the function returns true
+---
+--- @param tbl List
+--- @param index function
+--- @param inclusive boolean? If true the split value is in the first table, default false
+---
+--- @return List[]
+M.split_list = function(tbl, index, inclusive)
+  local out = { {} }
+
+  for key, val in ipairs(tbl) do
+    if index(val, key, tbl) then
+      table.insert(out, {})
+
+      if inclusive then
+        table.insert(out[#out - 1], val)
+      else
+        table.insert(out[#out], val)
+      end
+    else
+      table.insert(out[#out], val)
+    end
+  end
+
+  return out
+end
+
+--- Default transformers for statistics
+local transform = {
+  time = function(time)
+    time = tonumber(time)
+
+    if time >= 60 then
+      time = string.format("%.2f", time / 60)
+
+      return time .. " min"
+    end
+
+    local units = { "s", "ms", "µs", "ns" }
+    local unit = 1
+
+    while time < 1 and unit <= #units do
+      time = time * 1000
+      unit = unit + 1
+    end
+
+    time = string.format("%.2f", time)
+
+    return time .. " " .. units[unit]
+  end,
+
+  size = function(bytes)
+    bytes = tonumber(bytes)
+
+    local units = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" }
+    local unit = 1
+
+    while bytes >= 1024 and unit <= #units do
+      bytes = bytes / 1024
+      unit = unit + 1
+    end
+
+    bytes = string.format("%.2f", bytes)
+
+    return bytes .. " " .. units[unit]
+  end,
+}
+
+--- Parse statistics line to a table with key, value pairs
+---
+--- @param statistics_line string The statistics line from body
+---
+--- @return string[] statistics
+local get_parsed_statistics = function(statistics_line)
+  local out = {}
+
+  for _, statistics_pair in ipairs(M.split(statistics_line, "&")) do
+    local value = M.split(statistics_pair, "=", 1)
+
+    if #value == 1 then
+      table.insert(out, value[1])
+    else
+      out[value[1]] = value[2]
+    end
+  end
+
+  return out
+end
+
+--- Parse and transform statistics line to a table of strings to be output.
+--- Returns the body without statistics line and a table of statistics lines.
+---
+--- @param body string Response body
+---
+--- @return string body, string[] statistics
+M.parse_statistics = function(body)
+  local _, _, statistics = string.find(body, "[%c%s]+([^%c]*)$")
+  local config_statistics = config.get("result").show_statistics
+
+  body = string.gsub(body, "[%c%s]+([^%c]*)$", "")
+  local out = {}
+
+  statistics = get_parsed_statistics(statistics)
+
+  for _, tbl in ipairs(config_statistics) do
+    if type(tbl) == "string" then
+      tbl = { tbl }
+    end
+
+    local value = statistics[tbl[1]]
+
+    if tbl.type then
+      if type(tbl.type) == "string" then
+        value = transform[tbl.type](value)
+      end
+
+      if type(tbl.type) == "function" then
+        value = tbl.type(value)
+      end
+    else
+      for key, fun in pairs(transform) do
+        if string.match(tbl[1], "^" .. key) then
+          value = fun(value)
+        end
+      end
+    end
+
+    table.insert(out, (tbl.title or (tbl[1] .. " ")) .. value)
+  end
+
+  return body, out
+end
+
 -- http_status returns the status code and the meaning, e.g. 200 OK
 -- see https://httpstatuses.com/ for reference
 -- @param code The request status code
@@ -401,7 +629,7 @@ M.http_status = function(code)
     [200] = "OK",
     [201] = "Created",
     [202] = "Accepted",
-    [203] = "Non-authorative Information",
+    [203] = "Non-authoritative Information",
     [204] = "No Content",
     [205] = "Reset Content",
     [206] = "Partial Content",
@@ -535,7 +763,7 @@ M.curl_error = function(code)
     [63] = "Maximum file size exceeded.",
     [64] = "Requested FTP SSL level failed.",
     [65] = "Sending the data requires a rewind that failed.",
-    [66] = "Failed to initialise SSL Engine.",
+    [66] = "Failed to initialize SSL Engine.",
     [67] = "The user name, password, or similar was not accepted and curl failed to log in.",
     [68] = "File not found on TFTP server.",
     [69] = "Permission problem on TFTP server.",

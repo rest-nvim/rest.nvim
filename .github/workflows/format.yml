@@ -3,6 +3,9 @@ name: format
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - ".github/**"
+      - "**.md"
 
 jobs:
   stylua:
@@ -10,18 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup and run stylua
-        uses: JohnnyMorganz/stylua-action@1.0.0
+        uses: JohnnyMorganz/stylua-action@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version: v0.19.1
           args: --config-path=stylua.toml .
-      - name: Commit files
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          if [[ ! -z $(git status -s) ]]; then
-            git add lua/
-            git commit -m "Format source code"
-          fi
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: autoformat with stylua"
+          branch: ${{ github.ref }}
       - name: Push formatted files
         uses: ad-m/github-push-action@master
         with:
