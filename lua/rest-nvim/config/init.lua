@@ -33,6 +33,9 @@ local config = {
         }, body):gsub("\n$", "")
       end,
     },
+    buffer_name = function()
+      return 'rest_nvim_results'
+    end,
   },
   jump_to_request = false,
   env_file = ".env",

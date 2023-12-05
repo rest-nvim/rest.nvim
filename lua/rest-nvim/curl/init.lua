@@ -70,7 +70,38 @@ end
 -- get_or_create_buf checks if there is already a buffer with the rest run results
 -- and if the buffer does not exists, then create a new one
 M.get_or_create_buf = function()
-  local tmp_name = "rest_nvim_results"
+    vim.api.nvim_echo({
+      {
+        string.format("%s", config.get("result").buffer_name),
+        "Error",
+      },
+    }, false, {})
+  local tmp_name
+  local result_buffer_name = config.get("result").buffer_name
+  if type(result_buffer_name) == "function" then
+    local ok, out = pcall(result_buffer_name)
+    if ok and out and type(out) == "string" then
+      tmp_name = out
+    else
+      vim.api.nvim_echo({
+        {
+          string.format("config.result.buffer_name did not return a string"),
+          "Error",
+        },
+      }, false, {})
+      tmp_name = "rest_nvim_results"
+    end
+  elseif type(result_buffer_name) == "string" then
+    tmp_name = config.get("result").buffer_name
+  else
+    vim.api.nvim_echo({
+      {
+        string.format("config.result.buffer_name should be a function or a string"),
+        "Error",
+      },
+    }, false, {})
+    tmp_name = "rest_nvim_results"
+  end
 
   -- Check if the file is already loaded in the buffer
   local existing_bufnr = vim.fn.bufnr(tmp_name)
