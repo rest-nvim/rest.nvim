@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/rest-nvim/rest.nvim/compare/v1.0.0...v1.0.1) (2024-01-24)
+
+
+### Bug Fixes
+
+* **ci:** run luarocks CI on new releases too and let us run the CI manually ([6ce1f76](https://github.com/rest-nvim/rest.nvim/commit/6ce1f763247fb218ecf0fba749145c9688797afa))
+
 ## 1.0.0 (2023-11-29)
 
 
