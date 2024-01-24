@@ -1,8 +1,13 @@
 name: Luarocks release
+
 on:
   push:
+    release:
+      types:
+        - created
     tags:
       - "*"
+  workflow_dispatch:
 
 jobs:
   luarocks-release:
@@ -11,7 +16,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required to count the commits
       - name: Luarocks Upload
-        uses: mrcjkb/luarocks-tag-release@master
+        uses: mrcjkb/luarocks-tag-release@v5
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
