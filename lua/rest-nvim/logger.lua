@@ -15,6 +15,7 @@
 ---logger:set_log_level("info")
 ---
 ---logger:info("This is an info log")
+--- -- [rest.nvim] INFO: This is an info log
 ---```
 ---
 ---@brief ]]
