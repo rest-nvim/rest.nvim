@@ -17,7 +17,17 @@
 
 ; Variables
 
-(identifier) @variable
+(variable_declaration
+  name: (identifier) @variable)
+
+(variable_declaration
+  value: (number) @number)
+
+(variable_declaration
+  value: (boolean) @boolean)
+
+(variable_declaration
+  value: (string) @string)
 
 ; Fields
 
@@ -39,19 +49,14 @@
   "?"
   "&"
   "@"
+  "<"
 ] @operator
 
 ; Literals
 
-(string) @string
-
 (target_url) @text.uri
 
 (number) @number
-
-; (boolean) @boolean
-
-(null) @constant.builtin
 
 ; Punctuation
 
@@ -61,6 +66,11 @@
   ":"
 ] @punctuation.delimiter
 
+; external JSON body
+
+(external_body
+  file_path: (path) @text.uri)
+
 ; Comments
 
 (comment) @comment @spell
@@ -68,4 +78,3 @@
 ; Errors
 
 (ERROR) @error
-
