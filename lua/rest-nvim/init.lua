@@ -14,8 +14,10 @@ local autocmds = require("rest-nvim.autocmds")
 ---Set up rest.nvim
 ---@param user_configs RestConfig User configurations
 function rest.setup(user_configs)
+  -- Set up rest.nvim configurations
   _G._rest_nvim = config.set(user_configs or {})
 
+  -- Set up rest.nvim autocommands and commands
   autocmds.setup()
 end
 
