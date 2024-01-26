@@ -14,7 +14,7 @@ local check = {}
 ---@return string|nil error_message
 local function validate(tbl)
   local ok, err = pcall(vim.validate, tbl)
-  return ok or false, "Rest: Invalid config" .. (err and ": " .. err or "")
+  return ok or false, "Invalid config" .. (err and ": " .. err or "")
 end
 
 ---Validates the configuration

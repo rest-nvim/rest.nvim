@@ -62,7 +62,8 @@ local rest_command_tbl = {
   },
   env = {
     impl = function(args)
-      vim.print(args)
+      local logger = _G._rest_nvim.logger
+
       -- If there were no arguments for env then default to the `env("show", nil)` function behavior
       if #args < 1 then
         functions.env(nil, nil)
@@ -70,16 +71,17 @@ local rest_command_tbl = {
       end
       -- If there was only one argument and it is `set` then raise an error because we are also expecting for the env file path
       if #args == 1 and args[1] == "set" then
-        vim.notify(
-          "Rest: Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed",
-          vim.log.levels.ERROR
+        ---@diagnostic disable-next-line need-check-nil
+        logger:error(
+          "Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed"
         )
         return
       end
       -- We do not need too many arguments here, complain about it please!
       if #args > 3 then
-        vim.notify(
-          "Rest: Too many arguments were passed to the 'env' command: 2 arguments were expected, " .. #args .. " were passed"
+        ---@diagnostic disable-next-line need-check-nil
+        logger:error(
+          "Too many arguments were passed to the 'env' command: 2 arguments were expected, " .. #args .. " were passed"
         )
         return
       end
@@ -128,11 +130,18 @@ local function rest(opts)
   local cmd = fargs[1]
   local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
   local command = rest_command_tbl[cmd]
+
+  local logger = _G._rest_nvim.logger
+
   if not command then
-    vim.notify("Rest: Unknown command: " .. cmd, vim.log.levels.ERROR)
+    ---@diagnostic disable-next-line need-check-nil
+    logger:error("Unknown command: " .. cmd)
     return
   end
 
+  -- NOTE: I do not know why lua lsp is complaining about a missing parameter here
+  --       when all the `command.impl` functions expect only one parameter?
+  ---@diagnostic disable-next-line missing-argument
   command.impl(args)
 end
 
