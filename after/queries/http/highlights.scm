@@ -56,7 +56,11 @@
 
 (target_url) @text.uri
 
+(string) @string
+
 (number) @number
+
+(boolean) @boolean
 
 ; Punctuation
 
