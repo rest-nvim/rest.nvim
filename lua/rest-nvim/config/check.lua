@@ -30,6 +30,9 @@ function check.validate(cfg)
     skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
     keybinds = { cfg.keybinds, "table" },
+    -- RestConfigLogs
+    level = { cfg.logs.level, "string" },
+    save = { cfg.logs.save, "boolean" },
     -- RestConfigResult
     result = { cfg.result, "table" },
     -- RestConfigResultSplit

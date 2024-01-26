@@ -8,8 +8,14 @@
 
 local config = {}
 
+local logger = require("rest-nvim.logger")
+
 ---@class RestConfigDebug
 ---@field unrecognized_configs string[] Unrecognized configuration options
+
+---@class RestConfigLogs
+---@field level string The logging level name, see `:h vim.log.levels`. Default is `"info"`
+---@field save boolean Whether to save log messages into a `.log` file. Default is `true`
 
 ---@class RestConfigResult
 ---@field split RestConfigResultSplit Result split window behavior
@@ -44,16 +50,18 @@ local config = {}
 ---@field timeout number Duration time of the request highlighting in milliseconds
 
 ---@class RestConfig
----@field client string The HTTP client to be used when running requests, default is `curl`
+---@field client string The HTTP client to be used when running requests, default is `"curl"`
 ---@field env_file string Environment variables file to be used for the request variables in the document
 ---@field encode_url boolean Encode URL before making request
 ---@field yank_dry_run boolean Whether to copy the request preview (cURL command) to the clipboard
 ---@field skip_ssl_verification boolean Skip SSL verification, useful for unknown certificates
 ---@field custom_dynamic_variables { [string]: fun(): string }[] Table of custom dynamic variables
+---@field logs RestConfigLogs Logging system configuration
 ---@field result RestConfigResult Request results buffer behavior
 ---@field highlight RestConfigHighlight Request highlighting
 ---@field keybinds { [1]: string, [2]: string, [3]: string }[] Keybindings list
 ---@field debug_info? RestConfigDebug Configurations debug information, set automatically
+---@field logger? Logger Logging system, set automatically
 
 ---rest.nvim default configuration
 ---@type RestConfig
@@ -64,6 +72,10 @@ local default_config = {
   yank_dry_run = true,
   skip_ssl_verification = false,
   custom_dynamic_variables = {},
+  logs = {
+    level = "info",
+    save = true,
+  },
   result = {
     split = {
       horizontal = false,
@@ -134,14 +146,20 @@ function config.set(user_configs)
   }, default_config, user_configs)
 
   local ok, err = check.validate(conf)
+
+  -- We do not want to validate `logger` value so we are setting it after the validation
+  conf.logger = logger:new({
+    level_name = conf.logs.level,
+    save_logs = conf.logs.save,
+  })
+
   if not ok then
-    vim.notify("Rest: " .. err, vim.log.levels.ERROR)
+    conf.logger:error(err)
   end
 
   if #conf.debug_info.unrecognized_configs > 0 then
-    vim.notify(
-      "Rest: Unrecognized configs found in setup: " .. vim.inspect(config.debug_info.unrecognized_configs),
-      vim.log.levels.WARN
+    conf.logger:warn(
+      "Unrecognized configs found in setup: " .. vim.inspect(config.debug_info.unrecognized_configs)
     )
   end
 
