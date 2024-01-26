@@ -44,7 +44,7 @@ local config = {}
 ---@field timeout number Duration time of the request highlighting in milliseconds
 
 ---@class RestConfig
----@field runner string The HTTP client to be used when running requests, default is `curl`
+---@field client string The HTTP client to be used when running requests, default is `curl`
 ---@field env_file string Environment variables file to be used for the request variables in the document
 ---@field encode_url boolean Encode URL before making request
 ---@field yank_dry_run boolean Whether to copy the request preview (cURL command) to the clipboard
@@ -58,7 +58,7 @@ local config = {}
 ---rest.nvim default configuration
 ---@type RestConfig
 local default_config = {
-  runner = "curl",
+  client = "curl",
   env_file = ".env",
   encode_url = true,
   yank_dry_run = true,

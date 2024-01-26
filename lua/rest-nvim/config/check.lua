@@ -23,7 +23,7 @@ end
 ---@return string|nil error_message
 function check.validate(cfg)
   local ok, err = validate({
-    runner = { cfg.runner, "string" },
+    client = { cfg.client, "string" },
     env_file = { cfg.env_file, "string" },
     encode_url = { cfg.encode_url, "boolean" },
     yank_dry_run = { cfg.yank_dry_run, "boolean" },
