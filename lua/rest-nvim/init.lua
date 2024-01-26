@@ -129,6 +129,7 @@ local function splice_body(headers, payload)
       return vim.fn.json_encode(json_body)
     end
   end
+  return body
 end
 
 -- run will retrieve the required request information from the current buffer
