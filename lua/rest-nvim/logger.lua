@@ -5,6 +5,10 @@
 ---Logging library for rest.nvim, slightly inspired by rmagatti/logger.nvim
 ---Intended for use by internal and third-party modules.
 ---
+---Default logger instance is made during the `setup` and can be accessed
+---by anyone through the `_G._rest_nvim.logger` configuration field
+---that is set automatically.
+---
 ---------------------------------------------------------------------------------
 ---
 ---Usage:
@@ -20,7 +24,7 @@
 ---
 ---@brief ]]
 
----@class logger
+---@class Logger
 local logger = {}
 
 -- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
@@ -67,11 +71,12 @@ end
 
 ---Create a new logger instance
 ---@param opts LoggerConfig Logger configuration
----@return logger
+---@return Logger
 function logger:new(opts)
-  local config = vim.tbl_deep_extend("force", default_config, opts or {})
-  self.level = levels[config.level_name]
-  self.save_logs = config.save_logs
+  opts = opts or {}
+  local conf = vim.tbl_deep_extend("force", default_config, opts)
+  self.level = levels[conf.level_name]
+  self.save_logs = conf.save_logs
 
   self.__index = function(_, index)
     if type(self[index]) == "function" then
@@ -83,9 +88,9 @@ function logger:new(opts)
       return self[index]
     end
   end
-  setmetatable(config, self)
+  setmetatable(opts, self)
 
-  return config
+  return self
 end
 
 ---Set the log level for the logger
