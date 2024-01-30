@@ -54,7 +54,7 @@ local default_config = {
 local function store_log(msg)
   local date = os.date("%F %r") -- 2024-01-26 01:25:05 PM
   local log_msg = date .. " | " .. msg .. "\n"
-  local log_path = vim.fs.joinpath(vim.fn.stdpath("log"), "rest.nvim.log")
+  local log_path = table.concat({ vim.fn.stdpath("log"), "rest.nvim.log" }, "/")
 
   -- 644 sets read and write permissions for the owner, and it sets read-only
   -- mode for the group and others
