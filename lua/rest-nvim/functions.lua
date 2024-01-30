@@ -8,7 +8,9 @@
 
 local functions = {}
 
+local nio = require("nio")
 local utils = require("rest-nvim.utils")
+local parser = require("rest-nvim.parser")
 
 ---Execute or `preview` one or several HTTP requests depending on given `scope`
 ---and return request(s) results in a table that will be used to render results
@@ -23,6 +25,12 @@ function functions.exec(scope, preview)
   })
 
   local logger = _G._rest_nvim.logger
+  local ok, client = pcall(require, "rest-nvim.client." .. _G._rest_nvim.client)
+  if not ok then
+    ---@diagnostic disable-next-line need-check-nil
+    logger:error("The client '" .. _G._rest_nvim.client .. "' could not be found. Maybe it is not installed?")
+    return {}
+  end
 
   -- Fallback to 'cursor' if no scope was given
   if not scope then
@@ -33,12 +41,27 @@ function functions.exec(scope, preview)
   if not vim.tbl_contains({ "last", "cursor", "document" }, scope) then
     ---@diagnostic disable-next-line need-check-nil
     logger:error(
-      "Invalid scope '" .. scope .. "'provided to the 'exec' function"
+      "Invalid scope '" .. scope .. "' provided to the 'exec' function"
     )
     return {}
   end
 
-  print("WIP")
+  -- TODO: implement `last` and `document` scopes.
+  --
+  -- NOTE: The `document` scope may require some parser adjustments
+  if scope == "cursor" then
+    local req = parser.parse(
+      ---@diagnostic disable-next-line param-type-mismatch
+      parser.look_behind_until(parser.get_node_at_cursor(), "request")
+    )
+
+    local sleep = nio.wrap(function(ms, cb)
+      vim.defer_fn(cb, ms)
+    end, 2)
+    nio.run(function()
+      sleep(10, client.request(req))
+    end)
+  end
 end
 
 ---Manage the environment file that is currently in use while running requests
