@@ -10,8 +10,6 @@
 
 local parser = {}
 
-local logger = _G._rest_nvim.logger
-
 ---@alias NodesList { [string]: TSNode }[]
 ---@alias Variables { [string]: { type_: string, value: string|number|boolean } }[]
 
@@ -20,6 +18,8 @@ local logger = _G._rest_nvim.logger
 ---@return boolean
 local function check_syntax_error(node)
   if node:has_error() then
+    local logger = _G._rest_nvim.logger
+
     ---Create a node range string á la `:InspectTree` view
     ---@param n TSNode
     ---@return string
@@ -77,6 +77,7 @@ end
 ---@param query string The tree-sitter node type that we are looking for
 ---@return TSNode|nil
 function parser.look_behind_until(node, query)
+  local logger = _G._rest_nvim.logger
   node = node or parser.get_node_at_cursor()
 
   -- There are no more nodes behind the `document` one
@@ -146,6 +147,7 @@ end
 ---@param variables Variables HTTP document variables list
 ---@return string|nil The given `text` with expanded variables
 local function parse_variables(node, tree, text, variables)
+  local logger = _G._rest_nvim.logger
   local variable_query = vim.treesitter.query.parse("http", "(variable name: (_) @name)")
   ---@diagnostic disable-next-line missing-parameter
   for _, nod, _ in variable_query:iter_captures(node:root(), tree) do
@@ -233,6 +235,8 @@ local function traverse_body(tbl, variables)
     ---@param vars Variables HTTP document variables list
     ---@return string|number|boolean
     local function expand_variable(str, vars)
+      local logger = _G._rest_nvim.logger
+
       local variable_name = str:gsub("{{[%s]?", ""):gsub("[%s]?}}", ""):match(".*")
       local variable_value
       local variable = vars[variable_name]
