@@ -9,6 +9,7 @@
 local client = {}
 
 local curl = require("cURL.safe")
+local mimetypes = require("mimetypes")
 
 -- TODO: add support for running multiple requests at once for `:Rest run document`
 -- TODO: add support for submitting forms in the `client.request` function
@@ -59,6 +60,15 @@ function client.request(request)
 
     local json_body_string = vim.json.encode(request.body)
     req:setopt_postfields(json_body_string)
+  elseif request.body.__TYPE == "external_file" then
+    local body_mimetype = mimetypes.guess(request.body.path)
+    local post_data = {
+      [request.body.name and request.body.name or "body"] = {
+        file = request.body.path,
+        type = body_mimetype,
+      }
+    }
+    req:post(post_data)
   end
 
   -- Request execution
