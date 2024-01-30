@@ -46,7 +46,7 @@ function functions.exec(scope, preview)
     return {}
   end
 
-  -- TODO: implement `last` and `document` scopes.
+  -- TODO: implement `document` scope.
   --
   -- NOTE: The `document` scope may require some parser adjustments
   if scope == "cursor" then
@@ -61,6 +61,24 @@ function functions.exec(scope, preview)
     nio.run(function()
       sleep(10, client.request(req))
     end)
+
+    ---Last HTTP request made by the user
+    ---@type Request
+    _G._rest_nvim_last_request = req
+  elseif scope == "last" then
+    local req = _G._rest_nvim_last_request
+
+    if not req then
+      ---@diagnostic disable-next-line need-check-nil
+      logger:error("Rest run last: A previously made request was not found to be executed again")
+    else
+      local sleep = nio.wrap(function(ms, cb)
+        vim.defer_fn(cb, ms)
+      end, 2)
+      nio.run(function()
+        sleep(10, client.request(req))
+      end)
+    end
   end
 end
 
