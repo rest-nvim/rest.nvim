@@ -10,6 +10,9 @@
 
 local parser = {}
 
+-- TODO: parse and evaluate `(script_variable)` request node
+-- TODO: parse and evaluate dynamic variables too
+
 ---@alias NodesList { [string]: TSNode }[]
 ---@alias Variables { [string]: { type_: string, value: string|number|boolean } }[]
 
