@@ -188,6 +188,9 @@ function parser.parse_request(children_nodes, variables)
       request.method = assert(get_node_text(node, 0))
     elseif node_type == "target_url" then
       request.url = assert(get_node_text(node, 0))
+    elseif node_type == "http_version" then
+      local http_version = assert(get_node_text(node, 0))
+      request.http_version = http_version:gsub("HTTP/", "")
     end
   end
 
@@ -298,6 +301,19 @@ function parser.parse_body(children_nodes, variables)
   return body
 end
 
+---@class RequestReq
+---@field method string The request method
+---@field url string The request URL
+---@field http_version? string The request HTTP protocol
+
+---@class Request
+---@field request RequestReq
+---@field headers { [string]: string|number|boolean }[]
+---@field body table
+
+---Parse a request and return the request on itself, its headers and body
+---@param req_node TSNode Tree-sitter request node
+---@return Request
 function parser.parse(req_node)
   local ast = {
     request = {},
