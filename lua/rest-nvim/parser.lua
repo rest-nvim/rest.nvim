@@ -204,6 +204,41 @@ function parser.parse_headers(children_nodes, variables)
   return headers
 end
 
+---Recursively traverse a body table and expand all the variables
+---@param tbl table Request body
+---@return table
+local function traverse_body(tbl, variables)
+  for k, v in pairs(tbl) do
+    if type(v) == "table" then
+      traverse_body(v, variables)
+    end
+
+    if type(k) == "string" and k:find("{{[%s]?%w+[%s?]}}") then
+      local variable_name = k:match("%w+")
+      local variable = variables[variable_name]
+      local variable_value = variable.value
+      if variable.type_ == "string" then
+        variable_value = variable_value:gsub('"', "")
+      end
+
+      local key_value = tbl[k]
+      tbl[k] = nil
+      tbl[variable_value] = key_value
+    end
+    if type(v) == "string" and v:find("{{[%s]?%w+[%s?]}}") then
+      local variable_name = v:match("%w+")
+      local variable = variables[variable_name]
+      local variable_value = variable.value
+      if variable.type_ == "string" then
+        variable_value = variable_value:gsub('"', "")
+      end
+
+      tbl[k] = variable_value
+    end
+  end
+  return tbl
+end
+
 ---Parse a request tree-sitter node body
 ---@param children_nodes NodesList Tree-sitter nodes
 ---@param variables Variables
@@ -213,12 +248,13 @@ function parser.parse_body(children_nodes, variables)
   for node_type, node in pairs(children_nodes) do
     -- TODO: handle XML bodies by using xml2lua library from luarocks
     if node_type == "json_body" then
-      -- TODO: expand variables
       local json_body_text = assert(get_node_text(node, 0))
       local json_body = vim.json.decode(json_body_text, {
         luanil = { object = true, array = true },
       })
-      body = json_body
+      body = traverse_body(json_body, variables)
+      -- This is some metadata to be used later on
+      body.__TYPE = "json"
     end
   end
 
