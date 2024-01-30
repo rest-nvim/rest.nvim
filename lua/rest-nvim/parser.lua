@@ -288,6 +288,7 @@ end
 ---@return table
 function parser.parse_body(children_nodes, variables)
   local body = {}
+
   for node_type, node in pairs(children_nodes) do
     -- TODO: handle XML bodies by using xml2lua library from luarocks
     if node_type == "json_body" then
@@ -298,6 +299,15 @@ function parser.parse_body(children_nodes, variables)
       body = traverse_body(json_body, variables)
       -- This is some metadata to be used later on
       body.__TYPE = "json"
+    elseif node_type == "external_body" then
+      -- < @ (identifier) (file_path name: (path))
+      -- 0 1      2                 3
+      if node:child_count() > 2 then
+        body.name = assert(get_node_text(node:child(2), 0))
+      end
+      body.path = assert(get_node_text(node:field("file_path")[1], 0))
+      -- This is some metadata to be used later on
+      body.__TYPE = "external_file"
     end
   end
 
