@@ -39,7 +39,7 @@ local logger = require("rest-nvim.logger")
 
 ---@class RestConfigResultStats
 ---@field enable boolean Whether enable statistics or not
----@field stats string[]|{ [1]: string, title?: string, type: string }[] Statistics to be shown, takes cURL's `--write-out` options
+---@field stats string[]|{ [1]: string, title: string }[] Statistics to be shown, takes cURL's easy getinfo constants name
 
 ---@class RestConfigResultFormatters
 ---@field json string|fun(body: string): string JSON formatter
@@ -91,9 +91,10 @@ local default_config = {
       },
       statistics = {
         enable = true,
+        ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
         stats = {
-          { "time_total", title = "Total time: ", type = "time" },
-          { "size_download", title = "Request download size: ", type = "byte" },
+          { "total_time", title = "Time taken:" },
+          { "size_download_t", title = "Request download size:" },
         },
       },
       formatters = {
