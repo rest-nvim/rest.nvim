@@ -143,17 +143,32 @@ end
 ---@param node TSNode Tree-sitter node
 ---@param tree string The text where variables should be looked for
 ---@param text string The text where variables should be expanded
----@param variables Variables Document variables list
----@return string The given `text` with expanded variables
+---@param variables Variables HTTP document variables list
+---@return string|nil The given `text` with expanded variables
 local function parse_variables(node, tree, text, variables)
   local variable_query = vim.treesitter.query.parse("http", "(variable name: (_) @name)")
   ---@diagnostic disable-next-line missing-parameter
   for _, nod, _ in variable_query:iter_captures(node:root(), tree) do
     local variable_name = assert(get_node_text(nod, tree))
+    local variable_value
     local variable = variables[variable_name]
-    local variable_value = variable.value
-    if variable.type_ == "string" then
-      variable_value = variable_value:gsub('"', "")
+    -- If the variable was not found in the document then fallback to the shell environment
+    if not variable then
+      ---@diagnostic disable-next-line need-check-nil
+      logger:debug("The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ...")
+      local env_var = vim.env[variable_name]
+      if not env_var then
+        ---@diagnostic disable-next-line need-check-nil
+        logger:warn("The variable '" .. variable_name .. "' was not found in the document or in the environment. Returning the string as received ...")
+        return text
+      end
+      variable_value = env_var
+    else
+      variable_value = variable.value
+      if variable.type_ == "string" then
+        ---@cast variable_value string
+        variable_value = variable_value:gsub('"', "")
+      end
     end
     text = text:gsub("{{[%s]?" .. variable_name .. "[%s]?}}", variable_value)
   end
@@ -162,7 +177,7 @@ end
 
 ---Parse a request tree-sitter node
 ---@param children_nodes NodesList Tree-sitter nodes
----@param variables Variables
+---@param variables Variables HTTP document variables list
 ---@return table
 function parser.parse_request(children_nodes, variables)
   local request = {}
@@ -184,7 +199,7 @@ end
 
 ---Parse request headers tree-sitter nodes
 ---@param children_nodes TSNode[] Tree-sitter nodes
----@param variables Variables
+---@param variables Variables HTTP document variables list
 ---@return table
 function parser.parse_headers(children_nodes, variables)
   local headers = {}
@@ -213,26 +228,44 @@ local function traverse_body(tbl, variables)
       traverse_body(v, variables)
     end
 
-    if type(k) == "string" and k:find("{{[%s]?%w+[%s?]}}") then
-      local variable_name = k:match("%w+")
-      local variable = variables[variable_name]
-      local variable_value = variable.value
-      if variable.type_ == "string" then
-        variable_value = variable_value:gsub('"', "")
+    ---Expand a variable in the given string
+    ---@param str string String where the variables are going to be expanded
+    ---@param vars Variables HTTP document variables list
+    ---@return string|number|boolean
+    local function expand_variable(str, vars)
+      local variable_name = str:gsub("{{[%s]?", ""):gsub("[%s]?}}", ""):match(".*")
+      local variable_value
+      local variable = vars[variable_name]
+      -- If the variable was not found in the document then fallback to the shell environment
+      if not variable then
+        ---@diagnostic disable-next-line need-check-nil
+        logger:debug("The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ...")
+        local env_var = vim.env[variable_name]
+        if not env_var then
+          ---@diagnostic disable-next-line need-check-nil
+          logger:warn("The variable '" .. variable_name .. "' was not found in the document or in the environment. Returning the string as received ...")
+          return str
+        end
+        variable_value = env_var
+      else
+        variable_value = variable.value
+        if variable.type_ == "string" then
+          ---@cast variable_value string
+          variable_value = variable_value:gsub('"', "")
+        end
       end
+      ---@cast variable_value string|number|boolean
+      return variable_value
+    end
 
+    if type(k) == "string" and k:find("{{[%s]?.*[%s?]}}") then
+      local variable_value = expand_variable(k, variables)
       local key_value = tbl[k]
       tbl[k] = nil
       tbl[variable_value] = key_value
     end
-    if type(v) == "string" and v:find("{{[%s]?%w+[%s?]}}") then
-      local variable_name = v:match("%w+")
-      local variable = variables[variable_name]
-      local variable_value = variable.value
-      if variable.type_ == "string" then
-        variable_value = variable_value:gsub('"', "")
-      end
-
+    if type(v) == "string" and v:find("{{[%s]?.*[%s?]}}") then
+      local variable_value = expand_variable(v, variables)
       tbl[k] = variable_value
     end
   end
@@ -241,7 +274,7 @@ end
 
 ---Parse a request tree-sitter node body
 ---@param children_nodes NodesList Tree-sitter nodes
----@param variables Variables
+---@param variables Variables HTTP document variables list
 ---@return table
 function parser.parse_body(children_nodes, variables)
   local body = {}
