@@ -56,6 +56,8 @@
 
 (target_url) @text.uri
 
+(http_version) @constant
+
 (string) @string
 
 (number) @number
