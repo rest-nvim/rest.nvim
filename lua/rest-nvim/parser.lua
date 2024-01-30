@@ -105,10 +105,16 @@ end
 ---@param req_node TSNode Tree-sitter request node
 ---@return NodesList
 local function traverse_request(req_node)
-  local child_nodes = {}
-  for child, _ in req_node:iter_children() do
+  local child_nodes = {
+    headers = {},
+  }
+  for child, field_name in req_node:iter_children() do
     local child_type = child:type()
-    child_nodes[child_type] = child
+    if child_type == "header" then
+      table.insert(child_nodes.headers, child)
+    else
+      child_nodes[child_type] = child
+    end
   end
   return child_nodes
 end
@@ -177,17 +183,22 @@ function parser.parse_request(children_nodes, variables)
 end
 
 ---Parse request headers tree-sitter nodes
----@param children_nodes NodesList Tree-sitter nodes
+---@param children_nodes TSNode[] Tree-sitter nodes
 ---@param variables Variables
 ---@return table
 function parser.parse_headers(children_nodes, variables)
   local headers = {}
-  for node_type, node in pairs(children_nodes) do
-    if node_type == "header" then
-      local name = assert(get_node_text(node:field("name")[1], 0))
-      local value = assert(get_node_text(node:field("value")[1], 0))
-      headers[name] = vim.trim(value)
-    end
+  for _, node in ipairs(children_nodes.headers) do
+    local name = assert(get_node_text(node:field("name")[1], 0))
+    local value = vim.trim(assert(get_node_text(node:field("value")[1], 0)))
+
+    -- This dummy request is just for the parser to be able to recognize the header node
+    -- so we can iterate over it to parse the variables
+    local dummy_request = "GET http://localhost:3333\n"
+    local header_text = name .. ": " .. value
+    local header_tree = vim.treesitter.get_string_parser(dummy_request .. header_text, "http"):parse()[1]
+
+    headers[name] = parse_variables(header_tree:root(), dummy_request .. header_text, value, variables)
   end
 
   return headers
