@@ -81,6 +81,20 @@ function functions.exec(scope)
   result.write_res(result_buf, req_results)
 end
 
+---Find a list of environment files starting from the current directory
+---@return string[]
+function functions.find_env_files()
+  -- We are currently looking for any ".*env*" file, e.g. ".env", ".env.json"
+  --
+  -- This algorithm can be improved later on to search from a parent directory if the desired environment file
+  -- is somewhere else but in the current working directory.
+  local files = vim.fs.find(function(name, path)
+    return name:match(".*env.*$")
+  end, { limit = math.huge, type = "file", path = "./" })
+
+  return files
+end
+
 ---Manage the environment file that is currently in use while running requests
 ---
 ---If you choose to `set` the environment, you must provide a `path` to the environment file.

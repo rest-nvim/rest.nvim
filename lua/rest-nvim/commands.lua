@@ -93,15 +93,7 @@ local rest_command_tbl = {
       -- If the completion arguments is a table and `set` is the desired action then
       -- return a list of files in the current working directory for completion
       if type(args) == "table" and args[1]:match("set") then
-        -- We are currently looking for any ".*env*" file, e.g. ".env", ".env.json"
-        --
-        -- This algorithm can be improved later on to search from a parent directory if the desired environment file
-        -- is somewhere else but in the current working directory.
-        local files = vim.fs.find(function(name, path)
-          return name:match(".*env.*$")
-        end, { limit = math.huge, type = "file", path = "./" })
-
-        return files
+        return functions.find_env_files()
       end
 
       local match = vim.tbl_filter(function(action)
