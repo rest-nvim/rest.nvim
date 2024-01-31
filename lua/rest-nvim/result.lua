@@ -211,6 +211,14 @@ function result.display_buf(bufnr, res_code, stats)
     -- Disable concealing for the results buffer window
     vim.api.nvim_set_option_value("conceallevel", 0, { win = winnr })
 
+    -- Disable numbering for the results buffer window
+    vim.api.nvim_set_option_value("number", false, { win = winnr })
+    vim.api.nvim_set_option_value("relativenumber", false, { win = winnr })
+
+    -- Enable wrapping and smart indent on break
+    vim.api.nvim_set_option_value("wrap", true, { win = winnr })
+    vim.api.nvim_set_option_value("breakindent", true, { win = winnr })
+
     -- Set winbar pane contents
     ---@diagnostic disable-next-line undefined-field
     result.write_block(bufnr, result.pane_map[result.current_pane_index].contents, true, false)
