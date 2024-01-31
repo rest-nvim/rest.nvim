@@ -25,6 +25,8 @@ function check.validate(cfg)
   local ok, err = validate({
     client = { cfg.client, "string" },
     env_file = { cfg.env_file, "string" },
+    env_pattern = { cfg.env_pattern, "string" },
+    env_edit_command = { cfg.env_edit_command, "string" },
     encode_url = { cfg.encode_url, "boolean" },
     skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },

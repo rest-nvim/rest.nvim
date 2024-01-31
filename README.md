@@ -99,6 +99,9 @@ use {
       -- Jump to request line on run
       jump_to_request = false,
       env_file = '.env',
+      -- for telescope select
+      env_pattern = "\\.env$",
+      env_edit_command = "tabedit",
       custom_dynamic_variables = {},
       yank_dry_run = true,
     })
@@ -186,6 +189,26 @@ request method (e.g. `GET`) and run `rest.nvim`.
 Run `export DEBUG_PLENARY="debug"` before starting nvim. Logs will appear most
 likely in ~/.cache/nvim/rest.nvim.log
 
+## Telescope
+
+```lua
+
+-- first load extension
+require("telescope").load_extension("rest")
+-- then use telescope
+require("telescope").extensions.rest.select_env()
+
+```
+
+### Mappings
+
+- Enter: Select Env file
+- Ctrl+O: Edit Env file
+
+### Config
+
+- env_pattern: For env file pattern
+- env_edit_command: For env file edit command
 
 ## Contribute
 

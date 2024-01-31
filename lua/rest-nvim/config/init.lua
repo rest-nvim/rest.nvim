@@ -52,6 +52,8 @@ local logger = require("rest-nvim.logger")
 ---@class RestConfig
 ---@field client string The HTTP client to be used when running requests, default is `"curl"`
 ---@field env_file string Environment variables file to be used for the request variables in the document
+---@field env_pattern string Environment variables file pattern for telescope.nvim
+---@field env_edit_command string Neovim command to edit an environment file, default is `"tabedit"`
 ---@field encode_url boolean Encode URL before making request
 ---@field skip_ssl_verification boolean Skip SSL verification, useful for unknown certificates
 ---@field custom_dynamic_variables { [string]: fun(): string }[] Table of custom dynamic variables
@@ -67,6 +69,8 @@ local logger = require("rest-nvim.logger")
 local default_config = {
   client = "curl",
   env_file = ".env",
+  env_pattern = "\\.env$",
+  env_edit_command = "tabedit",
   encode_url = true,
   skip_ssl_verification = false,
   custom_dynamic_variables = {},
