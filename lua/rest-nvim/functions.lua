@@ -77,8 +77,11 @@ function functions.exec(scope)
     end
   end
 
-  local result_buf = result.get_or_create_buf()
-  result.write_res(result_buf, req_results)
+  -- We should not be trying to show a result if the request failed
+  if #req_results > 0 then
+    local result_buf = result.get_or_create_buf()
+    result.write_res(result_buf, req_results)
+  end
 end
 
 ---Find a list of environment files starting from the current directory
