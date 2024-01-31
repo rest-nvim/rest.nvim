@@ -85,6 +85,7 @@ end
 function result.display_buf(bufnr)
   local is_result_displayed = false
 
+  -- Check if the results buffer is already displayed
   for _, id in ipairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_get_buf(id) == bufnr then
       is_result_displayed = true
@@ -107,6 +108,17 @@ function result.display_buf(bufnr)
     else
       vim.cmd(cmd .. bufnr)
     end
+
+    -- Get the ID of the window that contains the results buffer
+    local winnr
+    for _, id in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_buf(id) == bufnr then
+        winnr = id
+      end
+    end
+
+    -- Disable concealing for the results buffer window
+    vim.api.nvim_set_option_value("conceallevel", 0, { win = winnr })
 
     -- Set unmodifiable state
     vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
