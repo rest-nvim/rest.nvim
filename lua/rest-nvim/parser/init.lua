@@ -10,8 +10,12 @@
 
 local parser = {}
 
+local xml2lua = require("xml2lua")
+
+local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
+
 -- TODO: parse and evaluate `(script_variable)` request node
--- TODO: parse and evaluate dynamic variables too
+-- TODO: parse and evaluate environment files too
 
 ---@alias NodesList { [string]: TSNode }[]
 ---@alias Variables { [string]: { type_: string, value: string|number|boolean } }[]
@@ -158,7 +162,16 @@ local function parse_variables(node, tree, text, variables)
   for _, nod, _ in variable_query:iter_captures(node:root(), tree) do
     local variable_name = assert(get_node_text(nod, tree))
     local variable_value
-    local variable = variables[variable_name]
+
+    -- If the variable name contains a `$` symbol then try to parse it as a dynamic variable
+    if variable_name:find("^%$") then
+      variable_value = dynamic_vars.read(variable_name)
+      if variable_value then
+        return variable_value
+      end
+    end
+
+    local variable = vars[variable_name]
     -- If the variable was not found in the document then fallback to the shell environment
     if not variable then
       ---@diagnostic disable-next-line need-check-nil
@@ -239,60 +252,70 @@ end
 ---@param tbl table Request body
 ---@return table
 local function traverse_body(tbl, variables)
+  ---Expand a variable in the given string
+  ---@param str string String where the variables are going to be expanded
+  ---@param vars Variables HTTP document variables list
+  ---@return string|number|boolean
+  local function expand_variable(str, vars)
+    local logger = _G._rest_nvim.logger
+
+    local variable_name = str:gsub("{{[%s]?", ""):gsub("[%s]?}}", ""):match(".*")
+    local variable_value
+
+    -- If the variable name contains a `$` symbol then try to parse it as a dynamic variable
+    if variable_name:find("^%$") then
+      variable_value = dynamic_vars.read(variable_name)
+      if variable_value then
+        return variable_value
+      end
+    end
+
+    local variable = vars[variable_name]
+    -- If the variable was not found in the document then fallback to the shell environment
+    if not variable then
+      ---@diagnostic disable-next-line need-check-nil
+      logger:debug(
+        "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
+      )
+      local env_var = vim.env[variable_name]
+      if not env_var then
+        ---@diagnostic disable-next-line need-check-nil
+        logger:warn(
+          "The variable '"
+            .. variable_name
+            .. "' was not found in the document or in the environment. Returning the string as received ..."
+        )
+        return str
+      end
+      variable_value = env_var
+    else
+      variable_value = variable.value
+      if variable.type_ == "string" then
+        ---@cast variable_value string
+        variable_value = variable_value:gsub('"', "")
+      end
+    end
+    ---@cast variable_value string|number|boolean
+    return variable_value
+  end
+
   for k, v in pairs(tbl) do
     if type(v) == "table" then
       traverse_body(v, variables)
     end
 
-    ---Expand a variable in the given string
-    ---@param str string String where the variables are going to be expanded
-    ---@param vars Variables HTTP document variables list
-    ---@return string|number|boolean
-    local function expand_variable(str, vars)
-      local logger = _G._rest_nvim.logger
-
-      local variable_name = str:gsub("{{[%s]?", ""):gsub("[%s]?}}", ""):match(".*")
-      local variable_value
-      local variable = vars[variable_name]
-      -- If the variable was not found in the document then fallback to the shell environment
-      if not variable then
-        ---@diagnostic disable-next-line need-check-nil
-        logger:debug(
-          "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
-        )
-        local env_var = vim.env[variable_name]
-        if not env_var then
-          ---@diagnostic disable-next-line need-check-nil
-          logger:warn(
-            "The variable '"
-              .. variable_name
-              .. "' was not found in the document or in the environment. Returning the string as received ..."
-          )
-          return str
-        end
-        variable_value = env_var
-      else
-        variable_value = variable.value
-        if variable.type_ == "string" then
-          ---@cast variable_value string
-          variable_value = variable_value:gsub('"', "")
-        end
-      end
-      ---@cast variable_value string|number|boolean
-      return variable_value
-    end
-
-    if type(k) == "string" and k:find("{{[%s]?.*[%s?]}}") then
+    if type(k) == "string" and k:find("{{[%s]?.*[%s]?}}") then
       local variable_value = expand_variable(k, variables)
       local key_value = tbl[k]
       tbl[k] = nil
       tbl[variable_value] = key_value
     end
-    if type(v) == "string" and v:find("{{[%s]?.*[%s?]}}") then
+    if type(v) == "string" and v:find("{{[%s]?.*[%s]?}}") then
       local variable_value = expand_variable(v, variables)
       tbl[k] = variable_value
     end
   end
+
   return tbl
 end
 
@@ -303,6 +326,7 @@ end
 function parser.parse_body(children_nodes, variables)
   local body = {}
 
+  -- TODO: handle GraphQL bodies by using a graphql parser library from luarocks
   for node_type, node in pairs(children_nodes) do
     -- TODO: handle XML bodies by using xml2lua library from luarocks
     if node_type == "json_body" then
