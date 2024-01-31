@@ -18,6 +18,7 @@ dependencies = {
   "nvim-nio",
   "Lua-cURL",
   "mimetypes",
+  "xml2lua",
 }
 
 source = {
