@@ -143,17 +143,18 @@ local function get_stats(req, statistics_tbl)
     return stat_info
   end
 
-  local stat_title, stat_info
+  local stat_key, stat_title, stat_info
   for _, stat in pairs(statistics_tbl) do
     for k, v in pairs(stat) do
       if type(k) == "string" and k == "title" then
         stat_title = v
       end
       if type(k) == "number" then
+        stat_key = v
         stat_info = get_stat(req, v)
       end
     end
-    table.insert(stats, stat_title .. " " .. stat_info)
+    stats[stat_key] = stat_title .. " " .. stat_info
   end
 
   return stats
@@ -229,8 +230,7 @@ function client.request(request)
     -- Get request statistics if they are enabled
     local stats_config = _G._rest_nvim.result.behavior.statistics
     if stats_config.enable then
-      local statistics = get_stats(req, stats_config.stats)
-      ret.statistics = statistics
+      ret.statistics = get_stats(req, stats_config.stats)
     end
 
     ret.url = req:getinfo_effective_url()
