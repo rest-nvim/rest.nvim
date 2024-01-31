@@ -11,7 +11,7 @@ local function hl_link(lhs, rhs)
   vim.api.nvim_set_hl(ns, lhs, { link = rhs })
 end
 
-syntax("match",   "httpResultComment", [[\v^#.*$"]])
+syntax("match",   "httpResultComment", [["\v^#.*$"]])
 syntax("match",   "httpResultPath",    [[/.*$/ contained]])
 syntax("keyword", "httpResultTitle",   [[GET POST PATCH PUT HEAD DELETE nextgroup=httpResultPath]])
 
