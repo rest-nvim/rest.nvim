@@ -12,10 +12,10 @@ local parser = {}
 
 local xml2lua = require("xml2lua")
 
+local env_vars = require("rest-nvim.parser.env_vars")
 local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
 
 -- TODO: parse and evaluate `(script_variable)` request node
--- TODO: parse and evaluate environment files too
 
 ---@alias NodesList { [string]: TSNode }[]
 ---@alias Variables { [string]: { type_: string, value: string|number|boolean } }[]
@@ -178,6 +178,7 @@ local function parse_variables(node, tree, text, variables)
       logger:debug(
         "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
       )
+      env_vars.read_file()
       local env_var = vim.env[variable_name]
       if not env_var then
         ---@diagnostic disable-next-line need-check-nil
@@ -277,6 +278,7 @@ local function traverse_body(tbl, variables)
       logger:debug(
         "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
       )
+      env_vars.read_file()
       local env_var = vim.env[variable_name]
       if not env_var then
         ---@diagnostic disable-next-line need-check-nil
