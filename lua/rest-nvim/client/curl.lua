@@ -124,7 +124,6 @@ function client.request(request)
   req:setopt_headerfunction(table.insert, res_headers)
 
   local ret = {}
-
   local ok, err = req:perform()
   if ok then
     -- Get request statistics if they are enabled
