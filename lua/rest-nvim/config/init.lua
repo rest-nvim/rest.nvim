@@ -53,7 +53,6 @@ local logger = require("rest-nvim.logger")
 ---@field client string The HTTP client to be used when running requests, default is `"curl"`
 ---@field env_file string Environment variables file to be used for the request variables in the document
 ---@field encode_url boolean Encode URL before making request
----@field yank_dry_run boolean Whether to copy the request preview (cURL command) to the clipboard
 ---@field skip_ssl_verification boolean Skip SSL verification, useful for unknown certificates
 ---@field custom_dynamic_variables { [string]: fun(): string }[] Table of custom dynamic variables
 ---@field logs RestConfigLogs Logging system configuration
@@ -69,7 +68,6 @@ local default_config = {
   client = "curl",
   env_file = ".env",
   encode_url = true,
-  yank_dry_run = true,
   skip_ssl_verification = false,
   custom_dynamic_variables = {},
   logs = {

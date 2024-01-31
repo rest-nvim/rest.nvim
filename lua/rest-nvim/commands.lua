@@ -13,8 +13,6 @@
 --- last                            Re-run the last executed request, alias to `run last`
 ---                                 to retain backwards compatibility with the old keybinds
 ---                                 layout.
---- preview                         Preview the cURL command that is going to be ran while
----                                 executing the request (this does NOT run the request).
 ---
 ---@brief ]]
 
@@ -53,11 +51,6 @@ local rest_command_tbl = {
   last = {
     impl = function(_)
       functions.exec("last", false)
-    end,
-  },
-  preview = {
-    impl = function(_)
-      functions.exec("cursor", true)
     end,
   },
   env = {
@@ -147,7 +140,7 @@ end
 function commands.init(bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, "Rest", rest, {
     nargs = "+",
-    desc = "Run or preview your HTTP requests",
+    desc = "Run your HTTP requests",
     complete = function(arg_lead, cmdline, _)
       local rest_commands = vim.tbl_keys(rest_command_tbl)
       local subcmd, subcmd_arg_lead = cmdline:match("^Rest*%s(%S+)%s(.*)$")

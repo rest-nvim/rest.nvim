@@ -13,15 +13,13 @@ local utils = require("rest-nvim.utils")
 local parser = require("rest-nvim.parser")
 local result = require("rest-nvim.result")
 
----Execute or `preview` one or several HTTP requests depending on given `scope`
+---Execute one or several HTTP requests depending on given `scope`
 ---and return request(s) results in a table that will be used to render results
 ---in a buffer.
 ---@param scope string Defines the request execution scope. Can be: `last`, `cursor` (default) or `document`
----@param preview boolean Whether execute the request or just preview the command that is going to be ran. Default is `false`
-function functions.exec(scope, preview)
+function functions.exec(scope)
   vim.validate({
     scope = { scope, "string" },
-    preview = { preview, "boolean" },
   })
 
   local logger = _G._rest_nvim.logger

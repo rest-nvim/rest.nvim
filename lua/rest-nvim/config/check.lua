@@ -26,7 +26,6 @@ function check.validate(cfg)
     client = { cfg.client, "string" },
     env_file = { cfg.env_file, "string" },
     encode_url = { cfg.encode_url, "boolean" },
-    yank_dry_run = { cfg.yank_dry_run, "boolean" },
     skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
     keybinds = { cfg.keybinds, "table" },
