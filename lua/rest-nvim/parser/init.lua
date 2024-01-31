@@ -11,6 +11,7 @@
 local parser = {}
 
 local xml2lua = require("xml2lua")
+local xml_handler = require("xmlhandler.tree")
 
 local env_vars = require("rest-nvim.parser.env_vars")
 local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
@@ -339,6 +340,14 @@ function parser.parse_body(children_nodes, variables)
       body = traverse_body(json_body, variables)
       -- This is some metadata to be used later on
       body.__TYPE = "json"
+    elseif node_type == "xml_body" then
+      local body_handler = xml_handler:new()
+      local xml_parser = xml2lua.parser(body_handler)
+      local xml_body_text = assert(get_node_text(node, 0))
+      xml_parser:parse(xml_body_text)
+      body = traverse_body(body_handler.root, variables)
+      -- This is some metadata to be used later on
+      body.__TYPE = "xml"
     elseif node_type == "external_body" then
       -- < @ (identifier) (file_path name: (path))
       -- 0 1      2                 3
