@@ -106,6 +106,40 @@ local rest_command_tbl = {
       return match
     end,
   },
+  result = {
+    impl = function(args)
+      local logger = _G._rest_nvim.logger
+
+      if #args > 1 then
+        ---@diagnostic disable-next-line need-check-nil
+        logger:error("Too many arguments were passed to the 'result' command: 1 argument was expected, " .. #args .. " were passed")
+        return
+      end
+      if not vim.tbl_contains({ "next", "prev" }, args[1]) then
+        ---@diagnostic disable-next-line need-check-nil
+        logger:error("Unknown argument was passed to the 'result' command: 'next' or 'prev' were expected")
+        return
+      end
+
+      functions.cycle_result_pane(args[1])
+    end,
+    ---@return string[]
+    complete = function(args)
+      local cycles = { "next", "prev" }
+      if #args < 1 then
+        return cycles
+      end
+
+      local match = vim.tbl_filter(function(cycle)
+        if string.find(cycle, "^" .. args) then
+          return cycle
+          ---@diagnostic disable-next-line missing-return
+        end
+      end, cycles)
+
+      return match
+    end,
+  },
 }
 
 local function rest(opts)

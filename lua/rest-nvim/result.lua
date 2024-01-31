@@ -57,21 +57,9 @@ local function set_winbar_hl()
     })
   end
 
-  -- Set highlighting for the winbar stats
+  -- Set highlighting for the winbar hints
   local textmuted_fg = get_hl_group_fg("TextMuted")
-  for _, hl in ipairs({ "Code", "Size", "Time" }) do
-    vim.api.nvim_set_hl(0, "Rest" .. hl, {
-      fg = textmuted_fg,
-    })
-  end
-
-  -- Set highlighting for the winbar status code
-  local moremsg = get_hl_group_fg("MoreMsg")
-  local errormsg = get_hl_group_fg("ErrorMsg")
-  local warningmsg = get_hl_group_fg("WarningMsg")
-  vim.api.nvim_set_hl(0, "RestCode200", { fg = moremsg })
-  vim.api.nvim_set_hl(0, "RestCode300", { fg = warningmsg })
-  vim.api.nvim_set_hl(0, "RestCodexxx", { fg = errormsg })
+  vim.api.nvim_set_hl(0, "RestText", { fg = textmuted_fg })
 end
 
 ---Select the winbar panel based on the pane index and set the pane contents
@@ -233,33 +221,9 @@ function result.display_buf(bufnr, res_code, stats)
     -- Set winbar
     --
     -- winbar panes
-    local winbar = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal#%=%<]]
+    local winbar = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal#%=%<]]
 
-    -- winbar status code
-    winbar = winbar .. "%#RestCode#" .. "status: "
-    if res_code >= 200 and res_code < 300 then
-      winbar = winbar .. "%#RestCode200#"
-    elseif res_code >= 300 and res_code < 400 then
-      winbar = winbar .. "%#RestCode300#"
-    elseif res_code >= 400 then
-      winbar = winbar .. "%#RestCodexxx#"
-    end
-    winbar = winbar .. tostring(res_code)
-
-    -- winbar statistics
-    for stat_name, stat_value in pairs(stats) do
-      local val = vim.split(stat_value, ": ")
-      if stat_name:find("total_time") then
-        winbar = winbar .. "%#RestTime#, " .. val[1]:lower() .. ": "
-        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-        winbar = winbar .. "%#Number#" .. value .. " %#Normal#" .. representation
-      elseif stat_name:find("size_download") then
-        winbar = winbar .. "%#RestSize#, " .. val[1]:lower() .. ": "
-        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-        winbar = winbar .. "%#Number#" .. value .. " %#Normal#" .. representation
-      end
-    end
-    winbar = winbar .. " "
+    winbar = winbar .. "%#RestText#Press %#Keyword#H%#RestText# for the prev pane or %#Keyword#L%#RestText# for the next pane%#Normal# "
     set_winbar_hl() -- Set initial highlighting before displaying winbar
     vim.wo[winnr].winbar = winbar
   end
@@ -347,10 +311,15 @@ function result.write_res(bufnr, res)
       end
       body = vim.split(res.result, "\n")
       table.insert(body, 1, res.method .. " " .. res.url)
-      table.insert(body, 2, "")
-      table.insert(body, 3, "#+RES")
+      table.insert(body, 2, headers[1]) -- HTTP/X and status code + meaning
+      table.insert(body, 3, "")
+      table.insert(body, 4, "#+RES")
       table.insert(body, "#+END")
       table.insert(body, "")
+
+      -- Remove the HTTP/X and status code + meaning from here to avoid duplicates
+      ---@diagnostic disable-next-line undefined-field
+      table.remove(result.pane_map[2].contents, 1)
 
       -- Add statistics to the response
       table.sort(res.statistics)

@@ -9,6 +9,7 @@
 local autocmds = {}
 
 local commands = require("rest-nvim.commands")
+local functions = require("rest-nvim.functions")
 
 ---Set up Rest autocommands group and set `:Rest` command on `*.http` files
 function autocmds.setup()
@@ -20,6 +21,20 @@ function autocmds.setup()
       commands.init(args.buf)
     end,
     desc = "Set up rest.nvim commands",
+  })
+
+  vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+    group = rest_nvim_augroup,
+    pattern = "rest_nvim_results",
+    callback = function(_)
+      vim.keymap.set("n", "H", function()
+        functions.cycle_result_pane("prev")
+      end)
+      vim.keymap.set("n", "L", function()
+        functions.cycle_result_pane("next")
+      end)
+    end,
+    desc = "Set up rest.nvim results buffer keybinds"
   })
 end
 

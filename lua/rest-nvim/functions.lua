@@ -136,4 +136,19 @@ function functions.env(action, path)
   end
 end
 
+---Cycle through the results buffer winbar panes
+---@param cycle string Cycle direction, can be: `"next"` or `"prev"`
+function functions.cycle_result_pane(cycle)
+  ---@type number
+  local idx = result.current_pane_index
+
+  if cycle == "next" then
+    idx = idx + 1
+  elseif cycle == "prev" then
+    idx = idx - 1
+  end
+
+  _G._rest_nvim_winbar(idx)
+end
+
 return functions
