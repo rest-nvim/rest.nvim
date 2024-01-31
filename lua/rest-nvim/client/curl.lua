@@ -234,6 +234,7 @@ function client.request(request)
     end
 
     ret.url = req:getinfo_effective_url()
+    ret.code = req:getinfo_response_code()
     ret.method = req:getinfo_effective_method()
     ret.headers = table.concat(res_headers):gsub("\r", "")
     ret.result = table.concat(res_result)
