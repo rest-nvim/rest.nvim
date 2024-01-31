@@ -1,7 +1,7 @@
 if exists("b:current_syntax") | finish | endif
 
 syn match   httpResultComment "\v^#.*$"
-syn keyword httpResultTitle GET POST PATCH PUT HEAD DELETE nextgroup=httpResultPath
+syn keyword httpResultMethod OPTIONS GET HEAD POST PUT DELETE TRACE CONNECT nextgroup=httpResultPath
 syn match   httpResultPath  /.*$/ contained
 
 syn match httpResultField /^\(\w\)[^:]\+:/he=e-1
@@ -19,8 +19,8 @@ syn region httpResultString start=/\vr?"/ end=/\v"/
 syn match  httpResultNumber /\v[ =]@1<=[0-9]*.?[0-9]+[ ,;&\n]/he=e-1
 
 hi link httpResultComment   Comment
-hi link httpResultTitle     Type
-hi link httpResultPath      httpTSURI
+hi link httpResultMethod    Type
+hi link httpResultPath      Link
 hi link httpResultField     Identifier
 hi link httpResultDateField Identifier
 hi link httpResultDate      String
