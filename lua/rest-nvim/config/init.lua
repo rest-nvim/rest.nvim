@@ -92,7 +92,7 @@ local default_config = {
         ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
         stats = {
           { "total_time", title = "Time taken:" },
-          { "size_download_t", title = "Request download size:" },
+          { "size_download_t", title = "Download size:" },
         },
       },
       formatters = {
