@@ -136,7 +136,7 @@ function result.write_res(bufnr, res)
   local headers = vim.tbl_filter(function(header)
     if header ~= "" then
       return header
-    ---@diagnostic disable-next-line missing-return
+      ---@diagnostic disable-next-line missing-return
     end
   end, vim.split(res.headers, "\n"))
 
@@ -186,15 +186,15 @@ function result.write_res(bufnr, res)
             res.result = stdout
           else
             ---@diagnostic disable-next-line need-check-nil
-            logger:error(
-              "Error running formatter '" .. fmt .. "' on response body:\n" .. stdout
-            )
+            logger:error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
           end
         end
       else
         ---@diagnostic disable-next-line need-check-nil
         logger:info(
-          "Could not find a formatter for the body type " .. res_type .. " returned in the request, the results will not be formatted"
+          "Could not find a formatter for the body type "
+            .. res_type
+            .. " returned in the request, the results will not be formatted"
         )
       end
       local body = vim.split(res.result, "\n")

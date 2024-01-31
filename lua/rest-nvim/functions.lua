@@ -40,9 +40,7 @@ function functions.exec(scope, preview)
   -- Raise an error if an invalid scope has been provided
   if not vim.tbl_contains({ "last", "cursor", "document" }, scope) then
     ---@diagnostic disable-next-line need-check-nil
-    logger:error(
-      "Invalid scope '" .. scope .. "' provided to the 'exec' function"
-    )
+    logger:error("Invalid scope '" .. scope .. "' provided to the 'exec' function")
     return {}
   end
 
@@ -57,9 +55,11 @@ function functions.exec(scope, preview)
       parser.look_behind_until(parser.get_node_at_cursor(), "request")
     )
 
-    req_results = nio.run(function()
-      return client.request(req)
-    end):wait()
+    req_results = nio
+      .run(function()
+        return client.request(req)
+      end)
+      :wait()
 
     ---Last HTTP request made by the user
     ---@type Request
@@ -71,9 +71,11 @@ function functions.exec(scope, preview)
       ---@diagnostic disable-next-line need-check-nil
       logger:error("Rest run last: A previously made request was not found to be executed again")
     else
-      req_results = nio.run(function()
-        return client.request(req)
-      end):wait()
+      req_results = nio
+        .run(function()
+          return client.request(req)
+        end)
+        :wait()
     end
   end
 
@@ -100,9 +102,7 @@ function functions.env(action, path)
 
   if not vim.tbl_contains({ "set", "show" }, action) then
     ---@diagnostic disable-next-line need-check-nil
-    logger:error(
-      "Invalid action '" .. action .. "' provided to the 'env' function"
-    )
+    logger:error("Invalid action '" .. action .. "' provided to the 'env' function")
     return
   end
 

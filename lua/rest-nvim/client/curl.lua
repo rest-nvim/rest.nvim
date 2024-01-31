@@ -30,7 +30,10 @@ local function get_stats(req, statistics_tbl)
     local curl_info = curl["INFO_" .. stat_:upper()]
     if not curl_info then
       ---@diagnostic disable-next-line need-check-nil
-      logger:error("The cURL request stat field '" .. stat_ "' was not found.\nPlease take a look at: https://curl.se/libcurl/c/curl_easy_getinfo.html")
+      logger:error(
+        "The cURL request stat field '"
+          .. stat_("' was not found.\nPlease take a look at: https://curl.se/libcurl/c/curl_easy_getinfo.html")
+      )
       return
     end
     local stat_info = req_:getinfo(curl_info)
@@ -45,7 +48,7 @@ local function get_stats(req, statistics_tbl)
 
   local stat_title, stat_info
   for _, stat in pairs(statistics_tbl) do
-    for k,v in pairs(stat) do
+    for k, v in pairs(stat) do
       if type(k) == "string" and k == "title" then
         stat_title = v
       end
@@ -112,7 +115,7 @@ function client.request(request)
       [request.body.name and request.body.name or "body"] = {
         file = request.body.path,
         type = body_mimetype,
-      }
+      },
     }
     req:post(post_data)
   end

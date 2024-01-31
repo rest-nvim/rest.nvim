@@ -41,7 +41,9 @@ local function check_syntax_error(node)
     end
 
     ---@diagnostic disable-next-line need-check-nil
-    logger:error("The tree-sitter node at the range " .. create_node_range_str(node) .. " has a syntax error and cannot be parsed")
+    logger:error(
+      "The tree-sitter node at the range " .. create_node_range_str(node) .. " has a syntax error and cannot be parsed"
+    )
     return true
   end
 
@@ -160,11 +162,17 @@ local function parse_variables(node, tree, text, variables)
     -- If the variable was not found in the document then fallback to the shell environment
     if not variable then
       ---@diagnostic disable-next-line need-check-nil
-      logger:debug("The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ...")
+      logger:debug(
+        "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
+      )
       local env_var = vim.env[variable_name]
       if not env_var then
         ---@diagnostic disable-next-line need-check-nil
-        logger:warn("The variable '" .. variable_name .. "' was not found in the document or in the environment. Returning the string as received ...")
+        logger:warn(
+          "The variable '"
+            .. variable_name
+            .. "' was not found in the document or in the environment. Returning the string as received ..."
+        )
         return text
       end
       variable_value = env_var
@@ -249,11 +257,17 @@ local function traverse_body(tbl, variables)
       -- If the variable was not found in the document then fallback to the shell environment
       if not variable then
         ---@diagnostic disable-next-line need-check-nil
-        logger:debug("The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ...")
+        logger:debug(
+          "The variable '" .. variable_name .. "' was not found in the document, falling back to the environment ..."
+        )
         local env_var = vim.env[variable_name]
         if not env_var then
           ---@diagnostic disable-next-line need-check-nil
-          logger:warn("The variable '" .. variable_name .. "' was not found in the document or in the environment. Returning the string as received ...")
+          logger:warn(
+            "The variable '"
+              .. variable_name
+              .. "' was not found in the document or in the environment. Returning the string as received ..."
+          )
           return str
         end
         variable_value = env_var

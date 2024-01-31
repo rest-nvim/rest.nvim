@@ -43,7 +43,7 @@ local rest_command_tbl = {
       local match = vim.tbl_filter(function(scope)
         if string.find(scope, "^" .. args) then
           return scope
-        ---@diagnostic disable-next-line missing-return
+          ---@diagnostic disable-next-line missing-return
         end
       end, scopes)
 
@@ -58,7 +58,7 @@ local rest_command_tbl = {
   preview = {
     impl = function(_)
       functions.exec("cursor", true)
-    end
+    end,
   },
   env = {
     impl = function(args)
@@ -72,9 +72,7 @@ local rest_command_tbl = {
       -- If there was only one argument and it is `set` then raise an error because we are also expecting for the env file path
       if #args == 1 and args[1] == "set" then
         ---@diagnostic disable-next-line need-check-nil
-        logger:error(
-          "Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed"
-        )
+        logger:error("Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed")
         return
       end
       -- We do not need too many arguments here, complain about it please!
@@ -116,13 +114,13 @@ local rest_command_tbl = {
       local match = vim.tbl_filter(function(action)
         if string.find(action, "^" .. args) then
           return action
-        ---@diagnostic disable-next-line missing-return
+          ---@diagnostic disable-next-line missing-return
         end
       end, actions)
 
       return match
     end,
-  }
+  },
 }
 
 local function rest(opts)
@@ -160,7 +158,7 @@ function commands.init(bufnr)
         return vim.tbl_filter(function(cmd)
           if string.find(cmd, "^" .. arg_lead) then
             return cmd
-          ---@diagnostic disable-next-line missing-return
+            ---@diagnostic disable-next-line missing-return
           end
         end, rest_commands)
       end
