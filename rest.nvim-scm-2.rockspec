@@ -16,7 +16,8 @@ description = {
 dependencies = {
   "lua >= 5.1, < 5.4",
   "nvim-nio",
-  "Lua-cURL"
+  "Lua-cURL",
+  "mimetypes",
 }
 
 source = {

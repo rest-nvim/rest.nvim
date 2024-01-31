@@ -12,6 +12,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Luarocks Upload
-        uses: mrcjkb/luarocks-tag-release@master
+        uses: mrcjkb/luarocks-tag-release@v5
+        with:
+          dependencies: |
+            nvim-nio
+            Lua-cURL
+            mimetypes
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
