@@ -24,6 +24,31 @@ function utils.file_exists(path)
   return false
 end
 
+---Read a file if it exists
+---@param path string file path
+---@return string
+function utils.read_file(path)
+  local logger = _G._rest_nvim.logger
+
+  ---@cast content string
+  local content
+  if utils.file_exists(path) then
+    local file = uv.fs_open(path, "r", 438)
+    ---@cast file number
+    local stat = uv.fs_fstat(file)
+    ---@cast stat uv.aliases.fs_stat_table
+    content = uv.fs_read(file, stat.size, 0)
+    ---@cast content string
+    uv.fs_close(file)
+  else
+    ---@diagnostic disable-next-line need-check-nil
+    logger:error("Failed to read file '" .. path .. "'")
+    return ""
+  end
+
+  return content
+end
+
 --- Default transformers for statistics
 local transform = {
   ---Transform `time` into a readable typed time (e.g. 200ms)
