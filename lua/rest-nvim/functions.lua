@@ -78,7 +78,7 @@ function functions.exec(scope)
   end
 
   -- We should not be trying to show a result if the request failed
-  if #req_results > 0 then
+  if not vim.tbl_isempty(req_results) then
     local result_buf = result.get_or_create_buf()
     result.write_res(result_buf, req_results)
   end
