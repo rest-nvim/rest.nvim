@@ -2,7 +2,7 @@ if exists("b:current_syntax") | finish | endif
 
 syn match   httpResultComment "\v^#.*$"
 syn keyword httpResultMethod OPTIONS GET HEAD POST PUT DELETE TRACE CONNECT nextgroup=httpResultPath
-syn match   httpResultPath  /.*$/ contained
+syn match   httpResultPath  /.*$/hs=s+1 contained
 
 syn match httpResultField /^\(\w\)[^:]\+:/he=e-1
 syn match httpResultDateField /^[Dd]ate:/he=e-1    nextgroup=httpResultDate
