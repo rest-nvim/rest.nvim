@@ -30,17 +30,17 @@ local function rest_env_select(opt)
 
   pickers
     .new({}, {
-      prompt_title = "Select Evn",
+      prompt_title = "Select Env File",
       finder = finders.new_table({
         results = lines,
       }),
       attach_mappings = function(prompt_bufnr, map)
         actions.select_default:replace(function()
           local selection = action_state.get_selected_entry()
+          actions.close(prompt_bufnr)
           if selection == nil then
             return
           end
-          actions.close(prompt_bufnr)
           rest.select_env(selection[1])
         end)
         map("i", "<c-o>", function()
