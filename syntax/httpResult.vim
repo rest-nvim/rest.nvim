@@ -18,18 +18,18 @@ syn match  httpResult500 /5\d\d.*$/ contained
 syn region httpResultString start=/\vr?"/ end=/\v"/
 syn match  httpResultNumber /\v[ =]@1<=[0-9]*.?[0-9]+[ ,;&\n]/he=e-1
 
-hi link httpResultComment   Comment
-hi link httpResultMethod    Type
-hi link httpResultPath      Link
-hi link httpResultField     Identifier
-hi link httpResultDateField Identifier
-hi link httpResultDate      String
-hi link httpResultString    String
-hi link httpResultNumber    Number
-hi link httpResultHeader    Type
-hi link httpResult200       String
-hi link httpResult300       Function
-hi link httpResult400       Number
-hi link httpResult500       Number
+hi link httpResultComment   @comment
+hi link httpResultMethod    @type
+hi link httpResultPath      @text.uri
+hi link httpResultField     @constant
+hi link httpResultDateField @constant
+hi link httpResultDate      @attribute
+hi link httpResultString    @string
+hi link httpResultNumber    @number
+hi link httpResultHeader    @constant
+hi link httpResult200       Msg
+hi link httpResult300       MoreMsg
+hi link httpResult400       WarningMsg
+hi link httpResult500       ErrorMsg
 
 let b:current_syntax = "httpResult"
