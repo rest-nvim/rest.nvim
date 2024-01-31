@@ -173,7 +173,7 @@ function result.write_block(bufnr, block, rewrite, newline)
   vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 end
 
-function result.display_buf(bufnr, res_code, stats)
+function result.display_buf(bufnr)
   local is_result_displayed = false
 
   -- Check if the results buffer is already displayed
@@ -236,6 +236,9 @@ function result.display_buf(bufnr, res_code, stats)
     vim.wo[winnr].winbar = winbar
   end
 
+  -- Set winbar pane contents
+  ---@diagnostic disable-next-line undefined-field
+  result.write_block(bufnr, result.pane_map[result.current_pane_index].contents, true, false)
   move_cursor(bufnr, 1, 1)
 end
 
@@ -359,7 +362,7 @@ function result.write_res(bufnr, res)
     result.pane_map[1].contents = body
   end)
 
-  result.display_buf(bufnr, res.code, res.statistics)
+  result.display_buf(bufnr)
 end
 
 return result
