@@ -11,11 +11,57 @@ local client = {}
 local curl = require("cURL.safe")
 local mimetypes = require("mimetypes")
 
+local utils = require("rest-nvim.utils")
+
 -- TODO: add support for running multiple requests at once for `:Rest run document`
 -- TODO: add support for submitting forms in the `client.request` function
 -- TODO: add support for submitting XML bodies in the `client.request` function
 
----@param request Request
+---Get request statistics
+---@param req table cURL request class
+---@param statistics_tbl RestConfigResultStats Statistics table
+---@return table
+local function get_stats(req, statistics_tbl)
+  local logger = _G._rest_nvim.logger
+
+  local stats = {}
+
+  local function get_stat(req_, stat_)
+    local curl_info = curl["INFO_" .. stat_:upper()]
+    if not curl_info then
+      ---@diagnostic disable-next-line need-check-nil
+      logger:error("The cURL request stat field '" .. stat_ "' was not found.\nPlease take a look at: https://curl.se/libcurl/c/curl_easy_getinfo.html")
+      return
+    end
+    local stat_info = req_:getinfo(curl_info)
+
+    if stat_:find("size") then
+      stat_info = utils.transform_size(stat_info)
+    elseif stat_:find("time") then
+      stat_info = utils.transform_time(stat_info)
+    end
+    return stat_info
+  end
+
+  local stat_title, stat_info
+  for _, stat in pairs(statistics_tbl) do
+    for k,v in pairs(stat) do
+      if type(k) == "string" and k == "title" then
+        stat_title = v
+      end
+      if type(k) == "number" then
+        stat_info = get_stat(req, v)
+      end
+    end
+    table.insert(stats, stat_title .. " " .. stat_info)
+  end
+
+  return stats
+end
+
+---Execute an HTTP request using cURL
+---@param request Request Request data to be passed to cURL
+---@return table
 function client.request(request)
   local logger = _G._rest_nvim.logger
 
@@ -77,21 +123,27 @@ function client.request(request)
   req:setopt_writefunction(table.insert, res_result)
   req:setopt_headerfunction(table.insert, res_headers)
 
+  local ret = {}
+
   local ok, err = req:perform()
   if ok then
-    local url = req:getinfo_effective_url()
-    local code = req:getinfo_response_code()
-    local content = table.concat(res_result)
-    vim.print(url .. " - " .. code)
-    vim.print("Request headers:", table.concat(res_headers):gsub("\r", ""))
-    vim.print("Request content:\n\n" .. content)
-    vim.print("\nTime taken: " .. string.format("%.2fs", req:getinfo_total_time()))
+    -- Get request statistics if they are enabled
+    local stats_config = _G._rest_nvim.result.behavior.statistics
+    if stats_config.enable then
+      local statistics = get_stats(req, stats_config.stats)
+      ret.statistics = statistics
+    end
+
+    ret.url = req:getinfo_effective_url()
+    ret.headers = table.concat(res_headers):gsub("\r", "")
+    ret.result = table.concat(res_result)
   else
     ---@diagnostic disable-next-line need-check-nil
-    logger:error(err)
+    logger:error("Something went wrong when making the request with cURL: " .. err)
   end
-
   req:close()
+
+  return ret
 end
 
 return client
