@@ -30,6 +30,9 @@ result.pane_map = {
   [3] = { name = "Cookies",  contents = { "Fetching ..." } },
 }
 
+---Get the foreground value of a highlighting group
+---@param name string Highlighting group name
+---@return string
 local function get_hl_group_fg(name)
   -- If the HEX color has a zero as the first character, `string.format` will skip it
   -- so we have to add it manually later
@@ -41,6 +44,7 @@ local function get_hl_group_fg(name)
   return hl_fg
 end
 
+---Set the results window winbar highlighting groups
 local function set_winbar_hl()
   -- Set highlighting for the winbar panes name
   local textinfo_fg = get_hl_group_fg("TextInfo")
@@ -70,6 +74,11 @@ local function set_winbar_hl()
   vim.api.nvim_set_hl(0, "RestCodexxx", { fg = errormsg })
 end
 
+---Select the winbar panel based on the pane index and set the pane contents
+---
+---If the pane index is higher than 3 or lower than 1, it will cycle through
+---the panes, e.g. >= 4 gets converted to 1 and <= 0 gets converted to 3
+---@param selected number winbar pane index
 local function rest_winbar(selected)
   if type(selected) == "number" then
     result.current_pane_index = selected
