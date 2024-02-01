@@ -17,24 +17,26 @@ winbar.current_pane_index = 1
 ---@return string
 function winbar.get_content(stats)
   -- winbar panes
-  local content = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal# %=%<]]
+  local content = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal# %#RestText#|%#Normal# %4@v:lua._G._rest_nvim_winbar@%#StatsHighlight#Stats%X%#Normal# %=%<]]
 
   -- winbar statistics
-  for stat_name, stat_value in pairs(stats) do
-    local val = vim.split(stat_value, ": ")
-    if stat_name:find("total_time") then
-      content = content .. "%#RestText# " .. val[1]:lower() .. ": "
-      local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-      content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
-    elseif stat_name:find("size_download") then
-      content = content .. "%#RestText#, " .. val[1]:lower() .. ": "
-      local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-      content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
+  if not vim.tbl_isempty(stats) then
+    for stat_name, stat_value in pairs(stats) do
+      local val = vim.split(stat_value, ": ")
+      if stat_name:find("total_time") then
+        content = content .. " %#RestText# " .. val[1]:lower() .. ": "
+        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
+        content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
+      elseif stat_name:find("size_download") then
+        content = content .. " %#RestText#" .. val[1]:lower() .. ": "
+        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
+        content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
+      end
     end
+    content = content .. " %#RestText#|%#Normal# "
   end
   -- content = content .. "%#RestText#Press %#Keyword#H%#RestText# for the prev pane or %#Keyword#L%#RestText# for the next pane%#Normal# "
-  content = content .. "%#RestText# | Press %#Keyword#?%#RestText# for help%#Normal# "
-  content = content .. " "
+  content = content .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
 
   return content
 end
@@ -49,6 +51,7 @@ winbar.pane_map = {
   [1] = { name = "Response", contents = { "Fetching ..." } },
   [2] = { name = "Headers",  contents = { "Fetching ..." } },
   [3] = { name = "Cookies",  contents = { "Fetching ..." } },
+  [4] = { name = "Stats",    contents = { "Fetching ..." } },
 }
 
 ---Get the foreground value of a highlighting group
@@ -85,8 +88,8 @@ end
 
 ---Select the winbar panel based on the pane index and set the pane contents
 ---
----If the pane index is higher than 3 or lower than 1, it will cycle through
----the panes, e.g. >= 4 gets converted to 1 and <= 0 gets converted to 3
+---If the pane index is higher than 4 or lower than 1, it will cycle through
+---the panes, e.g. >= 5 gets converted to 1 and <= 0 gets converted to 4
 ---@param selected number winbar pane index
 function winbar.set_pane(selected)
   if type(selected) == "number" then
@@ -94,11 +97,11 @@ function winbar.set_pane(selected)
   end
 
   -- Cycle through the panes
-  if winbar.current_pane_index > 3 then
+  if winbar.current_pane_index > 4 then
     winbar.current_pane_index = 1
   end
   if winbar.current_pane_index < 1 then
-    winbar.current_pane_index = 3
+    winbar.current_pane_index = 4
   end
 
   winbar.set_hl()

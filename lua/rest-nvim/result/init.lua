@@ -262,17 +262,10 @@ function result.write_res(bufnr, res)
       table.insert(body, 3, "")
       table.insert(body, 4, "#+RES")
       table.insert(body, "#+END")
-      table.insert(body, "")
 
       -- Remove the HTTP/X and status code + meaning from here to avoid duplicates
       ---@diagnostic disable-next-line undefined-field
       table.remove(winbar.pane_map[2].contents, 1)
-
-      -- Add statistics to the response
-      table.sort(res.statistics)
-      for _, stat in pairs(res.statistics) do
-        table.insert(body, stat)
-      end
 
       -- add syntax highlights for response
       vim.api.nvim_buf_call(bufnr, function()
@@ -297,6 +290,16 @@ function result.write_res(bufnr, res)
     ---@diagnostic disable-next-line inject-field
     winbar.pane_map[1].contents = body
   end)
+
+  -- Add statistics to the response
+  local stats = {}
+  table.sort(res.statistics)
+  for _, stat in pairs(res.statistics) do
+    table.insert(stats, stat)
+  end
+  table.sort(stats)
+  ---@diagnostic disable-next-line inject-field
+  winbar.pane_map[4].contents = stats
 
   result.display_buf(bufnr, res.statistics)
 end
