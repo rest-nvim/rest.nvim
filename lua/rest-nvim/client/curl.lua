@@ -12,7 +12,6 @@ local curl = require("cURL.safe")
 local mimetypes = require("mimetypes")
 
 local utils = require("rest-nvim.utils")
-local script_vars = require("rest-nvim.parser.script_vars")
 
 -- TODO: add support for running multiple requests at once for `:Rest run document`
 -- TODO: add support for submitting forms in the `client.request` function
@@ -239,10 +238,8 @@ function client.request(request)
     ret.method = req:getinfo_effective_method()
     ret.headers = table.concat(res_headers):gsub("\r", "")
     ret.body = table.concat(res_result)
-
-    if request.script ~= nil or not request.script == "" then
-      script_vars.load(request.script, ret)
-    end
+    -- We are returning the request script variable as it
+    ret.script = request.script
   else
     ---@diagnostic disable-next-line need-check-nil
     logger:error("Something went wrong when making the request with cURL:\n" .. curl_error(err:no()))

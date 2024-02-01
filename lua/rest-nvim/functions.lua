@@ -12,6 +12,7 @@ local nio = require("nio")
 local utils = require("rest-nvim.utils")
 local parser = require("rest-nvim.parser")
 local result = require("rest-nvim.result")
+local script_vars = require("rest-nvim.parser.script_vars")
 
 ---Execute one or several HTTP requests depending on given `scope`
 ---and return request(s) results in a table that will be used to render results
@@ -77,10 +78,15 @@ function functions.exec(scope)
     end
   end
 
-  -- We should not be trying to show a result if the request failed
   if not vim.tbl_isempty(req_results) then
+    -- We should not be trying to show a result if the request failed
     local result_buf = result.get_or_create_buf()
     result.write_res(result_buf, req_results)
+
+    -- Load the script variables
+    if req_results.script ~= nil or not req_results.script == "" then
+      script_vars.load(req_results.script, req_results)
+    end
   end
 end
 
