@@ -21,6 +21,14 @@ local function get_env_filetype(env_file)
   return ext == "" and nil or ext
 end
 
+---Set an environment variable for the current Neovim session
+---@param name string Variable name
+---@param value string|number|boolean Variable value
+---@see vim.env
+function env_vars.set_var(name, value)
+  vim.env[name] = value
+end
+
 ---Read the environment variables file from the rest.nvim configuration
 ---and store all the environment variables in the `vim.env` metatable
 ---@see vim.env

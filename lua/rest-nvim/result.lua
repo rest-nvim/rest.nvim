@@ -295,18 +295,18 @@ function result.write_res(bufnr, res)
       if vim.tbl_contains(filetypes, res_type) then
         local fmt = formatters[res_type]
         if type(fmt) == "function" then
-          local ok, out = pcall(fmt, res.result)
+          local ok, out = pcall(fmt, res.body)
           if ok and out then
-            res.result = out
+            res.body = out
           else
             ---@diagnostic disable-next-line need-check-nil
             logger:error("Error calling formatter on response body:\n" .. out)
           end
         elseif vim.fn.executable(fmt) == 1 then
-          local stdout = vim.fn.system(fmt, res.result):gsub("\n$", "")
+          local stdout = vim.fn.system(fmt, res.body):gsub("\n$", "")
           -- Check if formatter ran successfully
           if vim.v.shell_error == 0 then
-            res.result = stdout
+            res.body = stdout
           else
             ---@diagnostic disable-next-line need-check-nil
             logger:error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
@@ -320,7 +320,7 @@ function result.write_res(bufnr, res)
             .. " returned in the request, the results will not be formatted"
         )
       end
-      body = vim.split(res.result, "\n")
+      body = vim.split(res.body, "\n")
       table.insert(body, 1, res.method .. " " .. res.url)
       table.insert(body, 2, headers[1]) -- HTTP/X and status code + meaning
       table.insert(body, 3, "")

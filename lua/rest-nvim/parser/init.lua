@@ -16,8 +16,6 @@ local xml_handler = require("xmlhandler.tree")
 local env_vars = require("rest-nvim.parser.env_vars")
 local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
 
--- TODO: parse and evaluate `(script_variable)` request node
-
 ---@alias NodesList { [string]: TSNode }[]
 ---@alias Variables { [string]: { type_: string, value: string|number|boolean } }[]
 
@@ -25,7 +23,7 @@ local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
 ---@param node TSNode Tree-sitter node
 ---@return boolean
 local function check_syntax_error(node)
-  if node:has_error() then
+  if node and node:has_error() then
     local logger = _G._rest_nvim.logger
 
     ---Create a node range string á la `:InspectTree` view
@@ -172,7 +170,7 @@ local function parse_variables(node, tree, text, variables)
       end
     end
 
-    local variable = vars[variable_name]
+    local variable = variables[variable_name]
     -- If the variable was not found in the document then fallback to the shell environment
     if not variable then
       ---@diagnostic disable-next-line need-check-nil
@@ -331,7 +329,6 @@ function parser.parse_body(children_nodes, variables)
 
   -- TODO: handle GraphQL bodies by using a graphql parser library from luarocks
   for node_type, node in pairs(children_nodes) do
-    -- TODO: handle XML bodies by using xml2lua library from luarocks
     if node_type == "json_body" then
       local json_body_text = assert(get_node_text(node, 0))
       local json_body = vim.json.decode(json_body_text, {
@@ -363,6 +360,22 @@ function parser.parse_body(children_nodes, variables)
   return body
 end
 
+---Get a script variable node and return 
+---@param req_node TSNode Tree-sitter request node
+---@return string
+function parser.parse_script(req_node)
+  -- Get the next named sibling of the current request node,
+  -- if the request does not have any sibling or if it is not
+  -- a script_variable node then early return an empty string
+  local next_sibling = req_node:next_named_sibling()
+  ---@diagnostic disable-next-line need-check-nil
+  if not next_sibling or next_sibling and next_sibling:type() ~= "script_variable" then
+    return ""
+  end
+
+  return assert(get_node_text(next_sibling, 0))
+end
+
 ---@class RequestReq
 ---@field method string The request method
 ---@field url string The request URL
@@ -372,6 +385,7 @@ end
 ---@field request RequestReq
 ---@field headers { [string]: string|number|boolean }[]
 ---@field body table
+---@field script? string
 
 ---Parse a request and return the request on itself, its headers and body
 ---@param req_node TSNode Tree-sitter request node
@@ -381,6 +395,7 @@ function parser.parse(req_node)
     request = {},
     headers = {},
     body = {},
+    script = "",
   }
   local document_node = parser.look_behind_until(nil, "document")
 
@@ -391,6 +406,7 @@ function parser.parse(req_node)
   ast.request = parser.parse_request(request_children_nodes, document_variables)
   ast.headers = parser.parse_headers(request_children_nodes, document_variables)
   ast.body = parser.parse_body(request_children_nodes, document_variables)
+  ast.script = parser.parse_script(req_node)
 
   return ast
 end
