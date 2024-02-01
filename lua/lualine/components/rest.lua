@@ -12,7 +12,6 @@ function M:init(options)
   self.options = vim.tbl_deep_extend("keep", self.options or {}, default_options)
   self.icon = self.options.icon
 
-  print(vim.inspect(self.options))
   self.highlight_color = self:create_hl({ fg = self.options.fg }, "Rest")
 end
 
