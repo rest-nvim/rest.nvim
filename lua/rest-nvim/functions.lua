@@ -9,10 +9,13 @@
 local functions = {}
 
 local nio = require("nio")
+
 local utils = require("rest-nvim.utils")
 local parser = require("rest-nvim.parser")
-local result = require("rest-nvim.result")
 local script_vars = require("rest-nvim.parser.script_vars")
+
+local result = require("rest-nvim.result")
+local winbar = require("rest-nvim.result.winbar")
 
 ---Execute one or several HTTP requests depending on given `scope`
 ---and return request(s) results in a table that will be used to render results
@@ -146,7 +149,7 @@ end
 ---@param cycle string Cycle direction, can be: `"next"` or `"prev"`
 function functions.cycle_result_pane(cycle)
   ---@type number
-  local idx = result.current_pane_index
+  local idx = winbar.current_pane_index
 
   if cycle == "next" then
     idx = idx + 1

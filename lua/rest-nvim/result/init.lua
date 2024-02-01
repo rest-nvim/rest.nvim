@@ -10,82 +10,23 @@ local result = {}
 
 local nio = require("nio")
 
+local winbar = require("rest-nvim.result.winbar")
+
 ---Results buffer handler number
 ---@type number|nil
 result.bufnr = nil
-
----Current pane index in the results window winbar
----@type number
-result.current_pane_index = 1
-
----@class ResultPane
----@field name string Pane name
----@field contents string[] Pane contents
-
----Results window winbar panes list
----@type { [number]: ResultPane }[]
-result.pane_map = {
-  [1] = { name = "Response", contents = { "Fetching ..." } },
-  [2] = { name = "Headers",  contents = { "Fetching ..." } },
-  [3] = { name = "Cookies",  contents = { "Fetching ..." } },
-}
-
----Get the foreground value of a highlighting group
----@param name string Highlighting group name
----@return string
-local function get_hl_group_fg(name)
-  -- If the HEX color has a zero as the first character, `string.format` will skip it
-  -- so we have to add it manually later
-  local hl_fg = string.format("%02X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
-  if #hl_fg == 5 then
-    hl_fg = "0" .. hl_fg
-  end
-  hl_fg = "#" .. hl_fg
-  return hl_fg
-end
-
----Set the results window winbar highlighting groups
-local function set_winbar_hl()
-  -- Set highlighting for the winbar panes name
-  local textinfo_fg = get_hl_group_fg("TextInfo")
-  for i, pane in ipairs(result.pane_map) do
-    ---@diagnostic disable-next-line undefined-field
-    vim.api.nvim_set_hl(0, pane.name .. "Highlight", {
-      fg = textinfo_fg,
-      bold = (i == result.current_pane_index),
-      underline = (i == result.current_pane_index),
-    })
-  end
-
-  -- Set highlighting for the winbar hints
-  local textmuted_fg = get_hl_group_fg("TextMuted")
-  vim.api.nvim_set_hl(0, "RestText", { fg = textmuted_fg })
-end
 
 ---Select the winbar panel based on the pane index and set the pane contents
 ---
 ---If the pane index is higher than 3 or lower than 1, it will cycle through
 ---the panes, e.g. >= 4 gets converted to 1 and <= 0 gets converted to 3
 ---@param selected number winbar pane index
-local function rest_winbar(selected)
-  if type(selected) == "number" then
-    result.current_pane_index = selected
-  end
-
-  -- Cycle through the panes
-  if result.current_pane_index > 3 then
-    result.current_pane_index = 1
-  end
-  if result.current_pane_index < 1 then
-    result.current_pane_index = 3
-  end
-
-  set_winbar_hl()
+_G._rest_nvim_winbar = function(selected)
+  winbar.set_pane(selected)
   -- Set winbar pane contents
   ---@diagnostic disable-next-line undefined-field
-  result.write_block(result.bufnr, result.pane_map[result.current_pane_index].contents, true, false)
+  result.write_block(result.bufnr, winbar.pane_map[winbar.current_pane_index].contents, true, false)
 end
-_G._rest_nvim_winbar = rest_winbar
 
 ---Move the cursor to the desired position in the given buffer
 ---@param bufnr number Buffer handler number
@@ -173,7 +114,7 @@ function result.write_block(bufnr, block, rewrite, newline)
   vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 end
 
-function result.display_buf(bufnr)
+function result.display_buf(bufnr, stats)
   local is_result_displayed = false
 
   -- Check if the results buffer is already displayed
@@ -221,24 +162,19 @@ function result.display_buf(bufnr)
 
     -- Set winbar pane contents
     ---@diagnostic disable-next-line undefined-field
-    result.write_block(bufnr, result.pane_map[result.current_pane_index].contents, true, false)
+    result.write_block(bufnr, winbar.pane_map[winbar.current_pane_index].contents, true, false)
 
     -- Set unmodifiable state
     vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 
     -- Set winbar
-    --
-    -- winbar panes
-    local winbar = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal#%=%<]]
-
-    winbar = winbar .. "%#RestText#Press %#Keyword#H%#RestText# for the prev pane or %#Keyword#L%#RestText# for the next pane%#Normal# "
-    set_winbar_hl() -- Set initial highlighting before displaying winbar
-    vim.wo[winnr].winbar = winbar
+    winbar.set_hl() -- Set initial highlighting before displaying winbar
+    vim.wo[winnr].winbar = winbar.get_content(stats)
   end
 
   -- Set winbar pane contents
   ---@diagnostic disable-next-line undefined-field
-  result.write_block(bufnr, result.pane_map[result.current_pane_index].contents, true, false)
+  result.write_block(bufnr, winbar.pane_map[winbar.current_pane_index].contents, true, false)
   move_cursor(bufnr, 1, 1)
 end
 
@@ -266,10 +202,10 @@ function result.write_res(bufnr, res)
   -- Content-Type: application/json
   -- ......
   ---@diagnostic disable-next-line inject-field
-  result.pane_map[2].contents = headers
+  winbar.pane_map[2].contents = headers
 
   ---@diagnostic disable-next-line inject-field
-  result.pane_map[3].contents = vim.tbl_isempty(cookies) and { "No cookies" } or cookies
+  winbar.pane_map[3].contents = vim.tbl_isempty(cookies) and { "No cookies" } or cookies
 
   nio.run(function()
     ---@type string
@@ -330,7 +266,7 @@ function result.write_res(bufnr, res)
 
       -- Remove the HTTP/X and status code + meaning from here to avoid duplicates
       ---@diagnostic disable-next-line undefined-field
-      table.remove(result.pane_map[2].contents, 1)
+      table.remove(winbar.pane_map[2].contents, 1)
 
       -- Add statistics to the response
       table.sort(res.statistics)
@@ -359,10 +295,10 @@ function result.write_res(bufnr, res)
       end)
     end
     ---@diagnostic disable-next-line inject-field
-    result.pane_map[1].contents = body
+    winbar.pane_map[1].contents = body
   end)
 
-  result.display_buf(bufnr)
+  result.display_buf(bufnr, res.statistics)
 end
 
 return result
