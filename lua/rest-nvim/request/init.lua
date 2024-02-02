@@ -290,8 +290,11 @@ M.buf_get_request = function(bufnr, curpos)
   local curl_args, body_start = get_curl_args(bufnr, headers_end, end_line)
 
   local host = headers[utils.key(headers, "host")] or ""
-  parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
-  headers[utils.key(headers, "host")] = nil
+
+  if string.sub(parsed_url.url, 1, 1) == "/" then
+    parsed_url.url = host:gsub("%s+", "") .. parsed_url.url
+    headers[utils.key(headers, "host")] = nil
+  end
 
   local body = get_body(bufnr, body_start, end_line)
 
@@ -329,7 +332,7 @@ end
 -- full_body boolean
 M.stringify_request = function(req, opts)
   opts = vim.tbl_deep_extend(
-    "force", -- use value from rightmost map
+    "force",                               -- use value from rightmost map
     { full_body = false, headers = true }, -- defaults
     opts or {}
   )
