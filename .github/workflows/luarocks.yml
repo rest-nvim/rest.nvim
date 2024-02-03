@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0 # Required to count the commits
       - name: Install build dependencies
-        run: apt-get install -y libcurl4-gnutls-dev
+        run: sudo apt-get install -y libcurl4-gnutls-dev
       - name: Luarocks Upload
         uses: mrcjkb/luarocks-tag-release@v5
         with:
