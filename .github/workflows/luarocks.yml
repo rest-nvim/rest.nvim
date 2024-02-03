@@ -22,7 +22,7 @@ jobs:
         with:
           dependencies: |
             nvim-nio
-            Lua-cURL
+            lua-curl
             mimetypes
             xml2lua
         env:
