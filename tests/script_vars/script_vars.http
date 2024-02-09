@@ -11,5 +11,4 @@ context.set_env("postId", body.id)
 
 --%}
 
-###
 GET https://jsonplaceholder.typicode.com/posts/{{postId}}
