@@ -20,7 +20,7 @@
 --- env {action?} {path?}           Manage the environment file that is currently in use while
 ---                                 running requests. If you choose to `set` the environment,
 ---                                 you must provide a `path` to the environment file. The
----                                 default action is `show`, which displayes the current
+---                                 default action is `show`, which displays the current
 ---                                 environment file path.
 ---
 --- result {direction?}             Cycle through the results buffer winbar panes. The cycle
