@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/rest-nvim/rest.nvim/compare/v1.0.1...v1.1.0) (2024-02-12)
+
+
+### Features
+
+* add Lualine component ([#279](https://github.com/rest-nvim/rest.nvim/issues/279)) ([3e0d86d](https://github.com/rest-nvim/rest.nvim/commit/3e0d86d66db8858d7e847e7ad495274d6663c985))
+* add telescope extension ([#278](https://github.com/rest-nvim/rest.nvim/issues/278)) ([de3c0fd](https://github.com/rest-nvim/rest.nvim/commit/de3c0fd6130def3dea2ef3809dfbf4458a0946fc))
+
+
+### Bug Fixes
+
+* add host before url only if it starts with '/', otherwise it probably starts with 'http' ([f3d319f](https://github.com/rest-nvim/rest.nvim/commit/f3d319f4567d253977217963c1910e83eeb8c0af))
+* return non json body ([543b64c](https://github.com/rest-nvim/rest.nvim/commit/543b64cc639c01db319f00ba6a2b0767d0c8e8c1))
+* **telescope:** doc and check select is nil ([e862e72](https://github.com/rest-nvim/rest.nvim/commit/e862e725ba483b8c48585b44738767c86668d49e))
+
 ## [1.0.1](https://github.com/rest-nvim/rest.nvim/compare/v1.0.0...v1.0.1) (2024-01-24)
 
 
