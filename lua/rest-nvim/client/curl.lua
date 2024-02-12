@@ -10,12 +10,12 @@ local client = {}
 
 local curl = require("cURL.safe")
 local mimetypes = require("mimetypes")
+local xml2lua = require("xml2lua")
 
 local utils = require("rest-nvim.utils")
 
 -- TODO: add support for running multiple requests at once for `:Rest run document`
 -- TODO: add support for submitting forms in the `client.request` function
--- TODO: add support for submitting XML bodies in the `client.request` function
 
 ---Return the status code and the meaning of an curl error
 ---see man curl for reference
@@ -200,13 +200,19 @@ function client.request(request)
   end
 
   -- Request body
+  --
+  -- Create a copy of the request body table to remove the unneeded `__TYPE` metadata field later
+  local body = request.body
   if request.body.__TYPE == "json" then
-    -- Create a copy of the request body table to remove the unneeded `__TYPE` metadata field
-    local body = request.body
     body.__TYPE = nil
 
-    local json_body_string = vim.json.encode(request.body)
+    local json_body_string = vim.json.encode(body)
     req:setopt_postfields(json_body_string)
+  elseif request.body.__TYPE == "xml" then
+    body.__TYPE = nil
+
+    local xml_body_string = xml2lua.toXml(body)
+    req:setopt_postfields(xml_body_string)
   elseif request.body.__TYPE == "external_file" then
     local body_mimetype = mimetypes.guess(request.body.path)
     local post_data = {
