@@ -114,6 +114,9 @@ function result.write_block(bufnr, block, rewrite, newline)
   vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 end
 
+---Display results buffer window
+---@param bufnr number The target buffer
+---@param stats table Request statistics
 function result.display_buf(bufnr, stats)
   local is_result_displayed = false
 
@@ -198,9 +201,9 @@ function result.write_res(bufnr, res)
     end
   end, headers)
 
-  -- ......
+  --
   -- Content-Type: application/json
-  -- ......
+  --
   ---@diagnostic disable-next-line inject-field
   winbar.pane_map[2].contents = headers
 

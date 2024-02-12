@@ -112,12 +112,12 @@ end
 
 ---Traverse a request tree-sitter node and retrieve all its children nodes
 ---@param req_node TSNode Tree-sitter request node
----@return NodesList
+---@return { headers: TSNode[], [string]: TSNode }[]
 local function traverse_request(req_node)
   local child_nodes = {
     headers = {},
   }
-  for child, field_name in req_node:iter_children() do
+  for child, _ in req_node:iter_children() do
     local child_type = child:type()
     if child_type == "header" then
       table.insert(child_nodes.headers, child)
@@ -204,7 +204,7 @@ end
 ---Parse a request tree-sitter node
 ---@param children_nodes NodesList Tree-sitter nodes
 ---@param variables Variables HTTP document variables list
----@return table
+---@return table A table containing the request target `url` and `method` to be used
 function parser.parse_request(children_nodes, variables)
   local request = {}
   for node_type, node in pairs(children_nodes) do
@@ -227,12 +227,12 @@ function parser.parse_request(children_nodes, variables)
 end
 
 ---Parse request headers tree-sitter nodes
----@param children_nodes TSNode[] Tree-sitter nodes
+---@param header_nodes NodesList Tree-sitter nodes
 ---@param variables Variables HTTP document variables list
----@return table
-function parser.parse_headers(children_nodes, variables)
+---@return table Table containing the headers in a key-value style
+function parser.parse_headers(header_nodes, variables)
   local headers = {}
-  for _, node in ipairs(children_nodes.headers) do
+  for _, node in ipairs(header_nodes) do
     local name = assert(get_node_text(node:field("name")[1], 0))
     local value = vim.trim(assert(get_node_text(node:field("value")[1], 0)))
 
@@ -323,7 +323,7 @@ end
 ---Parse a request tree-sitter node body
 ---@param children_nodes NodesList Tree-sitter nodes
 ---@param variables Variables HTTP document variables list
----@return table
+---@return table Decoded body table
 function parser.parse_body(children_nodes, variables)
   local body = {}
 
@@ -360,9 +360,9 @@ function parser.parse_body(children_nodes, variables)
   return body
 end
 
----Get a script variable node and return 
+---Get a script variable node and return its content
 ---@param req_node TSNode Tree-sitter request node
----@return string
+---@return string Script variables content
 function parser.parse_script(req_node)
   -- Get the next named sibling of the current request node,
   -- if the request does not have any sibling or if it is not
@@ -389,7 +389,7 @@ end
 
 ---Parse a request and return the request on itself, its headers and body
 ---@param req_node TSNode Tree-sitter request node
----@return Request
+---@return Request Table containing the request data
 function parser.parse(req_node)
   local ast = {
     request = {},
@@ -404,7 +404,9 @@ function parser.parse(req_node)
   local document_variables = traverse_variables(document_node)
 
   ast.request = parser.parse_request(request_children_nodes, document_variables)
-  ast.headers = parser.parse_headers(request_children_nodes, document_variables)
+  -- TODO: make parse_headers use a traverse_headers function to avoid these diagnostic warnings
+  ---@diagnostic disable-next-line undefined-field
+  ast.headers = parser.parse_headers(request_children_nodes.headers, document_variables)
   ast.body = parser.parse_body(request_children_nodes, document_variables)
   ast.script = parser.parse_script(req_node)
 

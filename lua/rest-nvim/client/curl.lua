@@ -20,7 +20,7 @@ local utils = require("rest-nvim.utils")
 ---Return the status code and the meaning of an curl error
 ---see man curl for reference
 ---@param code number The exit code of curl
----@return string
+---@return string The curl error message
 local function curl_error(code)
   local curl_error_dictionary = {
     [1] = "Unsupported protocol. This build of curl has no support for this protocol.",
@@ -117,7 +117,7 @@ end
 ---Get request statistics
 ---@param req table cURL request class
 ---@param statistics_tbl RestConfigResultStats Statistics table
----@return table
+---@return table Request statistics
 local function get_stats(req, statistics_tbl)
   local logger = _G._rest_nvim.logger
 
@@ -162,7 +162,7 @@ end
 
 ---Execute an HTTP request using cURL
 ---@param request Request Request data to be passed to cURL
----@return table
+---@return table The request information (url, method, headers, body, etc)
 function client.request(request)
   local logger = _G._rest_nvim.logger
 

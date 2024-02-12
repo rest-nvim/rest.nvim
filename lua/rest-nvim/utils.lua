@@ -30,7 +30,7 @@ end
 function utils.read_file(path)
   local logger = _G._rest_nvim.logger
 
-  ---@cast content string
+  ---@type string|uv_fs_t|nil
   local content
   if utils.file_exists(path) then
     local file = uv.fs_open(path, "r", 438)
@@ -46,6 +46,7 @@ function utils.read_file(path)
     return ""
   end
 
+  ---@cast content string
   return content
 end
 
@@ -55,6 +56,7 @@ local transform = {
   ---@param time string
   ---@return string
   time = function(time)
+    ---@diagnostic disable-next-line cast-local-type
     time = tonumber(time)
 
     if time >= 60 then
@@ -67,6 +69,7 @@ local transform = {
     local unit = 1
 
     while time < 1 and unit <= #units do
+      ---@diagnostic disable-next-line cast-local-type
       time = time * 1000
       unit = unit + 1
     end

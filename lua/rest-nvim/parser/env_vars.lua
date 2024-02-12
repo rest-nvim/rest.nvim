@@ -49,6 +49,7 @@ function env_vars.read_file()
       for _, var in ipairs(vars_tbl) do
         local variable = vim.split(var, "=")
         local variable_name = variable[1]
+        local variable_value
         -- In case some weirdo adds a `=` character to his ENV value
         if #variable > 2 then
           table.remove(variable, 1)

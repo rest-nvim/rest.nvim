@@ -94,7 +94,7 @@ function functions.exec(scope)
 end
 
 ---Find a list of environment files starting from the current directory
----@return string[]
+---@return string[] Environment variable files path
 function functions.find_env_files()
   -- We are currently looking for any ".*env*" file, e.g. ".env", ".env.json"
   --
@@ -110,7 +110,8 @@ end
 ---Manage the environment file that is currently in use while running requests
 ---
 ---If you choose to `set` the environment, you must provide a `path` to the environment file.
----@param action string Determines the action to be taken. Can be: `set` or `show` (default)
+---@param action string|nil Determines the action to be taken. Can be: `set` or `show` (default)
+---@param path string|nil Path to the environment variables file
 function functions.env(action, path)
   -- TODO: add a `select` action later to open some kind of prompt to select one of many detected "*env*" files
   vim.validate({
@@ -131,6 +132,7 @@ function functions.env(action, path)
   end
 
   if action == "set" then
+    ---@cast path string
     if utils.file_exists(path) then
       _G._rest_nvim.env_file = path
       ---@diagnostic disable-next-line need-check-nil

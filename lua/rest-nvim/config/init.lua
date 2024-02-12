@@ -102,6 +102,7 @@ local default_config = {
             return body
           end
           -- stylua: ignore
+          ---@diagnostic disable-next-line redundant-return-value
           return vim.fn.system({
             "tidy",
             "-i",
@@ -134,7 +135,7 @@ local default_config = {
 
 ---Set user-defined configurations for rest.nvim
 ---@param user_configs RestConfig User configurations
----@return RestConfig
+---@return RestConfig rest.nvim configuration table
 function config.set(user_configs)
   local check = require("rest-nvim.config.check")
 
@@ -153,6 +154,7 @@ function config.set(user_configs)
   })
 
   if not ok then
+    ---@cast err string
     conf.logger:error(err)
   end
 

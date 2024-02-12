@@ -15,6 +15,7 @@ math.randomseed(os.time())
 ---@return string
 local function uuid()
   local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+  ---@diagnostic disable-next-line redundant-return-value
   return string.gsub(template, "[xy]", function(c)
     local v = (c == "x") and random(0, 0xf) or random(8, 0xb)
     return string.format("%x", v)
@@ -23,7 +24,7 @@ end
 
 ---Retrieve all dynamic variables from both rest.nvim and the ones declared by
 ---the user on his configuration
----@return { [string]: fun():string }[]
+---@return { [string]: fun():string }[] An array-like table of tables which contains dynamic variables definition
 function dynamic_vars.retrieve_all()
   local user_variables = _G._rest_nvim.custom_dynamic_variables or {}
   local rest_variables = {
@@ -42,7 +43,7 @@ end
 
 ---Look for a dynamic variable and evaluate it
 ---@param name string The dynamic variable name
----@return string|nil
+---@return string|nil The dynamic variable value or `nil` if the dynamic variable was not found
 function dynamic_vars.read(name)
   local logger = _G._rest_nvim.logger
 

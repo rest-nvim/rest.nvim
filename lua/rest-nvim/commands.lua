@@ -29,7 +29,7 @@ local rest_command_tbl = {
   run = {
     impl = function(args)
       local request_scope = #args == 0 and "cursor" or args[1]
-      functions.exec(request_scope, false)
+      functions.exec(request_scope)
     end,
     ---@return string[]
     complete = function(args)
@@ -50,7 +50,7 @@ local rest_command_tbl = {
   },
   last = {
     impl = function(_)
-      functions.exec("last", false)
+      functions.exec("last")
     end,
   },
   env = {
