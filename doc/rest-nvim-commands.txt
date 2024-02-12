@@ -1,0 +1,37 @@
+==============================================================================
+rest.nvim commands                                          *rest-nvim.commands*
+
+
+ `:Rest {command {args?}}`
+
+ command                         action
+------------------------------------------------------------------------------
+
+ run {scope?}                    Execute one or several HTTP requests depending
+                                 on given `scope`. This scope can be either `last`,
+                                 `cursor` (default) or `document`.
+
+ last                            Re-run the last executed request, alias to `run last`
+                                 to retain backwards compatibility with the old keybinds
+                                 layout.
+
+ logs                            Open the rest.nvim logs file in a new tab.
+
+ env {action?} {path?}           Manage the environment file that is currently in use while
+                                 running requests. If you choose to `set` the environment,
+                                 you must provide a `path` to the environment file. The
+                                 default action is `show`, which displays the current
+                                 environment file path.
+
+ result {direction?}             Cycle through the results buffer winbar panes. The cycle
+                                 direction can be either `next` or `prev`.
+
+
+RestCmd                                                                *RestCmd*
+
+    Fields: ~
+        {impl}       (fun(args:string[],opts:vim.api.keyset.user_command))  The command implementation
+        {complete?}  (fun(subcmd_arg_lead:string):string[])                 Command completions callback, taking the lead of the subcommand's argument
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
