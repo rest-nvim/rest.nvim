@@ -4,6 +4,7 @@ LoggerLevels	rest-nvim-api.txt	/*LoggerLevels*
 NodesList	rest-nvim-parser.txt	/*NodesList*
 Request	rest-nvim-parser.txt	/*Request*
 RequestReq	rest-nvim-parser.txt	/*RequestReq*
+RestCmd	rest-nvim-commands.txt	/*RestCmd*
 RestConfig	rest-nvim-config.txt	/*RestConfig*
 RestConfigDebug	rest-nvim-config.txt	/*RestConfigDebug*
 RestConfigHighlight	rest-nvim-config.txt	/*RestConfigHighlight*
@@ -60,6 +61,7 @@ rest-nvim-usage-external-files	rest-nvim.txt	/*rest-nvim-usage-external-files*
 rest-nvim-usage-requests	rest-nvim.txt	/*rest-nvim-usage-requests*
 rest-nvim.api	rest-nvim-api.txt	/*rest-nvim.api*
 rest-nvim.client.curl	rest-nvim-curl.txt	/*rest-nvim.client.curl*
+rest-nvim.commands	rest-nvim-commands.txt	/*rest-nvim.commands*
 rest-nvim.config	rest-nvim-config.txt	/*rest-nvim.config*
 rest-nvim.functions	rest-nvim-api.txt	/*rest-nvim.functions*
 rest-nvim.logger	rest-nvim-api.txt	/*rest-nvim.logger*
