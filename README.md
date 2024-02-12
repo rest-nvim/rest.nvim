@@ -213,6 +213,35 @@ require("telescope").extensions.rest.select_env()
 - env_pattern: For env file pattern
 - env_edit_command: For env file edit command
 
+## Lualine
+
+We also have lualine component to get what env file you select!
+And dont't worry, it will only show up under http files.
+
+```lua
+-- Juse add a component in your lualine config
+{
+  sections = {
+    lualine_x = {
+      "rest"
+    }
+  }
+}
+
+-- To custom icon and color
+{
+  sections = {
+    lualine_x = {
+      {
+        "rest",
+        icon = "",
+        fg = "#428890"
+      }
+    }
+  }
+}
+```
+
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
