@@ -10,9 +10,21 @@
 --- run {scope?}                    Execute one or several HTTP requests depending
 ---                                 on given `scope`. This scope can be either `last`,
 ---                                 `cursor` (default) or `document`.
+---
 --- last                            Re-run the last executed request, alias to `run last`
 ---                                 to retain backwards compatibility with the old keybinds
 ---                                 layout.
+---
+--- logs                            Open the rest.nvim logs file in a new tab.
+---
+--- env {action?} {path?}           Manage the environment file that is currently in use while
+---                                 running requests. If you choose to `set` the environment,
+---                                 you must provide a `path` to the environment file. The
+---                                 default action is `show`, which displayes the current
+---                                 environment file path.
+---
+--- result {direction?}             Cycle through the results buffer winbar panes. The cycle
+---                                 direction can be either `next` or `prev`.
 ---
 ---@brief ]]
 
@@ -51,6 +63,12 @@ local rest_command_tbl = {
   last = {
     impl = function(_)
       functions.exec("last")
+    end,
+  },
+  logs = {
+    impl = function(_)
+      local logs_path = table.concat({ vim.fn.stdpath("log"), "rest.nvim.log" }, "/")
+      vim.cmd("tabedit " .. logs_path)
     end,
   },
   env = {
