@@ -112,20 +112,31 @@ end
 
 ---Traverse a request tree-sitter node and retrieve all its children nodes
 ---@param req_node TSNode Tree-sitter request node
----@return { headers: TSNode[], [string]: TSNode }[]
+---@return NodesList
 local function traverse_request(req_node)
-  local child_nodes = {
-    headers = {},
-  }
+  local child_nodes = {}
   for child, _ in req_node:iter_children() do
     local child_type = child:type()
-    if child_type == "header" then
-      table.insert(child_nodes.headers, child)
-    else
+    if child_type ~= "header" then
       child_nodes[child_type] = child
     end
   end
   return child_nodes
+end
+
+---Traverse a request tree-sitter node and retrieve all its children header nodes
+---@param req_node TSNode Tree-sitter request node
+---@return NodesList An array-like table containing the request header nodes
+local function traverse_headers(req_node)
+  local headers = {}
+  for child, _ in req_node:iter_children() do
+    local child_type = child:type()
+    if child_type == "header" then
+      table.insert(headers, child)
+    end
+  end
+
+  return headers
 end
 
 ---Traverse the document tree-sitter node and retrieve all the `variable_declaration` nodes
@@ -229,7 +240,7 @@ end
 ---Parse request headers tree-sitter nodes
 ---@param header_nodes NodesList Tree-sitter nodes
 ---@param variables Variables HTTP document variables list
----@return table Table containing the headers in a key-value style
+---@return table A table containing the headers in a key-value style
 function parser.parse_headers(header_nodes, variables)
   local headers = {}
   for _, node in ipairs(header_nodes) do
@@ -400,13 +411,13 @@ function parser.parse(req_node)
   local document_node = parser.look_behind_until(nil, "document")
 
   local request_children_nodes = traverse_request(req_node)
+  local request_header_nodes = traverse_headers(req_node)
+
   ---@cast document_node TSNode
   local document_variables = traverse_variables(document_node)
 
   ast.request = parser.parse_request(request_children_nodes, document_variables)
-  -- TODO: make parse_headers use a traverse_headers function to avoid these diagnostic warnings
-  ---@diagnostic disable-next-line undefined-field
-  ast.headers = parser.parse_headers(request_children_nodes.headers, document_variables)
+  ast.headers = parser.parse_headers(request_header_nodes, document_variables)
   ast.body = parser.parse_body(request_children_nodes, document_variables)
   ast.script = parser.parse_script(req_node)
 
