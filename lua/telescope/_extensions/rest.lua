@@ -20,7 +20,7 @@ local function rest_env_select(opt)
   local pattern = config.get("env_pattern")
   local edit = config.get("env_edit_command")
 
-  local command = string.format("fd -H '%s'", pattern)
+  local command = string.format("fd -HI '%s'", pattern)
   local result = io.popen(command):read("*a")
 
   local lines = {}
