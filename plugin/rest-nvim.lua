@@ -7,6 +7,13 @@ if vim.g.loaded_rest_nvim then
   return
 end
 
+
+--- Dependencies management ---
+-------------------------------
+-- This variable is going to hold the dependencies state (whether they are found or not),
+-- to be used later by the `health.lua` module
+local rest_nvim_deps = {}
+
 -- Locate dependencies
 local dependencies = {
   ["nvim-nio"] = "rest.nvim will not work asynchronously.",
@@ -38,13 +45,28 @@ for dep, err in pairs(dependencies) do
       found_dep2 = pcall(require, dep)
     end
 
+    rest_nvim_deps[dep] = {
+      found = false,
+      error = err,
+    }
     if not found_dep2 then
       vim.notify(
         "[rest.nvim] Dependency '" .. dep .. "' was not found. " .. err,
         vim.log.levels.ERROR
       )
+    else
+      rest_nvim_deps[dep] = {
+        found = true,
+        error = err,
+      }
     end
+  else
+    rest_nvim_deps[dep] = {
+      found = true,
+      error = err,
+    }
   end
 end
+vim.g.rest_nvim_deps = rest_nvim_deps
 
 vim.g.loaded_rest_nvim = true
