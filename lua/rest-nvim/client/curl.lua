@@ -245,6 +245,14 @@ function client.request(request)
         }
         req:post(post_data)
       end
+    elseif request.body.__TYPE == "form_data" then
+      body.__TYPE = nil
+
+      local form = curl.form()
+      for k, v in pairs(body) do
+        form:add_content(k, v)
+      end
+      req:setopt_httppost(form)
     end
 
     -- Request execution

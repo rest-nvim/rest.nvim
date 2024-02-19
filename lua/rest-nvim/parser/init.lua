@@ -333,7 +333,6 @@ end
 ---@param variables Variables HTTP document variables list
 ---@return table Decoded body table
 function parser.parse_body(children_nodes, variables)
-  local logger = _G._rest_nvim.logger
   local body = {}
 
   -- TODO: handle GraphQL bodies by using a graphql parser library from luarocks
@@ -368,6 +367,22 @@ function parser.parse_body(children_nodes, variables)
       body.path = assert(get_node_text(node:field("file_path")[1], 0))
       -- This is some metadata to be used later on
       body.__TYPE = "external_file"
+    elseif node_type == "form_data" then
+      local names = node:field("name")
+      local values = node:field("value")
+      if vim.tbl_count(names) > 1 then
+        for idx, name in ipairs(names) do
+          ---@type string|number|boolean
+          local value = assert(get_node_text(values[idx], 0)):gsub('"', "")
+          body[assert(get_node_text(name, 0))] = value
+        end
+      else
+        ---@type string|number|boolean
+        local value = assert(get_node_text(values[1], 0)):gsub('"', "")
+        body[assert(get_node_text(names[1], 0))] = value
+      end
+      -- This is some metadata to be used later on
+      body.__TYPE = "form"
     end
   end
 
