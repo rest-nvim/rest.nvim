@@ -400,6 +400,8 @@ end
 ---@field headers { [string]: string|number|boolean }[]
 ---@field body table
 ---@field script? string
+---@field start number
+---@field end_ number
 
 ---Parse a request and return the request on itself, its headers and body
 ---@param req_node TSNode Tree-sitter request node
@@ -423,6 +425,10 @@ function parser.parse(req_node)
   ast.headers = parser.parse_headers(request_header_nodes, document_variables)
   ast.body = parser.parse_body(request_children_nodes, document_variables)
   ast.script = parser.parse_script(req_node)
+
+  -- Request node range
+  ast.start = req_node:start()
+  ast.end_ = req_node:end_()
 
   return ast
 end
