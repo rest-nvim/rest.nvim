@@ -76,7 +76,7 @@ local function configuration_health()
   local unrecognized_configs = _G._rest_nvim.debug_info.unrecognized_configs
   if not vim.tbl_isempty(unrecognized_configs) then
     for _, config_key in ipairs(unrecognized_configs) do
-      vim.health.error("Unrecognized configuration option `" .. config_key .. "` found")
+      vim.health.warn("Unrecognized configuration option `" .. config_key .. "` found")
     end
   else
     vim.health.ok("No unrecognized configuration options were found")
@@ -87,14 +87,14 @@ local function configuration_health()
   for ft, formatter in pairs(formatters) do
     if type(formatter) == "string" then
       if vim.fn.executable(formatter) ~= 1 then
-        vim.health.error("Formatter for `" .. ft .. "` is set to `" .. formatter .. "`, however, rest.nvim could not find it in your system")
+        vim.health.warn("Formatter for `" .. ft .. "` is set to `" .. formatter .. "`, however, rest.nvim could not find it in your system")
       else
         vim.health.ok("Formatter for `" .. ft .. "` is set to `" .. formatter .. "` and rest.nvim found it in your system")
       end
     elseif type(formatter) == "function" then
       local _, fmt_meta = formatter()
       if not fmt_meta.found then
-        vim.health.error("Formatter for `" .. ft .. "` is set to `" .. fmt_meta.name .. "`, however, rest.nvim could not find it in your system")
+        vim.health.warn("Formatter for `" .. ft .. "` is set to `" .. fmt_meta.name .. "`, however, rest.nvim could not find it in your system")
       else
         vim.health.ok("Formatter for `" .. ft .. "` is set to `" .. fmt_meta.name .. "` and rest.nvim found it in your system")
       end
