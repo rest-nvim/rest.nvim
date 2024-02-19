@@ -9,6 +9,7 @@
 
 local api = {}
 
+local keybinds = require("rest-nvim.keybinds")
 local autocmds = require("rest-nvim.autocmds")
 local commands = require("rest-nvim.commands")
 
@@ -38,6 +39,17 @@ end
 ---@param cmd RestCmd
 function api.register_rest_subcommand(name, cmd)
   commands.register_subcommand(name, cmd)
+end
+
+---Register a new keybinding
+---@see vim.keymap.set
+---
+---@param mode string Keybind mode
+---@param lhs string Keybind trigger
+---@param cmd string Command to be run
+---@param opts table Keybind options
+function api.register_rest_keybind(mode, lhs, cmd, opts)
+  keybinds.register_keybind(mode, lhs, cmd, opts)
 end
 
 return api
