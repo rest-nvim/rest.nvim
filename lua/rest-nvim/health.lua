@@ -35,7 +35,11 @@ local function install_health()
     if not dep_info.found then
       local err_advice = "Install it through `luarocks --local install " .. dep .. "`"
       if dep:find("nvim") then
-        err_advice = "Install it through your preferred plugins manager"
+        err_advice = "Install it through your preferred plugins manager or luarocks by using `luarocks --local install " .. dep .. "`"
+        -- NOTE: nvim-treesitter has a weird bug in luarocks due to the parsers installation logic so let's mark it as not recommended
+        if dep == "nvim-treesitter" then
+          err_advice = err_advice .. " (not recommended yet!)"
+        end
       end
 
       vim.health.error(
