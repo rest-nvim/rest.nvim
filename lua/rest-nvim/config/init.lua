@@ -124,7 +124,7 @@ local default_config = {
   },
   highlight = {
     enable = true,
-    timeout = 150,
+    timeout = 750,
   },
   ---Example:
   ---
