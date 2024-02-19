@@ -163,7 +163,7 @@ function config.set(user_configs)
   end
 
   if #conf.debug_info.unrecognized_configs > 0 then
-    conf.logger:warn("Unrecognized configs found in setup: " .. vim.inspect(config.debug_info.unrecognized_configs))
+    conf.logger:warn("Unrecognized configs found in setup: " .. vim.inspect(conf.debug_info.unrecognized_configs))
   end
 
   return conf
