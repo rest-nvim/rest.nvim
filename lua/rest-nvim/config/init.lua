@@ -130,7 +130,12 @@ local default_config = {
   ---
   ---```lua
   ---keybinds = {
-  ---  "<localleader>r", ":Rest run", "Run request under the cursor",
+  ---  {
+  ---    "<localleader>rr", ":Rest run", "Run request under the cursor",
+  ---  },
+  ---  {
+  ---    "<localleader>rl", ":Rest run last", "Re-run latest request",
+  ---  },
   ---}
   ---
   ---```
