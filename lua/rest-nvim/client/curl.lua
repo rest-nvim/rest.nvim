@@ -169,6 +169,17 @@ function client.request(request)
     ---@diagnostic disable-next-line need-check-nil
     logger:error("lua-curl could not be found, therefore the cURL client will not work.")
   else
+    -- If Host header exists then we need to tweak the request url
+    if vim.tbl_contains(vim.tbl_keys(request.headers), "Host") then
+      ---@diagnostic disable-next-line inject-field
+      request.request.url = request.headers["Host"] .. request.request.url
+      request.headers["Host"] = nil
+    elseif vim.tbl_contains(vim.tbl_keys(request.headers), "host") then
+      ---@diagnostic disable-next-line inject-field
+      request.request.url = request.headers["host"] .. request.request.url
+      request.headers["host"] = nil
+    end
+
     -- We have to concat request headers to a single string, e.g. ["Content-Type"]: "application/json" -> "Content-Type: application/json"
     local headers = {}
     for name, value in pairs(request.headers) do
