@@ -17,6 +17,11 @@ local commands = require("rest-nvim.commands")
 ---@see vim.version
 api.VERSION = "2.0.0"
 
+---rest.nvim namespace used for buffer highlights
+---@type number
+---@see vim.api.nvim_create_namespace
+api.namespace = vim.api.nvim_create_namespace("rest-nvim")
+
 ---Register a new autocommand in the `Rest` augroup
 ---@see vim.api.nvim_create_augroup
 ---@see vim.api.nvim_create_autocmd
