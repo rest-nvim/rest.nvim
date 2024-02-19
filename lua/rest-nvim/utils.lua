@@ -104,4 +104,36 @@ local transform = {
 utils.transform_time = transform.time
 utils.transform_size = transform.size
 
+---Highlight a request
+---@param bufnr number Buffer handler ID
+---@param start number Request tree-sitter node start
+---@param end_ number Request tree-sitter node end
+---@param ns number rest.nvim Neovim namespace
+function utils.highlight(bufnr, start, end_, ns)
+  local highlight = _G._rest_nvim.highlight
+  local higroup = "IncSearch"
+  local timeout = highlight.timeout
+
+  -- Clear buffer highlights
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+
+  -- Highlight request
+  vim.highlight.range(
+    bufnr,
+    ns,
+    higroup,
+    { start, 0 },
+    { end_, string.len(vim.fn.getline(end_)) },
+    { regtype = "c", inclusive = false }
+  )
+
+  -- Clear buffer highlights again after timeout
+  vim.defer_fn(function()
+    vim.notify("Cleaning highlights")
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    end
+  end, timeout)
+end
+
 return utils

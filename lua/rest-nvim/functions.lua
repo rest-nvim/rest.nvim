@@ -26,6 +26,7 @@ function functions.exec(scope)
     scope = { scope, "string" },
   })
 
+  local api = require("rest-nvim.api")
   local logger = _G._rest_nvim.logger
   local ok, client = pcall(require, "rest-nvim.client." .. _G._rest_nvim.client)
   if not ok then
@@ -57,6 +58,8 @@ function functions.exec(scope)
       parser.look_behind_until(parser.get_node_at_cursor(), "request")
     )
 
+    utils.highlight(0, req.start, req.end_, api.namespace)
+
     if found_nio then
       req_results = nio
         .run(function()
@@ -77,6 +80,8 @@ function functions.exec(scope)
       ---@diagnostic disable-next-line need-check-nil
       logger:error("Rest run last: A previously made request was not found to be executed again")
     else
+      utils.highlight(0, req.start, req.end_, api.namespace)
+
       if found_nio then
         req_results = nio
           .run(function()
