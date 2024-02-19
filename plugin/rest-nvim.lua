@@ -7,10 +7,44 @@ if vim.g.loaded_rest_nvim then
   return
 end
 
--- NOTE: legacy code, needs an alternative later
---
--- vim.api.nvim_create_user_command('RestLog', function()
---   vim.cmd(string.format('tabnew %s', vim.fn.stdpath('cache')..'/rest.nvim.log'))
--- end, { desc = 'Opens the rest.nvim log.', })
+-- Locate dependencies
+local dependencies = {
+  ["nvim-nio"] = "rest.nvim will not work asynchronously.",
+  ["lua-curl"] = "Default HTTP client won't work.",
+  xml2lua = "rest.nvim will be completely unable to use XML bodies in your requests.",
+  mimetypes = "rest.nvim will be completely unable to recognize the file type of external bodies.",
+}
+for dep, err in pairs(dependencies) do
+  local found_dep
+  -- Both nvim-nio and lua-curl has a different Lua module name
+  if dep == "nvim-nio" then
+    found_dep = package.searchpath("nio", package.path)
+  elseif dep == "lua-curl" then
+    found_dep = package.searchpath("cURL.safe", package.path)
+  else
+    found_dep = package.searchpath(dep, package.path)
+  end
+
+  -- If the dependency could not be find in the Lua package.path then try to load it using pcall
+  -- in case it has been installed through a regular plugin manager and not rocks.nvim
+  if not found_dep then
+    local found_dep2
+    -- Both nvim-nio and lua-curl has a different Lua module name
+    if dep == "nvim-nio" then
+      found_dep2 = pcall(require, "nio")
+    elseif dep == "lua-curl" then
+      found_dep2 = pcall(require, "cURL.safe")
+    else
+      found_dep2 = pcall(require, dep)
+    end
+
+    if not found_dep2 then
+      vim.notify(
+        "[rest.nvim] Dependency '" .. dep .. "' was not found. " .. err,
+        vim.log.levels.ERROR
+      )
+    end
+  end
+end
 
 vim.g.loaded_rest_nvim = true
