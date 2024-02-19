@@ -8,8 +8,24 @@
 
 local keybinds = {}
 
+local function legacy_keybinds()
+  -- NOTE: RestNvimPreview no longer exists
+  vim.keymap.set("n", "<Plug>RestNvim", function()
+    vim.deprecate("`<Plug>RestNvim` mapping", "`:Rest run`", "2.1.0", "rest.nvim", false)
+    vim.cmd("Rest run")
+  end)
+  vim.keymap.set("n", "<Plug>RestNvimLast", function()
+    vim.deprecate("`<Plug>RestNvimLast` mapping", "`:Rest run last`", "2.1.0", "rest.nvim", false)
+    vim.cmd("Rest run")
+  end)
+end
+
 ---Apply user-defined keybinds in the rest.nvim configuration
 function keybinds.apply()
+  -- Temporarily apply legacy <Plug> keybinds
+  legacy_keybinds()
+
+  -- User-defined keybinds
   local keybindings = _G._rest_nvim.keybinds
   for _, keybind in ipairs(keybindings) do
     local lhs = keybind[1]
