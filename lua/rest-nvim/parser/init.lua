@@ -10,9 +10,6 @@
 
 local parser = {}
 
-local xml2lua = require("xml2lua")
-local xml_handler = require("xmlhandler.tree")
-
 local env_vars = require("rest-nvim.parser.env_vars")
 local dynamic_vars = require("rest-nvim.parser.dynamic_vars")
 
@@ -336,6 +333,7 @@ end
 ---@param variables Variables HTTP document variables list
 ---@return table Decoded body table
 function parser.parse_body(children_nodes, variables)
+  local logger = _G._rest_nvim.logger
   local body = {}
 
   -- TODO: handle GraphQL bodies by using a graphql parser library from luarocks
@@ -349,11 +347,16 @@ function parser.parse_body(children_nodes, variables)
       -- This is some metadata to be used later on
       body.__TYPE = "json"
     elseif node_type == "xml_body" then
-      local body_handler = xml_handler:new()
-      local xml_parser = xml2lua.parser(body_handler)
-      local xml_body_text = assert(get_node_text(node, 0))
-      xml_parser:parse(xml_body_text)
-      body = traverse_body(body_handler.root, variables)
+      local found_xml2lua, xml2lua = pcall(require, "xml2lua")
+      if found_xml2lua then
+        local xml_handler = require("xmlhandler.tree")
+
+        local body_handler = xml_handler:new()
+        local xml_parser = xml2lua.parser(body_handler)
+        local xml_body_text = assert(get_node_text(node, 0))
+        xml_parser:parse(xml_body_text)
+        body = traverse_body(body_handler.root, variables)
+      end
       -- This is some metadata to be used later on
       body.__TYPE = "xml"
     elseif node_type == "external_body" then

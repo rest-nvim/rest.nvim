@@ -8,7 +8,7 @@
 
 local functions = {}
 
-local nio = require("nio")
+local found_nio, nio = pcall(require, "nio")
 
 local utils = require("rest-nvim.utils")
 local parser = require("rest-nvim.parser")
@@ -57,11 +57,15 @@ function functions.exec(scope)
       parser.look_behind_until(parser.get_node_at_cursor(), "request")
     )
 
-    req_results = nio
-      .run(function()
-        return client.request(req)
-      end)
-      :wait()
+    if found_nio then
+      req_results = nio
+        .run(function()
+          return client.request(req)
+        end)
+        :wait()
+    else
+      req_results = client.request(req)
+    end
 
     ---Last HTTP request made by the user
     ---@type Request
@@ -73,11 +77,15 @@ function functions.exec(scope)
       ---@diagnostic disable-next-line need-check-nil
       logger:error("Rest run last: A previously made request was not found to be executed again")
     else
-      req_results = nio
-        .run(function()
-          return client.request(req)
-        end)
-        :wait()
+      if found_nio then
+        req_results = nio
+          .run(function()
+            return client.request(req)
+          end)
+          :wait()
+      else
+        req_results = client.request(req)
+      end
     end
   end
 
@@ -100,7 +108,7 @@ function functions.find_env_files()
   --
   -- This algorithm can be improved later on to search from a parent directory if the desired environment file
   -- is somewhere else but in the current working directory.
-  local files = vim.fs.find(function(name, path)
+  local files = vim.fs.find(function(name, _)
     return name:match(".*env.*$")
   end, { limit = math.huge, type = "file", path = "./" })
 

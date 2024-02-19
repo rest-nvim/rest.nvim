@@ -8,9 +8,7 @@
 
 local client = {}
 
-local curl = require("cURL.safe")
-local mimetypes = require("mimetypes")
-local xml2lua = require("xml2lua")
+local found_curl, curl = pcall(require, "cURL.safe")
 
 local utils = require("rest-nvim.utils")
 
@@ -164,94 +162,108 @@ end
 ---@param request Request Request data to be passed to cURL
 ---@return table The request information (url, method, headers, body, etc)
 function client.request(request)
+  local ret = {}
   local logger = _G._rest_nvim.logger
 
-  -- We have to concat request headers to a single string, e.g. ["Content-Type"]: "application/json" -> "Content-Type: application/json"
-  local headers = {}
-  for name, value in pairs(request.headers) do
-    table.insert(headers, name .. ": " .. value)
-  end
-
-  -- Whether to skip SSL host and peer verification
-  local skip_ssl_verification = _G._rest_nvim.skip_ssl_verification
-  local req = curl.easy_init()
-  req:setopt({
-    url = request.request.url,
-    -- verbose = true,
-    httpheader = headers,
-    ssl_verifyhost = skip_ssl_verification,
-    ssl_verifypeer = skip_ssl_verification,
-  })
-
-  -- Set request HTTP version, defaults to HTTP/1.1
-  if request.request.http_version then
-    local http_version = request.request.http_version:gsub("%.", "_")
-    req:setopt_http_version(curl["HTTP_VERSION_" .. http_version])
+  if not found_curl then
+    ---@diagnostic disable-next-line need-check-nil
+    logger:error("lua-curl could not be found, therefore the cURL client will not work.")
   else
-    req:setopt_http_version(curl.HTTP_VERSION_1_1)
-  end
-
-  -- If the request method is not GET then we have to build the method in our own
-  -- See: https://github.com/Lua-cURL/Lua-cURLv3/issues/156
-  local method = request.request.method
-  if vim.tbl_contains({ "POST", "PUT", "PATCH", "TRACE", "OPTIONS", "DELETE" }, method) then
-    req:setopt_post(true)
-    req:setopt_customrequest(method)
-  end
-
-  -- Request body
-  --
-  -- Create a copy of the request body table to remove the unneeded `__TYPE` metadata field later
-  local body = request.body
-  if request.body.__TYPE == "json" then
-    body.__TYPE = nil
-
-    local json_body_string = vim.json.encode(body)
-    req:setopt_postfields(json_body_string)
-  elseif request.body.__TYPE == "xml" then
-    body.__TYPE = nil
-
-    local xml_body_string = xml2lua.toXml(body)
-    req:setopt_postfields(xml_body_string)
-  elseif request.body.__TYPE == "external_file" then
-    local body_mimetype = mimetypes.guess(request.body.path)
-    local post_data = {
-      [request.body.name and request.body.name or "body"] = {
-        file = request.body.path,
-        type = body_mimetype,
-      },
-    }
-    req:post(post_data)
-  end
-
-  -- Request execution
-  local res_result = {}
-  local res_headers = {}
-  req:setopt_writefunction(table.insert, res_result)
-  req:setopt_headerfunction(table.insert, res_headers)
-
-  local ret = {}
-  local ok, err = req:perform()
-  if ok then
-    -- Get request statistics if they are enabled
-    local stats_config = _G._rest_nvim.result.behavior.statistics
-    if stats_config.enable then
-      ret.statistics = get_stats(req, stats_config.stats)
+    -- We have to concat request headers to a single string, e.g. ["Content-Type"]: "application/json" -> "Content-Type: application/json"
+    local headers = {}
+    for name, value in pairs(request.headers) do
+      table.insert(headers, name .. ": " .. value)
     end
 
-    ret.url = req:getinfo_effective_url()
-    ret.code = req:getinfo_response_code()
-    ret.method = req:getinfo_effective_method()
-    ret.headers = table.concat(res_headers):gsub("\r", "")
-    ret.body = table.concat(res_result)
-    -- We are returning the request script variable as it
-    ret.script = request.script
-  else
-    ---@diagnostic disable-next-line need-check-nil
-    logger:error("Something went wrong when making the request with cURL:\n" .. curl_error(err:no()))
-    return {}
+    -- Whether to skip SSL host and peer verification
+    local skip_ssl_verification = _G._rest_nvim.skip_ssl_verification
+    local req = curl.easy_init()
+    req:setopt({
+      url = request.request.url,
+      -- verbose = true,
+      httpheader = headers,
+      ssl_verifyhost = skip_ssl_verification,
+      ssl_verifypeer = skip_ssl_verification,
+    })
+
+    -- Set request HTTP version, defaults to HTTP/1.1
+    if request.request.http_version then
+      local http_version = request.request.http_version:gsub("%.", "_")
+      req:setopt_http_version(curl["HTTP_VERSION_" .. http_version])
+    else
+      req:setopt_http_version(curl.HTTP_VERSION_1_1)
+    end
+
+    -- If the request method is not GET then we have to build the method in our own
+    -- See: https://github.com/Lua-cURL/Lua-cURLv3/issues/156
+    local method = request.request.method
+    if vim.tbl_contains({ "POST", "PUT", "PATCH", "TRACE", "OPTIONS", "DELETE" }, method) then
+      req:setopt_post(true)
+      req:setopt_customrequest(method)
+    end
+
+    -- Request body
+    --
+    -- Create a copy of the request body table to remove the unneeded `__TYPE` metadata field later
+    local body = request.body
+    if request.body.__TYPE == "json" then
+      body.__TYPE = nil
+
+      local json_body_string = vim.json.encode(body)
+      req:setopt_postfields(json_body_string)
+    elseif request.body.__TYPE == "xml" then
+      local ok, xml2lua = pcall(require, "xml2lua")
+      body.__TYPE = nil
+
+      -- Send an empty table if xml2lua is not installed
+      if ok then
+        local xml_body_string = xml2lua.toXml(body)
+        req:setopt_postfields(xml_body_string)
+      else
+        req:setopt_postfields({})
+      end
+    elseif request.body.__TYPE == "external_file" then
+      local ok, mimetypes = pcall(require, "mimetypes")
+      if ok then
+        local body_mimetype = mimetypes.guess(request.body.path)
+        local post_data = {
+          [request.body.name and request.body.name or "body"] = {
+            file = request.body.path,
+            type = body_mimetype,
+          },
+        }
+        req:post(post_data)
+      end
+    end
+
+    -- Request execution
+    local res_result = {}
+    local res_headers = {}
+    req:setopt_writefunction(table.insert, res_result)
+    req:setopt_headerfunction(table.insert, res_headers)
+
+    local ok, err = req:perform()
+    if ok then
+      -- Get request statistics if they are enabled
+      local stats_config = _G._rest_nvim.result.behavior.statistics
+      if stats_config.enable then
+        ret.statistics = get_stats(req, stats_config.stats)
+      end
+
+      ret.url = req:getinfo_effective_url()
+      ret.code = req:getinfo_response_code()
+      ret.method = req:getinfo_effective_method()
+      ret.headers = table.concat(res_headers):gsub("\r", "")
+      ret.body = table.concat(res_result)
+      -- We are returning the request script variable as it
+      ret.script = request.script
+    else
+      ---@diagnostic disable-next-line need-check-nil
+      logger:error("Something went wrong when making the request with cURL:\n" .. curl_error(err:no()))
+      return {}
+    end
+    req:close()
   end
-  req:close()
 
   return ret
 end
