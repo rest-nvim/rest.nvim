@@ -29,7 +29,7 @@ local logger = require("rest-nvim.logger")
 ---@class RestConfigResultBehavior
 ---@field show_info RestConfigResultInfo Request results information
 ---@field statistics RestConfigResultStats Request results statistics
----@field formatters RestConfigResultFormatters Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a boolean whether the formatter has been found or not
+---@field formatters RestConfigResultFormatters Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a table containing two values `found` (whether the formatter has been found or not) and `name` (the formatter name)
 
 ---@class RestConfigResultInfo
 ---@field url boolean Display the request URL
@@ -42,8 +42,8 @@ local logger = require("rest-nvim.logger")
 ---@field stats string[]|{ [1]: string, title: string }[] Statistics to be shown, takes cURL's easy getinfo constants name
 
 ---@class RestConfigResultFormatters
----@field json string|fun(body: string): string,boolean JSON formatter
----@field html string|fun(body: string): string,boolean HTML formatter
+---@field json string|fun(body: string): string,table JSON formatter
+---@field html string|fun(body: string): string,table HTML formatter
 
 ---@class RestConfigHighlight
 ---@field enable boolean Whether current request highlighting is enabled or not
@@ -103,7 +103,7 @@ local default_config = {
         json = "jq",
         html = function(body)
           if vim.fn.executable("tidy") == 0 then
-            return body, false
+            return body, { found = false, name = "tidy" }
           end
           -- stylua: ignore
           local fmt_body = vim.fn.system({
@@ -117,7 +117,7 @@ local default_config = {
             "-",
           }, body):gsub("\n$", "")
 
-          return fmt_body, true
+          return fmt_body, { found = true, name = "tidy" }
         end,
       },
     },
