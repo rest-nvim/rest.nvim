@@ -12,6 +12,11 @@ local api = {}
 local autocmds = require("rest-nvim.autocmds")
 local commands = require("rest-nvim.commands")
 
+---rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
+---@type string
+---@see vim.version
+api.VERSION = "2.0.0"
+
 ---Register a new autocommand in the `Rest` augroup
 ---@see vim.api.nvim_create_augroup
 ---@see vim.api.nvim_create_autocmd
