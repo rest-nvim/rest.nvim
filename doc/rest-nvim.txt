@@ -22,6 +22,7 @@ CONTENTS                                                   *rest-nvim-contents*
         4. Environment Variables........|rest-nvim-usage-environment-variables|
         5. Dynamic Variables................|rest-nvim-usage-dynamic-variables|
         6. Callbacks................................|rest-nvim-usage-callbacks|
+        7. Pre-script..............................|rest-nvim-usage-pre-script|
     5. Known issues..........................................|rest-nvim-issues|
     6. License..............................................|rest-nvim-license|
     7. Contributing....................................|rest-nvim-contributing|
@@ -238,6 +239,31 @@ rest.nvim fires different events upon requests:
 	 print("IT STARTED")
 	 vim.pretty_print(opts)
       end,
+    })
+<
+===============================================================================
+Pre-Script                                           *rest-nvim-usage-pre-script*
+
+rest.nvim allows configuring a pre-script that is invoked before launching a
+request. This script can be used to dynamically modify the request headers and
+body. The script receives the request opts and environment variables: >lua
+
+    -- pre-script example:
+    require("rest-nvim").setup({
+      request = {
+	pre_script = function(opts, variables)
+	  -- Access request body
+	  local body = opts["body"]
+	  -- Access request headers
+	  local content_type = opts["headers"]["Content-Type"]
+	  -- Access environment variables
+	  local secret_key = variables["SECRET_KEY"]
+
+	  -- Set custom request headers.
+	  opts["headers"]["X-Signature"] = signature(body, secret_key)
+	  opts["headers"]["X-Timestamp"] = os.time
+	end
+      },
     })
 <
 ===============================================================================

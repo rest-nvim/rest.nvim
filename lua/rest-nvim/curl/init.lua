@@ -276,6 +276,12 @@ end
 --           - yank_dry_run (boolean): displays the command
 --           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
+
+  --- Execute request pre-script if any.
+  if config.get("request").pre_script then
+    config.get("request").pre_script(opts, utils.get_variables())
+  end
+
   -- plenary's curl module is strange in the sense that with "dry_run" it returns the command
   -- otherwise it starts the request :/
   local dry_run_opts = vim.tbl_extend("force", opts, { dry_run = true })
