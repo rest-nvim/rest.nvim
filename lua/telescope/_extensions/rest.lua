@@ -16,7 +16,7 @@ local conf = require("telescope.config").values
 
 local config = require("rest-nvim.config")
 
-local function rest_env_select(opt)
+local function rest_env_select(_)
   local pattern = config.get("env_pattern")
   local edit = config.get("env_edit_command")
 
