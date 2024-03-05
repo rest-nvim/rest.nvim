@@ -10,6 +10,10 @@ local config = {
     enabled = true,
     timeout = 150,
   },
+  request = {
+    pre_script = function()
+    end
+  },
   result = {
     show_curl_command = true,
     show_url = true,
