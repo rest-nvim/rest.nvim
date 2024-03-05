@@ -61,6 +61,7 @@ function result.get_or_create_buf()
     -- Prevent modified flag
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
     -- Delete buffer content
+    ---@cast bufnr number
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
 
     -- Make sure the filetype of the buffer is `httpResult` so it will be highlighted
