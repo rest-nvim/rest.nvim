@@ -276,7 +276,6 @@ end
 --           - yank_dry_run (boolean): displays the command
 --           - arguments are forwarded to plenary
 M.curl_cmd = function(opts)
-
   --- Execute request pre-script if any.
   if config.get("request").pre_script then
     config.get("request").pre_script(opts, utils.get_variables())
