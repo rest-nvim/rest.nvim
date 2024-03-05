@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/rest-nvim/rest.nvim/compare/v1.1.0...v1.2.0) (2024-03-05)
+
+
+### Features
+
+* add pre-script configuration ([#287](https://github.com/rest-nvim/rest.nvim/issues/287)) ([2bb9570](https://github.com/rest-nvim/rest.nvim/commit/2bb957091ff8ddf1945308fae2925ce76f93b9ed))
+
 ## [1.1.0](https://github.com/rest-nvim/rest.nvim/compare/v1.0.1...v1.1.0) (2024-02-12)
 
 
