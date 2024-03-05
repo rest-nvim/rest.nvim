@@ -4,7 +4,7 @@ if not has_telescope then
   return
 end
 
-local rest = require("rest-nvim")
+local rest_functions = require("rest-nvim.functions")
 
 local state = require("telescope.actions.state")
 
@@ -14,11 +14,9 @@ local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local conf = require("telescope.config").values
 
-local config = require("rest-nvim.config")
-
-local function rest_env_select(opt)
-  local pattern = config.get("env_pattern")
-  local edit = config.get("env_edit_command")
+local function rest_env_select(_)
+  local pattern = _G._rest_nvim.env_pattern
+  local edit = _G._rest_nvim.env_edit_command
 
   local command = string.format("fd -HI '%s'", pattern)
   local result = io.popen(command):read("*a")
@@ -41,7 +39,7 @@ local function rest_env_select(opt)
           if selection == nil then
             return
           end
-          rest.select_env(selection[1])
+          rest_functions.env("set", selection[1])
         end)
         map("i", "<c-o>", function()
           actions.close(prompt_bufnr)
