@@ -129,7 +129,6 @@ function utils.highlight(bufnr, start, end_, ns)
 
   -- Clear buffer highlights again after timeout
   vim.defer_fn(function()
-    vim.notify("Cleaning highlights")
     if vim.api.nvim_buf_is_valid(bufnr) then
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
     end
