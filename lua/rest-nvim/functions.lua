@@ -114,7 +114,7 @@ function functions.find_env_files()
   -- This algorithm can be improved later on to search from a parent directory if the desired environment file
   -- is somewhere else but in the current working directory.
   local files = vim.fs.find(function(name, _)
-    return name:match(".*env.*$")
+    return name:match(_G._rest_nvim.env_pattern)
   end, { limit = math.huge, type = "file", path = "./" })
 
   return files
