@@ -1,11 +1,4 @@
-*rest-nvim.txt* A fast Neovim http client written in Lua based on curl
-
-             ______                                _        ~
-            (_____ \              _               (_)       ~
-             _____) )_____  ___ _| |_   ____ _   _ _ ____   ~
-            |  __  /| ___ |/___|_   _) |  _ \ | | | |    \  ~
-            | |  \ \| ____|___ | | |_ _| | | \ V /| | | | | ~
-            |_|   |_|_____|___/   \__|_)_| |_|\_/ |_|_|_|_| ~
+*rest-nvim.txt* A very fast, powerful, extensible and asynchronous Neovim HTTP client.
 
 
  NTBBloodbath                                                      *rest-nvim*
@@ -21,8 +14,8 @@ CONTENTS                                                   *rest-nvim-contents*
         3. Import body from external file......|rest-nvim-usage-external-files|
         4. Environment Variables........|rest-nvim-usage-environment-variables|
         5. Dynamic Variables................|rest-nvim-usage-dynamic-variables|
+        6. Script Variables..................|rest-nvim-usage-script-variables|
         6. Callbacks................................|rest-nvim-usage-callbacks|
-    5. Known issues..........................................|rest-nvim-issues|
     6. License..............................................|rest-nvim-license|
     7. Contributing....................................|rest-nvim-contributing|
 
@@ -30,57 +23,116 @@ CONTENTS                                                   *rest-nvim-contents*
 ===============================================================================
 INTRODUCTION                                                  *rest-nvim-intro*
 
-`rest.nvim` is a fast Neovim http client written in Lua which makes use of a
-curl wrapper made in pure Lua by github.com/tami5 and implemented in the
-plugin `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you
-don't have to leave Neovim!
-
+`rest.nvim` by default makes use of native `cURL` bindings. In this way, you
+get absolutely all the power that cURL provides from the comfort of our editor
+just by using a keybind and without wasting the precious resources of your
+machine.
 
 ===============================================================================
 FEATURES                                                   *rest-nvim-features*
 
 - Easy to use
-- Fast execution time
-- Run request under cursor
-- Syntax highlight for http files and output
-- Possibility of using environment variables in http files
-- Set environment variables based on the response
+- Friendly and organized request results window
+- Fast runtime with statistics about your request
+- Easily set environment variables based on the response to re-use the data later
+- Tree-sitter based parsing and syntax highlighting for speed and perfect accuracy
+- Possibility of using dynamic/environment variables and Lua scripting in HTTP files
 
 
 ===============================================================================
 QUICK START                                             *rest-nvim-quick-start*
 
 After installing `rest.nvim` you will need to configure it using a `setup`
-function, it looks like this by default: >lua
-
-    require("rest-nvim").setup({
-      -- Open request results in a horizontal split
-      result_split_horizontal = false,
-     -- Keep the http file buffer above|left when split horizontal|vertical
-     result_split_in_place = false,
-      -- Skip SSL verification, useful for unknown certificates
-      skip_ssl_verification = false,
-      -- Highlight request on run
-      highlight = {
-	  enabled = true,
-	  timeout = 150,
+function, it looks like this by default:
+>lua
+  require("rest-nvim").setup({
+    client = "curl",
+    env_file = ".env",
+    env_pattern = "\\.env$",
+    env_edit_command = "tabedit",
+    encode_url = true,
+    skip_ssl_verification = false,
+    custom_dynamic_variables = {},
+    logs = {
+      level = "info",
+      save = true,
+    },
+    result = {
+      split = {
+        horizontal = false,
+        in_place = false,
+        stay_in_current_window_after_split = true,
       },
-      -- Jump to request line on run
-      jump_to_request = false,
-      env_file = '.env',
-      yank_dry_run = true,
-    })
+      behavior = {
+        show_info = {
+          url = true,
+          headers = true,
+          http_info = true,
+          curl_command = true,
+        },
+        statistics = {
+          enable = true,
+          ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
+          stats = {
+            { "total_time", title = "Time taken:" },
+            { "size_download_t", title = "Download size:" },
+          },
+        },
+        formatters = {
+          json = "jq",
+          html = function(body)
+            if vim.fn.executable("tidy") == 0 then
+              return body, { found = false, name = "tidy" }
+            end
+            local fmt_body = vim.fn.system({
+              "tidy",
+              "-i",
+              "-q",
+              "--tidy-mark",      "no",
+              "--show-body-only", "auto",
+              "--show-errors",    "0",
+              "--show-warnings",  "0",
+              "-",
+            }, body):gsub("\n$", "")
+
+            return fmt_body, { found = true, name = "tidy" }
+          end,
+        },
+      },
+    },
+    highlight = {
+      enable = true,
+      timeout = 750,
+    },
+    ---Example:
+    ---
+    ---```lua
+    ---keybinds = {
+    ---  {
+    ---    "<localleader>rr", ":Rest run", "Run request under the cursor",
+    ---  },
+    ---  {
+    ---    "<localleader>rl", ":Rest run last", "Re-run latest request",
+    ---  },
+    ---}
+    ---
+    ---```
+    ---@see vim.keymap.set
+    keybinds = {},
+  })
+<
+Please refer to |rest-nvim.config| for more information and documentation.
 
 In this section we will be using `https://reqres.in/` for requests.
 
 Let's say we want to create a new user and send our body as a JSON, so we
 will do the following:
 
-    1. We declare the HTTP method to use followed by the URL. >lua
+    1. We declare the HTTP method to use followed by the URL. >http
        POST https://reqres.in/api/users
 <
     2. Since we want to send our body as a JSON object, we set the
-       Content-Type header. >http
+       Content-Type header. >
        Content-Type: application/json
 <
     3. Now, we set the body of our request. >json
@@ -89,42 +141,56 @@ will do the following:
            "job": "leader"
        }
 <
-    4. Finally, we place the cursor over or below the method of our request 
-       and call `rest.nvim` with `:lua require('rest-nvim').run()`.
-
-Since the way to call rest.nvim with Lua is not comfortable, rest.nvim
-exposes a command to be mapped. See |rest-nvim-usage-commands|
+    4. Finally, we place the cursor over or below the method of our request
+       and call `rest.nvim` with the following command: >vim
+       :Rest run
+<
+To get a better understanding of the `:Rest` command, please see |rest-nvim.commands|
 
 
 ===============================================================================
 USAGE                                                         *rest-nvim-usage*
 
-Create a new http file or open an existing one and place the cursor over the
-request line (e.g. `GET http://localhost:3000/foo`) or below and run `rest.nvim`
-(see |rest-nvim-usage-commands|).
+Create a new HTTP file or open an existing one and place the cursor over the
+request and run the `:Rest run` command (see |rest-nvim.commands|).
 
 Notes:
-    - `rest.nvim` follows the RFC 2616 request format so any other http file
-      should work without problems.
-    - `rest.nvim` supports multiple http requests in one file. It selects the
-      nearest request in or above the current cursor line.
+    - You can find examples of use in the `tests` directory in the GitHub
+      repository.
+    - `rest.nvim` supports multiple HTTP requests in one file. It selects the
+      request in the current cursor line, no matters the position as long as
+      the cursor is on a request tree-sitter node.
 
 
 ===============================================================================
 COMMANDS                                             *rest-nvim-usage-commands*
 
-- `<Plug>RestNvim`
-  Run `rest.nvim` in the current cursor position.
+`rest.nvim` exposes a `:Rest` command that is available only in HTTP buffers,
+this command has very useful subcommands for you (see |rest-nvim.commands|).
+Some of these commands are the following:
+
+- `:Rest run`
+  Execute one or several HTTP requests depending on the given `scope`.
+  Defaults to the request under the cursor (`:Rest run cursor`).
+
+- `:Rest last`
+  Re-run the last executed request, alias to `:Rest run last`.
+
+- `:Rest env`
+  Manage the environment file that is currently in use while running requests.
+
+If you have used `rest.nvim` before v2 (aka `Thunder Rest`), you will know that
+before we used `<Plug>` commands that had to be used in keybinds. This has
+changed, and in order not to completely break your workflow, these
+commands (`<Plug>RestNvim` and `<Plug>RestNvimLast`) will still work until
+the next version, but it is highly recommended to update your setup.
+
+Unfortunately, the following command has had to be removed as it cannot be
+re-implemented with the `rest.nvim` v2 architecture and workflow:
 
 - `<Plug>RestNvimPreview`
   Same as `RestNvim` but it returns the cURL command without executing the
   request. Intended for debugging purposes.
-
-- `:RestLog`
-  Shows `rest.nvim` logs (export DEBUG_PLENARY=debug for more logs).
-
-- `:RestSelectEnv path/to/env`
-  Set the path to an env file.
 
 
 ===============================================================================
@@ -144,8 +210,12 @@ IMPORT BODY FROM EXTERNAL FILE                 *rest-nvim-usage-external-files*
 
 `rest.nvim` allows the http file to import the body from an external file.
 
-The syntax is `< path/to/file.json`. `rest.nvim` supports absolute and relative
-paths to the external file.
+The syntax is to append an external body from a file is `< path/to/file.json`.
+
+You can also choose a name for the file sent to the backend using
+the syntax `<@user.json path/to/file.json`.
+
+`rest.nvim` supports absolute and relative paths to the external file.
 
 
 ===============================================================================
@@ -153,62 +223,66 @@ ENVIRONMENT VARIABLES                   *rest-nvim-usage-environment-variables*
 
 `rest.nvim` allows the use of environment variables in requests.
 
-To use environment variables, the following syntax is used: `{{VARIABLE_NAME}}`
+To use environment variables, the following syntax is used: `{{VARIABLE_NAME}}`.
 
 These environment variables can be obtained from:
-    - File in the current working directory (env_file in config or '.env')
-    - System
+    - Your current Neovim session (`vim.env`)
+    - Your system shell environment.
+    - File in the current working directory (`env_file` in config, `.env` by default).
 
-Environment variables can be set in .env format or in json.
+Environment variables can be set in `.env` format or in `json`.
 
-To change the environment for the session use :RestSelectEnv path/to/environment
+To change the environment for the session use `:Rest env set path/to/environment`
 
-Environment variables can be set dynamically from the response body. 
-(see rest-nvim-usage-dynamic-variables)
+Environment variables can be set dynamically from the response body.
+(see |rest-nvim-usage-script-variables|)
 
 
 ===============================================================================
-RESPONSE SCRIPT                                     *rest-nvim-response-script*
+SCRIPT VARIABLES                                   *rest-nvim-script-variables*
 
-A lua script can be run after a request has completed. This script must below
-the body and wrapped in {% script %}. A context table is avaliable in the 
+A Lua script can be run after a request has completed. This script must below
+the body and wrapped in `--{% script --%}`. A context table is avaliable in the
 response script. The context table can be used to read the response and set
-environment variables. 
+environment variables.
 
-The context table: >lua
+The context table:
+>lua
     {
       result = res,
-      pretty_print = vim.pretty_print,
-      json_decode = vim.fn.json_decode,
+      pretty_print = vim.print,
+      json_decode = vim.json.decode,
       set_env = utils.set_env,
     }
 <
 Now environment variables can be set like so:
->
+>http
     GET https://jsonplaceholder.typicode.com/posts/3
-     
-    {% 
-     
+
+    --{%
+
     local body = context.json_decode(context.result.body)
     context.set_env("postId", body.id)
-     
-    %}
+
+    --%}
 <
+
+
 ===============================================================================
 DYNAMIC VARIABLES                           *rest-nvim-usage-dynamic-variables*
 
 `rest.nvim` allows the use of dynamic variables in requests.
 
 The following dynamic variables are currently supported:
-    - $uuid: generates a universally unique identifier (UUID-v4)
-    - $timestamp: generates the current UNIX timestamp (seconds since epoch)
-    - $randomInt: generates a random integer between 0 and 1000
+    - `$uuid`: generates a universally unique identifier (UUID-v4)
+    - `$timestamp`: generates the current UNIX timestamp (seconds since epoch)
+    - `$randomInt`: generates a random integer between 0 and 1000
 
-To use dynamic variables, the following syntax is used: `{{DYNAMIC_VARIABLE}}`, 
+To use dynamic variables, the following syntax is used: `{{$DYNAMIC_VARIABLE}}`,
 e.g. `{{$uuid}}`
 
-You can extend or overwrite built-in dynamic variables, with the config key >lua
-
+You can extend or overwrite built-in dynamic variables, with the config key
+>lua
     -- custom_dynamic_variables:
     require("rest-nvim").setup({
       custom_dynamic_variables = {
@@ -223,53 +297,33 @@ You can extend or overwrite built-in dynamic variables, with the config key >lua
         end,
       },
     })
+<
+
 
 ===============================================================================
 CALLBACKS                                             *rest-nvim-usage-callbacks*
 
-rest.nvim fires different events upon requests:
-   - a User RestStartRequest event when launching the request
-   - a User RestStopRequest event when the requests finishes or errors out >lua
+`rest.nvim` fires different events upon requests:
+   - a User `RestStartRequest` event when launching the request
+   - a User `RestStopRequest` event when the requests finishes or errors out
 
+>lua
     vim.api.nvim_create_autocmd("User", {
     pattern = "RestStartRequest",
     once = true,
       callback = function(opts)
-	 print("IT STARTED")
-	 vim.pretty_print(opts)
+        print("IT STARTED")
+        vim.pretty_print(opts)
       end,
     })
 <
-===============================================================================
-KNOWN ISSUES                                                 *rest-nvim-issues*
-
-    - Nothing here at the moment :)
 
 
 ===============================================================================
 LICENSE                                                     *rest-nvim-license*
 
-rest.nvim is distributed under MIT License.
-
-Copyright (c) 2021 NTBBloodbath
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+`rest.nvim` is distributed under GPLv3 License, please read the LICENSE file
+in the GitHub repository (`rest-nvim/rest.nvim`).
 
 
 ===============================================================================
@@ -280,5 +334,6 @@ CONTRIBUTING                                           *rest-nvim-contributing*
     3. Commit your changes (`git commit -am 'Add some feature'`)
     4. Push to the branch (`git push origin my-new-feature`)
     5. Create a new Pull Request
+
 
 vim:tw=78:ts=8:noet:ft=help:norl:
