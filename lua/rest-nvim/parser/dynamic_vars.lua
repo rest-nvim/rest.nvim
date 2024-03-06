@@ -50,9 +50,7 @@ function dynamic_vars.read(name)
   local vars = dynamic_vars.retrieve_all()
   if not vim.tbl_contains(vim.tbl_keys(vars), name) then
     ---@diagnostic disable-next-line need-check-nil
-    logger:error(
-      "The dynamic variable '" .. name .. "' was not found. Maybe it's written wrong or doesn't exist?"
-    )
+    logger:error("The dynamic variable '" .. name .. "' was not found. Maybe it's written wrong or doesn't exist?")
     return nil
   end
 

@@ -130,7 +130,9 @@ local rest_command_tbl = {
 
       if #args > 1 then
         ---@diagnostic disable-next-line need-check-nil
-        logger:error("Too many arguments were passed to the 'result' command: 1 argument was expected, " .. #args .. " were passed")
+        logger:error(
+          "Too many arguments were passed to the 'result' command: 1 argument was expected, " .. #args .. " were passed"
+        )
         return
       end
       if not vim.tbl_contains({ "next", "prev" }, args[1]) then

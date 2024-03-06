@@ -17,7 +17,8 @@ winbar.current_pane_index = 1
 ---@return string
 function winbar.get_content(stats)
   -- winbar panes
-  local content = [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal# %#RestText#|%#Normal# %4@v:lua._G._rest_nvim_winbar@%#StatsHighlight#Stats%X%#Normal# %=%<]]
+  local content =
+    [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal# %#RestText#|%#Normal# %4@v:lua._G._rest_nvim_winbar@%#StatsHighlight#Stats%X%#Normal# %=%<]]
 
   -- winbar statistics
   if not vim.tbl_isempty(stats) then
@@ -49,9 +50,9 @@ end
 ---@type { [number]: ResultPane }[]
 winbar.pane_map = {
   [1] = { name = "Response", contents = { "Fetching ..." } },
-  [2] = { name = "Headers",  contents = { "Fetching ..." } },
-  [3] = { name = "Cookies",  contents = { "Fetching ..." } },
-  [4] = { name = "Stats",    contents = { "Fetching ..." } },
+  [2] = { name = "Headers", contents = { "Fetching ..." } },
+  [3] = { name = "Cookies", contents = { "Fetching ..." } },
+  [4] = { name = "Stats", contents = { "Fetching ..." } },
 }
 
 ---Get the foreground value of a highlighting group

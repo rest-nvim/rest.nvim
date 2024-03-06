@@ -34,7 +34,7 @@ function autocmds.setup()
         functions.cycle_result_pane("next")
       end)
     end,
-    desc = "Set up rest.nvim results buffer keybinds"
+    desc = "Set up rest.nvim results buffer keybinds",
   })
 end
 
