@@ -7,19 +7,23 @@ on:
       - ".github/**"
       - "**.md"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   stylua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup and run stylua
-        uses: JohnnyMorganz/stylua-action@v3
+        uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: v0.19.1
           args: --config-path=stylua.toml .
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: autoformat with stylua"
           branch: ${{ github.ref }}
