@@ -227,7 +227,12 @@ request and run the <kbd>:Rest run</kbd> command.
 
 > [!NOTE]
 >
-> You can find examples of use in the [tests](./tests) directory.
+> 1. You can find examples of use in the [tests](./tests) directory.
+>
+> 2. `rest.nvim` supports multiple HTTP requests in one file. It selects the
+>    request in the current cursor line, no matters the position as long as
+>    the cursor is on a request tree-sitter node.
+
 
 ---
 
