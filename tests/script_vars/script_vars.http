@@ -6,6 +6,7 @@ GET https://jsonplaceholder.typicode.com/posts/3
 
 local body = context.json_decode(context.result.body)
 
+-- These environment variables are stored in 'vim.env'
 context.set_env("userId", body.userId)
 context.set_env("postId", body.id)
 
