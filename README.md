@@ -33,6 +33,7 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 - Easy to use
 - Friendly and organized request results window
 - Fast runtime with statistics about your request
+- Easily set environment variables based on the response to re-use the data later
 - Tree-sitter based parsing and syntax highlighting for speed and perfect accuracy
 - Possibility of using dynamic/environment variables and Lua scripting in HTTP files
 
