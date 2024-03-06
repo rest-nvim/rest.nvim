@@ -3,220 +3,265 @@
 # rest.nvim
 
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
-![Neovim version](https://img.shields.io/badge/Neovim-0.5-5ba246?style=for-the-badge&logo=neovim)
+![Neovim version](https://img.shields.io/badge/Neovim-0.9.2-5ba246?style=for-the-badge&logo=neovim)
+[![LuaRocks](https://img.shields.io/luarocks/v/teto/rest.nvim?style=for-the-badge&logo=lua&color=blue)](https://luarocks.org/modules/teto/rest.nvim)
 ![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
-![Demo](./assets/demo.png)
+![Demo](https://github.com/rest-nvim/rest.nvim/assets/36456999/e9b536a5-f7b2-4cd8-88fb-fdc5409dd2a4)
 
 </div>
 
 ---
 
-A fast Neovim http client written in Lua.
+A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
 
-`rest.nvim` makes use of a curl wrapper made in pure Lua by [tami5] and implemented
-in `plenary.nvim` so, in other words, `rest.nvim` is a curl wrapper so you don't
-have to leave Neovim!
+`rest.nvim` by default makes use of native [cURL](https://curl.se/) bindings. In this way, you get
+absolutely all the power that cURL provides from the comfort of our editor just by using a keybind
+and without wasting the precious resources of your machine.
 
-> **IMPORTANT:** If you are facing issues, please [report them](https://github.com/rest-nvim/rest.nvim/issues/new)
+In addition to this, you can also write integrations with external HTTP clients, such as the postman
+CLI. For more information on this, please see this [blog post](https://amartin.codeberg.page/posts/first-look-at-thunder-rest/#third-party-clients).
 
-## Notices
-
-- **2023-07-12**: tagged 0.2 release before changes for 0.10 compatibility
-- **2021-11-04**: HTTP Tree-Sitter parser now depends on JSON parser for the JSON bodies detection,
-  please install it too.
-- **2021-08-26**: We have deleted the syntax file for HTTP files to start using the tree-sitter parser instead,
-  please see [Tree-Sitter parser](#tree-sitter-parser) section for more information.
-- **2021-07-01**: Now for getting syntax highlighting in http files you should
-  add a `require('rest-nvim').setup()` to your `rest.nvim` setup, refer to [packer.nvim](#packernvim).
-  This breaking change should allow lazy-loading of `rest.nvim`.
+> [!IMPORTANT]
+>
+> If you are facing issues, please [report them](https://github.com/rest-nvim/rest.nvim/issues/new) so we can work in a fix together :)
 
 ## Features
 
 - Easy to use
-- Fast execution time
-- Run request under cursor
-- Syntax highlight for http files and output
-- Possibility of using environment variables in http files
+- Friendly and organized request results window
+- Fast runtime with statistics about your request
+- Tree-sitter based parsing and syntax highlighting for speed and perfect accuracy
+- Possibility of using dynamic/environment variables and Lua scripting in HTTP files
 
 ## Install
 
-> **WARNING:** rest.nvim requires Neovim >= 0.5 to work.
+> [!NOTE]
+>
+> rest.nvim requires Neovim >= 0.9.2 to work.
 
 ### Dependencies
 
 - System-wide
-  - curl
-- Optional [can be changed, see config below]
-  - jq   (to format JSON output)
-  - tidy (to format HTML output)
-- Other plugins
-  - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+  - `Python` (only if you are using `packer.nvim` or `lazy.nvim` plus `luarocks.nvim` for the installation)
+  - `cURL` development headers (usually called `libcurl-dev` or `libcurl-devel` depending on your Linux distribution)
+- Optional [can be changed, see config below](#default-configuration)
+  - `jq`   (to format JSON output)
+  - `tidy` (to format HTML output)
 
-### packer.nvim
+### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
+
+```vim
+:Rocks install rest.nvim
+```
+
+### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
   "rest-nvim/rest.nvim",
-  requires = { "nvim-lua/plenary.nvim" },
+  rocks = { "lua-curl", "nvim-nio", "mimetypes", "xml2lua" },
   config = function()
-    require("rest-nvim").setup({
-      -- Open request results in a horizontal split
-      result_split_horizontal = false,
-      -- Keep the http file buffer above|left when split horizontal|vertical
-      result_split_in_place = false,
-      -- Skip SSL verification, useful for unknown certificates
-      skip_ssl_verification = false,
-      -- Encode URL before making request
-      encode_url = true,
-      -- Highlight request on run
-      highlight = {
-        enabled = true,
-        timeout = 150,
-      },
-      result = {
-        -- toggle showing URL, HTTP info, headers at top the of result window
-        show_url = true,
-        -- show the generated curl command in case you want to launch
-        -- the same request via the terminal (can be verbose)
-        show_curl_command = false,
-        show_http_info = true,
-        show_headers = true,
-        -- table of curl `--write-out` variables or false if disabled
-        -- for more granular control see Statistics Spec
-        show_statistics = false,
-        -- executables or functions for formatting response body [optional]
-        -- set them to false if you want to disable them
-        formatters = {
-          json = "jq",
-          html = function(body)
-            return vim.fn.system({"tidy", "-i", "-q", "-"}, body)
-          end
-        },
-      },
-      -- Jump to request line on run
-      jump_to_request = false,
-      env_file = '.env',
-      -- for telescope select
-      env_pattern = "\\.env$",
-      env_edit_command = "tabedit",
-      custom_dynamic_variables = {},
-      yank_dry_run = true,
-    })
-  end
+    require("rest-nvim").setup()
+  end,
 }
 ```
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
--- plugins/rest.lua
-return {
-   "rest-nvim/rest.nvim",
-   dependencies = { { "nvim-lua/plenary.nvim" } },
-   config = function()
-     require("rest-nvim").setup({
-       --- Get the same options from Packer setup
-    })
-  end
+{
+  "vhyrro/luarocks.nvim",
+  branch = "more-fixes",
+  config = function()
+    require("luarocks").setup({})
+  end,
+},
+{
+  "rest-nvim/rest.nvim",
+  dependencies = { "luarocks.nvim" },
+  config = function()
+    require("rest-nvim").setup()
+  end,
 }
 ```
 
-### Tree-Sitter parser
+### Default configuration
 
-We are using a Tree-Sitter parser for our HTTP files, in order to get the correct syntax highlighting
-for HTTP files (including JSON bodies) you should add the following into your `ensure_installed` table
-in your tree-sitter setup.
+This is the default configuration of `rest.nvim`, it is fully documented and typed internally so you
+get a good experience during autocompletion :)
+
+> [!NOTE]
+>
+> You can also check out `:h rest-nvim.config` for documentation.
 
 ```lua
-ensure_installed = { "http", "json" }
+local default_config = {
+  client = "curl",
+  env_file = ".env",
+  env_pattern = "\\.env$",
+  env_edit_command = "tabedit",
+  encode_url = true,
+  skip_ssl_verification = false,
+  custom_dynamic_variables = {},
+  logs = {
+    level = "info",
+    save = true,
+  },
+  result = {
+    split = {
+      horizontal = false,
+      in_place = false,
+      stay_in_current_window_after_split = true,
+    },
+    behavior = {
+      show_info = {
+        url = true,
+        headers = true,
+        http_info = true,
+        curl_command = true,
+      },
+      statistics = {
+        enable = true,
+        ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
+        stats = {
+          { "total_time", title = "Time taken:" },
+          { "size_download_t", title = "Download size:" },
+        },
+      },
+      formatters = {
+        json = "jq",
+        html = function(body)
+          if vim.fn.executable("tidy") == 0 then
+            return body, { found = false, name = "tidy" }
+          end
+          local fmt_body = vim.fn.system({
+            "tidy",
+            "-i",
+            "-q",
+            "--tidy-mark",      "no",
+            "--show-body-only", "auto",
+            "--show-errors",    "0",
+            "--show-warnings",  "0",
+            "-",
+          }, body):gsub("\n$", "")
+
+          return fmt_body, { found = true, name = "tidy" }
+        end,
+      },
+    },
+  },
+  highlight = {
+    enable = true,
+    timeout = 750,
+  },
+  ---Example:
+  ---
+  ---```lua
+  ---keybinds = {
+  ---  {
+  ---    "<localleader>rr", ":Rest run", "Run request under the cursor",
+  ---  },
+  ---  {
+  ---    "<localleader>rl", ":Rest run last", "Re-run latest request",
+  ---  },
+  ---}
+  ---
+  ---```
+  ---@see vim.keymap.set
+  keybinds = {},
+}
 ```
 
-Or manually run `:TSInstall http json`.
+### Tree-Sitter parsing
+
+`rest.nvim` uses tree-sitter as a first-class citizen, so it will not work if the required parsers are
+not installed. These parsers are as follows and you can add them to your `ensure_installed` table
+in your `nvim-treesitter` configuration.
+
+```lua
+ensure_installed = { "lua", "xml", "http", "json", "graphql" }
+```
+
+Or manually run `:TSInstall lua xml http json graphql`.
 
 ## Keybindings
 
 By default `rest.nvim` does not have any key mappings so you will not have
 conflicts with any of your existing ones.
 
-To run `rest.nvim` you should map the following commands:
+However, `rest.nvim` exposes a `:Rest` command in HTTP files that you can use to create your
+keybinds easily. For example:
+
+```lua
+keybinds = {
+  {
+    "<localleader>rr", ":Rest run", "Run request under the cursor",
+  },
+  {
+    "<localleader>rl", ":Rest run last", "Re-run latest request",
+  },
+}
+```
+
+You can still also use the legacy `<Plug>RestNvim` commands for mappings:
 - `<Plug>RestNvim`, run the request under the cursor
-- `<Plug>RestNvimPreview`, preview the request cURL command
 - `<Plug>RestNvimLast`, re-run the last request
 
-## Settings
-
-- `result_split_horizontal` opens result on a horizontal split (default opens
-    on vertical)
-- `result_split_in_place` opens result below|right on horizontal|vertical split
-    (default opens top|left on horizontal|vertical split)
-- `skip_ssl_verification` passes the `-k` flag to cURL in order to skip SSL verification,
-    useful when using unknown certificates
-- `encode_url` flag to encode the URL before making request
-- `highlight` allows to enable and configure the highlighting of the selected request when send,
-- `jump_to_request` moves the cursor to the selected request line when send,
-- `env_file` specifies file name that consist environment variables (default: .env)
-- `custom_dynamic_variables` allows to extend or overwrite built-in dynamic variable functions
-    (default: {})
-
-### Statistics Spec
-
-| Property | Type               | Description                                            |
-| :------- | :----------------- | :----------------------------------------------------- |
-| [1]      | string             | `--write-out` variable name, see `man curl`. Required. |
-| title    | string             | Replaces the variable name in the output if defined.   |
-| type     | string or function | Specifies type transformation for the output value. Default transformers are `time` and `size`. Can also be a function which takes the value as a parameter and returns a string. |
+> [!NOTE]
+>
+> 1. `<Plug>RestNvimPreview` has been removed, as we can no longer implement it with the current
+>    cURL implementation.
+>
+> 2. The legacy `<Plug>` mappings will raise a deprecation warning suggesting you to switch to
+>    the `:Rest` command, as they are going to be completely removed in the next version.
 
 ## Usage
 
 Create a new http file or open an existing one and place the cursor over the
-request method (e.g. `GET`) and run `rest.nvim`.
+request and run the <kbd>:Rest run</kbd> command.
 
-> **NOTES**:
+> [!NOTE]
 >
-> 1. `rest.nvim` follows the RFC 2616 request format so any other
->    http file should work without problems.
->
-> 2. You can find examples of use in [tests](./tests)
+> You can find examples of use in the [tests](./tests) directory.
 
 ---
 
-### Debug
+### Telescope Extension
 
-
-Run `export DEBUG_PLENARY="debug"` before starting nvim. Logs will appear most
-likely in ~/.cache/nvim/rest.nvim.log
-
-## Telescope Extension
+`rest.nvim` provides a [telescope.nvim] extension to select the environment variables file,
+you can load and use it with the following snippet:
 
 ```lua
-
 -- first load extension
 require("telescope").load_extension("rest")
--- then use it
+-- then use it, you can also use the `:Telescope rest select_env` command
 require("telescope").extensions.rest.select_env()
-
 ```
+Here is a preview of the extension working :)
+
+![telescope rest extension demo](https://github.com/rest-nvim/rest.nvim/assets/36456999/a810954f-b45c-44ee-854d-94039de8e2fc)
 
 ### Mappings
 
-- Enter: Select Env file
-- Ctrl+O: Edit Env file
+- <kbd>Enter</kbd>: Select Env file
+- <kbd>Ctrl + O</kbd>: Edit Env file
 
 ### Config
 
-- env_pattern: For env file pattern
-- env_edit_command: For env file edit command
+- `env_pattern`: For env file pattern
+- `env_edit_command`: For env file edit command
 
 ## Lualine
 
 We also have lualine component to get what env file you select!
-And dont't worry, it will only show up under http files.
+
+And dont't worry, it will only show up under HTTP files.
 
 ```lua
--- Juse add a component in your lualine config
+-- Just add a component in your lualine config
 {
   sections = {
     lualine_x = {
@@ -225,7 +270,7 @@ And dont't worry, it will only show up under http files.
   }
 }
 
--- To custom icon and color
+-- To use a custom icon and color
 {
   sections = {
     lualine_x = {
@@ -239,6 +284,10 @@ And dont't worry, it will only show up under http files.
 }
 ```
 
+Here is a preview of the component working :)
+
+![lualine component demo](https://github.com/rest-nvim/rest.nvim/assets/81607010/cf4bb327-61aa-494c-84a5-82f5ee21004f)
+
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
@@ -246,9 +295,6 @@ And dont't worry, it will only show up under http files.
 3. Commit your changes (<kbd>git commit -am 'Add some feature'</kbd>)
 4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
 5. Create a new Pull Request
-
-To run the tests, enter a nix shell with `nix develop ./contrib`, then run `make
-test`.
 
 ## Related software
 
@@ -259,6 +305,4 @@ test`.
 
 ## License
 
-rest.nvim is [MIT Licensed](./LICENSE).
-
-[tami5]: https://github.com/tami5
+rest.nvim is [GPLv3 Licensed](./LICENSE).
