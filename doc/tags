@@ -17,7 +17,10 @@ RestConfigResultSplit	rest-nvim-config.txt	/*RestConfigResultSplit*
 RestConfigResultStats	rest-nvim-config.txt	/*RestConfigResultStats*
 ResultPane	rest-nvim-api.txt	/*ResultPane*
 Variables	rest-nvim-parser.txt	/*Variables*
+api.VERSION	rest-nvim-api.txt	/*api.VERSION*
+api.namespace	rest-nvim-api.txt	/*api.namespace*
 api.register_rest_autocmd	rest-nvim-api.txt	/*api.register_rest_autocmd*
+api.register_rest_keybind	rest-nvim-api.txt	/*api.register_rest_keybind*
 api.register_rest_subcommand	rest-nvim-api.txt	/*api.register_rest_subcommand*
 client.request	rest-nvim-curl.txt	/*client.request*
 config.set	rest-nvim-config.txt	/*config.set*
@@ -29,6 +32,8 @@ functions.cycle_result_pane	rest-nvim-api.txt	/*functions.cycle_result_pane*
 functions.env	rest-nvim-api.txt	/*functions.env*
 functions.exec	rest-nvim-api.txt	/*functions.exec*
 functions.find_env_files	rest-nvim-api.txt	/*functions.find_env_files*
+help.close	rest-nvim-api.txt	/*help.close*
+help.open	rest-nvim-api.txt	/*help.open*
 logger:debug	rest-nvim-api.txt	/*logger:debug*
 logger:error	rest-nvim-api.txt	/*logger:error*
 logger:info	rest-nvim-api.txt	/*logger:info*
@@ -70,6 +75,7 @@ rest-nvim.parser.dynamic_vars	rest-nvim-parser.txt	/*rest-nvim.parser.dynamic_va
 rest-nvim.parser.env_vars	rest-nvim-parser.txt	/*rest-nvim.parser.env_vars*
 rest-nvim.parser.script_vars	rest-nvim-parser.txt	/*rest-nvim.parser.script_vars*
 rest-nvim.result	rest-nvim-api.txt	/*rest-nvim.result*
+rest-nvim.result.help	rest-nvim-api.txt	/*rest-nvim.result.help*
 rest-nvim.result.winbar	rest-nvim-api.txt	/*rest-nvim.result.winbar*
 rest-nvim.txt	rest-nvim.txt	/*rest-nvim.txt*
 rest-nvim.utils	rest-nvim-api.txt	/*rest-nvim.utils*
@@ -80,6 +86,7 @@ result.write_block	rest-nvim-api.txt	/*result.write_block*
 result.write_res	rest-nvim-api.txt	/*result.write_res*
 script_vars.load	rest-nvim-parser.txt	/*script_vars.load*
 utils.file_exists	rest-nvim-api.txt	/*utils.file_exists*
+utils.highlight	rest-nvim-api.txt	/*utils.highlight*
 utils.read_file	rest-nvim-api.txt	/*utils.read_file*
 winbar.current_pane_index	rest-nvim-api.txt	/*winbar.current_pane_index*
 winbar.get_content	rest-nvim-api.txt	/*winbar.get_content*

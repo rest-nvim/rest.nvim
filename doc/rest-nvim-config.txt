@@ -38,7 +38,7 @@ RestConfigResultBehavior                              *RestConfigResultBehavior*
     Fields: ~
         {show_info}   (RestConfigResultInfo)        Request results information
         {statistics}  (RestConfigResultStats)       Request results statistics
-        {formatters}  (RestConfigResultFormatters)  Formatters for the request results body
+        {formatters}  (RestConfigResultFormatters)  Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a table containing two values `found` (whether the formatter has been found or not) and `name` (the formatter name)
 
 
 RestConfigResultInfo                                      *RestConfigResultInfo*
@@ -60,8 +60,8 @@ RestConfigResultStats                                    *RestConfigResultStats*
 RestConfigResultFormatters                          *RestConfigResultFormatters*
 
     Fields: ~
-        {json}  (string|fun(body:string):string)  JSON formatter
-        {html}  (string|fun(body:string):string)  HTML formatter
+        {json}  (string|fun(body:string):string,table)  JSON formatter
+        {html}  (string|fun(body:string):string,table)  HTML formatter
 
 
 RestConfigHighlight                                        *RestConfigHighlight*
@@ -76,6 +76,8 @@ RestConfig                                                          *RestConfig*
     Fields: ~
         {client}                    (string)   The HTTP client to be used when running requests, default is `"curl"`
         {env_file}                  (string)   Environment variables file to be used for the request variables in the document
+        {env_pattern}               (string)   Environment variables file pattern for telescope.nvim
+        {env_edit_command}          (string)   Neovim command to edit an environment file, default is `"tabedit"`
         {encode_url}                (boolean)  Encode URL before making request
         {skip_ssl_verification}     (boolean)  Skip SSL verification, useful for unknown certificates
         {custom_dynamic_variables}  ()

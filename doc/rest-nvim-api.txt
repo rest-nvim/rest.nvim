@@ -6,6 +6,26 @@ The Lua API for rest.nvim
 Intended for use by third-party modules that extend its functionalities.
 
 
+api.VERSION                                                        *api.VERSION*
+    rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
+
+    Type: ~
+        (string)
+
+    See: ~
+        |vim.version|
+
+
+api.namespace                                                    *api.namespace*
+    rest.nvim namespace used for buffer highlights
+
+    Type: ~
+        (number)
+
+    See: ~
+        |vim.api.nvim_create_namespace|
+
+
                                                      *api.register_rest_autocmd*
 api.register_rest_autocmd({events}, {cb}, {description})
 
@@ -23,6 +43,17 @@ api.register_rest_subcommand({name}, {cmd})
     Parameters: ~
         {name}  (string)   The name of the subcommand to register
         {cmd}   (RestCmd)
+
+
+                                                     *api.register_rest_keybind*
+api.register_rest_keybind({mode}, {lhs}, {cmd}, {opts})
+
+
+    Parameters: ~
+        {mode}  (string)  Keybind mode
+        {lhs}   (string)  Keybind trigger
+        {cmd}   (string)  Command to be run
+        {opts}  (table)   Keybind options
 
 
 ==============================================================================
@@ -50,6 +81,17 @@ utils.read_file({path})                                        *utils.read_file*
 
     Returns: ~
         (string)
+
+
+                                                               *utils.highlight*
+utils.highlight({bufnr}, {start}, {end_}, {ns})
+    Highlight a request
+
+    Parameters: ~
+        {bufnr}  (number)  Buffer handler ID
+        {start}  (number)  Request tree-sitter node start
+        {end_}   (number)  Request tree-sitter node end
+        {ns}     (number)  rest.nvim Neovim namespace
 
 
 ==============================================================================
@@ -270,6 +312,21 @@ winbar.set_pane({selected})                                    *winbar.set_pane*
 
     Parameters: ~
         {selected}  (number)  winbar pane index
+
+
+==============================================================================
+rest.nvim result buffer help                             *rest-nvim.result.help*
+
+
+ rest.nvim result buffer help window handling
+
+
+help.open()                                                          *help.open*
+    Open the request results help window
+
+
+help.close()                                                        *help.close*
+    Close the request results help window
 
 
 vim:tw=78:ts=8:noet:ft=help:norl:
