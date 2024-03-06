@@ -25,8 +25,9 @@ function rest.setup(user_configs)
   autocmds.setup()
 
   -- Set up tree-sitter HTTP parser branch
-  -- NOTE: remove this piece of code once rest.nvim v2 has been pushed
+  -- NOTE: remove this piece of code once rest.nvim v2 has been pushed,
   --       and tree-sitter-http `next` branch has been merged
+  --       and nvim-treesitter http is up-to-date
   local ok, treesitter_parsers = pcall(require, "nvim-treesitter.parsers")
   if ok then
     local parser_config = treesitter_parsers.get_parser_configs()
