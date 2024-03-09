@@ -229,7 +229,7 @@ local function format_body(bufnr, headers, res)
           logger:error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
         end
       end
-    else
+    elseif res_type ~= nil then
       ---@diagnostic disable-next-line need-check-nil
       logger:info(
         "Could not find a formatter for the body type "
@@ -237,6 +237,7 @@ local function format_body(bufnr, headers, res)
           .. " returned in the request, the results will not be formatted"
       )
     end
+
     body = vim.split(res.body, "\n")
     table.insert(body, 1, res.method .. " " .. res.url)
     table.insert(body, 2, headers[1]) -- HTTP/X and status code + meaning
@@ -249,11 +250,12 @@ local function format_body(bufnr, headers, res)
     table.remove(winbar.pane_map[2].contents, 1)
 
     -- add syntax highlights for response
-    vim.api.nvim_buf_call(bufnr, function()
-      local syntax_file = vim.fn.expand(string.format("$VIMRUNTIME/syntax/%s.vim", res_type))
-      if vim.fn.filereadable(syntax_file) == 1 then
-        vim.cmd(string.gsub(
-          [[
+    if res_type ~= nil then
+      vim.api.nvim_buf_call(bufnr, function()
+        local syntax_file = vim.fn.expand(string.format("$VIMRUNTIME/syntax/%s.vim", res_type))
+        if vim.fn.filereadable(syntax_file) == 1 then
+          vim.cmd(string.gsub(
+            [[
             if exists("b:current_syntax")
               unlet b:current_syntax
             endif
@@ -262,11 +264,12 @@ local function format_body(bufnr, headers, res)
 
             let b:current_syntax = "httpResult"
             ]],
-          "%%s",
-          res_type
-        ))
-      end
-    end)
+            "%%s",
+            res_type
+          ))
+        end
+      end)
+    end
   end
   ---@diagnostic disable-next-line inject-field
   winbar.pane_map[1].contents = body
