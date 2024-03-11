@@ -247,6 +247,9 @@ require("telescope").load_extension("rest")
 -- then use it, you can also use the `:Telescope rest select_env` command
 require("telescope").extensions.rest.select_env()
 ```
+
+If running Ubuntu or Debian based systems you might need to run `ln -s $(which fdfind) ~/.local/bin/fd` to get extension to work. This is becuase extension runs the [fd](https://github.com/sharkdp/fd?tab=readme-ov-file#installation) command.
+
 Here is a preview of the extension working :)
 
 ![telescope rest extension demo](https://github.com/rest-nvim/rest.nvim/assets/36456999/a810954f-b45c-44ee-854d-94039de8e2fc)
