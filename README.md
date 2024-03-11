@@ -214,6 +214,8 @@ require("telescope").extensions.rest.select_env()
 - env_pattern: For env file pattern
 - env_edit_command: For env file edit command
 
+If running Ubuntu or Debian based systems you might need to run `ln -s $(which fdfind) ~/.local/bin/fd` to get extension to work. This is becuase extension runs the [fd](https://github.com/sharkdp/fd?tab=readme-ov-file#installation) command.
+
 ## Lualine
 
 We also have lualine component to get what env file you select!
