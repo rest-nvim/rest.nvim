@@ -133,7 +133,13 @@ local function create_callback(curl_cmd, opts)
 
     local content_type = res.headers[utils.key(res.headers, "content-type")]
     if content_type then
-      content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
+      local isJson = content_type:match("application/.+(json)")
+
+      if isJson then
+        content_type = "json"
+      else
+        content_type = content_type:match("application/([-a-z]+)") or content_type:match("text/(%l+)")
+      end
     end
 
     if script_str ~= nil then
