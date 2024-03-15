@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/rest-nvim/rest.nvim/compare/v1.2.0...v1.2.1) (2024-03-15)
+
+
+### Bug Fixes
+
+* get json content type for custom content types ([#297](https://github.com/rest-nvim/rest.nvim/issues/297)) ([91badd4](https://github.com/rest-nvim/rest.nvim/commit/91badd46c60df6bd9800c809056af2d80d33da4c))
+
 ## [1.2.0](https://github.com/rest-nvim/rest.nvim/compare/v1.1.0...v1.2.0) (2024-03-05)
 
 
