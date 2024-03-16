@@ -72,7 +72,7 @@ end
 ---Set the results window winbar highlighting groups
 function winbar.set_hl()
   -- Set highlighting for the winbar panes name
-  local textinfo_fg = get_hl_group_fg("TextInfo")
+  local textinfo_fg = get_hl_group_fg("Statement")
   for i, pane in ipairs(winbar.pane_map) do
     ---@diagnostic disable-next-line undefined-field
     vim.api.nvim_set_hl(0, pane.name .. "Highlight", {
@@ -83,7 +83,7 @@ function winbar.set_hl()
   end
 
   -- Set highlighting for the winbar text
-  local textmuted_fg = get_hl_group_fg("TextMuted")
+  local textmuted_fg = get_hl_group_fg("Comment")
   vim.api.nvim_set_hl(0, "RestText", { fg = textmuted_fg })
 end
 
