@@ -5,7 +5,8 @@
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
 ![Neovim version](https://img.shields.io/badge/Neovim-0.9.2-5ba246?style=for-the-badge&logo=neovim)
 [![LuaRocks](https://img.shields.io/luarocks/v/teto/rest.nvim?style=for-the-badge&logo=lua&color=blue)](https://luarocks.org/modules/teto/rest.nvim)
-![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)
+[![Discord](https://img.shields.io/badge/discord-join-7289da?style=for-the-badge&logo=discord)](https://discord.gg/AcXkuXKj7C)
+[![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)](https://matrix.to/#/#rest.nvim:matrix.org)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
@@ -75,7 +76,6 @@ use {
 ```lua
 {
   "vhyrro/luarocks.nvim",
-  branch = "more-fixes",
   config = function()
     require("luarocks").setup({})
   end,
@@ -89,6 +89,11 @@ use {
   end,
 }
 ```
+
+> [!NOTE]
+>
+> There's a `build.lua` file in the repository that `lazy.nvim` will find and source to install the
+> luarocks dependencies for you by using `luarocks.nvim`.
 
 ### Default configuration
 
