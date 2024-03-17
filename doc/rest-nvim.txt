@@ -15,7 +15,7 @@ CONTENTS                                                   *rest-nvim-contents*
         4. Environment Variables........|rest-nvim-usage-environment-variables|
         5. Dynamic Variables................|rest-nvim-usage-dynamic-variables|
         6. Script Variables..................|rest-nvim-usage-script-variables|
-        6. Callbacks................................|rest-nvim-usage-callbacks|
+        7. Hooks........................................|rest-nvim-usage-hooks|
     6. License..............................................|rest-nvim-license|
     7. Contributing....................................|rest-nvim-contributing|
 
@@ -64,6 +64,7 @@ function, it looks like this by default:
         stay_in_current_window_after_split = true,
       },
       behavior = {
+        decode_url = true,
         show_info = {
           url = true,
           headers = true,
@@ -301,19 +302,24 @@ You can extend or overwrite built-in dynamic variables, with the config key
 
 
 ===============================================================================
-CALLBACKS                                             *rest-nvim-usage-callbacks*
+HOOKS                                                   *rest-nvim-usage-hooks*
 
 `rest.nvim` fires different events upon requests:
-   - a User `RestStartRequest` event when launching the request
-   - a User `RestStopRequest` event when the requests finishes or errors out
+   - a User `RestStartRequest` event when launching the request.
+   - a User `RestStopRequest` event when the requests finishes.
 
 >lua
   vim.api.nvim_create_autocmd("User", {
     pattern = "RestStartRequest",
-    once = true,
-    callback = function(opts)
-      print("IT STARTED")
-      vim.pretty_print(opts)
+    once = true, -- This is optional, only if you want the hook to run once
+    callback = function()
+      print("Started request")
+      -- You can access and modify the request data (body, headers, etc) by
+      -- using the following temporal global variable
+      vim.print(_G._rest_nvim_req_data)
+      -- You can also access environment variables from both your current
+      -- shell session and your environment file by using 'vim.env'
+      _G._rest_nvim_req_data.headers["USER"] = vim.env.USERNAME
     end,
   })
 <

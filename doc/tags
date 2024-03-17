@@ -57,11 +57,11 @@ rest-nvim-license	rest-nvim.txt	/*rest-nvim-license*
 rest-nvim-quick-start	rest-nvim.txt	/*rest-nvim-quick-start*
 rest-nvim-script-variables	rest-nvim.txt	/*rest-nvim-script-variables*
 rest-nvim-usage	rest-nvim.txt	/*rest-nvim-usage*
-rest-nvim-usage-callbacks	rest-nvim.txt	/*rest-nvim-usage-callbacks*
 rest-nvim-usage-commands	rest-nvim.txt	/*rest-nvim-usage-commands*
 rest-nvim-usage-dynamic-variables	rest-nvim.txt	/*rest-nvim-usage-dynamic-variables*
 rest-nvim-usage-environment-variables	rest-nvim.txt	/*rest-nvim-usage-environment-variables*
 rest-nvim-usage-external-files	rest-nvim.txt	/*rest-nvim-usage-external-files*
+rest-nvim-usage-hooks	rest-nvim.txt	/*rest-nvim-usage-hooks*
 rest-nvim-usage-requests	rest-nvim.txt	/*rest-nvim-usage-requests*
 rest-nvim.api	rest-nvim-api.txt	/*rest-nvim.api*
 rest-nvim.client.curl	rest-nvim-curl.txt	/*rest-nvim.client.curl*
@@ -84,6 +84,7 @@ result.get_or_create_buf	rest-nvim-api.txt	/*result.get_or_create_buf*
 result.write_block	rest-nvim-api.txt	/*result.write_block*
 result.write_res	rest-nvim-api.txt	/*result.write_res*
 script_vars.load	rest-nvim-parser.txt	/*script_vars.load*
+utils.escape	rest-nvim-api.txt	/*utils.escape*
 utils.file_exists	rest-nvim-api.txt	/*utils.file_exists*
 utils.highlight	rest-nvim-api.txt	/*utils.highlight*
 utils.read_file	rest-nvim-api.txt	/*utils.read_file*
