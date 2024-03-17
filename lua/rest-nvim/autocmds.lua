@@ -52,7 +52,7 @@ function autocmds.setup()
         desc = "Close rest.nvim request results help window",
         buffer = args.buf,
       })
-    end
+    end,
   })
 end
 
