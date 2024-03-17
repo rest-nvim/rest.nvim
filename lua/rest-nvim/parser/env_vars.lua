@@ -10,9 +10,6 @@ local env_vars = {}
 
 local utils = require("rest-nvim.utils")
 
--- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
-local uv = vim.uv or vim.loop
-
 ---Get the environment variables file filetype
 ---@param env_file string The environment file path
 ---@return string|nil
@@ -31,8 +28,10 @@ end
 
 ---Read the environment variables file from the rest.nvim configuration
 ---and store all the environment variables in the `vim.env` metatable
+---@param quiet boolean Whether to fail silently if an environment file is not found, defaults to `false`
 ---@see vim.env
-function env_vars.read_file()
+function env_vars.read_file(quiet)
+  quiet = quiet or false
   local path = _G._rest_nvim.env_file
   local logger = _G._rest_nvim.logger
 
@@ -65,8 +64,10 @@ function env_vars.read_file()
       vim.env[k] = v
     end
   else
-    ---@diagnostic disable-next-line need-check-nil
-    logger:error("Current environment file '" .. path .. "' was not found in the current working directory")
+    if not quiet then
+      ---@diagnostic disable-next-line need-check-nil
+      logger:error("Current environment file '" .. path .. "' was not found in the current working directory")
+    end
   end
 end
 
