@@ -63,6 +63,17 @@ rest.nvim utilities                                            *rest-nvim.utils*
  rest.nvim utility functions
 
 
+utils.escape({str})                                               *utils.escape*
+    Encodes a string into its escaped hexadecimal representation
+    taken from Lua Socket and added underscore to ignore
+
+    Parameters: ~
+        {str}  (string)  Binary string to be encoded
+
+    Returns: ~
+        (string)
+
+
 utils.file_exists({path})                                    *utils.file_exists*
     Check if a file exists in the given `path`
 
