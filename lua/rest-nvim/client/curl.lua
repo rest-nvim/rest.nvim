@@ -197,6 +197,18 @@ function client.request(request)
       ssl_verifypeer = skip_ssl_verification,
     })
 
+    -- Encode URL query parameters and set the request URL again with the encoded values
+    local should_encode_url = _G._rest_nvim.encode_url
+    if should_encode_url then
+      -- Create a new URL as we cannot extract the URL from the req object
+      local _url = curl.url()
+      _url:set_url(request.request.url)
+      -- Re-add the request query with the encoded parameters
+      _url:set_query(_url:get_query(), curl.U_URLENCODE)
+      -- Re-add the request URL to the req object
+      req:setopt_url(_url:get_url())
+    end
+
     -- Set request HTTP version, defaults to HTTP/1.1
     if request.request.http_version then
       local http_version = request.request.http_version:gsub("%.", "_")
@@ -269,7 +281,14 @@ function client.request(request)
         ret.statistics = get_stats(req, stats_config.stats)
       end
 
-      ret.url = req:getinfo_effective_url()
+      -- Returns the decoded URL if the request URL was encoded by cURL to improve the results
+      -- buffer output readability.
+      -- NOTE: perhaps make this configurable in case someone wants to see the encoded URL instead?
+      if should_encode_url then
+        ret.url = request.request.url
+      else
+        ret.url = req:getinfo_effective_url()
+      end
       ret.code = req:getinfo_response_code()
       ret.method = req:getinfo_effective_method()
       ret.headers = table.concat(res_headers):gsub("\r", "")
