@@ -39,9 +39,12 @@ env_vars.set_var({name}, {value})                             *env_vars.set_var*
         |vim.env|
 
 
-env_vars.read_file()                                        *env_vars.read_file*
+env_vars.read_file({quiet})                                 *env_vars.read_file*
     Read the environment variables file from the rest.nvim configuration
     and store all the environment variables in the `vim.env` metatable
+
+    Parameters: ~
+        {quiet}  (boolean)  Whether to fail silently if an environment file is not found, defaults to `false`
 
     See: ~
         |vim.env|
