@@ -27,6 +27,8 @@ function functions.exec(scope)
   })
 
   local api = require("rest-nvim.api")
+  local env_vars = require("rest-nvim.parser.env_vars")
+
   local logger = _G._rest_nvim.logger
   local ok, client = pcall(require, "rest-nvim.client." .. _G._rest_nvim.client)
   if not ok then
@@ -60,6 +62,17 @@ function functions.exec(scope)
 
     utils.highlight(0, req.start, req.end_, api.namespace)
 
+    -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
+    -- so the values can be modified from the pre-request hooks
+    _G._rest_nvim_req_data = req
+    -- Load environment variables from the env file
+    env_vars.read_file(true)
+    -- Run pre-request hooks
+    api.exec_pre_request_hooks()
+    -- Clean the _rest_nvim_req_data global after running the pre-request hooks
+    -- as the req table will remain modified
+    _G._rest_nvim_req_data = nil
+
     if found_nio then
       req_results = nio
         .run(function()
@@ -82,6 +95,17 @@ function functions.exec(scope)
     else
       utils.highlight(0, req.start, req.end_, api.namespace)
 
+      -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
+      -- so the values can be modified from the pre-request hooks
+      _G._rest_nvim_req_data = req
+      -- Load environment variables from the env file
+      env_vars.read_file(true)
+      -- Run pre-request hooks
+      api.exec_pre_request_hooks()
+      -- Clean the _rest_nvim_req_data global after running the pre-request hooks
+      -- as the req table will remain modified
+      _G._rest_nvim_req_data = nil
+
       if found_nio then
         req_results = nio
           .run(function()
@@ -94,8 +118,8 @@ function functions.exec(scope)
     end
   end
 
+  -- We should not be trying to show a result or evaluate code if the request failed
   if not vim.tbl_isempty(req_results) then
-    -- We should not be trying to show a result if the request failed
     local result_buf = result.get_or_create_buf()
     result.write_res(result_buf, req_results)
 
@@ -103,6 +127,15 @@ function functions.exec(scope)
     if req_results.script ~= nil or not req_results.script == "" then
       script_vars.load(req_results.script, req_results)
     end
+
+    -- Set up a _rest_nvim_res_data Lua global table that holds the request results
+    -- so the values can be modified from the post-request hooks
+    _G._rest_nvim_res_data = req_results
+    -- Run post-request hooks
+    api.exec_post_request_hooks()
+    -- Clean the _rest_nvim_res_data global after running the post-request hooks
+    -- as the req_results table will remain modified
+    _G._rest_nvim_res_data = nil
   end
 end
 

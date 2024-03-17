@@ -52,4 +52,28 @@ function api.register_rest_keybind(mode, lhs, cmd, opts)
   keybinds.register_keybind(mode, lhs, cmd, opts)
 end
 
+---Execute all the pre-request hooks, functions that are meant to run before executing a request
+---
+---This function is called automatically during the execution of the requests, invoking it again could cause inconveniences
+---@see vim.api.nvim_exec_autocmds
+---@package
+function api.exec_pre_request_hooks()
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "RestStartRequest",
+    modeline = false,
+  })
+end
+
+---Execute all the post-request hooks, functions that are meant to run after executing a request
+---
+---This function is called automatically during the execution of the requests, invoking it again could cause inconveniences
+---@see vim.api.nvim_exec_autocmds
+---@package
+function api.exec_post_request_hooks()
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "RestStopRequest",
+    modeline = false,
+  })
+end
+
 return api
