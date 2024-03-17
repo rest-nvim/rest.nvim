@@ -11,12 +11,26 @@ local utils = {}
 -- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
 local uv = vim.uv or vim.loop
 
+---Encodes a string into its escaped hexadecimal representation
+---taken from Lua Socket and added underscore to ignore
+---@param str string Binary string to be encoded
+---@return string
+function utils.escape(str)
+  local encoded = string.gsub(str, "([^A-Za-z0-9_])", function(c)
+    return string.format("%%%02x", string.byte(c))
+  end)
+
+  return encoded
+end
+
 ---Check if a file exists in the given `path`
 ---@param path string file path
 ---@return boolean
 function utils.file_exists(path)
+  ---@diagnostic disable-next-line undefined-field
   local fd = uv.fs_open(path, "r", 438)
   if fd then
+    ---@diagnostic disable-next-line undefined-field
     uv.fs_close(fd)
     return true
   end
@@ -30,15 +44,16 @@ end
 function utils.read_file(path)
   local logger = _G._rest_nvim.logger
 
-  ---@type string|uv_fs_t|nil
+  ---@type string|nil
   local content
   if utils.file_exists(path) then
+    ---@diagnostic disable-next-line undefined-field
     local file = uv.fs_open(path, "r", 438)
-    ---@cast file number
+    ---@diagnostic disable-next-line undefined-field
     local stat = uv.fs_fstat(file)
-    ---@cast stat uv.aliases.fs_stat_table
+    ---@diagnostic disable-next-line undefined-field
     content = uv.fs_read(file, stat.size, 0)
-    ---@cast content string
+    ---@diagnostic disable-next-line undefined-field
     uv.fs_close(file)
   else
     ---@diagnostic disable-next-line need-check-nil
