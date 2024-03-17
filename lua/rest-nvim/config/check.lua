@@ -43,6 +43,7 @@ function check.validate(cfg)
     stay_in_current_window_after_split = { cfg.result.split.stay_in_current_window_after_split, "boolean" },
     -- RestConfigResultBehavior
     behavior = { cfg.result.behavior, "table" },
+    decode_url = { cfg.result.behavior.decode_url, "boolean" },
     -- RestConfigResultInfo
     show_info = { cfg.result.behavior.show_info, "table" },
     url = { cfg.result.behavior.show_info.url, "boolean" },

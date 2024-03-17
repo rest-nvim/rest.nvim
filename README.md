@@ -124,6 +124,7 @@ local default_config = {
       stay_in_current_window_after_split = true,
     },
     behavior = {
+      decode_url = true,
       show_info = {
         url = true,
         headers = true,

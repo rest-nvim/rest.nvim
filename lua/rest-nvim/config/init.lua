@@ -28,6 +28,7 @@ local logger = require("rest-nvim.logger")
 
 ---@class RestConfigResultBehavior
 ---@field show_info RestConfigResultInfo Request results information
+---@field decode_url boolean Whether to decode the request URL query parameters to improve readability
 ---@field statistics RestConfigResultStats Request results statistics
 ---@field formatters RestConfigResultFormatters Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a table containing two values `found` (whether the formatter has been found or not) and `name` (the formatter name)
 
@@ -85,6 +86,7 @@ local default_config = {
       stay_in_current_window_after_split = true,
     },
     behavior = {
+      decode_url = true,
       show_info = {
         url = true,
         headers = true,

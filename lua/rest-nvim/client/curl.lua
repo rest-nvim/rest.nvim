@@ -282,9 +282,8 @@ function client.request(request)
       end
 
       -- Returns the decoded URL if the request URL was encoded by cURL to improve the results
-      -- buffer output readability.
-      -- NOTE: perhaps make this configurable in case someone wants to see the encoded URL instead?
-      if should_encode_url then
+      -- buffer output readability
+      if should_encode_url and _G._rest_nvim.result.behavior.decode_url then
         ret.url = request.request.url
       else
         ret.url = req:getinfo_effective_url()
