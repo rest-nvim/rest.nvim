@@ -54,6 +54,13 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
   - `jq`   (to format JSON output)
   - `tidy` (to format HTML output)
 
+> [!NOTE]
+>
+> 1. Python will be unnecessary once `luarocks.nvim` gets rid of it as a dependency in the `go-away-python` branch.
+>
+> 2. I will be working on making a binary rock of `Lua-cURL` so that the `cURL` development headers are not
+> necessary for the installation process.
+
 ### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
 
 ```vim
@@ -309,9 +316,15 @@ Here is a preview of the component working :)
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
 2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
-3. Commit your changes (<kbd>git commit -am 'Add some feature'</kbd>)
-4. Push to the branch (<kbd>git push origin my-new-feature</kbd>)
+3. Commit your changes (<kbd>git commit -am 'feat: add some feature'</kbd>)
+4. Push to the branch (<kbd>git push -u origin my-new-feature</kbd>)
 5. Create a new Pull Request
+
+> [!IMPORTANT]
+>
+> rest.nvim uses [semantic commits](https://www.conventionalcommits.org/en/v1.0.0/) that adhere to
+> semantic versioning and these help with automatic releases, please use this type of convention
+> when submitting changes to the project.
 
 ## Related software
 
