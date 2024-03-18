@@ -1,4 +1,4 @@
-.PHONY: lint format docgen
+.PHONY: lint format test docgen
 .SILENT: docgen
 
 lint:
@@ -6,6 +6,9 @@ lint:
 
 format:
 	stylua .
+
+test:
+	nvim --headless --clean -n -u tests/test.lua "$(FILE)"
 
 docgen:
 	lemmy-help lua/rest-nvim/client/curl.lua > doc/rest-nvim-curl.txt
