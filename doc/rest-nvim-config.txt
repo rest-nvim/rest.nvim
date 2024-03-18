@@ -1,0 +1,90 @@
+==============================================================================
+rest.nvim configuration                                       *rest-nvim.config*
+
+
+ rest.nvim configuration options
+
+
+RestConfigDebug                                                *RestConfigDebug*
+
+    Fields: ~
+        {unrecognized_configs}  (string[])  Unrecognized configuration options
+
+
+RestConfigLogs                                                  *RestConfigLogs*
+
+    Fields: ~
+        {level}  (string)   The logging level name, see `:h vim.log.levels`. Default is `"info"`
+        {save}   (boolean)  Whether to save log messages into a `.log` file. Default is `true`
+
+
+RestConfigResult                                              *RestConfigResult*
+
+    Fields: ~
+        {split}     (RestConfigResultSplit)     Result split window behavior
+        {behavior}  (RestConfigResultBehavior)  Result buffer behavior
+
+
+RestConfigResultSplit                                    *RestConfigResultSplit*
+
+    Fields: ~
+        {horizontal}                          (boolean)  Open request results in a horizontal split
+        {in_place}                            (boolean)  Keep the HTTP file buffer above|left when split horizontal|vertical
+        {stay_in_current_window_after_split}  (boolean)  Stay in the current window (HTTP file) or change the focus to the results window
+
+
+RestConfigResultBehavior                              *RestConfigResultBehavior*
+
+    Fields: ~
+        {show_info}   (RestConfigResultInfo)        Request results information
+        {decode_url}  (boolean)                     Whether to decode the request URL query parameters to improve readability
+        {statistics}  (RestConfigResultStats)       Request results statistics
+        {formatters}  (RestConfigResultFormatters)  Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a table containing two values `found` (whether the formatter has been found or not) and `name` (the formatter name)
+
+
+RestConfigResultInfo                                      *RestConfigResultInfo*
+
+    Fields: ~
+        {url}           (boolean)  Display the request URL
+        {headers}       (boolean)  Display the request headers
+        {http_info}     (boolean)  Display the request HTTP information
+        {curl_command}  (boolean)  Display the cURL command that was used for the request
+
+
+RestConfigResultStats                                    *RestConfigResultStats*
+
+    Fields: ~
+        {enable}  (boolean)    Whether enable statistics or not
+        {stats}   (string[]|)
+
+
+RestConfigResultFormatters                          *RestConfigResultFormatters*
+
+    Fields: ~
+        {json}  (string|fun(body:string):string,table)  JSON formatter
+        {html}  (string|fun(body:string):string,table)  HTML formatter
+
+
+RestConfigHighlight                                        *RestConfigHighlight*
+
+    Fields: ~
+        {enable}   (boolean)  Whether current request highlighting is enabled or not
+        {timeout}  (number)   Duration time of the request highlighting in milliseconds
+
+
+RestConfig                                                          *RestConfig*
+
+    Fields: ~
+        {client}                    (string)   The HTTP client to be used when running requests, default is `"curl"`
+        {env_file}                  (string)   Environment variables file to be used for the request variables in the document
+        {env_pattern}               (string)   Environment variables file pattern for telescope.nvim
+        {env_edit_command}          (string)   Neovim command to edit an environment file, default is `"tabedit"`
+        {encode_url}                (boolean)  Encode URL before making request
+        {skip_ssl_verification}     (boolean)  Skip SSL verification, useful for unknown certificates
+        {custom_dynamic_variables}  ()
+
+
+config.set()                                                        *config.set*
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

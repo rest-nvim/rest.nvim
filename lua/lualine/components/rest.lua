@@ -1,6 +1,5 @@
 local lualine_require = require("lualine_require")
 local M = lualine_require.require("lualine.component"):extend()
-local config = require("rest-nvim.config")
 
 local default_options = {
   fg = "#428890",
@@ -23,7 +22,7 @@ end
 function M.update_status()
   local current_filetype = vim.bo.filetype
   if current_filetype == "http" then
-    return config.get("env_file")
+    return _G._rest_nvim.env_file
   end
   return ""
 end

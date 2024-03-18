@@ -2,7 +2,7 @@ name: Luarocks release
 
 on:
   push:
-    release:
+    releases:
       types:
         - created
     tags:
@@ -15,10 +15,20 @@ jobs:
     name: Luarocks upload
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Required to count the commits
+      - name: Install build dependencies
+        run: sudo apt-get install -y libcurl4-gnutls-dev
       - name: Luarocks Upload
         uses: mrcjkb/luarocks-tag-release@v5
+        with:
+          dependencies: |
+            nvim-nio
+            lua-curl
+            mimetypes
+            xml2lua
+          extra_luarocks_args: |
+            CURL_INCDIR=/usr/include/x86_64-linux-gnu
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}

@@ -9,23 +9,27 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
 
 jobs:
-  stylua:
+  docgen:
     runs-on: ubuntu-latest
+    name: Generate documentation
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup and run stylua
-        uses: JohnnyMorganz/stylua-action@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up lemmy-help
+        uses: supplypike/setup-bin@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          version: v0.19.1
-          args: --config-path=stylua.toml .
+          uri: "https://github.com/numToStr/lemmy-help/releases/download/v0.11.0/lemmy-help-x86_64-unknown-linux-gnu.tar.gz"
+          name: lemmy-help
+          version: "0.11.0"
+      - name: Generate docs
+        run: "make docgen"
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: autoformat with stylua"
+          commit_message: "chore: regenerate documentation"
           branch: ${{ github.ref }}
       - name: Push formatted files
         uses: ad-m/github-push-action@master

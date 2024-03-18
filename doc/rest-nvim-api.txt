@@ -1,0 +1,343 @@
+==============================================================================
+rest.nvim Lua API                                                *rest-nvim.api*
+
+
+The Lua API for rest.nvim
+Intended for use by third-party modules that extend its functionalities.
+
+
+api.VERSION                                                        *api.VERSION*
+    rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
+
+    Type: ~
+        (string)
+
+    See: ~
+        |vim.version|
+
+
+api.namespace                                                    *api.namespace*
+    rest.nvim namespace used for buffer highlights
+
+    Type: ~
+        (number)
+
+    See: ~
+        |vim.api.nvim_create_namespace|
+
+
+                                                     *api.register_rest_autocmd*
+api.register_rest_autocmd({events}, {cb}, {description})
+
+
+    Parameters: ~
+        {events}       (string[])                Autocommand events, see `:h events`
+        {cb}           (string|fun(args:table))  Autocommand lua callback, runs a Vimscript command instead if it is a `string`
+        {description}  (string)                  Autocommand description
+
+
+                                                  *api.register_rest_subcommand*
+api.register_rest_subcommand({name}, {cmd})
+    Register a new `:Rest` subcommand
+
+    Parameters: ~
+        {name}  (string)   The name of the subcommand to register
+        {cmd}   (RestCmd)
+
+
+                                                     *api.register_rest_keybind*
+api.register_rest_keybind({mode}, {lhs}, {cmd}, {opts})
+
+
+    Parameters: ~
+        {mode}  (string)  Keybind mode
+        {lhs}   (string)  Keybind trigger
+        {cmd}   (string)  Command to be run
+        {opts}  (table)   Keybind options
+
+
+==============================================================================
+rest.nvim utilities                                            *rest-nvim.utils*
+
+
+ rest.nvim utility functions
+
+
+utils.escape({str})                                               *utils.escape*
+    Encodes a string into its escaped hexadecimal representation
+    taken from Lua Socket and added underscore to ignore
+
+    Parameters: ~
+        {str}  (string)  Binary string to be encoded
+
+    Returns: ~
+        (string)
+
+
+utils.file_exists({path})                                    *utils.file_exists*
+    Check if a file exists in the given `path`
+
+    Parameters: ~
+        {path}  (string)  file path
+
+    Returns: ~
+        (boolean)
+
+
+utils.read_file({path})                                        *utils.read_file*
+    Read a file if it exists
+
+    Parameters: ~
+        {path}  (string)  file path
+
+    Returns: ~
+        (string)
+
+
+                                                               *utils.highlight*
+utils.highlight({bufnr}, {start}, {end_}, {ns})
+    Highlight a request
+
+    Parameters: ~
+        {bufnr}  (number)  Buffer handler ID
+        {start}  (number)  Request tree-sitter node start
+        {end_}   (number)  Request tree-sitter node end
+        {ns}     (number)  rest.nvim Neovim namespace
+
+
+==============================================================================
+rest.nvim functions                                        *rest-nvim.functions*
+
+
+ rest.nvim functions
+
+
+functions.exec({scope})                                         *functions.exec*
+    Execute one or several HTTP requests depending on given `scope`
+    and return request(s) results in a table that will be used to render results
+    in a buffer.
+
+    Parameters: ~
+        {scope}  (string)  Defines the request execution scope. Can be: `last`, `cursor` (default) or `document`
+
+
+functions.find_env_files()                            *functions.find_env_files*
+    Find a list of environment files starting from the current directory
+
+    Returns: ~
+        (string[])  variable files path
+
+
+functions.env({action}, {path})                                  *functions.env*
+    Manage the environment file that is currently in use while running requests
+
+    If you choose to `set` the environment, you must provide a `path` to the environment file.
+
+    Parameters: ~
+        {action}  (string|nil)  Determines the action to be taken. Can be: `set` or `show` (default)
+        {path}    (string|nil)  Path to the environment variables file
+
+
+functions.cycle_result_pane({cycle})               *functions.cycle_result_pane*
+    Cycle through the results buffer winbar panes
+
+    Parameters: ~
+        {cycle}  (string)  Cycle direction, can be: `"next"` or `"prev"`
+
+
+==============================================================================
+rest.nvim logger                                              *rest-nvim.logger*
+
+
+Logging library for rest.nvim, slightly inspired by rmagatti/logger.nvim
+Intended for use by internal and third-party modules.
+
+Default logger instance is made during the `setup` and can be accessed
+by anyone through the `_G._rest_nvim.logger` configuration field
+that is set automatically.
+
+------------------------------------------------------------------------------
+
+Usage:
+
+```lua
+local logger = require("rest-nvim.logger"):new({ level = "debug" })
+
+logger:set_log_level("info")
+
+logger:info("This is an info log")
+ -- [rest.nvim] INFO: This is an info log
+```
+
+
+Logger                                                                  *Logger*
+
+
+LoggerLevels                                                      *LoggerLevels*
+
+
+LoggerConfig                                                      *LoggerConfig*
+
+    Fields: ~
+        {level_name}  (string)   Logging level name. Default is `"info"`
+        {save_logs}   (boolean)  Whether to save log messages into a `.log` file. Default is `true`
+
+
+logger:new({opts})                                                  *logger:new*
+    Create a new logger instance
+
+    Parameters: ~
+        {opts}  (LoggerConfig)  Logger configuration
+
+    Returns: ~
+        (Logger)
+
+
+logger:set_log_level({level})                             *logger:set_log_level*
+    Set the log level for the logger
+
+    Parameters: ~
+        {level}  (string)  New logging level
+
+    See: ~
+        |vim.log.levels|
+
+
+logger:trace({msg})                                               *logger:trace*
+    Log a trace message
+
+    Parameters: ~
+        {msg}  (string)  Log message
+
+
+logger:debug({msg})                                               *logger:debug*
+    Log a debug message
+
+    Parameters: ~
+        {msg}  (string)  Log message
+
+
+logger:info({msg})                                                 *logger:info*
+    Log an info message
+
+    Parameters: ~
+        {msg}  (string)  Log message
+
+
+logger:warn({msg})                                                 *logger:warn*
+    Log a warning message
+
+    Parameters: ~
+        {msg}  (string)  Log message
+
+
+logger:error({msg})                                               *logger:error*
+    Log an error message
+
+    Parameters: ~
+        {msg}  (string)  Log message
+
+
+==============================================================================
+rest.nvim result buffer                                       *rest-nvim.result*
+
+
+ rest.nvim result buffer handling
+
+
+result.bufnr                                                      *result.bufnr*
+    Results buffer handler number
+
+    Type: ~
+        (number|nil)
+
+
+result.get_or_create_buf()                            *result.get_or_create_buf*
+
+    Returns: ~
+        (number)  handler number
+
+
+result.write_block()                                        *result.write_block*
+
+    See: ~
+        |vim.api.nvim_buf_set_lines|
+
+
+result.display_buf({bufnr}, {stats})                        *result.display_buf*
+    Display results buffer window
+
+    Parameters: ~
+        {bufnr}  (number)  The target buffer
+        {stats}  (table)   Request statistics
+
+
+result.write_res({bufnr}, {res})                              *result.write_res*
+    Write request results in the given buffer and display it
+
+    Parameters: ~
+        {bufnr}  (number)  The target buffer
+        {res}    (table)   Request results
+
+
+==============================================================================
+rest.nvim result buffer winbar add-on                  *rest-nvim.result.winbar*
+
+
+ rest.nvim result buffer winbar
+
+
+winbar.current_pane_index                            *winbar.current_pane_index*
+    Current pane index in the results window winbar
+
+    Type: ~
+        (number)
+
+
+winbar.get_content({stats})                                 *winbar.get_content*
+    Create the winbar contents and return them
+
+    Parameters: ~
+        {stats}  (table)  Request statistics
+
+    Returns: ~
+        (string)
+
+
+ResultPane                                                          *ResultPane*
+
+    Fields: ~
+        {name}      (string)    Pane name
+        {contents}  (string[])  Pane contents
+
+
+winbar.set_hl()                                                  *winbar.set_hl*
+    Set the results window winbar highlighting groups
+
+
+winbar.set_pane({selected})                                    *winbar.set_pane*
+    Select the winbar panel based on the pane index and set the pane contents
+
+    If the pane index is higher than 4 or lower than 1, it will cycle through
+    the panes, e.g. >= 5 gets converted to 1 and <= 0 gets converted to 4
+
+    Parameters: ~
+        {selected}  (number)  winbar pane index
+
+
+==============================================================================
+rest.nvim result buffer help                             *rest-nvim.result.help*
+
+
+ rest.nvim result buffer help window handling
+
+
+help.open()                                                          *help.open*
+    Open the request results help window
+
+
+help.close()                                                        *help.close*
+    Close the request results help window
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
