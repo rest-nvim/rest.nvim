@@ -221,6 +221,8 @@ function parser.parse_request(children_nodes, variables)
     elseif node_type == "http_version" then
       local http_version = assert(get_node_text(node, 0))
       request.http_version = http_version:gsub("HTTP/", "")
+    elseif node_type == "request" then
+      request = parser.parse_request(traverse_request(node), variables)
     end
   end
 
