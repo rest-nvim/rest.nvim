@@ -1,4 +1,4 @@
-local MAJOR, REV = "scm", "-2"
+local MAJOR, REV = "scm", "-1"
 rockspec_format = "3.0"
 package = "rest.nvim"
 version = MAJOR .. REV
