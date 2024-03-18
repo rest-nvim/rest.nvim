@@ -200,7 +200,7 @@ local function format_body(bufnr, headers, res)
   end
 
   -- Do not try to format binary content
-  local body = {}
+  local body
   if res_type == "octet-stream" then
     body = { "Binary answer" }
   else

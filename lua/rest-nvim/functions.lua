@@ -124,7 +124,7 @@ function functions.exec(scope)
     result.write_res(result_buf, req_results)
 
     -- Load the script variables
-    if req_results.script ~= nil or not req_results.script == "" then
+    if not (req_results.script == "" or req_results.script == nil) then
       script_vars.load(req_results.script, req_results)
     end
 
