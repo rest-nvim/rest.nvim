@@ -91,7 +91,10 @@ function check.get_unrecognized_keys(tbl, default_tbl)
     if type(default_tbl[k]) == "table" and tbl[k] then
       for _, subk in pairs(check.get_unrecognized_keys(tbl[k], default_tbl[k])) do
         local key = k .. "." .. subk
-        ret[key] = key
+        -- Keybinds configuration table requires a special treatment as it does not have a "static" syntax
+        if k ~= "keybinds" or k == "keybinds" and type(subk) ~= "number" then
+          ret[key] = key
+        end
       end
     end
   end
