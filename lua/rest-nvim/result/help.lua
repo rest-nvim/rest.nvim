@@ -62,7 +62,7 @@ function help.open()
   end
 
   -- Help window sizing and positioning
-  local width = vim.api.nvim_win_get_width(winnr) / 2
+  local width = math.floor(vim.api.nvim_win_get_width(winnr) / 2)
   local height = 8
 
   local col = vim.api.nvim_win_get_width(winnr) - width - 4
