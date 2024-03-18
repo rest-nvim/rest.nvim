@@ -326,6 +326,10 @@ Here is a preview of the component working :)
 > semantic versioning and these help with automatic releases, please use this type of convention
 > when submitting changes to the project.
 
+Tests can be ran via `make test`. You must have `luarocks` installed and `lua5.1` or `luajit` to
+install dependencies. The test runner through `make test` will automatically install all required
+dependencies.
+
 ## Related software
 
 - [vim-rest-console](https://github.com/diepm/vim-rest-console)
