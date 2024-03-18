@@ -60,7 +60,7 @@ function M.make_luarock()
     "--lua-version=5.1",
     "--tree=" .. install_destination,
     "make",
-    rest_nvim_dir .. "/rest.nvim-scm-2.rockspec",
+    rest_nvim_dir .. "/rest.nvim-scm-1.rockspec",
   })
 
   local sysname = vim.uv.os_uname().sysname:lower()
