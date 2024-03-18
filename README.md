@@ -178,10 +178,10 @@ local default_config = {
   ---```lua
   ---keybinds = {
   ---  {
-  ---    "<localleader>rr", ":Rest run", "Run request under the cursor",
+  ---    "<localleader>rr", "<cmd>Rest run<cr>", "Run request under the cursor",
   ---  },
   ---  {
-  ---    "<localleader>rl", ":Rest run last", "Re-run latest request",
+  ---    "<localleader>rl", "<cmd>Rest run last<cr>", "Re-run latest request",
   ---  },
   ---}
   ---
@@ -214,10 +214,10 @@ keybinds easily. For example:
 ```lua
 keybinds = {
   {
-    "<localleader>rr", ":Rest run", "Run request under the cursor",
+    "<localleader>rr", "<cmd>Rest run<cr>", "Run request under the cursor",
   },
   {
-    "<localleader>rl", ":Rest run last", "Re-run latest request",
+    "<localleader>rl", "<cmd>Rest run last<cr>", "Re-run latest request",
   },
 }
 ```
