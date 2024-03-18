@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0](https://github.com/rest-nvim/rest.nvim/compare/v1.2.1...v2.0.0) (2024-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* release v2, it's finally here :)
+* **parser:** do not read environment files during the parsing process
+
+### ref
+
+* **parser:** do not read environment files during the parsing process ([5c34314](https://github.com/rest-nvim/rest.nvim/commit/5c34314cdc086a8a068458b68e752325980fb37f))
+
+
+### Features
+
+* **config:** add `decode_url` configuration option to the `result.behavior` table ([070660b](https://github.com/rest-nvim/rest.nvim/commit/070660bfe00d06d4ba01434be12e666860175985))
+* **curl:** encode URL query parameters using cURL flags ([16284ba](https://github.com/rest-nvim/rest.nvim/commit/16284ba6c127c4bfa0468b3e9406595d93fe1a48))
+* **env_vars:** add a `quiet` parameter to `read_file` to decide whether to fail silently if an environment file is not found, some cleanups ([ee3f047](https://github.com/rest-nvim/rest.nvim/commit/ee3f047a34961b4fbf203559253578dadfc1a31b))
+* re-implement pre and post request hooks, load env variables from environment file before running the requests ([b8cfe07](https://github.com/rest-nvim/rest.nvim/commit/b8cfe071ede11988d19c785d9cccc8bf721aab06))
+* release v2, it's finally here :) ([72e2662](https://github.com/rest-nvim/rest.nvim/commit/72e2662b380049f200ca81d9ff1b5a082e97913f))
+* **utils:** expose a `escape` function to encode strings, meant to be used by extensions to encode URLs in case their clients does not provide an encode utility ([c3dca4a](https://github.com/rest-nvim/rest.nvim/commit/c3dca4ac73269f5bf8b8be7a424b8eea640da159))
+
 ## [1.1.0](https://github.com/rest-nvim/rest.nvim/compare/v1.0.1...v1.1.0) (2024-02-12)
 
 
