@@ -13,7 +13,10 @@ local function install_health()
 
   -- Luarocks installed
   -- we check for either luarocks system-wide or rocks.nvim as rocks.nvim can manage Luarocks installation
-  if vim.fn.executable("luarocks") ~= 1 and not vim.g.rocks_nvim_loaded then
+  -- and also luarocks.nvim in case the end-user is using lazy.nvim
+  local found_luarocks_nvim = package.searchpath("luarocks", package.path)
+
+  if vim.fn.executable("luarocks") ~= 1 and not vim.g.rocks_nvim_loaded and not found_luarocks_nvim then
     vim.health.error("`Luarocks` is not installed in your system")
   else
     vim.health.ok("Found `luarocks` installed in your system")
