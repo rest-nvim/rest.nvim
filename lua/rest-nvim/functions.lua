@@ -55,6 +55,9 @@ function functions.exec(scope)
   local req_results = {}
 
   if scope == "cursor" then
+    -- Load environment variables from the env file before parsing the request
+    env_vars.read_file(true)
+
     local req = parser.parse(
       ---@diagnostic disable-next-line param-type-mismatch
       parser.look_behind_until(parser.get_node_at_cursor(), "request")
@@ -65,8 +68,6 @@ function functions.exec(scope)
     -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
     -- so the values can be modified from the pre-request hooks
     _G._rest_nvim_req_data = req
-    -- Load environment variables from the env file
-    env_vars.read_file(true)
     -- Run pre-request hooks
     api.exec_pre_request_hooks()
     -- Clean the _rest_nvim_req_data global after running the pre-request hooks
@@ -98,8 +99,6 @@ function functions.exec(scope)
       -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
       -- so the values can be modified from the pre-request hooks
       _G._rest_nvim_req_data = req
-      -- Load environment variables from the env file
-      env_vars.read_file(true)
       -- Run pre-request hooks
       api.exec_pre_request_hooks()
       -- Clean the _rest_nvim_req_data global after running the pre-request hooks
