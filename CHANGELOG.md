@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/rest-nvim/rest.nvim/compare/v2.0.0...v2.0.1) (2024-03-19)
+
+
+### Bug Fixes
+
+* **config:** proper checking for the keybinds configuration table correctness, see [#306](https://github.com/rest-nvim/rest.nvim/issues/306) ([0277464](https://github.com/rest-nvim/rest.nvim/commit/0277464a9ca9707029f8d04aa14407a8b3239ef1))
+* ensure help window width is an int ([af7b2ea](https://github.com/rest-nvim/rest.nvim/commit/af7b2ead485f6c88199e9c3e0bf551555a9a7fb6))
+* **functions:** proper env variables file loading order, fixes [#308](https://github.com/rest-nvim/rest.nvim/issues/308) ([2030bf6](https://github.com/rest-nvim/rest.nvim/commit/2030bf65a4a91b08de95b3bd0e753050d1066b53))
+* **health:** include `luarocks.nvim` plugin in the luarocks installation section ([eff6f1b](https://github.com/rest-nvim/rest.nvim/commit/eff6f1bef97e983f09abc1bb0b22a53c9298db9f))
+* **parser:** make `parse_request` handle `request` TS nodes ([a74e940](https://github.com/rest-nvim/rest.nvim/commit/a74e940a8bab560f280f2bb7c822e4087e19dc8f))
+* **plugin:** improve log message when a dependency was not found ([abfc4b2](https://github.com/rest-nvim/rest.nvim/commit/abfc4b24270bb10e1468e14d73cadd16570de2f3))
+
 ## [2.0.0](https://github.com/rest-nvim/rest.nvim/compare/v1.2.1...v2.0.0) (2024-03-18)
 
 
