@@ -228,7 +228,7 @@ function client.request(request)
     -- Request body
     --
     -- Create a copy of the request body table to remove the unneeded `__TYPE` metadata field later
-    local body = request.body
+    local body = vim.deepcopy(request.body)
     if request.body.__TYPE == "json" then
       body.__TYPE = nil
 
