@@ -67,26 +67,13 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 :Rocks install rest.nvim
 ```
 
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
-
-```lua
-use {
-  "rest-nvim/rest.nvim",
-  rocks = { "lua-curl", "nvim-nio", "mimetypes", "xml2lua" },
-  config = function()
-    require("rest-nvim").setup()
-  end,
-}
-```
-
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
   "vhyrro/luarocks.nvim",
-  config = function()
-    require("luarocks").setup({})
-  end,
+  priority = 1000,
+  config = true,
 },
 {
   "rest-nvim/rest.nvim",
@@ -101,7 +88,20 @@ use {
 > [!NOTE]
 >
 > There's a `build.lua` file in the repository that `lazy.nvim` will find and source to install the
-> luarocks dependencies for you by using `luarocks.nvim`.
+> luarocks dependencies for you by using `luarocks.nvim`. You don't need to specify a rock list
+> by yourself.
+
+### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+
+```lua
+use {
+  "rest-nvim/rest.nvim",
+  rocks = { "lua-curl", "nvim-nio", "mimetypes", "xml2lua" },
+  config = function()
+    require("rest-nvim").setup()
+  end,
+}
+```
 
 ### Default configuration
 
