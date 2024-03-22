@@ -243,10 +243,10 @@ Environment variables can be set dynamically from the response body.
 ===============================================================================
 SCRIPT VARIABLES                                   *rest-nvim-script-variables*
 
-A Lua script can be run after a request has completed. This script must below
-the body and wrapped in `--{% script --%}`. A context table is avaliable in the
-response script. The context table can be used to read the response and set
-environment variables.
+A Lua script can be run after a request has completed. This script must be
+below the body and wrapped in `--{% script --%}`. A context table is avaliable
+in the response script. The context table can be used to read the response and
+set environment variables.
 
 The context table:
 >lua
