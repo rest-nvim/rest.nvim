@@ -36,9 +36,9 @@ local function install_health()
   -- Luarocks dependencies existence checking
   for dep, dep_info in pairs(vim.g.rest_nvim_deps) do
     if not dep_info.found then
-      local err_advice = "Install it through `luarocks --local install " .. dep .. "`"
+      local err_advice = "Install it through `luarocks --local --lua-version=5.1 install " .. dep .. "`"
       if dep:find("nvim") then
-        err_advice = "Install it through your preferred plugins manager or luarocks by using `luarocks --local install "
+        err_advice = "Install it through your preferred plugins manager or luarocks by using `luarocks --local --lua-version=5.1 install "
           .. dep
           .. "`"
         -- NOTE: nvim-treesitter has a weird bug in luarocks due to the parsers installation logic so let's mark it as not recommended
