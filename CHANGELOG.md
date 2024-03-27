@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.2](https://github.com/rest-nvim/rest.nvim/compare/v2.0.1...v2.0.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* **build:** proper require for luarocks.nvim breaking changes ([5300ae0](https://github.com/rest-nvim/rest.nvim/commit/5300ae0b111dbee1322949a197cc424eac6b849f))
+* **functions:** handle highlights of winbar result with prefixed zeros ([1bad966](https://github.com/rest-nvim/rest.nvim/commit/1bad966117230e173e31f503c9718f9eb145388f))
+* **health:** recommend using the `--lua-version` flag in luarocks commands ([9b9ad65](https://github.com/rest-nvim/rest.nvim/commit/9b9ad6529d4026c4a18b23c60c6d6923c8109bb3))
+* **run last:** not modify body in order to use it again ([9598c89](https://github.com/rest-nvim/rest.nvim/commit/9598c893ac8e6aee2e3e0dc526f2c44bc4889ba9))
+
 ## [2.0.1](https://github.com/rest-nvim/rest.nvim/compare/v2.0.0...v2.0.1) (2024-03-19)
 
 
