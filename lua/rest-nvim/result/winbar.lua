@@ -59,8 +59,8 @@ winbar.pane_map = {
 ---@param name string Highlighting group name
 ---@return string
 local function get_hl_group_fg(name)
-	-- This will still error out if the highlight doesn't exist
-	return string.format("#%06X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
+  -- This will still error out if the highlight doesn't exist
+  return string.format("#%06X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
 end
 
 ---Set the results window winbar highlighting groups
