@@ -59,16 +59,8 @@ winbar.pane_map = {
 ---@param name string Highlighting group name
 ---@return string
 local function get_hl_group_fg(name)
-  -- If the HEX color has a zero as the first character, `string.format` will skip it
-  -- so we have to add it manually later
-  local hl_fg = string.format("%02X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
-  if #hl_fg == 4 then
-    hl_fg = "00" .. hl_fg
-  elseif #hl_fg == 5 then
-    hl_fg = "0" .. hl_fg
-  end
-  hl_fg = "#" .. hl_fg
-  return hl_fg
+	-- This will still error out if the highlight doesn't exist
+	return string.format("#%06X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
 end
 
 ---Set the results window winbar highlighting groups
