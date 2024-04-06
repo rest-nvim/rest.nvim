@@ -15,6 +15,7 @@ local result_help = require("rest-nvim.result.help")
 ---Set up Rest autocommands group and set `:Rest` command on `*.http` files
 function autocmds.setup()
   local rest_nvim_augroup = vim.api.nvim_create_augroup("Rest", {})
+  local keybinds = _G._rest_nvim.result.keybinds
   vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     group = rest_nvim_augroup,
     pattern = "*.http",
@@ -28,17 +29,17 @@ function autocmds.setup()
     group = rest_nvim_augroup,
     pattern = "rest_nvim_results",
     callback = function(args)
-      vim.keymap.set("n", "H", function()
+      vim.keymap.set("n", keybinds.prev, function()
         functions.cycle_result_pane("prev")
       end, {
         desc = "Go to previous winbar pane",
-        buffer = args.buf,
+        buffer = keybinds.buffer_local and args.buf or nil,
       })
-      vim.keymap.set("n", "L", function()
+      vim.keymap.set("n", keybinds.next, function()
         functions.cycle_result_pane("next")
       end, {
         desc = "Go to next winbar pane",
-        buffer = args.buf,
+        buffer = keybinds.buffer_local and args.buf or nil,
       })
       vim.keymap.set("n", "?", result_help.open, {
         desc = "Open rest.nvim request results help window",

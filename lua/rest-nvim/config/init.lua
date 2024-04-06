@@ -126,6 +126,11 @@ local default_config = {
         end,
       },
     },
+    keybinds = {
+      buffer_local = false,
+      prev = "H",
+      next = "L",
+    },
   },
   highlight = {
     enable = true,

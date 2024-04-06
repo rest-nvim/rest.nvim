@@ -58,6 +58,11 @@ function check.validate(cfg)
     formatters = { cfg.result.behavior.formatters, "table" },
     json = { cfg.result.behavior.formatters.json, { "string", "function" } },
     html = { cfg.result.behavior.formatters.html, { "string", "function" } },
+    -- RestConfigResultKeybinds
+    result_keybinds = { cfg.result.keybinds, "table" },
+    prev = { cfg.result.keybinds.prev, "string" },
+    next = { cfg.result.keybinds.next, "string" },
+    buffer_local = { cfg.result.keybinds.buffer_local, "boolean" },
     -- RestConfigHighlight
     highlight_enable = { cfg.highlight.enable, "boolean" },
     timeout = { cfg.highlight.timeout, "number" },
