@@ -26,6 +26,7 @@ local function get_or_create_buf()
   if not existing_buf then
     -- Create a new buffer
     local new_bufnr = vim.api.nvim_create_buf(false, true)
+    local keybinds = _G._rest_nvim.result.keybinds
     vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
     vim.api.nvim_set_option_value("ft", "markdown", { buf = new_bufnr })
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
@@ -35,8 +36,8 @@ local function get_or_create_buf()
       "**`rest.nvim` results window help**",
       "",
       "**Keybinds**:",
-      "  - `H`: go to previous pane",
-      "  - `L`: go to next pane",
+      "  - `" .. keybinds.prev .. "`: go to previous pane",
+      "  - `" .. keybinds.next .. "`: go to next pane",
       "  - `q`: close results window",
       "",
       "**Press `q` to close this help window**",
