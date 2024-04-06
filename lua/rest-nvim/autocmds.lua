@@ -30,10 +30,16 @@ function autocmds.setup()
     callback = function(args)
       vim.keymap.set("n", "H", function()
         functions.cycle_result_pane("prev")
-      end, { desc = "Go to previous winbar pane" })
+      end, {
+        desc = "Go to previous winbar pane",
+        buffer = args.buf,
+      })
       vim.keymap.set("n", "L", function()
         functions.cycle_result_pane("next")
-      end, { desc = "Go to next winbar pane" })
+      end, {
+        desc = "Go to next winbar pane",
+        buffer = args.buf,
+      })
       vim.keymap.set("n", "?", result_help.open, {
         desc = "Open rest.nvim request results help window",
         buffer = args.buf,
