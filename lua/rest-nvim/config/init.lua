@@ -20,6 +20,7 @@ local logger = require("rest-nvim.logger")
 ---@class RestConfigResult
 ---@field split RestConfigResultSplit Result split window behavior
 ---@field behavior RestConfigResultBehavior Result buffer behavior
+---@field keybinds RestConfigResultKeybinds Keybinds settings to navigate throught request results
 
 ---@class RestConfigResultSplit
 ---@field horizontal boolean Open request results in a horizontal split
@@ -45,6 +46,11 @@ local logger = require("rest-nvim.logger")
 ---@class RestConfigResultFormatters
 ---@field json string|fun(body: string): string,table JSON formatter
 ---@field html string|fun(body: string): string,table HTML formatter
+
+---@class RestConfigResultKeybinds
+---@field buffer_local boolean Enable keybinds only in request result buffer
+---@field prev string Mapping for cycle to previous result pane
+---@field next string Mapping for cycle to next result pane
 
 ---@class RestConfigHighlight
 ---@field enable boolean Whether current request highlighting is enabled or not
