@@ -23,6 +23,7 @@ RestConfigResult                                              *RestConfigResult*
     Fields: ~
         {split}     (RestConfigResultSplit)     Result split window behavior
         {behavior}  (RestConfigResultBehavior)  Result buffer behavior
+        {keybinds}  (RestConfigResultKeybinds)  Keybinds settings to navigate throught request results
 
 
 RestConfigResultSplit                                    *RestConfigResultSplit*
@@ -63,6 +64,14 @@ RestConfigResultFormatters                          *RestConfigResultFormatters*
     Fields: ~
         {json}  (string|fun(body:string):string,table)  JSON formatter
         {html}  (string|fun(body:string):string,table)  HTML formatter
+
+
+RestConfigResultKeybinds                              *RestConfigResultKeybinds*
+
+    Fields: ~
+        {buffer_local}  (boolean)  Enable keybinds only in request result buffer
+        {prev}          (string)   Mapping for cycle to previous result pane
+        {next}          (string)   Mapping for cycle to next result pane
 
 
 RestConfigHighlight                                        *RestConfigHighlight*
