@@ -204,7 +204,13 @@ function client.request(request)
       local _url = curl.url()
       _url:set_url(request.request.url)
       -- Re-add the request query with the encoded parameters
-      _url:set_query(_url:get_query(), curl.U_URLENCODE)
+      local query = _url:get_query()
+      if type(query) == "string" then
+        _url:set_query('')
+        for param in vim.gsplit(query, "&") do
+          _url:set_query(param, curl.U_URLENCODE + curl.U_APPENDQUERY)
+        end
+      end
       -- Re-add the request URL to the req object
       req:setopt_url(_url:get_url())
     end
