@@ -202,7 +202,7 @@ function client.request(request)
     if should_encode_url then
       -- Create a new URL as we cannot extract the URL from the req object
       local _url = curl.url()
-      -- New url to replace request.request.url
+      -- New URL to replace request.request.url with encoded parameter values
       local _new_url = curl.url()
       _url:set_url(request.request.url)
       _new_url:set_url(request.request.url)
