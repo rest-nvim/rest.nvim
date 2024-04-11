@@ -202,11 +202,22 @@ function client.request(request)
     if should_encode_url then
       -- Create a new URL as we cannot extract the URL from the req object
       local _url = curl.url()
+      -- New url to replace request.request.url
+      local _new_url = curl.url()
       _url:set_url(request.request.url)
-      -- Re-add the request query with the encoded parameters
-      _url:set_query(_url:get_query(), curl.U_URLENCODE)
-      -- Re-add the request URL to the req object
-      req:setopt_url(_url:get_url())
+      _new_url:set_url(request.request.url)
+      _new_url:set_query(curl.null)
+      -- According to manual of curl's --data-urlencode, curl encodes only content in name=content expression inside query, but not entire query
+      -- rest.nvim supposed to have same behaviour
+      -- See: https://github.com/rest-nvim/rest.nvim/issues/355
+      if _url:get_query() ~= curl.null then
+        for _, query_parameter in ipairs(vim.split(_url:get_query(), "&", { trimempty = true })) do
+          -- Re-add the request query with the encoded parameters
+          _new_url:set_query(query_parameter, curl.U_APPENDQUERY + curl.U_URLENCODE)
+        end
+        -- Re-add the request URL to the req object
+        req:setopt_url(_new_url:get_url())
+      end
     end
 
     -- Set request HTTP version, defaults to HTTP/1.1
