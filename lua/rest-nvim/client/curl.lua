@@ -206,7 +206,7 @@ function client.request(request)
       -- Re-add the request query with the encoded parameters
       local query = _url:get_query()
       if type(query) == "string" then
-        _url:set_query('')
+        _url:set_query("")
         for param in vim.gsplit(query, "&") do
           _url:set_query(param, curl.U_URLENCODE + curl.U_APPENDQUERY)
         end
