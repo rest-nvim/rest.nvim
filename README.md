@@ -168,7 +168,7 @@ local default_config = {
         end,
       },
       keybinds = {
-        buffer_local = false,
+        buffer_local = true,
         prev = "H",
         next = "L",
       },
