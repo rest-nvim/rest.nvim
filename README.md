@@ -167,11 +167,11 @@ local default_config = {
           return fmt_body, { found = true, name = "tidy" }
         end,
       },
-      keybinds = {
-        buffer_local = true,
-        prev = "H",
-        next = "L",
-      },
+    },
+    keybinds = {
+      buffer_local = true,
+      prev = "H",
+      next = "L",
     },
   },
   highlight = {
