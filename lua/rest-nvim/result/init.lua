@@ -192,7 +192,7 @@ local function format_body(bufnr, headers, res)
   ---@type string
   local res_type
   for _, header in ipairs(headers) do
-    if header:find("^Content%-Type") then
+    if header:lower():find("^content%-type") then
       local content_type = vim.trim(vim.split(header, ":")[2])
       -- We need to remove the leading charset if we are getting a JSON
       res_type = vim.split(content_type, "/")[2]:gsub(";.*", "")
