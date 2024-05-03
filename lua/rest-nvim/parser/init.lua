@@ -338,9 +338,7 @@ function parser.parse_body(children_nodes, variables)
   for node_type, node in pairs(children_nodes) do
     if node_type == "json_body" then
       local json_body_text = assert(get_node_text(node, 0))
-      local json_body = vim.json.decode(json_body_text, {
-        luanil = { object = true, array = true },
-      })
+      local json_body = vim.json.decode(json_body_text)
       body = traverse_body(json_body, variables)
       -- This is some metadata to be used later on
       body.__TYPE = "json"
