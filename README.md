@@ -286,11 +286,44 @@ Here is a preview of the extension working :)
 - `env_pattern`: For env file pattern
 - `env_edit_command`: For env file edit command
 
+
+### Select environment alternative
+
+If you are not using telescope, this custom keybind can let you select an environment
+
+```lua
+vim.keymap.set('n', ',q', function()
+  local pattern = _G._rest_nvim.env_pattern
+  local command = string.format("fd -HI '%s'", pattern)
+  local result = io.popen(command):read('*a')
+
+  local env_list = {}
+  for line in result:gmatch('[^\r\n]+') do
+    table.insert(env_list, line)
+  end
+
+  local rest_functions = require('rest-nvim.functions')
+
+  vim.ui.select(env_list, {
+    prompt = 'Select env file ',
+    format_item = function(item)
+      return item
+    end,
+  }, function(choice)
+    if choice == nil then
+      return
+    end
+    rest_functions.env('set', choice)
+  end)
+end, { desc = '[q]uery envs' })
+```
+
+
 ## Lualine
 
 We also have lualine component to get what env file you select!
 
-And dont't worry, it will only show up under HTTP files.
+And don't worry, it will only show up under HTTP files.
 
 ```lua
 -- Just add a component in your lualine config
