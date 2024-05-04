@@ -49,7 +49,7 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 
 - System-wide
   - `Python` (only if you are using `packer.nvim` or `lazy.nvim` plus `luarocks.nvim` for the installation)
-  - `cURL` development headers (usually called `libcurl-dev` or `libcurl-devel` depending on your Linux distribution)
+  - `cURL` development headers (usually called `libcurl-dev` or `libcurl-devel` depending on your Linux distribution. Eg : linux mint 21.3 do `$ sudo apt install libcurl4-gnutls-dev && luarocks --local --lua-version=5.1 install lua-curl CURL_INCDIR=/usr/include/x86_64-linux-gnu`)
 - Optional [can be changed, see config below](#default-configuration)
   - `jq`   (to format JSON output)
   - `tidy` (to format HTML output)
