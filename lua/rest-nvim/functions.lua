@@ -63,7 +63,7 @@ function functions.exec(scope)
       parser.look_behind_until(parser.get_node_at_cursor(), "request")
     )
 
-    utils.highlight(0, req.start, req.end_, api.namespace)
+    utils.highlight(vim.api.nvim_get_current_buf(), req.start, req.end_, api.namespace)
 
     -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
     -- so the values can be modified from the pre-request hooks
@@ -94,7 +94,7 @@ function functions.exec(scope)
       ---@diagnostic disable-next-line need-check-nil
       logger:error("Rest run last: A previously made request was not found to be executed again")
     else
-      utils.highlight(0, req.start, req.end_, api.namespace)
+      utils.highlight(vim.api.nvim_get_current_buf(), req.start, req.end_, api.namespace)
 
       -- Set up a _rest_nvim_req_data Lua global table that holds the parsed request
       -- so the values can be modified from the pre-request hooks
