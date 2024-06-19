@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.0.0](https://github.com/rest-nvim/rest.nvim/compare/v2.0.1...v3.0.0) (2024-06-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* add archiving notice
+
+### Features
+
+* custom mappings for result window ([8f62a29](https://github.com/rest-nvim/rest.nvim/commit/8f62a290be397a1e4a2778330f026f731251f197))
+
+
+### Bug Fixes
+
+* **build:** proper require for luarocks.nvim breaking changes ([5300ae0](https://github.com/rest-nvim/rest.nvim/commit/5300ae0b111dbee1322949a197cc424eac6b849f))
+* change default HL behavior ([31a5665](https://github.com/rest-nvim/rest.nvim/commit/31a56656f374625c012ff0c411da1593e7c8cd8a))
+* correctly urlencode query parameters (fixes [#317](https://github.com/rest-nvim/rest.nvim/issues/317)) ([38ceda9](https://github.com/rest-nvim/rest.nvim/commit/38ceda9bc3e4dc17aa67dcd1a17829e0d3c2334b))
+* **functions:** handle highlights of winbar result with prefixed zeros ([1bad966](https://github.com/rest-nvim/rest.nvim/commit/1bad966117230e173e31f503c9718f9eb145388f))
+* H and L keymaps are buffer local ([21a9ae3](https://github.com/rest-nvim/rest.nvim/commit/21a9ae3e48d188df5330c14dda40e8f6244eac68))
+* **health:** recommend using the `--lua-version` flag in luarocks commands ([9b9ad65](https://github.com/rest-nvim/rest.nvim/commit/9b9ad6529d4026c4a18b23c60c6d6923c8109bb3))
+* match lowercase content-type header ([20c5b52](https://github.com/rest-nvim/rest.nvim/commit/20c5b5259afa7f4867474cc463211d64c93ba371))
+* **run last:** not modify body in order to use it again ([9598c89](https://github.com/rest-nvim/rest.nvim/commit/9598c893ac8e6aee2e3e0dc526f2c44bc4889ba9))
+
+
+### Documentation
+
+* add archiving notice ([e7843c5](https://github.com/rest-nvim/rest.nvim/commit/e7843c55f9df6a9db9f97dac180035c6ff895a90))
+
 ## [2.0.1](https://github.com/rest-nvim/rest.nvim/compare/v2.0.0...v2.0.1) (2024-03-19)
 
 
