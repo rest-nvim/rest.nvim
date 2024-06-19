@@ -14,6 +14,10 @@
 
 </div>
 
+# ⚠️ NOTICE
+
+Currently my focus is university and other projects, which is why I have no interest in rest.nvim and it's extremely difficult for me to work on bugs or features of a plugin that I have not used for a long time and that in the time that I've used it, it works perfectly on my computer. That said, I have looked for another maintainer for the project but I have never been able to find it, so I have decided that it's best to archive it and hope that in the future someone makes better software than me and is willing to maintain it.
+
 ---
 
 A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
