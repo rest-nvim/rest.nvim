@@ -8,7 +8,7 @@
 # - Body
 POST {{URL}}
 Content-Type: application/json
-Authorization: Bearer {{TOKEN}}
+Authorization: {{TOKEN}}
 
 {
     "name": "{{USERNAME}}",
@@ -20,6 +20,6 @@ Authorization: Bearer {{TOKEN}}
 
 POST {{URL}}
 Content-Type: application/json
-Authorization: Bearer {{TOKEN}}
+Authorization: {{TOKEN}}
 
 < {{PAYLOAD]}}
