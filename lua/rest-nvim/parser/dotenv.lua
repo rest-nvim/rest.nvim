@@ -1,4 +1,5 @@
 local utils = require("rest-nvim.utils")
+local logger = require("rest-nvim.logger")
 
 local M = {}
 
@@ -36,7 +37,6 @@ end
 ---@return boolean ok
 ---@return table<string,string>|nil
 function M.parse(path, setter)
-  local logger = assert(_G._rest_nvim.logger)
   local vars
   if not setter then
     vars = {}
@@ -45,7 +45,7 @@ function M.parse(path, setter)
     end
   end
   if not utils.file_exists(path) then
-    logger:error("Current environment file '" .. path .. "' was not found")
+    logger.error("Current environment file '" .. path .. "' was not found")
     return false
   end
   local env_ext = get_filetype(path)
@@ -53,7 +53,7 @@ function M.parse(path, setter)
   if env_ext == "json" then
     local ok, json_tbl = pcall(vim.json.decode, file_contents)
     if not ok or not type(json_tbl) == "table" or vim.islist(json_tbl) then
-      logger:error("failed parsing json data")
+      logger.error("failed parsing json data")
       return false
     end
     for key, value in pairs(json_tbl) do

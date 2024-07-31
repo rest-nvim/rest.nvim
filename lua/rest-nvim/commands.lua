@@ -36,6 +36,8 @@ local commands = {}
 
 local dotenv = require("rest-nvim.dotenv")
 local request = require("rest-nvim.request")
+local logger = require("rest-nvim.logger")
+
 
 ---@type table<string, RestCmd>
 local rest_command_tbl = {
@@ -111,10 +113,8 @@ local function rest(opts)
   local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}
   local command = rest_command_tbl[cmd]
 
-  local logger = assert(_G._rest_nvim.logger)
-
   if not command then
-    logger:error("Unknown command: " .. cmd)
+    logger.error("Unknown command: " .. cmd)
     return
   end
 

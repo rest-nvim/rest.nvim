@@ -5,6 +5,7 @@ local M = {}
 local Context = require("rest-nvim.context").Context
 local script = require("rest-nvim.script")
 local utils   = require("rest-nvim.utils")
+local logger   = require("rest-nvim.logger")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
@@ -62,7 +63,6 @@ end
 ---@param context Context
 ---@return ReqBody|nil
 function M.parse_body(body_node, source, context)
-  local logger = assert(_G._rest_nvim.logger)
   local body = {}
   body.__TYPE = body_node:type():gsub("_%w+", "")
   ---@cast body ReqBody
@@ -71,7 +71,7 @@ function M.parse_body(body_node, source, context)
     body.data = expand_variables(body.data, context)
     local ok, _ = pcall(vim.json.decode, body.data)
     if not ok then
-      logger:warn("invalid json: '" .. body.data .. "'")
+      logger.warn("invalid json: '" .. body.data .. "'")
       return nil
     end
   elseif body.__TYPE == "xml" then
@@ -82,7 +82,7 @@ function M.parse_body(body_node, source, context)
     local parser = xml2lua.parser(handler)
     local ok = pcall(function (t) return parser:parse(t) end, body.data)
     if not ok then
-      logger:warn("invalid xml: '" .. body.data .. "'")
+      logger.warn("invalid xml: '" .. body.data .. "'")
       return nil
     end
   elseif body.__TYPE == "form" then
@@ -102,7 +102,7 @@ function M.parse_body(body_node, source, context)
       path = assert(get_node_field_text(body_node, "path", source)),
     }
   elseif body.__TYPE == "graphql" then
-    logger:error("graphql body is not supported yet")
+    logger.error("graphql body is not supported yet")
   end
   return body
 end
@@ -184,21 +184,20 @@ end
 ---@return Request_|nil
 function M.parse(req_node, source, context)
   context = context or Context:new()
-  local logger = assert(_G._rest_nvim.logger)
   -- request should not include error
   if req_node:has_error() then
-    logger:error(utils.ts_node_error_log(req_node))
+    logger.error(utils.ts_node_error_log(req_node))
     return nil
   end
   local body_node = req_node:field("body")[1]
   local body = body_node and M.parse_body(body_node, source, context)
   if body_node and not body then
-    logger:error("parsing body failed")
+    logger.error("parsing body failed")
     return nil
   end
   local method = get_node_field_text(req_node, "method", source)
   if not method then
-    logger:info("no method provided, falling back to 'GET'")
+    logger.info("no method provided, falling back to 'GET'")
     method = "GET"
   end
   local url = expand_variables(

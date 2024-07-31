@@ -9,6 +9,7 @@
 local help = {}
 
 local result = require("rest-nvim.result")
+local logger = require("rest-nvim.logger")
 
 ---Get or create a new request window help buffer
 local function get_or_create_buf()
@@ -89,8 +90,6 @@ end
 
 ---Close the request results help window
 function help.close()
-  local logger = _G._rest_nvim.logger
-
   -- Get the help buffer ID
   local winnr
   for _, id in ipairs(vim.api.nvim_list_wins()) do
@@ -101,7 +100,7 @@ function help.close()
 
   if not winnr then
     ---@diagnostic disable-next-line need-check-nil
-    logger:error("Could not find a help window to close")
+    logger.error("Could not find a help window to close")
     return
   end
 

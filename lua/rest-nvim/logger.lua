@@ -2,176 +2,117 @@
 ---
 ---@brief [[
 ---
----Logging library for rest.nvim, slightly inspired by rmagatti/logger.nvim
+---Logging library for rest.nvim, inspired by nvim-neorocks/rocks.nvim
 ---Intended for use by internal and third-party modules.
----
----Default logger instance is made during the `setup` and can be accessed
----by anyone through the `_G._rest_nvim.logger` configuration field
----that is set automatically.
----
----------------------------------------------------------------------------------
----
----Usage:
----
----```lua
----local logger = require("rest-nvim.logger"):new({ level = "debug" })
----
----logger:set_log_level("info")
----
----logger:info("This is an info log")
---- -- [rest.nvim] INFO: This is an info log
----```
 ---
 ---@brief ]]
 
----@class Logger
 local logger = {}
 
--- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
-local uv = vim.uv or vim.loop
-
----@see vim.log.levels
----@class LoggerLevels
-local levels = {
-  trace = vim.log.levels.TRACE,
-  debug = vim.log.levels.DEBUG,
-  info = vim.log.levels.INFO,
-  warn = vim.log.levels.WARN,
-  error = vim.log.levels.ERROR,
-}
-
----@class LoggerConfig
----@field level_name string Logging level name. Default is `"info"`
----@field save_logs boolean Whether to save log messages into a `.log` file. Default is `true`
-local default_config = {
-  level_name = "info",
-  save_logs = true,
-}
+---@type fun(any)
+function logger.trace(_) end
+---@type fun(any)
+function logger.debug(_) end
+---@type fun(any)
+function logger.info(_) end
+---@type fun(any)
+function logger.warn(_) end
+---@type fun(any)
+function logger.error(_) end
 
 local default_log_path = vim.fn.stdpath("log") --[[@as string]]
+
+local LARGE = 1e9
+
+local log_date_format = "%F %H:%M:%S"
 
 ---Get the rest.nvim log file path.
 ---@package
 ---@return string filepath
 function logger.get_logfile()
-    return vim.fs.joinpath(default_log_path, "rest-nvim.log")
+  return vim.fs.joinpath(default_log_path, "rest-nvim.log")
 end
 
----Store the logger output in a file at `vim.fn.stdpath("log")`
----@see vim.fn.stdpath
----@param msg string Logger message to be saved
-local function store_log(msg)
-  local date = os.date("%F %r") -- 2024-01-26 01:25:05 PM
-  local log_msg = date .. " | " .. msg .. "\n"
-  local log_path = logger.get_logfile()
-
-  -- 644 sets read and write permissions for the owner, and it sets read-only
-  -- mode for the group and others
-  uv.fs_open(log_path, "a+", tonumber(644, 8), function(err, file)
-    if file and not err then
-      local file_pipe = uv.new_pipe(false)
-      ---@cast file_pipe uv_pipe_t
-      uv.pipe_open(file_pipe, file)
-      uv.write(file_pipe, log_msg)
-      uv.fs_close(file)
-    end
-  end)
-end
-
----Create a new logger instance
----@param opts LoggerConfig Logger configuration
----@return Logger
-function logger:new(opts)
-  opts = opts or {}
-  local conf = vim.tbl_deep_extend("force", default_config, opts)
-  self.level = levels[conf.level_name]
-  self.save_logs = conf.save_logs
-
-  self.__index = function(_, index)
-    if type(self[index]) == "function" then
-      return function(...)
-        -- Make any logger function call with "." access result in the syntactic sugar ":" access
-        self[index](self, ...)
-      end
-    else
-      return self[index]
-    end
+local logfile, openerr
+---@private
+---Opens log file. Returns true if file is open, false on error
+---@return boolean
+local function open_logfile()
+  -- Try to open file only once
+  if logfile then
+    return true
   end
-  setmetatable(opts, self)
+  if openerr then
+    return false
+  end
 
-  return self
+  vim.fn.mkdir(default_log_path, "-p")
+  logfile, openerr = io.open(logger.get_logfile(), "w+")
+  if not logfile then
+    local err_msg = string.format("Failed to open rest.nvim log file: %s", openerr)
+    vim.notify(err_msg, vim.log.levels.ERROR)
+    return false
+  end
+
+  local log_info = vim.uv.fs_stat(logger.get_logfile())
+  if log_info and log_info.size > LARGE then
+    local warn_msg =
+      string.format("rest.nvim log is large (%d MB): %s", log_info.size / (1000 * 1000), logger.get_logfile())
+    vim.notify(warn_msg, vim.log.levels.WARN)
+  end
+
+  -- Start message for logging
+  logfile:write(string.format("[START][%s] rest.nvim logging initiated\n", os.date(log_date_format)))
+  return true
+end
+
+local log_levels = vim.deepcopy(vim.log.levels)
+for levelstr, levelnr in pairs(log_levels) do
+  log_levels[levelnr] = levelstr
 end
 
 ---Set the log level for the logger
----@param level string New logging level
+---@param level (string|integer) New logging level
 ---@see vim.log.levels
-function logger:set_log_level(level)
-  self.level = levels[level]
-end
-
----Log a trace message
----@param msg string Log message
-function logger:trace(msg)
-  msg = "[rest.nvim] TRACE: " .. msg
-  if self.level == vim.log.levels.TRACE then
-    vim.notify(msg, levels.trace)
-  end
-
-  if self.save_logs then
-    store_log(msg)
+function logger.set_log_level(level)
+  if type(level) == "string" then
+    logger.level = assert(log_levels[level:upper()], string.format("rest.nvim: Invalid log level: %q", level))
+  else
+    assert(log_levels[level], string.format("rest.nvim: Invalid log level: %d", level))
+    logger.level = level
   end
 end
 
----Log a debug message
----@param msg string Log message
-function logger:debug(msg)
-  msg = "[rest.nvim] DEBUG: " .. msg
-  if self.level == vim.log.levels.DEBUG then
-    vim.notify(msg, levels.debug)
-  end
-
-  if self.save_logs then
-    store_log(msg)
-  end
-end
-
----Log an info message
----@param msg string Log message
-function logger:info(msg)
-  msg = "[rest.nvim] INFO: " .. msg
-  local valid_levels = { vim.log.levels.INFO, vim.log.levels.DEBUG }
-  if vim.tbl_contains(valid_levels, self.level) then
-    vim.notify(msg, levels.info)
-  end
-
-  if self.save_logs then
-    store_log(msg)
-  end
-end
-
----Log a warning message
----@param msg string Log message
-function logger:warn(msg)
-  msg = "[rest.nvim] WARN: " .. msg
-  local valid_levels = { vim.log.levels.INFO, vim.log.levels.DEBUG, vim.log.levels.WARN }
-  if vim.tbl_contains(valid_levels, self.level) then
-    vim.notify(msg, levels.warn)
-  end
-
-  if self.save_logs then
-    store_log(msg)
+for level, levelnr in pairs(vim.log.levels) do
+  logger[level:lower()] = function(...)
+    if logger.level == vim.log.levels.OFF or not open_logfile() then
+      return false
+    end
+    local argc = select("#", ...)
+    if levelnr < logger.level then
+      return false
+    end
+    if argc == 0 then
+      return true
+    end
+    local info = debug.getinfo(2, "Sl")
+    local fileinfo = string.format("%s:%s", info.short_src, info.currentline)
+    local parts = { level, "|", os.date(log_date_format), "|", fileinfo, "|" }
+    for i = 1, argc do
+      local arg = select(i, ...)
+      if arg == nil then
+        table.insert(parts, "<nil>")
+      elseif type(arg) == "string" then
+        table.insert(parts, arg)
+      else
+        table.insert(parts, vim.inspect(arg))
+      end
+    end
+    logfile:write(table.concat(parts, " "), "\n")
+    logfile:flush()
   end
 end
 
----Log an error message
----@param msg string Log message
-function logger:error(msg)
-  msg = "[rest.nvim] ERROR: " .. msg
-  vim.notify(msg, levels.error)
-
-  if self.save_logs then
-    store_log(msg)
-  end
-end
+logger.set_log_level(vim.tbl_get(_G, "_rest_nvim", "_log_level") or vim.log.levels.WARN)
 
 return logger

@@ -6,6 +6,8 @@
 ---
 ---@brief ]]
 
+local logger = require("rest-nvim.logger")
+
 local utils = {}
 
 -- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
@@ -42,8 +44,6 @@ end
 ---@param path string file path
 ---@return string
 function utils.read_file(path)
-  local logger = _G._rest_nvim.logger
-
   ---@type string|nil
   local content
   if utils.file_exists(path) then
@@ -57,7 +57,7 @@ function utils.read_file(path)
     uv.fs_close(file)
   else
     ---@diagnostic disable-next-line need-check-nil
-    logger:error("Failed to read file '" .. path .. "'")
+    logger.error("Failed to read file '" .. path .. "'")
     return ""
   end
 

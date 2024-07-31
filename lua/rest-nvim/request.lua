@@ -3,7 +3,8 @@
 local M = {}
 
 local parser = require("rest-nvim.parser")
-local utils   = require("rest-nvim.utils")
+local utils  = require("rest-nvim.utils")
+local logger = require("rest-nvim.logger")
 
 ---@class Request_
 ---@field context Context
@@ -21,13 +22,13 @@ _G._rest_nvim_last_request_ = nil
 ---@param req Request_
 ---@return boolean ok
 local function run_request(req)
-  local logger = assert(_G._rest_nvim.logger)
   local client = require("rest-nvim.client.curl")
   _G._rest_nvim_last_request_ = req
 
+  logger.info("sending request to: " .. req.url)
   local res = client.request_(req)
   if not res then
-    logger:error("request failed")
+    logger.error("request failed")
     return false
   end
 
@@ -45,10 +46,9 @@ end
 ---run request in current cursor position
 ---@return boolean ok
 function M.run()
-  local logger = assert(_G._rest_nvim.logger)
   local req_node = parser.get_cursor_request_node()
   if not req_node then
-    logger:error("failed to find request at cursor position")
+    logger.error("failed to find request at cursor position")
     return false
   end
   local ctx = parser.create_context(0)
@@ -57,7 +57,7 @@ function M.run()
   end
   local req = parser.parse(req_node, 0, ctx)
   if not req then
-    logger:error("failed to parse request")
+    logger.error("failed to parse request")
     return false
   end
   local highlight = _G._rest_nvim.highlight
@@ -70,10 +70,9 @@ end
 ---run last request
 ---@return boolean ok
 function M.run_last()
-  local logger = assert(_G._rest_nvim.logger)
   local req = _G._rest_nvim_last_request_
   if not req then
-    logger:warn("no last request")
+    logger.warn("no last request")
     return false
   end
   return run_request(req)
@@ -82,14 +81,13 @@ end
 ---run all requests in current file with same context
 ---@return boolean ok
 function M.run_all()
-  local logger = assert(_G._rest_nvim.logger)
-  logger:error("not implemented")
+  logger.error("not implemented")
   local reqs = parser.get_all_request_node()
   local ctx = parser.create_context(0)
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
     if not req then
-      logger:error("failed to run request")
+      logger.error("failed to run request")
       return false
     end
     local ok = run_request(req)

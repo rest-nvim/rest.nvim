@@ -1,5 +1,7 @@
 ---@mod rest-nvim.sscript rest.nvim tree-sitter parsing module
 
+local logger = require("rest-nvim.logger")
+
 local M = {}
 
 -- TODO: fill script environment
@@ -58,11 +60,10 @@ end
 ---@param script string
 ---@return function
 function M.load(script, context)
-  local logger = assert(_G._rest_nvim.logger)
   local env = M.create_env(context)
   local f, error_msg = load(script, "script_variable", "bt", env)
   if error_msg then
-    logger:error(error_msg)
+    logger.error(error_msg)
   end
   return assert(f)
 end

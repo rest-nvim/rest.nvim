@@ -11,6 +11,7 @@ local client = {}
 local found_curl, curl = pcall(require, "cURL.safe")
 
 local utils = require("rest-nvim.utils")
+local logger = require("rest-nvim.logger")
 
 -- TODO: add support for submitting forms in the `client.request` function
 
@@ -116,15 +117,12 @@ end
 ---@param statistics_tbl RestConfigResultStats Statistics table
 ---@return table Request statistics
 local function get_stats(req, statistics_tbl)
-  local logger = _G._rest_nvim.logger
-
   local stats = {}
 
   local function get_stat(req_, stat_)
     local curl_info = curl["INFO_" .. stat_:upper()]
     if not curl_info then
-      ---@diagnostic disable-next-line need-check-nil
-      logger:error(
+      logger.error(
         "The cURL request stat field '"
           .. stat_("' was not found.\nPlease take a look at: https://curl.se/libcurl/c/curl_easy_getinfo.html")
       )
@@ -163,10 +161,9 @@ end
 ---@return table? info The request information (url, method, headers, body, etc)
 function client.request_(request)
   local info = {}
-  local logger = assert(_G._rest_nvim.logger)
   if not found_curl then
     ---@diagnostic disable-next-line need-check-nil
-    logger:error("lua-curl could not be found, therefore the cURL client will not work.")
+    logger.error("lua-curl could not be found, therefore the cURL client will not work.")
     return
   end
   local host = request.headers["host"]
@@ -248,7 +245,7 @@ function client.request_(request)
       end
       req:setopt_httppost(form)
     else
-      logger:error(("'%s' type body is not supported yet"):format(request.body.__TYPE))
+      logger.error(("'%s' type body is not supported yet"):format(request.body.__TYPE))
       return
     end
   end
@@ -273,7 +270,7 @@ function client.request_(request)
     info.headers = table.concat(res_headers):gsub("\r", "")
     info.body = table.concat(res_result)
   else
-    logger:error("Something went wrong when making the request with cURL:\n" .. curl_error(err:no()))
+    logger.error("Something went wrong when making the request with cURL:\n" .. curl_error(err:no()))
     return
   end
   req:close()

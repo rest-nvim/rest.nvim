@@ -11,6 +11,7 @@ local result = {}
 local found_nio, nio = pcall(require, "nio")
 
 local winbar = require("rest-nvim.result.winbar")
+local logger = require("rest-nvim.logger")
 
 ---Results buffer handler number
 ---@type number|nil
@@ -193,8 +194,6 @@ end
 ---@param headers table Request headers
 ---@param res table Request results
 local function format_body(bufnr, headers, res)
-  local logger = _G._rest_nvim.logger
-
   ---@type string
   local res_type
   for _, header in ipairs(headers) do
@@ -222,8 +221,7 @@ local function format_body(bufnr, headers, res)
         if ok and out then
           res.body = out
         else
-          ---@diagnostic disable-next-line need-check-nil
-          logger:error("Error calling formatter on response body:\n" .. out)
+          logger.error("Error calling formatter on response body:\n" .. out)
         end
       elseif vim.fn.executable(fmt) == 1 then
         local stdout = vim.fn.system(fmt, res.body):gsub("\n$", "")
@@ -232,12 +230,12 @@ local function format_body(bufnr, headers, res)
           res.body = stdout
         else
           ---@diagnostic disable-next-line need-check-nil
-          logger:error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
+          logger.error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
         end
       end
     elseif res_type ~= nil then
       ---@diagnostic disable-next-line need-check-nil
-      logger:info(
+      logger.info(
         "Could not find a formatter for the body type "
           .. res_type
           .. " returned in the request, the results will not be formatted"

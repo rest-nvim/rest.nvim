@@ -65,7 +65,6 @@ local logger = require("rest-nvim.logger")
 ---@field result RestConfigResult Request results buffer behavior
 ---@field highlight RestConfigHighlight Request highlighting
 ---@field _debug_info? RestConfigDebug Configurations debug information, set automatically
----@field logger? Logger Logging system, set automatically
 
 ---rest.nvim default configuration
 ---@type RestConfig
@@ -132,6 +131,7 @@ local default_config = {
     enable = true,
     timeout = 750,
   },
+  _log_level = vim.log.levels.WARN,
 }
 
 ---Set user-defined configurations for rest.nvim
@@ -148,19 +148,13 @@ function config.set(user_configs)
 
   local ok, err = check.validate(conf)
 
-  -- We do not want to validate `logger` value so we are setting it after the validation
-  conf.logger = logger:new({
-    level_name = conf.logs.level,
-    save_logs = conf.logs.save,
-  })
-
   if not ok then
     ---@cast err string
-    conf.logger:error(err)
+    conf.logger.error(err)
   end
 
   if #conf._debug_info.unrecognized_configs > 0 then
-    conf.logger:warn("Unrecognized configs found in setup: " .. vim.inspect(conf._debug_info.unrecognized_configs))
+    conf.logger.warn("Unrecognized configs found in setup: " .. vim.inspect(conf._debug_info.unrecognized_configs))
   end
 
   return conf
