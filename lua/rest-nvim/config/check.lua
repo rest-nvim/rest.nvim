@@ -23,14 +23,11 @@ end
 ---@return string|nil error_message
 function check.validate(cfg)
   local ok, err = validate({
-    client = { cfg.client, "string" },
-    env_file = { cfg.env_file, "string" },
     env_pattern = { cfg.env_pattern, "string" },
     env_edit_command = { cfg.env_edit_command, "string" },
     encode_url = { cfg.encode_url, "boolean" },
     skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
-    keybinds = { cfg.keybinds, "table" },
     -- RestConfigLogs
     level = { cfg.logs.level, "string" },
     save = { cfg.logs.save, "boolean" },
@@ -62,7 +59,6 @@ function check.validate(cfg)
     result_keybinds = { cfg.result.keybinds, "table" },
     prev = { cfg.result.keybinds.prev, "string" },
     next = { cfg.result.keybinds.next, "string" },
-    buffer_local = { cfg.result.keybinds.buffer_local, "boolean" },
     -- RestConfigHighlight
     highlight_enable = { cfg.highlight.enable, "boolean" },
     timeout = { cfg.highlight.timeout, "number" },

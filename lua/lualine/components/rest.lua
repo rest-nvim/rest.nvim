@@ -22,7 +22,7 @@ end
 function M.update_status()
   local current_filetype = vim.bo.filetype
   if current_filetype == "http" then
-    return _G._rest_nvim.env_file
+    return vim.b._rest_nvim_env_file
   end
   return ""
 end

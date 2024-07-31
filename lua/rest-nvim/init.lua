@@ -9,7 +9,6 @@
 local rest = {}
 
 local config = require("rest-nvim.config")
-local keybinds = require("rest-nvim.keybinds")
 local autocmds = require("rest-nvim.autocmds")
 
 ---Set up rest.nvim
@@ -17,9 +16,6 @@ local autocmds = require("rest-nvim.autocmds")
 function rest.setup(user_configs)
   -- Set up rest.nvim configurations
   _G._rest_nvim = config.set(user_configs or {})
-
-  -- Set up rest.nvim keybinds
-  keybinds.apply()
 
   -- Set up rest.nvim autocommands and commands
   autocmds.setup()

@@ -4,7 +4,7 @@ if not has_telescope then
   return
 end
 
-local rest_functions = require("rest-nvim.functions")
+local dotenv = require("rest-nvim.dotenv")
 
 local state = require("telescope.actions.state")
 
@@ -18,6 +18,7 @@ local function rest_env_select(_)
   local pattern = _G._rest_nvim.env_pattern
   local edit = _G._rest_nvim.env_edit_command
 
+  -- TODO: use dotenv.find_env_files instead
   local command = string.format("fd -HI '%s'", pattern)
   local result = io.popen(command):read("*a")
 
@@ -39,7 +40,7 @@ local function rest_env_select(_)
           if selection == nil then
             return
           end
-          rest_functions.env("set", selection[1])
+          dotenv.register_file(selection[1])
         end)
         map("i", "<c-o>", function()
           actions.close(prompt_bufnr)

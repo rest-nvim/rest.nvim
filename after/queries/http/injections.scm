@@ -13,5 +13,5 @@
   (#set! injection.language "graphql"))
 
 ; Lua scripting
-((script_variable) @injection.content
+((script) @injection.content
   (#set! injection.language "lua"))

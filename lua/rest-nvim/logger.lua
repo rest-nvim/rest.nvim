@@ -48,13 +48,22 @@ local default_config = {
   save_logs = true,
 }
 
+local default_log_path = vim.fn.stdpath("log") --[[@as string]]
+
+---Get the rest.nvim log file path.
+---@package
+---@return string filepath
+function logger.get_logfile()
+    return vim.fs.joinpath(default_log_path, "rest-nvim.log")
+end
+
 ---Store the logger output in a file at `vim.fn.stdpath("log")`
 ---@see vim.fn.stdpath
 ---@param msg string Logger message to be saved
 local function store_log(msg)
   local date = os.date("%F %r") -- 2024-01-26 01:25:05 PM
   local log_msg = date .. " | " .. msg .. "\n"
-  local log_path = table.concat({ vim.fn.stdpath("log"), "rest.nvim.log" }, "/")
+  local log_path = logger.get_logfile()
 
   -- 644 sets read and write permissions for the owner, and it sets read-only
   -- mode for the group and others

@@ -21,11 +21,17 @@ result.bufnr = nil
 ---If the pane index is higher than 3 or lower than 1, it will cycle through
 ---the panes, e.g. >= 4 gets converted to 1 and <= 0 gets converted to 3
 ---@param selected number winbar pane index
-_G._rest_nvim_winbar = function(selected)
+function result.select_pane(selected)
   winbar.set_pane(selected)
   -- Set winbar pane contents
   ---@diagnostic disable-next-line undefined-field
   result.write_block(result.bufnr, winbar.pane_map[winbar.current_pane_index].contents, true, false)
+end
+
+---@param count number
+function result.cycle_pane(count)
+  local idx = winbar.current_pane_index
+  result.select_pane(idx + count)
 end
 
 ---Move the cursor to the desired position in the given buffer
@@ -154,7 +160,7 @@ function result.display_buf(bufnr, stats)
     end
 
     -- Disable concealing for the results buffer window
-    vim.api.nvim_set_option_value("conceallevel", 0, { win = winnr })
+    -- vim.api.nvim_set_option_value("conceallevel", 0, { win = winnr })
 
     -- Disable numbering for the results buffer window
     vim.api.nvim_set_option_value("number", false, { win = winnr })
@@ -239,6 +245,7 @@ local function format_body(bufnr, headers, res)
     end
 
     body = vim.split(res.body, "\n")
+    -- TODO: apply result.behavior.decode_url option
     table.insert(body, 1, res.method .. " " .. res.url)
     table.insert(body, 2, headers[1]) -- HTTP/X and status code + meaning
     table.insert(body, 3, "")

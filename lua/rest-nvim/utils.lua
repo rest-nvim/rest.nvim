@@ -138,8 +138,7 @@ function utils.highlight(bufnr, start, end_, ns)
     ns,
     higroup,
     { start, 0 },
-    { end_, string.len(vim.fn.getline(end_)) },
-    { regtype = "c", inclusive = false }
+    { end_, string.len(vim.fn.getline(end_)) }
   )
 
   -- Clear buffer highlights again after timeout
@@ -148,6 +147,91 @@ function utils.highlight(bufnr, start, end_, ns)
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
     end
   end, timeout)
+end
+
+---@param bufnr number
+---@param node TSNode
+---@param ns number
+function utils.ts_highlight_node(bufnr, node, ns)
+  if bufnr == 0 then
+    bufnr = vim.api.nvim_get_current_buf()
+  end
+  local highlight = _G._rest_nvim.highlight
+  local higroup = "IncSearch"
+  local s_row, s_col = node:start()
+  local e_row, e_col = node:end_()
+  vim.highlight.range(
+    bufnr,
+    ns,
+    higroup,
+    { s_row, s_col },
+    { e_row, e_col },
+    { regtype = "v" }
+  )
+
+  -- Clear buffer highlights again after timeout
+  vim.defer_fn(function()
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    end
+  end, highlight.timeout)
+end
+
+---@param source string|integer
+---@return vim.treesitter.LanguageTree
+---@return TSTree
+function utils.ts_parse_source(source)
+  local ts_parser
+  if type(source) == "string" then
+    ts_parser = vim.treesitter.get_string_parser(source, "http")
+  else
+    ts_parser = vim.treesitter.get_parser(source, "http")
+  end
+  return ts_parser, assert(ts_parser:parse({})[1])
+end
+
+---@param node TSNode
+---@param type string
+---@return TSNode?
+function utils.ts_find(node, type)
+  if node:type() == type then
+    return node
+  end
+  local parent = node:parent()
+  if parent then
+    return utils.ts_find(parent, type)
+  end
+  return nil
+end
+
+---@param node TSNode
+---@param expected_type string
+---@return table
+function utils.ts_node_spec(node, expected_type)
+  return {
+    node,
+    function (n)
+      return n:type() == expected_type
+    end,
+    "("..expected_type..") TSNode",
+  }
+end
+
+---Create error log for TSNode that has a syntax error
+---@param node TSNode Tree-sitter node
+---@return string
+function utils.ts_node_error_log(node)
+  local s_row, s_col = node:start()
+  local e_row, e_col = node:end_()
+  local range = "["
+
+  if s_row == e_row then
+    range = range .. s_row .. ":" .. s_col .. " - " .. e_col
+  else
+    range = range .. s_row .. ":" .. s_col .. " - " .. e_row .. ":" .. e_col
+  end
+  range = range .. "]"
+  return "The tree-sitter node at the range " .. range .. " has a syntax error and cannot be parsed"
 end
 
 return utils

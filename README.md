@@ -121,8 +121,6 @@ get a good experience during autocompletion :)
 
 ```lua
 local default_config = {
-  client = "curl",
-  env_file = ".env",
   env_pattern = "\\.env$",
   env_edit_command = "tabedit",
   encode_url = true,
@@ -176,30 +174,14 @@ local default_config = {
       },
     },
     keybinds = {
-      buffer_local = true,
       prev = "H",
       next = "L",
     },
   },
   highlight = {
     enable = true,
-    timeout = 750,
+    timeout = 250,
   },
-  ---Example:
-  ---
-  ---```lua
-  ---keybinds = {
-  ---  {
-  ---    "<localleader>rr", "<cmd>Rest run<cr>", "Run request under the cursor",
-  ---  },
-  ---  {
-  ---    "<localleader>rl", "<cmd>Rest run last<cr>", "Re-run latest request",
-  ---  },
-  ---}
-  ---
-  ---```
-  ---@see vim.keymap.set
-  keybinds = {},
 }
 ```
 

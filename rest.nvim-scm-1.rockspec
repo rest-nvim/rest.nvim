@@ -21,6 +21,15 @@ dependencies = {
   "xml2lua",
 }
 
+test_dependencies = {
+  "lua >= 5.1, < 5.4",
+  "nvim-nio",
+  "lua-curl",
+  "mimetypes",
+  "xml2lua",
+  "nlua",
+}
+
 source = {
   url = "http://github.com/rest-nvim/rest.nvim/archive/" .. MAJOR .. ".zip",
   dir = "rest.nvim-" .. MAJOR,

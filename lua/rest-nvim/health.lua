@@ -41,33 +41,11 @@ local function install_health()
         err_advice = "Install it through your preferred plugins manager or luarocks by using `luarocks --local --lua-version=5.1 install "
           .. dep
           .. "`"
-        -- NOTE: nvim-treesitter has a weird bug in luarocks due to the parsers installation logic so let's mark it as not recommended
-        if dep == "nvim-treesitter" then
-          err_advice = err_advice .. " (not recommended yet!)"
-        end
       end
 
       vim.health.error("Dependency `" .. dep .. "` was not found (" .. dep_info.error .. ")", err_advice)
     else
       vim.health.ok("Dependency `" .. dep .. "` was found")
-    end
-  end
-
-  -- Tree-sitter and HTTP parser
-  local found_treesitter, ts_info = pcall(require, "nvim-treesitter.info")
-  if not found_treesitter then
-    vim.health.warn(
-      "Could not check for tree-sitter `http` parser existence because `nvim-treesitter` is not installed"
-    )
-  else
-    local is_http_parser_installed = vim.tbl_contains(ts_info.installed_parsers(), "http")
-    if not is_http_parser_installed then
-      vim.health.error(
-        "Tree-sitter `http` parser is not installed (rest.nvim parsing will not work.)",
-        "Install it through `:TSInstall http` or add it to your `nvim-treesitter`'s `ensure_installed` table."
-      )
-    else
-      vim.health.ok("Tree-sitter `http` parser is installed")
     end
   end
 end
@@ -76,7 +54,7 @@ local function configuration_health()
   vim.health.start("Configuration")
 
   -- Configuration options
-  local unrecognized_configs = _G._rest_nvim.debug_info.unrecognized_configs
+  local unrecognized_configs = _G._rest_nvim._debug_info.unrecognized_configs
   if not vim.tbl_isempty(unrecognized_configs) then
     for _, config_key in ipairs(unrecognized_configs) do
       vim.health.warn("Unrecognized configuration option `" .. config_key .. "` found")

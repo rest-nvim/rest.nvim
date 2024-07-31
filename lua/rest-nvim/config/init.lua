@@ -11,7 +11,7 @@ local config = {}
 local logger = require("rest-nvim.logger")
 
 ---@class RestConfigDebug
----@field unrecognized_configs string[] Unrecognized configuration options
+---@field unrecognized_configs table<string,string> Unrecognized configuration options
 
 ---@class RestConfigLogs
 ---@field level string The logging level name, see `:h vim.log.levels`. Default is `"info"`
@@ -48,7 +48,6 @@ local logger = require("rest-nvim.logger")
 ---@field html string|fun(body: string): string,table HTML formatter
 
 ---@class RestConfigResultKeybinds
----@field buffer_local boolean Enable keybinds only in request result buffer
 ---@field prev string Mapping for cycle to previous result pane
 ---@field next string Mapping for cycle to next result pane
 
@@ -57,25 +56,20 @@ local logger = require("rest-nvim.logger")
 ---@field timeout number Duration time of the request highlighting in milliseconds
 
 ---@class RestConfig
----@field client string The HTTP client to be used when running requests, default is `"curl"`
----@field env_file string Environment variables file to be used for the request variables in the document
 ---@field env_pattern string Environment variables file pattern for telescope.nvim
 ---@field env_edit_command string Neovim command to edit an environment file, default is `"tabedit"`
 ---@field encode_url boolean Encode URL before making request
 ---@field skip_ssl_verification boolean Skip SSL verification, useful for unknown certificates
----@field custom_dynamic_variables { [string]: fun(): string }[] Table of custom dynamic variables
+---@field custom_dynamic_variables table<string, fun():string> Table of custom dynamic variables
 ---@field logs RestConfigLogs Logging system configuration
 ---@field result RestConfigResult Request results buffer behavior
 ---@field highlight RestConfigHighlight Request highlighting
----@field keybinds { [1]: string, [2]: string, [3]: string }[] Keybindings list
----@field debug_info? RestConfigDebug Configurations debug information, set automatically
+---@field _debug_info? RestConfigDebug Configurations debug information, set automatically
 ---@field logger? Logger Logging system, set automatically
 
 ---rest.nvim default configuration
 ---@type RestConfig
 local default_config = {
-  client = "curl",
-  env_file = ".env",
   env_pattern = ".*env.*$",
   env_edit_command = "tabedit",
   encode_url = true,
@@ -84,9 +78,6 @@ local default_config = {
   logs = {
     level = "info",
     save = true,
-  },
-  request = {
-    pre_script = function() end,
   },
   result = {
     split = {
@@ -133,30 +124,14 @@ local default_config = {
       },
     },
     keybinds = {
-      buffer_local = true,
       prev = "H",
       next = "L",
     },
   },
   highlight = {
     enable = true,
-    timeout = 750,
+    timeout = 250,
   },
-  ---Example:
-  ---
-  ---```lua
-  ---keybinds = {
-  ---  {
-  ---    "<localleader>rr", ":Rest run", "Run request under the cursor",
-  ---  },
-  ---  {
-  ---    "<localleader>rl", ":Rest run last", "Re-run latest request",
-  ---  },
-  ---}
-  ---
-  ---```
-  ---@see vim.keymap.set
-  keybinds = {},
 }
 
 ---Set user-defined configurations for rest.nvim
@@ -166,7 +141,7 @@ function config.set(user_configs)
   local check = require("rest-nvim.config.check")
 
   local conf = vim.tbl_deep_extend("force", {
-    debug_info = {
+    _debug_info = {
       unrecognized_configs = check.get_unrecognized_keys(user_configs, default_config),
     },
   }, default_config, user_configs)
@@ -184,8 +159,8 @@ function config.set(user_configs)
     conf.logger:error(err)
   end
 
-  if #conf.debug_info.unrecognized_configs > 0 then
-    conf.logger:warn("Unrecognized configs found in setup: " .. vim.inspect(conf.debug_info.unrecognized_configs))
+  if #conf._debug_info.unrecognized_configs > 0 then
+    conf.logger:warn("Unrecognized configs found in setup: " .. vim.inspect(conf._debug_info.unrecognized_configs))
   end
 
   return conf
