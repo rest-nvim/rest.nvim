@@ -119,36 +119,6 @@ local transform = {
 utils.transform_time = transform.time
 utils.transform_size = transform.size
 
----Highlight a request
----@param bufnr number Buffer handler ID
----@param start number Request tree-sitter node start
----@param end_ number Request tree-sitter node end
----@param ns number rest.nvim Neovim namespace
-function utils.highlight(bufnr, start, end_, ns)
-  local highlight = _G._rest_nvim.highlight
-  local higroup = "IncSearch"
-  local timeout = highlight.timeout
-
-  -- Clear buffer highlights
-  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-
-  -- Highlight request
-  vim.highlight.range(
-    bufnr,
-    ns,
-    higroup,
-    { start, 0 },
-    { end_, string.len(vim.fn.getline(end_)) }
-  )
-
-  -- Clear buffer highlights again after timeout
-  vim.defer_fn(function()
-    if vim.api.nvim_buf_is_valid(bufnr) then
-      vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-    end
-  end, timeout)
-end
-
 ---@param bufnr number
 ---@param node TSNode
 ---@param ns number
@@ -160,6 +130,11 @@ function utils.ts_highlight_node(bufnr, node, ns)
   local higroup = "IncSearch"
   local s_row, s_col = node:start()
   local e_row, e_col = node:end_()
+  -- don't try to highlight over the last line
+  if e_col == 0 then
+    e_row = e_row - 1
+    e_col = -1
+  end
   vim.highlight.range(
     bufnr,
     ns,
@@ -187,7 +162,7 @@ function utils.ts_parse_source(source)
   else
     ts_parser = vim.treesitter.get_parser(source, "http")
   end
-  return ts_parser, assert(ts_parser:parse({})[1])
+  return ts_parser, assert(ts_parser:parse(false)[1])
 end
 
 ---@param node TSNode

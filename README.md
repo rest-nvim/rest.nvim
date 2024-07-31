@@ -180,7 +180,7 @@ local default_config = {
   },
   highlight = {
     enable = true,
-    timeout = 250,
+    timeout = 750,
   },
 }
 ```
