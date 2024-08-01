@@ -12,6 +12,7 @@ local found_nio, nio = pcall(require, "nio")
 
 local winbar = require("rest-nvim.result.winbar")
 local logger = require("rest-nvim.logger")
+local config = require("rest-nvim.config")
 
 ---Results buffer handler number
 ---@type number|nil
@@ -139,14 +140,12 @@ function result.display_buf(bufnr, stats)
   if not is_result_displayed then
     local cmd = "vert sb"
 
-    local split_behavior = _G._rest_nvim.result.split
+    local split_behavior = config.result.window
     if split_behavior.horizontal then
       cmd = "sb"
-    elseif split_behavior.in_place then
-      cmd = "bel " .. cmd
     end
 
-    if split_behavior.stay_in_current_window_after_split then
+    if not split_behavior.enter then
       vim.cmd(cmd .. bufnr .. " | wincmd p")
     else
       vim.cmd(cmd .. bufnr)
@@ -209,7 +208,7 @@ local function format_body(bufnr, headers, res)
   if res_type == "octet-stream" then
     body = { "Binary answer" }
   else
-    local formatters = _G._rest_nvim.result.behavior.formatters
+    local formatters = config.result.behavior.formatters
     local filetypes = vim.tbl_keys(formatters)
 
     -- If there is a formatter for the content type filetype then
@@ -317,9 +316,10 @@ function result.write_res(bufnr, res)
 
   -- Add statistics to the response
   local stats = {}
-  table.sort(res.statistics)
-  for _, stat in pairs(res.statistics) do
-    table.insert(stats, stat)
+  for name, stat in pairs(res.statistics) do
+    local style = config.result.behavior.statistics.stats[name] or {}
+    local title = style.title or name
+    table.insert(stats, title .. ": " .. stat)
   end
   table.sort(stats)
   ---@diagnostic disable-next-line inject-field

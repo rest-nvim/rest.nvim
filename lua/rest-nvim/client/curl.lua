@@ -12,6 +12,7 @@ local found_curl, curl = pcall(require, "cURL.safe")
 
 local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
+local config = require("rest-nvim.config")
 
 -- TODO: add support for submitting forms in the `client.request` function
 
@@ -112,13 +113,13 @@ local function curl_error(code)
   return "cURL error " .. tostring(code) .. ": " .. curl_error_dictionary[code]
 end
 
+-- TODO: don't render statistics here. render from rest-nvim.result
+
 ---Get request statistics
 ---@param req table cURL request class
----@param statistics_tbl RestConfigResultStats Statistics table
----@return table Request statistics
+---@param statistics_tbl table Statistics table
+---@return table<string,string> stats Request statistics
 local function get_stats(req, statistics_tbl)
-  local stats = {}
-
   local function get_stat(req_, stat_)
     local curl_info = curl["INFO_" .. stat_:upper()]
     if not curl_info then
@@ -138,18 +139,11 @@ local function get_stats(req, statistics_tbl)
     return stat_info
   end
 
-  local stat_key, stat_title, stat_info
-  for _, stat in pairs(statistics_tbl) do
-    for k, v in pairs(stat) do
-      if type(k) == "string" and k == "title" then
-        stat_title = v
-      end
-      if type(k) == "number" then
-        stat_key = v
-        stat_info = get_stat(req, v)
-      end
-    end
-    stats[stat_key] = stat_title .. " " .. stat_info
+  local stats = {}
+
+  for name, _ in pairs(statistics_tbl) do
+    -- stats[name] = style.title .. " " .. get_stat(req, name)
+    stats[name] = get_stat(req, name)
   end
 
   return stats
@@ -178,7 +172,7 @@ function client.request_(request)
   end
 
   -- Whether to skip SSL host and peer verification
-  local skip_ssl_verification = _G._rest_nvim.skip_ssl_verification
+  local skip_ssl_verification = config.skip_ssl_verification
   local req = curl.easy_init()
   req:setopt({
     url = request.url,
@@ -189,7 +183,7 @@ function client.request_(request)
   })
 
   -- Encode URL query parameters and set the request URL again with the encoded values
-  local should_encode_url = _G._rest_nvim.encode_url
+  local should_encode_url = config.encode_url
   if should_encode_url then
     -- Create a new URL as we cannot extract the URL from the req object
     local _url = curl.url()
@@ -259,7 +253,7 @@ function client.request_(request)
   local ok, err = req:perform()
   if ok then
     -- Get request statistics if they are enabled
-    local stats_config = _G._rest_nvim.result.behavior.statistics
+    local stats_config = config.result.behavior.statistics
     if stats_config.enable then
       info.statistics = get_stats(req, stats_config.stats)
     end

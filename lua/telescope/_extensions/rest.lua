@@ -5,6 +5,7 @@ if not has_telescope then
 end
 
 local dotenv = require("rest-nvim.dotenv")
+local config = require("rest-nvim.config")
 
 local state = require("telescope.actions.state")
 
@@ -15,8 +16,7 @@ local pickers = require("telescope.pickers")
 local conf = require("telescope.config").values
 
 local function rest_env_select(_)
-  local pattern = _G._rest_nvim.env_pattern
-  local edit = _G._rest_nvim.env_edit_command
+  local pattern = config.env_pattern
 
   -- TODO: use dotenv.find_env_files instead
   local command = string.format("fd -HI '%s'", pattern)
@@ -48,7 +48,7 @@ local function rest_env_select(_)
           if selection == nil then
             return
           end
-          vim.api.nvim_command(edit .. " " .. selection[1])
+          vim.cmd.edit(selection[1])
         end)
         return true
       end,

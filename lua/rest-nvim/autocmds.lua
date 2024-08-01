@@ -9,12 +9,13 @@
 local autocmds = {}
 
 local result = require("rest-nvim.result")
+local config = require("rest-nvim.config")
 local result_help = require("rest-nvim.result.help")
 
 ---Set up Rest autocommands group
 function autocmds.setup()
   local rest_nvim_augroup = vim.api.nvim_create_augroup("Rest", {})
-  local keybinds = _G._rest_nvim.result.keybinds
+  local keybinds = config.result.keybinds
 
   vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     group = rest_nvim_augroup,

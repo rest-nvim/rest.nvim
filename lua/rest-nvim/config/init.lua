@@ -6,100 +6,106 @@
 ---
 ---@brief ]]
 
+---@type RestConfig
 local config = {}
 
-local logger = require("rest-nvim.logger")
+---@alias RestResultFormatters string|fun(body:string):string,table
 
----@class RestConfigDebug
----@field unrecognized_configs table<string,string> Unrecognized configuration options
+---@class RestOptsHighlight
+--- Whether current request highlighting is enabled or not (Default: `true`)
+---@field enable? boolean
+--- Duration time of the request highlighting in milliseconds (Default: `250`)
+---@field timeout? number
 
----@class RestConfigLogs
----@field level string The logging level name, see `:h vim.log.levels`. Default is `"info"`
----@field save boolean Whether to save log messages into a `.log` file. Default is `true`
+---@class RestOptsResult
+---@field window? RestOptsResultWindow
+---@field behavior? RestOptsResultBehavior
+---@field keybinds? RestOptsResultKeybinds
 
----@class RestConfigResult
----@field split RestConfigResultSplit Result split window behavior
----@field behavior RestConfigResultBehavior Result buffer behavior
----@field keybinds RestConfigResultKeybinds Keybinds settings to navigate throught request results
+---@class RestOptsResultWindow
+--- Open request results in a horizontal split (Default: `false`)
+---@field horizontal? boolean
+---@field enter? boolean
 
----@class RestConfigResultSplit
----@field horizontal boolean Open request results in a horizontal split
----@field in_place boolean Keep the HTTP file buffer above|left when split horizontal|vertical
----@field stay_in_current_window_after_split boolean Stay in the current window (HTTP file) or change the focus to the results window
+---@class RestOptsResultBehavior
+---@field decode_url boolean
+---@field statistics RestOptsStatistics
+---@field formatters table<string,RestResultFormatters>
 
----@class RestConfigResultBehavior
----@field show_info RestConfigResultInfo Request results information
----@field decode_url boolean Whether to decode the request URL query parameters to improve readability
----@field statistics RestConfigResultStats Request results statistics
----@field formatters RestConfigResultFormatters Formatters for the request results body. If the formatter is a function it should return two values, the formatted body and a table containing two values `found` (whether the formatter has been found or not) and `name` (the formatter name)
+---@class RestOptsStatistics
+---@field enable boolean
+---@field stats table<string,RestOptsResultStatStyle>
 
----@class RestConfigResultInfo
----@field url boolean Display the request URL
----@field headers boolean Display the request headers
----@field http_info boolean Display the request HTTP information
----@field curl_command boolean Display the cURL command that was used for the request
+---@class RestOptsResultKeybinds
+--- Mapping for cycle to previous result pane (Default: `"H"`)
+---@field prev? string
+--- Mapping for cycle to next result pane (Default: `"L"`)
+---@field next? string
 
----@class RestConfigResultStats
----@field enable boolean Whether enable statistics or not
----@field stats string[]|{ [1]: string, title: string }[] Statistics to be shown, takes cURL's easy getinfo constants name
+---@class RestOptsResultStatStyle
+--- Title used on result pane
+---@field title? string
+--- Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
+--- to hide title If true, rest.nvim will use lowered `title` field
+---@field winbar? string|boolean
 
----@class RestConfigResultFormatters
----@field json string|fun(body: string): string,table JSON formatter
----@field html string|fun(body: string): string,table HTML formatter
+---@class RestOpts
+--- Environment variables file pattern for telescope.nvim
+--- (Default: `".*env.*$"`)
+---@field env_pattern? string
+--- Encode URL before making request (Default: `true`)
+---@field encode_url? boolean
+--- Skip SSL verification, useful for unknown certificates (Default: `false`)
+---@field skip_ssl_verification? boolean
+--- Table of custom dynamic variables
+---@field custom_dynamic_variables? table<string, fun():string>
+--- Request highlighting config
+---@field highlight? RestOptsHighlight
+--- Result view config
+---@field result? RestOptsResult
 
----@class RestConfigResultKeybinds
----@field prev string Mapping for cycle to previous result pane
----@field next string Mapping for cycle to next result pane
-
----@class RestConfigHighlight
----@field enable boolean Whether current request highlighting is enabled or not
----@field timeout number Duration time of the request highlighting in milliseconds
-
----@class RestConfig
----@field env_pattern string Environment variables file pattern for telescope.nvim
----@field env_edit_command string Neovim command to edit an environment file, default is `"tabedit"`
----@field encode_url boolean Encode URL before making request
----@field skip_ssl_verification boolean Skip SSL verification, useful for unknown certificates
----@field custom_dynamic_variables table<string, fun():string> Table of custom dynamic variables
----@field logs RestConfigLogs Logging system configuration
----@field result RestConfigResult Request results buffer behavior
----@field highlight RestConfigHighlight Request highlighting
----@field _debug_info? RestConfigDebug Configurations debug information, set automatically
+---@type RestOpts
+vim.g.rest_nvim = vim.g.rest_nvim
 
 ---rest.nvim default configuration
----@type RestConfig
+---@class RestConfig
 local default_config = {
+  ---@type string Environment variables file pattern for telescope.nvim
   env_pattern = ".*env.*$",
-  env_edit_command = "tabedit",
+
+  ---@type boolean Encode URL before making request
   encode_url = true,
+  ---@type boolean Skip SSL verification, useful for unknown certificates
   skip_ssl_verification = false,
+  ---@type table<string, fun():string> Table of custom dynamic variables
   custom_dynamic_variables = {},
-  logs = {
-    level = "info",
-    save = true,
-  },
+
+  ---@class RestConfigResult
   result = {
-    split = {
+    ---@class RestConfigResultWindow
+    window = {
+      ---@type boolean Open request results in a horizontal split
       horizontal = false,
-      in_place = false,
-      stay_in_current_window_after_split = true,
+      ---@type boolean Change the focus to the results window or stay in the current window (HTTP file)
+      enter = false,
     },
+    ---@class RestConfigResultBehavior
     behavior = {
+      ---@type boolean Whether to decode the request URL query parameters to improve readability
       decode_url = true,
-      show_info = {
-        url = true,
-        headers = true,
-        http_info = true,
-        curl_command = true,
-      },
+      ---@class RestConfigResultStats
       statistics = {
+        ---@type boolean Whether enable statistics or not
         enable = true,
+        ---Statistics to be shown, takes cURL's easy getinfo constants name
         ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
+        ---@type table<string,RestOptsResultStatStyle>
         stats = {
-          { "total_time", title = "Time taken:" },
-          { "size_download_t", title = "Download size:" },
+          total_time = { winbar = true, title = "Time taken" },
+          size_download_t = { winbar = true, title = "Download size" },
         },
       },
+      ---@type table<string,RestResultFormatters>
       formatters = {
         json = "jq",
         html = function(body)
@@ -122,42 +128,51 @@ local default_config = {
         end,
       },
     },
+    ---@class RestConfigResultKeybinds
     keybinds = {
+      ---@type string Mapping for cycle to previous result pane
       prev = "H",
+      ---@type string Mapping for cycle to next result pane
       next = "L",
     },
   },
+  ---@class RestConfigHighlight
   highlight = {
+    ---@type boolean Whether current request highlighting is enabled or not
     enable = true,
+    ---@type number Duration time of the request highlighting in milliseconds
     timeout = 750,
   },
+  ---@see vim.log.levels
+  ---@type integer log level
   _log_level = vim.log.levels.WARN,
+  ---@class RestConfigDebugInfo
+  _debug_info = {
+    -- NOTE: default option is `nil` to prevent overwriting as empty array
+    ---@type string[]
+    unrecognized_configs = nil,
+  },
 }
 
----Set user-defined configurations for rest.nvim
----@param user_configs RestConfig User configurations
----@return RestConfig rest.nvim configuration table
-function config.set(user_configs)
-  local check = require("rest-nvim.config.check")
+local check = require("rest-nvim.config.check")
+local opts = vim.g.rest_nvim or {}
+config = vim.tbl_deep_extend("force", {
+  _debug_info = {
+    unrecognized_configs = check.get_unrecognized_keys(opts, default_config),
+  },
+}, default_config, opts)
+---@cast config RestConfig
+local ok, err = check.validate(config)
 
-  local conf = vim.tbl_deep_extend("force", {
-    _debug_info = {
-      unrecognized_configs = check.get_unrecognized_keys(user_configs, default_config),
-    },
-  }, default_config, user_configs)
+if not ok then
+  vim.notify("Rest.nvim: " .. err, vim.log.levels.ERROR)
+end
 
-  local ok, err = check.validate(conf)
-
-  if not ok then
-    ---@cast err string
-    conf.logger.error(err)
-  end
-
-  if #conf._debug_info.unrecognized_configs > 0 then
-    conf.logger.warn("Unrecognized configs found in setup: " .. vim.inspect(conf._debug_info.unrecognized_configs))
-  end
-
-  return conf
+if #config._debug_info.unrecognized_configs > 0 then
+  vim.notify(
+    "Unrecognized configs found in setup: " .. vim.inspect(config._debug_info.unrecognized_configs),
+    vim.log.levels.WARN
+  )
 end
 
 return config

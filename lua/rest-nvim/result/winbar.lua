@@ -8,6 +8,8 @@
 
 local winbar = {}
 
+local config = require("rest-nvim.config")
+
 ---Current pane index in the results window winbar
 ---@type number
 winbar.current_pane_index = 1
@@ -21,21 +23,18 @@ function winbar.get_content(stats)
     [[%#Normal# %1@v:lua._G._rest_nvim_winbar@%#ResponseHighlight#Response%X%#Normal# %#RestText#|%#Normal# %2@v:lua._G._rest_nvim_winbar@%#HeadersHighlight#Headers%X%#Normal# %#RestText#|%#Normal# %3@v:lua._G._rest_nvim_winbar@%#CookiesHighlight#Cookies%X%#Normal# %#RestText#|%#Normal# %4@v:lua._G._rest_nvim_winbar@%#StatsHighlight#Stats%X%#Normal# %=%<]]
 
   -- winbar statistics
-  if not vim.tbl_isempty(stats) then
-    for stat_name, stat_value in pairs(stats) do
-      local val = vim.split(stat_value, ": ")
-      if stat_name:find("total_time") then
-        content = content .. " %#RestText# " .. val[1]:lower() .. ": "
-        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-        content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
-      elseif stat_name:find("size_download") then
-        content = content .. " %#RestText#" .. val[1]:lower() .. ": "
-        local value, representation = vim.split(val[2], " ")[1], vim.split(val[2], " ")[2]
-        content = content .. "%#Number#" .. value .. " %#Normal#" .. representation
+  for stat_name, stat_value in pairs(stats) do
+    local style = config.result.behavior.statistics.stats[stat_name] or {}
+    if style.winbar then
+      local title = type(style.winbar) == "string" and style.winbar or (style.title or stat_name):lower()
+      if title ~= "" then
+        title = title .. ": "
       end
+      local value, representation = vim.split(stat_value, " ")[1], vim.split(stat_value, " ")[2]
+      content = content .. "  %#RestText#" .. title .. "%#Number#" .. value .. " %#Normal#" .. representation
     end
-    content = content .. " %#RestText#|%#Normal# "
   end
+  content = content .. " %#RestText#|%#Normal# "
   -- content = content .. "%#RestText#Press %#Keyword#H%#RestText# for the prev pane or %#Keyword#L%#RestText# for the next pane%#Normal# "
   content = content .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
 
@@ -47,7 +46,7 @@ end
 ---@field contents string[] Pane contents
 
 ---Results window winbar panes list
----@type { [number]: ResultPane }[]
+---@type ResultPane[]
 winbar.pane_map = {
   [1] = { name = "Response", contents = { "Fetching ..." } },
   [2] = { name = "Headers", contents = { "Fetching ..." } },

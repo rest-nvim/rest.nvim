@@ -65,4 +65,6 @@ for dep, err in pairs(dependencies) do
 end
 vim.g.rest_nvim_deps = rest_nvim_deps
 
+require("rest-nvim.autocmds").setup()
+
 vim.g.loaded_rest_nvim = true

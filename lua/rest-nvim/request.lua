@@ -5,6 +5,7 @@ local M = {}
 local parser = require("rest-nvim.parser")
 local utils  = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
+local config = require("rest-nvim.config")
 
 ---@class Request_
 ---@field context Context
@@ -17,13 +18,13 @@ local logger = require("rest-nvim.logger")
 ---@field handlers fun()[]
 
 ---@type Request_|nil
-_G._rest_nvim_last_request_ = nil
+local rest_nvim_last_request = nil
 
 ---@param req Request_
 ---@return boolean ok
 local function run_request(req)
   local client = require("rest-nvim.client.curl")
-  _G._rest_nvim_last_request_ = req
+  rest_nvim_last_request = req
 
   logger.info("sending request to: " .. req.url)
   local res = client.request_(req)
@@ -60,7 +61,7 @@ function M.run()
     logger.error("failed to parse request")
     return false
   end
-  local highlight = _G._rest_nvim.highlight
+  local highlight = config.highlight
   if highlight.enable then
     utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
   end
@@ -70,7 +71,7 @@ end
 ---run last request
 ---@return boolean ok
 function M.run_last()
-  local req = _G._rest_nvim_last_request_
+  local req = rest_nvim_last_request
   if not req then
     logger.warn("no last request")
     return false

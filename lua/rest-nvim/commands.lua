@@ -58,7 +58,7 @@ local rest_command_tbl = {
   },
   logs = {
     impl = function(_)
-      vim.cmd.e(require("rest-nvim.logger").get_logfile())
+      vim.cmd.e(logger.get_logfile())
     end,
   },
   env = {

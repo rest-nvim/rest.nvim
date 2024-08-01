@@ -1,5 +1,5 @@
-local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
+local utils = require("rest-nvim.utils")
 
 local M = {}
 

@@ -7,6 +7,7 @@
 ---@brief ]]
 
 local logger = require("rest-nvim.logger")
+-- local config = require("rest-nvim.config")
 
 local utils = {}
 
@@ -126,7 +127,7 @@ function utils.ts_highlight_node(bufnr, node, ns)
   if bufnr == 0 then
     bufnr = vim.api.nvim_get_current_buf()
   end
-  local highlight = _G._rest_nvim.highlight
+  local highlight = require("rest-nvim.config").highlight
   local higroup = "IncSearch"
   local s_row, s_col = node:start()
   local e_row, e_col = node:end_()

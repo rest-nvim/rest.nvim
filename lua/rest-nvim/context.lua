@@ -1,6 +1,7 @@
 ---@mod rest-nvim.context_ rest.nvim context (mainly contains variables)
 
 local dotenv = require("rest-nvim.dotenv")
+local config = require("rest-nvim.config")
 local M = {}
 
 ---@class Context
@@ -65,7 +66,7 @@ end
 ---@param key string
 ---@return nil|fun():string
 local function get_dynamic_vars(key)
-  local user_variables = _G._rest_nvim.custom_dynamic_variables or {}
+  local user_variables = config.custom_dynamic_variables or {}
   return user_variables[key] or rest_variables[key]
 end
 

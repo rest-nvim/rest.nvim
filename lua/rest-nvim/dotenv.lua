@@ -3,6 +3,7 @@
 local M = {}
 
 local dotenv_parser = require("rest-nvim.parser.dotenv")
+local config = require("rest-nvim.config")
 
 ---load dotenv file
 ---This function will set environment variables in current editor session.
@@ -56,7 +57,7 @@ function M.find_env_files()
   -- This algorithm can be improved later on to search from a parent directory if the desired environment file
   -- is somewhere else but in the current working directory.
   local files = vim.fs.find(function(name, _)
-    return name:match(_G._rest_nvim.env_pattern)
+    return name:match(config.env_pattern)
   end, { limit = math.huge, type = "file", path = "./" })
 
   return files

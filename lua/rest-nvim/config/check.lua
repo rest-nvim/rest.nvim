@@ -24,29 +24,18 @@ end
 function check.validate(cfg)
   local ok, err = validate({
     env_pattern = { cfg.env_pattern, "string" },
-    env_edit_command = { cfg.env_edit_command, "string" },
     encode_url = { cfg.encode_url, "boolean" },
     skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
-    -- RestConfigLogs
-    level = { cfg.logs.level, "string" },
-    save = { cfg.logs.save, "boolean" },
     -- RestConfigResult
     result = { cfg.result, "table" },
-    -- RestConfigResultSplit
-    split = { cfg.result.split, "table" },
-    horizontal = { cfg.result.split.horizontal, "boolean" },
-    in_place = { cfg.result.split.in_place, "boolean" },
-    stay_in_current_window_after_split = { cfg.result.split.stay_in_current_window_after_split, "boolean" },
+    -- RestConfigResultWindow
+    window = { cfg.result.window, "table" },
+    horizontal = { cfg.result.window.horizontal, "boolean" },
+    enter = { cfg.result.window.enter, "boolean" },
     -- RestConfigResultBehavior
     behavior = { cfg.result.behavior, "table" },
     decode_url = { cfg.result.behavior.decode_url, "boolean" },
-    -- RestConfigResultInfo
-    show_info = { cfg.result.behavior.show_info, "table" },
-    url = { cfg.result.behavior.show_info.url, "boolean" },
-    headers = { cfg.result.behavior.show_info.headers, "boolean" },
-    http_info = { cfg.result.behavior.show_info.http_info, "boolean" },
-    curl_command = { cfg.result.behavior.show_info.curl_command, "boolean" },
     -- RestConfigResultStats
     statistics = { cfg.result.behavior.statistics, "table" },
     statistics_enable = { cfg.result.behavior.statistics.enable, "boolean" },

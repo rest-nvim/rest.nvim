@@ -6,6 +6,7 @@ local Context = require("rest-nvim.context").Context
 local script = require("rest-nvim.script")
 local utils   = require("rest-nvim.utils")
 local logger   = require("rest-nvim.logger")
+local config = require("rest-nvim.config")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
@@ -203,7 +204,7 @@ function M.parse(req_node, source, context)
   local url = expand_variables(
     assert(get_node_field_text(req_node, "url", source)),
     context,
-    _G._rest_nvim.encode_url and utils.escape or nil
+    config.encode_url and utils.escape or nil
   )
   local pre_req_scripts = req_node:field("pre_request_script")
   for _, script_node in ipairs(pre_req_scripts) do

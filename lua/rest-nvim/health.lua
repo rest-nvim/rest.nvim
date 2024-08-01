@@ -8,6 +8,8 @@
 
 local health = {}
 
+local config = require("rest-nvim.config")
+
 local function install_health()
   vim.health.start("Installation")
 
@@ -54,7 +56,7 @@ local function configuration_health()
   vim.health.start("Configuration")
 
   -- Configuration options
-  local unrecognized_configs = _G._rest_nvim._debug_info.unrecognized_configs
+  local unrecognized_configs = config._debug_info.unrecognized_configs
   if not vim.tbl_isempty(unrecognized_configs) then
     for _, config_key in ipairs(unrecognized_configs) do
       vim.health.warn("Unrecognized configuration option `" .. config_key .. "` found")
@@ -64,7 +66,7 @@ local function configuration_health()
   end
 
   -- Formatters
-  local formatters = _G._rest_nvim.result.behavior.formatters
+  local formatters = config.result.behavior.formatters
   for ft, formatter in pairs(formatters) do
     if type(formatter) == "string" then
       if vim.fn.executable(formatter) ~= 1 then
