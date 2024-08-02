@@ -151,10 +151,11 @@ end
 
 ---Execute an HTTP request using cURL
 ---return return nil if execution failed
----@param request Request_ Request data to be passed to cURL
+---@param request Request Request data to be passed to cURL
 ---@return table? info The request information (url, method, headers, body, etc)
 function client.request_(request)
-  local info = {}
+  -- write to `Context.response` without altering the reference
+  local info = request.context.response
   if not found_curl then
     ---@diagnostic disable-next-line need-check-nil
     logger.error("lua-curl could not be found, therefore the cURL client will not work.")

@@ -153,12 +153,11 @@ end
 
 ---@param node TSNode
 ---@param source Source
----@param context Context
----@return function
-function M.parse_script(node, source, context)
+---@return string str
+local function parse_script(node, source)
   vim.validate({ node = utils.ts_node_spec(node, "script") })
   local str = vim.treesitter.get_node_text(node, source):sub(3,-3)
-  return script.load(str, context)
+  return str
 end
 
 ---@param script_node TSNode
@@ -166,7 +165,8 @@ end
 ---@param context Context
 function M.parse_pre_request_script(script_node, source, context)
   local node = assert(script_node:named_child(0))
-  M.parse_script(node, source, context)()
+  local str = parse_script(node, source)
+  script.load_prescript(str, context)()
 end
 
 ---@param handler_node TSNode
@@ -174,7 +174,38 @@ end
 ---@param context Context
 function M.parse_request_handler(handler_node, source, context)
   local node = assert(handler_node:named_child(0))
-  return M.parse_script(node, source, context)
+  local str = parse_script(node, source)
+  return script.load_handler(str, context)
+end
+
+---@param node TSNode
+---@param kind? string[]
+---@return TSNode[] siblings
+local function collect_prev_siblings(node, kind)
+  local siblings = {}
+  local n = node:prev_named_sibling()
+  while n and n:type() ~= "request_separator" do
+    if not kind or vim.tbl_contains(kind, n:type()) then
+      table.insert(siblings, 0, n)
+    end
+    n = n:prev_named_sibling()
+  end
+  return siblings
+end
+
+---@param node TSNode
+---@param kind? string[]
+---@return TSNode[] siblings
+local function collect_next_siblings(node, kind)
+  local siblings = {}
+  local n = node:next_named_sibling()
+  while n and n:type() ~= "request_separator" do
+    if not kind or vim.tbl_contains(kind, n:type()) then
+      table.insert(siblings, n)
+    end
+    n = n:next_named_sibling()
+  end
+  return siblings
 end
 
 ---Parse the request node and create Request object. Returns `nil` if parsing
@@ -182,7 +213,7 @@ end
 ---@param req_node TSNode Tree-sitter request node
 ---@param source Source
 ---@param context? Context
----@return Request_|nil
+---@return Request|nil
 function M.parse(req_node, source, context)
   context = context or Context:new()
   -- request should not include error
@@ -206,14 +237,16 @@ function M.parse(req_node, source, context)
     context,
     config.encode_url and utils.escape or nil
   )
-  local pre_req_scripts = req_node:field("pre_request_script")
-  for _, script_node in ipairs(pre_req_scripts) do
+
+  local pre_script_nodes = collect_prev_siblings(req_node, {"pre_request_script"})
+  for _, script_node in ipairs(pre_script_nodes) do
     M.parse_pre_request_script(script_node, source, context)
   end
-  local handlers = vim.iter(req_node:field("handler_script")):map(function (node)
+  local handler_nodes = collect_next_siblings(req_node, {"res_handler_script"})
+  local handlers = vim.iter(handler_nodes):map(function (node)
     return M.parse_request_handler(node, source, context)
   end):totable()
-  ---@type Request_
+  ---@type Request
   return {
     context = context,
     method = method,

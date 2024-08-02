@@ -7,7 +7,7 @@ local utils  = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
 
----@class Request_
+---@class Request
 ---@field context Context
 ---@field name? string The request identifier
 ---@field method string The request method
@@ -17,12 +17,13 @@ local config = require("rest-nvim.config")
 ---@field body? ReqBody
 ---@field handlers fun()[]
 
----@type Request_|nil
+---@type Request|nil
 local rest_nvim_last_request = nil
 
----@param req Request_
+---@param req Request
 ---@return boolean ok
 local function run_request(req)
+  logger.debug("run_request")
   local client = require("rest-nvim.client.curl")
   rest_nvim_last_request = req
 
@@ -32,10 +33,12 @@ local function run_request(req)
     logger.error("request failed")
     return false
   end
+  logger.debug("request success")
 
   -- run request handler scripts
-  -- TODO: run them with response info
   vim.iter(req.handlers):each(function (f) f() end)
+
+  logger.debug("handler end")
 
   -- update result UI
   local result = require("rest-nvim.result")
@@ -47,6 +50,7 @@ end
 ---run request in current cursor position
 ---@return boolean ok
 function M.run()
+  logger.info("starting request")
   local req_node = parser.get_cursor_request_node()
   if not req_node then
     logger.error("failed to find request at cursor position")

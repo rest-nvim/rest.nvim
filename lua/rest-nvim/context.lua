@@ -7,6 +7,8 @@ local M = {}
 ---@class Context
 ---@field vars table<string,string>
 ---@field files string[]
+---@field request? Request
+---@field response? any
 local Context = {}
 Context.__index = Context
 
@@ -40,10 +42,12 @@ local rest_variables = {
 
 ---@return Context
 function Context:new()
+  ---@type Context
   local obj = {
     __index = self,
     vars = {},
     files = {},
+    response = {}, -- create response table here to pass the reference first
   }
   setmetatable(obj, self)
   return obj
