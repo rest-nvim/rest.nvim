@@ -73,7 +73,7 @@ end
 function M.run_last()
   local req = rest_nvim_last_request
   if not req then
-    logger.warn("no last request")
+    vim.notify("No last request found", vim.log.levels.WARN)
     return false
   end
   return run_request(req)
@@ -82,17 +82,17 @@ end
 ---run all requests in current file with same context
 ---@return boolean ok
 function M.run_all()
-  logger.error("not implemented")
   local reqs = parser.get_all_request_node()
   local ctx = parser.create_context(0)
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
     if not req then
-      logger.error("failed to run request")
+      vim.notify("Parsing request failed. See `:Rest log` for more info", vim.log.levels.ERROR)
       return false
     end
     local ok = run_request(req)
     if not ok then
+      vim.notify("Running request failed. See `:Rest log` for more info", vim.log.levels.ERROR)
       return false
     end
   end
