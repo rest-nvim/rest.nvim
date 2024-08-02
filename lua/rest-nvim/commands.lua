@@ -115,6 +115,7 @@ local function rest(opts)
 
   if not command then
     logger.error("Unknown command: " .. cmd)
+    vim.notify("Unknown command: " .. cmd)
     return
   end
 

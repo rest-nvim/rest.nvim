@@ -113,6 +113,6 @@ for level, levelnr in pairs(vim.log.levels) do
   end
 end
 
-logger.set_log_level(vim.tbl_get(_G, "_rest_nvim", "_log_level") or vim.log.levels.WARN)
+logger.set_log_level(vim.tbl_get(vim.g, "rest_nvim", "_log_level") or vim.log.levels.WARN)
 
 return logger
