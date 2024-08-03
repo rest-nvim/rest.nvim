@@ -291,7 +291,7 @@ function result.write_res(bufnr, res)
   end, vim.split(res.headers, "\n"))
 
   local cookies = vim.tbl_filter(function(header)
-    if header:find("set%-cookie") then
+    if header:lower():find("set%-cookie") then
       return header
       ---@diagnostic disable-next-line missing-return
     end
