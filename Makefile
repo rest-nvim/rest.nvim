@@ -8,7 +8,8 @@ format:
 	stylua .
 
 test:
-	nvim --headless --clean -n -u tests/test.lua "$(FILE)"
+	eval "$(shell luarocks path --no-bin)"
+	luarocks test --local
 
 docgen:
 	lemmy-help lua/rest-nvim/client/curl.lua > doc/rest-nvim-curl.txt
