@@ -1,4 +1,4 @@
----@mod rest-nvim.result.help rest.nvim result buffer help
+---@mod rest-nvim.ui.help rest.nvim result buffer help
 ---
 ---@brief [[
 ---
@@ -32,6 +32,10 @@ local function get_or_create_buf()
     vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
     vim.api.nvim_set_option_value("ft", "markdown", { buf = new_bufnr })
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })
+    vim.keymap.set("n", "q", help.close, {
+      desc = "Close rest.nvim request results help window",
+      buffer = new_bufnr,
+    })
 
     -- Write to buffer
     local buf_content = {
@@ -57,12 +61,7 @@ function help.open()
   local help_bufnr = get_or_create_buf()
 
   -- Get the results buffer window ID
-  local winnr
-  for _, id in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(id)):find("rest_nvim_results") then
-      winnr = id
-    end
-  end
+  local winnr = vim.api.nvim_get_current_win()
 
   -- Help window sizing and positioning
   local width = math.floor(vim.api.nvim_win_get_width(winnr) / 2)

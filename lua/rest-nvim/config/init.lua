@@ -89,6 +89,10 @@ local default_config = {
       horizontal = false,
       ---@type boolean Change the focus to the results window or stay in the current window (HTTP file)
       enter = false,
+      ---@type boolean
+      headers = true,
+      ---@type boolean
+      cookies = true,
     },
     ---@class RestConfigResultBehavior
     behavior = {
@@ -102,8 +106,8 @@ local default_config = {
         ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
         ---@type table<string,RestOptsResultStatStyle>
         stats = {
-          total_time = { winbar = true, title = "Time taken" },
-          size_download_t = { winbar = true, title = "Download size" },
+          total_time = { winbar = "take", title = "Time taken" },
+          size_download_t = { winbar = "size", title = "Download size" },
         },
       },
       ---@type table<string,RestResultFormatters>

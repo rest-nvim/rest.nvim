@@ -8,51 +8,9 @@
 
 local autocmds = {}
 
-local result = require("rest-nvim.result")
-local config = require("rest-nvim.config")
-local result_help = require("rest-nvim.result.help")
-
 ---Set up Rest autocommands group
 function autocmds.setup()
-  local rest_nvim_augroup = vim.api.nvim_create_augroup("Rest", {})
-  local keybinds = config.result.keybinds
-
-  vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
-    group = rest_nvim_augroup,
-    pattern = "rest_nvim_results",
-    callback = function(args)
-      vim.keymap.set("n", keybinds.prev, function()
-        result.cycle_pane(-1)
-      end, {
-        desc = "Go to previous winbar pane",
-        buffer = args.buf,
-      })
-      vim.keymap.set("n", keybinds.next, function()
-        result.cycle_pane(1)
-      end, {
-        desc = "Go to next winbar pane",
-        buffer = args.buf,
-      })
-      vim.keymap.set("n", "?", result_help.open, {
-        desc = "Open rest.nvim request results help window",
-        buffer = args.buf,
-      })
-      vim.keymap.set("n", "q", function()
-        vim.api.nvim_buf_delete(args.buf, { unload = true })
-      end, { desc = "Close rest.nvim results buffer", buffer = args.buf })
-    end,
-    desc = "Set up rest.nvim results buffer keybinds",
-  })
-  vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
-    group = rest_nvim_augroup,
-    pattern = "rest_winbar_help",
-    callback = function(args)
-      vim.keymap.set("n", "q", result_help.close, {
-        desc = "Close rest.nvim request results help window",
-        buffer = args.buf,
-      })
-    end,
-  })
+  vim.api.nvim_create_augroup("Rest", { clear = true })
 end
 
 ---Register a new autocommand in the `Rest` augroup
@@ -71,7 +29,7 @@ function autocmds.register_autocmd(events, cb, description)
   })
 
   local autocmd_opts = {
-    group = "Rest",
+    group = vim.api.nvim_create_augroup("Rest", { clear = false }),
     pattern = "*.http",
     desc = description,
   }

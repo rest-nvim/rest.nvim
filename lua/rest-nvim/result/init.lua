@@ -228,12 +228,10 @@ local function format_body(bufnr, headers, res)
         if vim.v.shell_error == 0 then
           res.body = stdout
         else
-          ---@diagnostic disable-next-line need-check-nil
           logger.error("Error running formatter '" .. fmt .. "' on response body:\n" .. stdout)
         end
       end
     elseif res_type ~= nil then
-      ---@diagnostic disable-next-line need-check-nil
       logger.info(
         "Could not find a formatter for the body type "
           .. res_type

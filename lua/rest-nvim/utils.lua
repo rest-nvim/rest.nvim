@@ -210,4 +210,20 @@ function utils.ts_node_error_log(node)
   return "The tree-sitter node at the range " .. range .. " has a syntax error and cannot be parsed"
 end
 
+---Set window-option to specific buffer
+---Some options leaves in `vim.wo` while they are actually tied to buffers
+---see: <https://github.com/neovim/neovim/issues/11525> and `:h local-options`
+---@param bufnr number
+---@param name string
+---@param value any
+function utils.nvim_lazy_set_wo(bufnr, name, value)
+  vim.api.nvim_create_autocmd("BufWinEnter", {
+    buffer = bufnr,
+    callback = function()
+      vim.api.nvim_set_option_value(name, value, { scope = "local" })
+    end,
+    once = true,
+  })
+end
+
 return utils

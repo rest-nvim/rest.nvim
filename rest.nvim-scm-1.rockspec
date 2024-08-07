@@ -20,6 +20,7 @@ dependencies = {
   "lua-curl",
   "mimetypes",
   "xml2lua",
+  "fidget.nvim",
 }
 
 test_dependencies = {
@@ -28,6 +29,7 @@ test_dependencies = {
   "lua-curl",
   "mimetypes",
   "xml2lua",
+  "fidget.nvim",
   "nlua",
 }
 

@@ -254,11 +254,12 @@ function M.parse(node, source, context)
     M.parse_pre_request_script(script_node, source, context)
   end
   local handler_nodes = collect_next_siblings(req_node, {"res_handler_script"})
-  local handlers = vim.iter(handler_nodes):map(function (node)
-    return M.parse_request_handler(node, source, context)
+  local handlers = vim.iter(handler_nodes):map(function (n)
+    return M.parse_request_handler(n, source, context)
   end):totable()
   local headers = parse_headers(req_node, source, context)
-  if headers["host"] then
+  -- HACK: check if url doesn't have host
+  if headers["host"] and url[1] == "/" then
     url = headers["host"]..url
     headers["host"] = nil
   end

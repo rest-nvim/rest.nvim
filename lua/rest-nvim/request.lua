@@ -6,6 +6,8 @@ local parser = require("rest-nvim.parser")
 local utils  = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
+local ui     = require("rest-nvim.ui.result")
+local nio    = require("nio")
 
 ---@class Request
 ---@field context Context
@@ -24,26 +26,41 @@ local rest_nvim_last_request = nil
 ---@return boolean ok
 local function run_request(req)
   logger.debug("run_request")
-  local client = require("rest-nvim.client.curl")
+  local client = require("rest-nvim.client.curl.cli")
   rest_nvim_last_request = req
 
-  logger.info("sending request to: " .. req.url)
-  local res = client.request_(req)
-  if not res then
-    logger.error("request failed")
-    return false
-  end
-  logger.debug("request success")
+  -- remove previous result
+  _G._rest_nvim_result = nil
+  -- clear the ui
+  ui.update()
 
-  -- run request handler scripts
-  vim.iter(req.handlers):each(function (f) f() end)
+  -- open result UI
+  ui.open_ui()
 
-  logger.debug("handler end")
+  -- TODO: set UI with request informations (e.g. method & get)
 
-  -- update result UI
-  local result = require("rest-nvim.result")
-  local result_buf = result.get_or_create_buf()
-  result.write_res(result_buf, res)
+  nio.run(function ()
+    local ok, res = pcall(client.request(req).wait)
+    if not ok then
+      logger.error("request failed")
+      -- TODO: should return here
+      return
+    end
+    logger.info("request success")
+    -- wrap with schedule to set global variable outside of lua callback loop
+    vim.schedule(function ()
+      _G._rest_nvim_result = res
+
+      -- run request handler scripts
+      vim.iter(req.handlers):each(function (f) f() end)
+
+      logger.info("handler done")
+
+      -- update result UI
+      ui.update()
+    end)
+  end)
+  -- FIXME: use future instead of returning true here
   return true
 end
 
@@ -91,12 +108,12 @@ function M.run_all()
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
     if not req then
-      vim.notify("Parsing request failed. See `:Rest log` for more info", vim.log.levels.ERROR)
+      vim.notify("Parsing request failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
       return false
     end
     local ok = run_request(req)
     if not ok then
-      vim.notify("Running request failed. See `:Rest log` for more info", vim.log.levels.ERROR)
+      vim.notify("Running request failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
       return false
     end
   end
