@@ -225,7 +225,15 @@ function builder.build(request)
   table.insert(args, request.url)
   table.insert(args, builder.method(request.method))
   table.insert(args, builder.headers(request.headers))
-  -- TODO: body
+  if request.body then
+    if request.body.__TYPE == "form" then
+      table.insert(args, builder.form(request.body.data))
+    elseif request.body.__TYPE == "external" then
+      -- TODO: external body (how intellij works?)
+    else
+      table.insert(args, builder.raw_body(request.body.data))
+    end
+  end
   -- TODO: auth?
   builder.http_version(request.http_version)
   return vim.iter(args):flatten():totable()

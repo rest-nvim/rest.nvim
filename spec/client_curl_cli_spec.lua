@@ -19,6 +19,38 @@ describe("curl cli builder", function()
     })
     assert.same({ "http://localhost:8000", "-X", "GET" }, args)
   end)
+  it("from POST request with form body", function ()
+    local args = builder.build({
+      context = Context:new(),
+      method = "POST",
+      url = "http://localhost:8000",
+      headers = {},
+      handlers = {},
+      body = {
+        __TYPE = "form",
+        data = {
+          foo = "bar",
+        },
+      },
+    })
+    assert.same({ "http://localhost:8000", "-X", "POST", "-F", "foo=bar" }, args)
+  end)
+  it("from POST request with json body", function ()
+    local json_text = [[{ "string": "foo", "number": 100, "array":  [1, 2, 3], "json": { "key": "value" } }]]
+    local args = builder.build({
+      context = Context:new(),
+      method = "POST",
+      url = "http://localhost:8000",
+      headers = {
+      },
+      handlers = {},
+      body = {
+        __TYPE = "json",
+        data = json_text,
+      },
+    })
+    assert.same({ "http://localhost:8000", "-X", "POST", "--data-raw", json_text }, args)
+  end)
 end)
 
 describe("curl cli response parser", function()
