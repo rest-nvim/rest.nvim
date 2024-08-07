@@ -246,13 +246,18 @@ function M.parse(req_node, source, context)
   local handlers = vim.iter(handler_nodes):map(function (node)
     return M.parse_request_handler(node, source, context)
   end):totable()
+  local headers = parse_headers(req_node, source, context)
+  if headers["host"] then
+    url = headers["host"]..url
+    headers["host"] = nil
+  end
   ---@type Request
   return {
     context = context,
     method = method,
     url = url,
     http_version = get_node_field_text(req_node, "version", source),
-    headers = parse_headers(req_node, source, context),
+    headers = headers,
     body = body,
     handlers = handlers,
   }

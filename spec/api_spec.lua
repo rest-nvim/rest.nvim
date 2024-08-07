@@ -106,7 +106,7 @@ describe("parser", function()
   end)
   it("parse with variables in header", function ()
     local source = [[POST https://example.com
-HOST: {{$date}}
+X-DATE: {{$date}}
 ]]
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
@@ -114,7 +114,7 @@ HOST: {{$date}}
     assert.is_not_nil(req)
     ---@cast req Request
     assert.same({
-      host = os.date("%Y-%m-%d")
+      ["x-date"] = os.date("%Y-%m-%d")
     }, req.headers)
   end)
   it("parse with variables in header", function ()
