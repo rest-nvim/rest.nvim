@@ -3,4 +3,7 @@
     "runtime": {
         "version": "LuaJIT"
     },
+    "workspace": {
+        "checkThirdParty": "Disable"
+    }
 }
