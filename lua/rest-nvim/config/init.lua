@@ -84,6 +84,7 @@ local default_config = {
   result = {
     ---@class RestConfigResultWindow
     window = {
+      -- TODO: use `:horizontal` instead. see `:h command-modifiers` and opts.smods
       ---@type boolean Open request results in a horizontal split
       horizontal = false,
       ---@type boolean Change the focus to the results window or stay in the current window (HTTP file)

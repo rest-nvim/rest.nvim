@@ -28,8 +28,10 @@
 ---
 ---@brief ]]
 
+-- HACK: what is the type of opts here?
+
 ---@class RestCmd
----@field impl fun(args:string[], opts: vim.api.keyset.user_command?) The command implementation
+---@field impl fun(args:string[], opts: any) The command implementation
 ---@field complete? fun(subcmd_arg_lead: string): string[] Command completions callback, taking the lead of the subcommand's argument
 
 local commands = {}
@@ -43,7 +45,7 @@ local logger = require("rest-nvim.logger")
 local rest_command_tbl = {
   run = {
     -- TODO: run request by name
-    impl = function(args)
+    impl = function(args, opts)
       if #args > 1 then
         vim.notify("Running request by name isn't supported yet", vim.log.levels.INFO)
         return
@@ -53,17 +55,25 @@ local rest_command_tbl = {
     end,
   },
   last = {
-    impl = function(_)
+    impl = function(_, _)
       request.run_last()
     end,
   },
   logs = {
-    impl = function(_)
-      vim.cmd.e(logger.get_logfile())
+    impl = function(_, opts)
+      local is_split = opts.smods.vertiacal or opts.smods.horizontal
+      local is_tab = opts.smods.tab ~= -1
+      if is_split or is_tab then
+        ---@diagnostic disable-next-line: invisible
+        vim.cmd(opts.mods .. " split " .. logger.get_logfile())
+      else
+        ---@diagnostic disable-next-line: invisible
+        vim.cmd.edit(logger.get_logfile())
+      end
     end,
   },
   env = {
-    impl = function(args)
+    impl = function(args, _)
       if not args[1] or args[1] == "show" then
         dotenv.show_registered_file()
         return
@@ -120,7 +130,7 @@ local function rest(opts)
     return
   end
 
-  command.impl(args)
+  command.impl(args, opts)
 end
 
 ---@package
