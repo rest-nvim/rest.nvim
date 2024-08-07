@@ -1,19 +1,19 @@
 ---@mod rest-nvim.ui.panes Small internal library to create pane style window
 
----@class RestUIPane
+---@class rest.ui.panes.Pane
 ---@field name string
 ---@field bufnr number
----@field group RestUIPaneGroup
----@field render fun(self:RestUIPane)
+---@field group rest.ui.panes.PaneGroup
+---@field render fun(self:rest.ui.panes.Pane)
 
----@class RestUIPaneOpts
+---@class rest.ui.panes.PaneOpts
 ---@field name string
----@field on_init? fun(self:RestUIPane)
----@field render fun(self:RestUIPane):(modifiable:boolean?)
+---@field on_init? fun(self:rest.ui.panes.Pane)
+---@field render fun(self:rest.ui.panes.Pane):(modifiable:boolean?)
 
----@class RestUIPaneGroup
+---@class rest.ui.panes.PaneGroup
 ---@field name string
----@field panes RestUIPane[]
+---@field panes rest.ui.panes.Pane[]
 local RestUIPaneGroup = {}
 ---@param direction number
 function RestUIPaneGroup:cycle(direction)
@@ -38,26 +38,28 @@ function RestUIPaneGroup:enter(winnr)
   vim.api.nvim_win_set_buf(winnr, self.panes[1].bufnr)
 end
 
----@class RestUIPaneGroupOpts
----@field on_init? fun(self:RestUIPane)
+---@class rest.ui.panes.PaneGroupOpts
+---@field on_init? fun(self:rest.ui.panes.Pane)
 
 local M = {}
 
----@type table<string,RestUIPaneGroup>
+---@type table<string,rest.ui.panes.PaneGroup>
 local groups = {}
 
 ---@param name string
----@param pane_opts RestUIPaneOpts[]
----@param opts? RestUIPaneGroupOpts
----@return RestUIPaneGroup
+---@param pane_opts rest.ui.panes.PaneOpts[]
+---@param opts? rest.ui.panes.PaneGroupOpts
+---@return rest.ui.panes.PaneGroup
 function M.create_pane_group(name, pane_opts, opts)
-  ---@type RestUIPaneGroup
+  ---@type rest.ui.panes.PaneGroup
   local group = { name = name, panes = {} }
   setmetatable(group, { __index = RestUIPaneGroup })
-  -- TODO: validate name doesn't conflict
+  if groups[name] then
+    error(("Pane group name '%s' is already taken"):format(name))
+  end
   groups[name] = group
   for _, pane_opt in ipairs(pane_opts) do
-    ---@type RestUIPane
+    ---@type rest.ui.panes.Pane
     ---@diagnostic disable-next-line: missing-fields
     local pane = {
       name = pane_opt.name,

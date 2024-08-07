@@ -47,7 +47,7 @@ local parser = {}
 
 ---@package
 ---@param str string
----@return {version:string,code:number,status:string}
+---@return rest.Response.status
 function parser.parse_verbose_status(str)
   local version, code = str:match("^(%S+) (%d+)")
   return {
@@ -91,6 +91,7 @@ local VERBOSE_PREFIX_RES_HEADER = "<"
 local VERBOSE_PREFIX_RES_BODY = "{"
 
 ---@param lines string[]
+---@return rest.Response
 function parser.parse_verbose(lines)
   local response = {
     headers = {},
@@ -241,7 +242,7 @@ end
 
 ---returns future containing Result
 ---@param request Request Request data to be passed to cURL
----@return nio.control.Future
+---@return nio.control.Future future future containing rest.Response
 function curl.request(request)
   local progress_handle = progress.handle.create({
     title = "Fetching",

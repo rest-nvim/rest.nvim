@@ -8,7 +8,7 @@ local M = {}
 ---@field vars table<string,string>
 ---@field files string[]
 ---@field request? Request
----@field response? any
+---@field response? rest.Response
 local Context = {}
 Context.__index = Context
 
@@ -47,6 +47,7 @@ function Context:new()
     __index = self,
     vars = {},
     files = {},
+    ---@diagnostic disable-next-line: missing-fields
     response = {}, -- create response table here to pass the reference first
   }
   setmetatable(obj, self)

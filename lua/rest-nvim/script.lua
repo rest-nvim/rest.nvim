@@ -4,8 +4,6 @@ local logger = require("rest-nvim.logger")
 
 local M = {}
 
--- TODO: fill script environment
-
 ---@class RestEnvRequestVariables
 ---@field set fun(key:string,value:string)
 ---@field get fun(key:string):string
@@ -74,12 +72,8 @@ function M.create_handler_env(ctx)
         end,
       }
     },
-    ---@class RestHandlerEnvResponse
+    -- TODO: create wrapper class for response
     response = ctx.response,
-      -- body
-      -- headers
-      -- status
-      -- content_type
     vim = vim
   }
   return env
