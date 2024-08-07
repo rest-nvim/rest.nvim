@@ -1,0 +1,4 @@
+[submodule "tree-sitter-http"]
+	path = tree-sitter-http
+	url = https://github.com/boltlessengineer/tree-sitter-http
+	branch = refactor-spec
