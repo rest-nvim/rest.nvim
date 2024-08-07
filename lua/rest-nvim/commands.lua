@@ -48,6 +48,7 @@ local rest_command_tbl = {
         vim.notify("Running request by name isn't supported yet", vim.log.levels.INFO)
         return
       end
+      -- TODO: open result window here (use `:horizontal`)
       request.run()
     end,
   },
@@ -87,7 +88,7 @@ local rest_command_tbl = {
 
       -- If the completion arguments have a whitespace then treat them as a table instead for easiness
       if args:find(" ") then
-        args = vim.split(args, " ")
+        args = vim.split(args, " ", { trimempty = true })
       end
       -- If the completion arguments is a table and `set` is the desired action then
       -- return a list of files in the current working directory for completion
