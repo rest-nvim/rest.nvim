@@ -9,7 +9,7 @@ local logger = require("rest-nvim.logger")
 
 local spy = require("luassert.spy")
 
-local function file(path)
+local function open(path)
   vim.cmd.edit(path)
   return 0
 end
@@ -31,7 +31,7 @@ describe("parser", function()
     }, parser.parse(req_node, source))
   end)
   it("parse from http file", function()
-    local source = file "spec/api.http"
+    local source = open "spec/api.http"
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     assert.same({
@@ -111,7 +111,7 @@ X-DATE: {{$date}}
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     local req = parser.parse(req_node, source)
-    assert.is_not_nil(req)
+    assert.not_nil(req)
     ---@cast req Request
     assert.same({
       ["x-date"] = os.date("%Y-%m-%d")
@@ -128,7 +128,7 @@ X-DATE: {{$date}}
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     local req = parser.parse(req_node, source)
-    assert.is_not_nil(req)
+    assert.not_nil(req)
     ---@cast req Request
     assert.same({
       __TYPE = "json",
@@ -140,7 +140,7 @@ X-DATE: {{$date}}
   it("parse variable declaration", function ()
     local source = "@foo = bar\n"
     local _, tree = utils.ts_parse_source(source)
-    local vd_node = assert(tree:root():child(0))
+    local vd_node = assert(tree:root():child(0):child(0))
     assert.same("variable_declaration", vd_node:type())
     local c = context:new()
     parser.parse_variable_declaration(vd_node, source, c)
@@ -152,8 +152,8 @@ X-DATE: {{$date}}
     local source = "@foo = bar\n@baz = {{foo}} {{$date}}"
     local _, tree = utils.ts_parse_source(source)
     local c = context:new()
-    parser.parse_variable_declaration(assert(tree:root():child(0)), source, c)
-    parser.parse_variable_declaration(assert(tree:root():child(1)), source, c)
+    parser.parse_variable_declaration(assert(tree:root():child(0):child(0)), source, c)
+    parser.parse_variable_declaration(assert(tree:root():child(0):child(1)), source, c)
     assert.same({
       foo = "bar",
       baz = "bar " .. os.date("%Y-%m-%d"),
@@ -163,7 +163,7 @@ X-DATE: {{$date}}
     local source = "< {%\nrequest.variables.set('foo', 'bar')\n%}\n"
     local _, tree = utils.ts_parse_source(source)
     local c = context:new()
-    local script_node = tree:root():child(0)
+    local script_node = tree:root():child(0):child(0)
     assert(script_node)
     assert.same("pre_request_script", script_node:type())
     parser.parse_pre_request_script(script_node, source, c)

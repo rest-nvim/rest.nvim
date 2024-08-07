@@ -108,13 +108,16 @@ function M.parse_body(body_node, source, context)
   return body
 end
 
+local IN_PLACE_VARIABLE_QUERY = "(variable_declaration) @inplace_variable"
+
 ---parse all in-place variables from source
 ---@param source Source
 ---@return Context ctx
 function M.create_context(source)
+  local query = vim.treesitter.query.parse("http", IN_PLACE_VARIABLE_QUERY)
   local ctx = Context:new()
   local _, tree = utils.ts_parse_source(source)
-  for node, _ in tree:root():iter_children() do
+  for _, node in query:iter_captures(tree:root(), source) do
     if node:type() == "variable_declaration" then
       M.parse_variable_declaration(node, source, ctx)
     end
@@ -122,10 +125,10 @@ function M.create_context(source)
   return ctx
 end
 
----@return TSNode?
+---@return TSNode? node TSNode with type `request_section`
 function M.get_cursor_request_node()
   local node = vim.treesitter.get_node()
-  return node and utils.ts_find(node, "request")
+  return node and utils.ts_find(node, "request_section")
 end
 
 ---@return TSNode[]
@@ -145,6 +148,7 @@ end
 ---@param source Source
 ---@param ctx Context
 function M.parse_variable_declaration(vd_node, source, ctx)
+  vim.validate({ node = utils.ts_node_spec(vd_node, "variable_declaration") })
   local name = assert(get_node_field_text(vd_node, "name", source))
   local value = vim.trim(assert(get_node_field_text(vd_node, "value", source)))
   value = expand_variables(value, ctx)
@@ -210,15 +214,21 @@ end
 
 ---Parse the request node and create Request object. Returns `nil` if parsing
 ---failed.
----@param req_node TSNode Tree-sitter request node
+---@param node TSNode Tree-sitter request node
 ---@param source Source
 ---@param context? Context
 ---@return Request|nil
-function M.parse(req_node, source, context)
+function M.parse(node, source, context)
+  assert(node:type() == "request_section")
   context = context or Context:new()
   -- request should not include error
-  if req_node:has_error() then
-    logger.error(utils.ts_node_error_log(req_node))
+  if node:has_error() then
+    logger.error(utils.ts_node_error_log(node))
+    return nil
+  end
+  local req_node = node:field("request")[1]
+  if not req_node then
+    logger.error("request section doesn't have request node")
     return nil
   end
   local body_node = req_node:field("body")[1]
@@ -238,6 +248,7 @@ function M.parse(req_node, source, context)
     config.encode_url and utils.escape or nil
   )
 
+  -- FIXME: use query instead
   local pre_script_nodes = collect_prev_siblings(req_node, {"pre_request_script"})
   for _, script_node in ipairs(pre_script_nodes) do
     M.parse_pre_request_script(script_node, source, context)
