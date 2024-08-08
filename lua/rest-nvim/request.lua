@@ -10,20 +10,24 @@ local ui     = require("rest-nvim.ui.result")
 local nio    = require("nio")
 local response = require("rest-nvim.response")
 
----@class Request
----@field context Context
+---@class rest.Request.Body
+---@field __TYPE BodyType
+---@field data any
+
+---@class rest.Request
+---@field context rest.Context
 ---@field name? string The request identifier
 ---@field method string The request method
 ---@field url string The request URL
 ---@field http_version? string The request HTTP protocol
 ---@field headers table<string,string>
----@field body? ReqBody
+---@field body? rest.Request.Body
 ---@field handlers fun()[]
 
----@type Request|nil
+---@type rest.Request|nil
 local rest_nvim_last_request = nil
 
----@param req Request
+---@param req rest.Request
 local function run_request(req)
   logger.debug("run_request")
   local client = require("rest-nvim.client.curl.cli")

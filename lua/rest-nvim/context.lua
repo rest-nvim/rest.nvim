@@ -4,10 +4,10 @@ local dotenv = require("rest-nvim.dotenv")
 local config = require("rest-nvim.config")
 local M = {}
 
----@class Context
+---@class rest.Context
 ---@field vars table<string,string>
 ---@field files string[]
----@field request? Request
+---@field request? rest.Request
 ---@field response? rest.Response
 local Context = {}
 Context.__index = Context
@@ -40,9 +40,9 @@ local rest_variables = {
   end,
 }
 
----@return Context
+---@return rest.Context
 function Context:new()
-  ---@type Context
+  ---@type rest.Context
   local obj = {
     __index = self,
     vars = {},

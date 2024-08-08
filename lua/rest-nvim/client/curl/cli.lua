@@ -219,7 +219,7 @@ function builder.http_version(version)
 end
 
 ---build curl request arguments based on Request object
----@param request Request
+---@param request rest.Request
 ---@return string[] args
 function builder.build(request)
   local args = {}
@@ -241,7 +241,7 @@ function builder.build(request)
 end
 
 ---returns future containing Result
----@param request Request Request data to be passed to cURL
+---@param request rest.Request Request data to be passed to cURL
 ---@return nio.control.Future future future containing rest.Response
 function curl.request(request)
   local progress_handle = progress.handle.create({

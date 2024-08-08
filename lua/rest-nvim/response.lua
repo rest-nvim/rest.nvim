@@ -34,6 +34,12 @@ function response.try_format_body(content_type, body)
     local fmt = formatters[res_type]
     if fmt then
       if type(fmt) == "function" then
+        local ok, out = pcall(fmt, body)
+        if ok and out then
+          body = out
+        else
+          logger.error("Error calling formatter on response body:\n" .. out)
+        end
       elseif vim.fn.executable(fmt[1] or fmt) then
         local cmd = type(fmt) == "string" and { fmt } or fmt
         ---@cast cmd string[]

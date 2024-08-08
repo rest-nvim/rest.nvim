@@ -55,7 +55,7 @@ end
 
 ---Execute an HTTP request using cURL
 ---return return nil if execution failed
----@param request Request Request data to be passed to cURL
+---@param request rest.Request Request data to be passed to cURL
 ---@return table? info The request information (url, method, headers, body, etc)
 function client.request_(request)
   logger.info("sending request to: " .. request.url)

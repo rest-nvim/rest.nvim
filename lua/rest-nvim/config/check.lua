@@ -18,7 +18,7 @@ local function validate(tbl)
 end
 
 ---Validates the configuration
----@param cfg RestConfig
+---@param cfg rest.Config
 ---@return boolean is_valid
 ---@return string|nil error_message
 function check.validate(cfg)

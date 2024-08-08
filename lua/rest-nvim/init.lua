@@ -9,7 +9,7 @@
 local rest = {}
 
 ---Set up rest.nvim
----@param user_configs RestOpts User configurations
+---@param user_configs rest.Opts User configurations
 function rest.setup(user_configs)
   -- Set up rest.nvim configurations
   vim.g.rest_nvim = user_configs

@@ -12,10 +12,6 @@ local config = require("rest-nvim.config")
 
 ---@alias BodyType "json"|"xml"|"external"|"form"|"graphql"
 
----@class ReqBody
----@field __TYPE BodyType
----@field data any
-
 local NAMED_REQUEST_QUERY = vim.treesitter.query.parse("http", [[
 (section
   (request_separator
@@ -39,7 +35,7 @@ local function get_node_field_text(node, field, source)
 end
 
 ---@param src string
----@param context Context
+---@param context rest.Context
 ---@param encoder? fun(s:string):string
 ---@return string
 ---@return integer
@@ -56,7 +52,7 @@ end
 
 ---@param req_node TSNode Tree-sitter request node
 ---@param source Source
----@param context Context
+---@param context rest.Context
 ---@return table<string,string> headers
 local function parse_headers(req_node, source, context)
   local headers = {}
@@ -74,12 +70,12 @@ end
 
 ---@param body_node TSNode
 ---@param source Source
----@param context Context
----@return ReqBody|nil
+---@param context rest.Context
+---@return rest.Request.Body|nil
 function M.parse_body(body_node, source, context)
   local body = {}
   body.__TYPE = body_node:type():gsub("_%w+", "")
-  ---@cast body ReqBody
+  ---@cast body rest.Request.Body
   if body.__TYPE == "json" then
     body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
     body.data = expand_variables(body.data, context)
@@ -128,7 +124,7 @@ local IN_PLACE_VARIABLE_QUERY = "(variable_declaration) @inplace_variable"
 
 ---parse all in-place variables from source
 ---@param source Source
----@return Context ctx
+---@return rest.Context ctx
 function M.create_context(source)
   local query = vim.treesitter.query.parse("http", IN_PLACE_VARIABLE_QUERY)
   local ctx = Context:new()
@@ -184,7 +180,7 @@ end
 
 ---@param vd_node TSNode
 ---@param source Source
----@param ctx Context
+---@param ctx rest.Context
 function M.parse_variable_declaration(vd_node, source, ctx)
   vim.validate({ node = utils.ts_node_spec(vd_node, "variable_declaration") })
   local name = assert(get_node_field_text(vd_node, "name", source))
@@ -204,7 +200,7 @@ end
 
 ---@param script_node TSNode
 ---@param source Source
----@param context Context
+---@param context rest.Context
 function M.parse_pre_request_script(script_node, source, context)
   local node = assert(script_node:named_child(0))
   local str = parse_script(node, source)
@@ -213,7 +209,7 @@ end
 
 ---@param handler_node TSNode
 ---@param source Source
----@param context Context
+---@param context rest.Context
 function M.parse_request_handler(handler_node, source, context)
   local node = assert(handler_node:named_child(0))
   local str = parse_script(node, source)
@@ -239,8 +235,8 @@ end
 ---failed.
 ---@param node TSNode Tree-sitter request node
 ---@param source Source
----@param context? Context
----@return Request|nil
+---@param context? rest.Context
+---@return rest.Request|nil
 function M.parse(node, source, context)
   assert(node:type() == "section")
   context = context or Context:new()
@@ -293,7 +289,7 @@ function M.parse(node, source, context)
     url = headers["host"]..url
     headers["host"] = nil
   end
-  ---@type Request
+  ---@type rest.Request
   return {
     name = name,
     context = context,

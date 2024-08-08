@@ -4,18 +4,18 @@ local logger = require("rest-nvim.logger")
 
 local M = {}
 
----@class RestEnvRequestVariables
+---@class rest.Env.Request.Variables
 ---@field set fun(key:string,value:string)
 ---@field get fun(key:string):string
 
----@param ctx Context
----@retrun RestPreScriptEnv
+---@param ctx rest.Context
+---@return rest.PreScriptEnv
 function M.create_prescript_env(ctx)
-  ---@class RestPreScriptEnv
+  ---@class rest.PreScriptEnv
   local env = {
-    ---@class RestPreScriptEnvRequest
+    ---@class rest.PreScriptEnv.Request
     request = {
-      ---@type RestEnvRequestVariables
+      ---@type rest.Env.Request.Variables
       variables = {
         ---sets request-local variable
         set = function (key, value)
@@ -32,16 +32,16 @@ function M.create_prescript_env(ctx)
   return env
 end
 
----@param ctx Context
----@return RestHandlerEnv
+---@param ctx rest.Context
+---@return rest.HandlerEnv
 function M.create_handler_env(ctx)
-  ---@class RestHandlerEnv
+  ---@class rest.HandlerEnv
   local env = {
-    ---@class RestHandlerEnvClient
+    ---@class rest.HandlerEnv.Client
     client = {
       test = function () end,
       assert = function () end,
-      ---@type RestEnvRequestVariables
+      ---@type rest.Env.Request.Variables
       global = {
         ---set global variable (this overwrites `vim.env`)
         set = function (key, value)
@@ -53,14 +53,14 @@ function M.create_handler_env(ctx)
         end,
       },
     },
-    ---@class RestHandlerEnvRequest
+    ---@class rest.HandlerEnv.Request
     request = {
       body = {},
       environment = {},
       headers = {},
       method = "GET",
       url = "",
-      ---@type RestEnvRequestVariables
+      ---@type rest.Env.Request.Variables
       variables = {
         ---sets request-local variable
         set = function (key, value)
@@ -91,14 +91,14 @@ function M.load(script, env)
 end
 
 ---@param script string
----@param ctx Context
+---@param ctx rest.Context
 ---@return function
 function M.load_prescript(script, ctx)
   return M.load(script, M.create_prescript_env(ctx))
 end
 
 ---@param script string
----@param ctx Context
+---@param ctx rest.Context
 ---@return function
 function M.load_handler(script, ctx)
   return M.load(script, M.create_handler_env(ctx))

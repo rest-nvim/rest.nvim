@@ -112,7 +112,7 @@ X-DATE: {{$date}}
     local req_node = assert(tree:root():child(0))
     local req = parser.parse(req_node, source)
     assert.not_nil(req)
-    ---@cast req Request
+    ---@cast req rest.Request
     assert.same({
       ["x-date"] = os.date("%Y-%m-%d")
     }, req.headers)
@@ -129,7 +129,7 @@ X-DATE: {{$date}}
     local req_node = assert(tree:root():child(0))
     local req = parser.parse(req_node, source)
     assert.not_nil(req)
-    ---@cast req Request
+    ---@cast req rest.Request
     assert.same({
       __TYPE = "json",
       data = [[{

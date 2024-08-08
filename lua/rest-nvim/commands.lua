@@ -31,7 +31,7 @@
 -- HACK: what is the type of opts here?
 
 ---@class RestCmd
----@field impl fun(args:string[], opts: any) The command implementation
+---@field impl fun(args:string[], opts: table?) The command implementation
 ---@field complete? fun(subcmd_arg_lead: string): string[] Command completions callback, taking the lead of the subcommand's argument
 
 local commands = {}
@@ -45,13 +45,11 @@ local parser = require("rest-nvim.parser")
 ---@type table<string, RestCmd>
 local rest_command_tbl = {
   run = {
-    -- TODO: run request by name
-    impl = function(args, opts)
+    impl = function(args, _opts)
       if #args > 1 then
         vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN)
         return
       elseif #args == 1 then
-        -- TODO: get request by name
         request.run_by_name(args[1])
         return
       end

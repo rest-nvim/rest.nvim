@@ -52,7 +52,7 @@ function M.parse(path, setter)
   local file_contents = utils.read_file(path)
   if env_ext == "json" then
     local ok, json_tbl = pcall(vim.json.decode, file_contents)
-    if not ok or not type(json_tbl) == "table" or vim.islist(json_tbl) then
+    if not ok or type(json_tbl) ~= "table" or vim.islist(json_tbl) then
       logger.error("failed parsing json data")
       return false
     end

@@ -6,50 +6,50 @@
 ---
 ---@brief ]]
 
----@type RestConfig
-local config = {}
+---@type rest.Config
+local config
 
 ---@alias RestResultFormatters string|fun(body:string):string,table
 
----@class RestOptsHighlight
+---@class rest.Opts.Highlight
 --- Whether current request highlighting is enabled or not (Default: `true`)
 ---@field enable? boolean
 --- Duration time of the request highlighting in milliseconds (Default: `250`)
 ---@field timeout? number
 
----@class RestOptsResult
----@field window? RestOptsResultWindow
----@field behavior? RestOptsResultBehavior
----@field keybinds? RestOptsResultKeybinds
+---@class rest.Opts.Result
+---@field window? rest.Opts.Result.Window
+---@field behavior? rest.Opts.Result.Behavior
+---@field keybinds? rest.Opts.Result.Keybinds
 
----@class RestOptsResultWindow
+---@class rest.Opts.Result.Window
 --- Open request results in a horizontal split (Default: `false`)
 ---@field horizontal? boolean
 ---@field enter? boolean
 
----@class RestOptsResultBehavior
+---@class rest.Opts.Result.Behavior
 ---@field decode_url boolean
----@field statistics RestOptsStatistics
+---@field statistics rest.Opts.Statistics
 ---@field formatters table<string,RestResultFormatters>
 
----@class RestOptsStatistics
+---@class rest.Opts.Statistics
 ---@field enable boolean
----@field stats table<string,RestOptsResultStatStyle>
+---@field stats table<string,rest.Opts.Result.Stat.Style>
 
----@class RestOptsResultKeybinds
+---@class rest.Opts.Result.Keybinds
 --- Mapping for cycle to previous result pane (Default: `"H"`)
 ---@field prev? string
 --- Mapping for cycle to next result pane (Default: `"L"`)
 ---@field next? string
 
----@class RestOptsResultStatStyle
+---@class rest.Opts.Result.Stat.Style
 --- Title used on result pane
 ---@field title? string
 --- Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
 
----@class RestOpts
+---@class rest.Opts
 --- Environment variables file pattern for telescope.nvim
 --- (Default: `".*env.*$"`)
 ---@field env_pattern? string
@@ -60,15 +60,15 @@ local config = {}
 --- Table of custom dynamic variables
 ---@field custom_dynamic_variables? table<string, fun():string>
 --- Request highlighting config
----@field highlight? RestOptsHighlight
+---@field highlight? rest.Opts.Highlight
 --- Result view config
----@field result? RestOptsResult
+---@field result? rest.Opts.Result
 
----@type RestOpts
+---@type rest.Opts
 vim.g.rest_nvim = vim.g.rest_nvim
 
 ---rest.nvim default configuration
----@class RestConfig
+---@class rest.Config
 local default_config = {
   ---@type string Environment variables file pattern for telescope.nvim
   env_pattern = ".*env.*$",
@@ -80,9 +80,9 @@ local default_config = {
   ---@type table<string, fun():string> Table of custom dynamic variables
   custom_dynamic_variables = {},
 
-  ---@class RestConfigResult
+  ---@class rest.Config.Result
   result = {
-    ---@class RestConfigResultWindow
+    ---@class rest.Cnofig.Result.Window
     window = {
       -- TODO: use `:horizontal` instead. see `:h command-modifiers` and opts.smods
       ---@type boolean Open request results in a horizontal split
@@ -94,17 +94,17 @@ local default_config = {
       ---@type boolean
       cookies = true,
     },
-    ---@class RestConfigResultBehavior
+    ---@class rest.Config.Result.Behavior
     behavior = {
       ---@type boolean Whether to decode the request URL query parameters to improve readability
       decode_url = true,
-      ---@class RestConfigResultStats
+      ---@class rest.Config.Result.Stats
       statistics = {
         ---@type boolean Whether enable statistics or not
         enable = true,
         ---Statistics to be shown, takes cURL's easy getinfo constants name
         ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
-        ---@type table<string,RestOptsResultStatStyle>
+        ---@type table<string,rest.Opts.Result.Stat.Style>
         stats = {
           total_time = { winbar = "take", title = "Time taken" },
           size_download_t = { winbar = "size", title = "Download size" },
@@ -133,7 +133,7 @@ local default_config = {
         end,
       },
     },
-    ---@class RestConfigResultKeybinds
+    ---@class rest.Config.Result.Keybinds
     keybinds = {
       ---@type string Mapping for cycle to previous result pane
       prev = "H",
@@ -141,7 +141,7 @@ local default_config = {
       next = "L",
     },
   },
-  ---@class RestConfigHighlight
+  ---@class rest.Config.Highlight
   highlight = {
     ---@type boolean Whether current request highlighting is enabled or not
     enable = true,
@@ -151,7 +151,7 @@ local default_config = {
   ---@see vim.log.levels
   ---@type integer log level
   _log_level = vim.log.levels.WARN,
-  ---@class RestConfigDebugInfo
+  ---@class rest.Config.DebugInfo
   _debug_info = {
     -- NOTE: default option is `nil` to prevent overwriting as empty array
     ---@type string[]
@@ -166,7 +166,7 @@ config = vim.tbl_deep_extend("force", {
     unrecognized_configs = check.get_unrecognized_keys(opts, default_config),
   },
 }, default_config, opts)
----@cast config RestConfig
+---@cast config rest.Config
 local ok, err = check.validate(config)
 
 if not ok then
