@@ -39,6 +39,7 @@ local commands = {}
 local dotenv = require("rest-nvim.dotenv")
 local request = require("rest-nvim.request")
 local logger = require("rest-nvim.logger")
+local parser = require("rest-nvim.parser")
 
 
 ---@type table<string, RestCmd>
@@ -47,12 +48,27 @@ local rest_command_tbl = {
     -- TODO: run request by name
     impl = function(args, opts)
       if #args > 1 then
-        vim.notify("Running request by name isn't supported yet", vim.log.levels.INFO)
+        vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN)
+        return
+      elseif #args == 1 then
+        -- TODO: get request by name
+        request.run_by_name(args[1])
         return
       end
       -- TODO: open result window here (use `:horizontal`)
       request.run()
     end,
+    ---@return string[]
+    complete = function (args)
+      local names = parser.get_request_names(0)
+      local matches = vim.iter(names):filter(function (name)
+        return name:find("^" .. vim.pesc(args))
+      end):map(function (name)
+        name = name:gsub("%s+", "\\ ")
+        return name
+      end):totable()
+      return matches
+    end
   },
   last = {
     impl = function(_, _)

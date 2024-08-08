@@ -201,4 +201,17 @@ X-DATE: {{$date}}
     assert.same(nil, vim.env["bar"])
     assert.same("old", vim.env["baz"])
   end)
+  it("capture all request names", function ()
+    local source = [[
+### first named request
+GET http://localhost:80
+### request separator that isn't a request name
+###
+# @name=second named request
+# additional comments
+GET http://localhost:80
+]]
+    local names = parser.get_request_names(source)
+    assert.same({"first named request", "second named request"}, names)
+  end)
 end)

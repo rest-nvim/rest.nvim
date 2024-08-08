@@ -16,6 +16,19 @@ local config = require("rest-nvim.config")
 ---@field __TYPE BodyType
 ---@field data any
 
+local NAMED_REQUEST_QUERY = vim.treesitter.query.parse("http", [[
+(section
+  (request_separator
+    value: (_) @name)
+  request: (_)) @request
+(section
+  (comment
+    name: (_) @keyword
+    value: (_) @name
+    (#eq? @keyword "name"))
+  request: (_)) @request
+]])
+
 ---@param node TSNode
 ---@param field string
 ---@param source Source
@@ -105,7 +118,6 @@ function M.parse_body(body_node, source, context)
       name = get_node_field_text(body_node, "name", source),
       path = path,
     }
-    vim.print(body.data.path)
   elseif body.__TYPE == "graphql" then
     logger.error("graphql body is not supported yet")
   end
@@ -129,10 +141,16 @@ function M.create_context(source)
   return ctx
 end
 
----@return TSNode? node TSNode with type `request_section`
+---@return TSNode? node TSNode with type `section`
 function M.get_cursor_request_node()
   local node = vim.treesitter.get_node()
-  return node and utils.ts_find(node, "request_section")
+  if node then
+    node = utils.ts_find(node, "section")
+    if not node or #node:field("request") < 1 then
+      return
+    end
+  end
+  return node
 end
 
 ---@return TSNode[]
@@ -146,6 +164,22 @@ function M.get_all_request_node()
     end
   end
   return reqs
+end
+
+---@return TSNode?
+function M.get_request_node_by_name(name)
+  local source = 0
+  local _, tree = utils.ts_parse_source(source)
+  local query = NAMED_REQUEST_QUERY
+  for id, node, _metadata, _match in query:iter_captures(tree:root(), source) do
+    local capture_name = query.captures[id]
+    if capture_name == "name" and vim.treesitter.get_node_text(node, source) == name then
+      local find = utils.ts_find(node, "section")
+      if find then
+        return find
+      end
+    end
+  end
 end
 
 ---@param vd_node TSNode
@@ -186,34 +220,19 @@ function M.parse_request_handler(handler_node, source, context)
   return script.load_handler(str, context)
 end
 
----@param node TSNode
----@param kind? string[]
----@return TSNode[] siblings
-local function collect_prev_siblings(node, kind)
-  local siblings = {}
-  local n = node:prev_named_sibling()
-  while n and n:type() ~= "request_separator" do
-    if not kind or vim.tbl_contains(kind, n:type()) then
-      table.insert(siblings, 0, n)
+---@param source Source
+---@return string[]
+function M.get_request_names(source)
+  local _, tree = utils.ts_parse_source(source)
+  local query = NAMED_REQUEST_QUERY
+  local result = {}
+  for id, node, _metadata, _match in query:iter_captures(tree:root(), source) do
+    local capture_name = query.captures[id]
+    if capture_name == "name" then
+      table.insert(result, vim.treesitter.get_node_text(node, source))
     end
-    n = n:prev_named_sibling()
   end
-  return siblings
-end
-
----@param node TSNode
----@param kind? string[]
----@return TSNode[] siblings
-local function collect_next_siblings(node, kind)
-  local siblings = {}
-  local n = node:next_named_sibling()
-  while n and n:type() ~= "request_separator" do
-    if not kind or vim.tbl_contains(kind, n:type()) then
-      table.insert(siblings, n)
-    end
-    n = n:next_named_sibling()
-  end
-  return siblings
+  return result
 end
 
 ---Parse the request node and create Request object. Returns `nil` if parsing
@@ -223,7 +242,7 @@ end
 ---@param context? Context
 ---@return Request|nil
 function M.parse(node, source, context)
-  assert(node:type() == "request_section")
+  assert(node:type() == "section")
   context = context or Context:new()
   -- request should not include error
   if node:has_error() then
@@ -235,11 +254,14 @@ function M.parse(node, source, context)
     logger.error("request section doesn't have request node")
     return nil
   end
+  local body
   local body_node = req_node:field("body")[1]
-  local body = body_node and M.parse_body(body_node, source, context)
-  if body_node and not body then
-    logger.error("parsing body failed")
-    return nil
+  if body_node then
+    body = M.parse_body(body_node, source, context)
+    if not body then
+      logger.error("parsing body failed")
+      return nil
+    end
   end
   local method = get_node_field_text(req_node, "method", source)
   if not method then
@@ -252,15 +274,19 @@ function M.parse(node, source, context)
     config.encode_url and utils.escape or nil
   )
 
-  -- FIXME: use query instead
-  local pre_script_nodes = collect_prev_siblings(req_node, {"pre_request_script"})
-  for _, script_node in ipairs(pre_script_nodes) do
-    M.parse_pre_request_script(script_node, source, context)
+  local name
+  local handlers = {}
+  for child, _ in node:iter_children() do
+    local node_type = child:type()
+    if node_type == "pre_request_script" then
+      M.parse_pre_request_script(child, source, context)
+    elseif node_type == "res_handler_script" then
+      table.insert(handlers, M.parse_request_handler(child, source, context))
+    elseif node_type == "request_separator" then
+      name = get_node_field_text(child, "value", source)
+    end
   end
-  local handler_nodes = collect_next_siblings(req_node, {"res_handler_script"})
-  local handlers = vim.iter(handler_nodes):map(function (n)
-    return M.parse_request_handler(n, source, context)
-  end):totable()
+
   local headers = parse_headers(req_node, source, context)
   -- HACK: check if url doesn't have host
   if headers["host"] and url[1] == "/" then
@@ -269,6 +295,7 @@ function M.parse(node, source, context)
   end
   ---@type Request
   return {
+    name = name,
     context = context,
     method = method,
     url = url,
