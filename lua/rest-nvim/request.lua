@@ -8,6 +8,7 @@ local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
 local ui     = require("rest-nvim.ui.result")
 local nio    = require("nio")
+local response = require("rest-nvim.response")
 
 ---@class Request
 ---@field context Context
@@ -30,7 +31,7 @@ local function run_request(req)
   rest_nvim_last_request = req
 
   -- remove previous result
-  _G._rest_nvim_result = nil
+  response.current = nil
   -- clear the ui
   ui.update()
 
@@ -46,19 +47,17 @@ local function run_request(req)
       -- TODO: should return here
       return
     end
+    ---@cast res rest.Response
     logger.info("request success")
-    -- wrap with schedule to set global variable outside of lua callback loop
-    vim.schedule(function ()
-      _G._rest_nvim_result = res
+    response.current = res
 
-      -- run request handler scripts
-      vim.iter(req.handlers):each(function (f) f() end)
+    -- run request handler scripts
+    vim.iter(req.handlers):each(function (f) f() end)
+    logger.info("handler done")
 
-      logger.info("handler done")
-
-      -- update result UI
-      ui.update()
-    end)
+    -- update result UI
+    -- NOTE: wrap with schedule to set vim variable outside of lua callback loop
+    vim.schedule(ui.update)
   end)
   -- FIXME: use future instead of returning true here
   return true

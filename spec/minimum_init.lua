@@ -11,9 +11,6 @@ if not vim.treesitter.language.get_lang("http") then
   vim.treesitter.language.register("http", "http")
 end
 vim.opt.runtimepath:append(rest_nvim_dir)
-_G._rest_nvim = {
+vim.g.rest_nvim = {
   _log_level = vim.log.levels.INFO
 }
-require("rest-nvim").setup({
-  _log_level = vim.log.levels.INFO
-})

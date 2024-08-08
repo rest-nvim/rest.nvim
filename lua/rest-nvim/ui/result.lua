@@ -24,7 +24,7 @@ local panes = {
   {
     name = "Response",
     render = function(self)
-      local result = _G._rest_nvim_result
+      local result = response.current
       if not result then
         vim.bo[self.bufnr].undolevels = -1
         set_lines(self.bufnr, { "Loading..." })
@@ -46,7 +46,7 @@ local panes = {
   {
     name = "Statistics",
     render = function(self)
-      local result = _G._rest_nvim_result
+      local result = response.current
       if not result then
         set_lines(self.bufnr, { "Loading..." })
         return
@@ -71,7 +71,7 @@ if config.result.window.cookies then
   table.insert(panes, 2, {
     name = "Cookies",
     render = function(self)
-      local result = _G._rest_nvim_result
+      local result = response.current
       if not result then
         set_lines(self.bufnr, { "Loading..." })
         return
@@ -93,7 +93,7 @@ if config.result.window.headers then
   table.insert(panes, 2, {
     name = "Headers",
     render = function(self)
-      local result = _G._rest_nvim_result
+      local result = response.current
       if not result then
         set_lines(self.bufnr, { "Loading..." })
         return
@@ -112,10 +112,10 @@ end
 
 local winbar = "%#Normal# %{%v:lua.require('rest-nvim.ui.panes').winbar()%}"
 winbar = winbar .. "%=%<"
-winbar = winbar .. "%{%v:lua._G._stat_winbar()%}"
+winbar = winbar .. "%{%v:lua.require('rest-nvim.ui.result').stat_winbar()%}"
 winbar = winbar .. " %#RestText#|%#Normal# "
 winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
-function _G._stat_winbar()
+function M.stat_winbar()
   local content = ""
   local stats = vim.tbl_get(_G, "_rest_nvim_result", "statistics")
   if not stats then
@@ -134,18 +134,18 @@ function _G._stat_winbar()
   end
   return content
 end
-local result_help = require("rest-nvim.ui.help")
 
 ---@type rest.ui.panes.PaneGroup
 local group = paneui.create_pane_group("rest_nvim_result", panes, {
   on_init = function(self)
+    local help = require("rest-nvim.ui.help")
     vim.keymap.set("n", config.result.keybinds.prev, function()
       self.group:cycle(-1)
     end, { buffer = self.bufnr })
     vim.keymap.set("n", config.result.keybinds.next, function()
       self.group:cycle(1)
     end, { buffer = self.bufnr })
-    vim.keymap.set("n", "?", result_help.open, { buffer = self.bufnr })
+    vim.keymap.set("n", "?", help.open, { buffer = self.bufnr })
     vim.bo[self.bufnr].filetype = "rest_nvim_result"
     utils.nvim_lazy_set_wo(self.bufnr, "winbar", winbar)
   end,
