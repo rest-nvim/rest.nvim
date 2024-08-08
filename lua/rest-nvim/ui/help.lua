@@ -8,9 +8,12 @@
 
 local help = {}
 
-local result = require("rest-nvim.result")
 local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
+
+local function set_lines(buffer, lines)
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+end
 
 ---Get or create a new request window help buffer
 local function get_or_create_buf()
@@ -48,7 +51,7 @@ local function get_or_create_buf()
       "",
       "**Press `q` to close this help window**",
     }
-    result.write_block(new_bufnr, buf_content, false, false)
+    set_lines(new_bufnr, buf_content)
 
     return new_bufnr
   end
