@@ -31,8 +31,9 @@ function RestUIPaneGroup:render()
     pane:render()
   end
 end
+---@param winnr integer
 function RestUIPaneGroup:enter(winnr)
-  if not self.panes[1].bufnr then
+  if not self.panes[1].bufnr or not vim.api.nvim_buf_is_loaded(self.panes[1].bufnr) then
     self:render()
   end
   vim.api.nvim_win_set_buf(winnr, self.panes[1].bufnr)
@@ -65,8 +66,11 @@ function M.create_pane_group(name, pane_opts, opts)
       name = pane_opt.name,
       group = group,
       render = function (self)
-        if not self.bufnr then
-          self.bufnr = vim.api.nvim_create_buf(false, false)
+        if not self.bufnr or not vim.api.nvim_buf_is_loaded(self.bufnr) then
+          self.bufnr = self.bufnr or vim.api.nvim_create_buf(false, false)
+          -- small trick to ensure buffer is loaded before the `BufWinEnter` event
+          -- unless lazy-setting winbar won't work
+          vim.fn.bufload(self.bufnr)
           vim.bo[self.bufnr].modifiable = false
           vim.bo[self.bufnr].swapfile = false
           vim.bo[self.bufnr].buftype = "nofile"
