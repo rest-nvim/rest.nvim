@@ -98,10 +98,14 @@ function M.parse_body(body_node, source, context)
       end
     end
   elseif body.__TYPE == "external" then
+    local path = assert(get_node_field_text(body_node, "path", source))
+    -- TODO: make sure expand happens in `.http` file
+    path = vim.fs.normalize(vim.fs.joinpath(vim.fn.expand("%:h"), path))
     body.data = {
-      name = assert(get_node_field_text(body_node, "name", source)),
-      path = assert(get_node_field_text(body_node, "path", source)),
+      name = get_node_field_text(body_node, "name", source),
+      path = path,
     }
+    vim.print(body.data.path)
   elseif body.__TYPE == "graphql" then
     logger.error("graphql body is not supported yet")
   end

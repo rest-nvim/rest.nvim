@@ -1,0 +1,4 @@
+POST http://localhost:8000/post/json
+Content-Type: application/json
+
+< ./post_json.json

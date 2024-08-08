@@ -197,7 +197,7 @@ function builder.file(file)
     return
   end
   -- FIXME: should normalize/expand the file path
-  return { "-d", "@" .. file }
+  return { "--data-binary", "@" .. file }
 end
 
 ---@package
@@ -230,7 +230,7 @@ function builder.build(request)
     if request.body.__TYPE == "form" then
       table.insert(args, builder.form(request.body.data))
     elseif request.body.__TYPE == "external" then
-      -- TODO: external body (how intellij works?)
+      table.insert(args, builder.file(request.body.data.path))
     else
       table.insert(args, builder.raw_body(request.body.data))
     end

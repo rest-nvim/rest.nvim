@@ -51,6 +51,23 @@ describe("curl cli builder", function()
     })
     assert.same({ "http://localhost:8000", "-X", "POST", "--data-raw", json_text }, args)
   end)
+  it("from POST request with external body", function ()
+    local args = builder.build({
+      context = Context:new(),
+      method = "POST",
+      url = "http://localhost:8000",
+      headers = {
+      },
+      handlers = {},
+      body = {
+        __TYPE = "external",
+        data = {
+          path = "spec/test_server/post_json.json"
+        },
+      },
+    })
+    assert.same({ "http://localhost:8000", "-X", "POST", "--data-binary", "@spec/test_server/post_json.json" }, args)
+  end)
 end)
 
 describe("curl cli response parser", function()
