@@ -106,8 +106,9 @@ local default_config = {
         ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
         ---@type table<string,rest.Opts.Result.Stat.Style>
         stats = {
-          total_time = { winbar = "take", title = "Time taken" },
-          size_download_t = { winbar = "size", title = "Download size" },
+          -- TODO: use `curl --write-out` instead
+          time_total = { winbar = "take", title = "Time taken" },
+          size_download = { winbar = "size", title = "Download size" },
         },
       },
       ---@type table<string,RestResultFormatters>

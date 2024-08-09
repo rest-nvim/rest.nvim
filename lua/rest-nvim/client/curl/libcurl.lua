@@ -17,8 +17,6 @@ local curl_utils = require("rest-nvim.client.curl.utils")
 
 -- TODO: add support for submitting forms in the `client.request` function
 
--- TODO: don't render statistics here. render from rest-nvim.result
-
 ---Get request statistics
 ---@param req table cURL request class
 ---@param statistics_tbl table Statistics table

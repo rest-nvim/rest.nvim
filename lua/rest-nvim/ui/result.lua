@@ -117,7 +117,7 @@ winbar = winbar .. " %#RestText#|%#Normal# "
 winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
 function M.stat_winbar()
   local content = ""
-  local stats = vim.tbl_get(_G, "_rest_nvim_result", "statistics")
+  local stats = vim.tbl_get(response, "current", "statistics")
   if not stats then
     return "Loading...%#Normal#"
   end

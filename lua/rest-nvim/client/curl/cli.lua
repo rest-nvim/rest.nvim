@@ -12,6 +12,8 @@ local curl = {}
 local nio = require("nio")
 local log = require("rest-nvim.logger")
 local curl_utils = require("rest-nvim.client.curl.utils")
+local utils = require("rest-nvim.utils")
+local config = require("rest-nvim.config")
 local progress = require("fidget.progress")
 
 ---@see vim.system
@@ -27,7 +29,7 @@ curl.cli = nio.create(function(args, on_exit, opts)
   opts.detach = false
   opts.text = true
   -- TODO(boltless): parse by chunk using `--trace-ascii %`
-  local curl_cmd = { "curl", "-sL", "--trace-time", "-v" }
+  local curl_cmd = { "curl", "-sL", "-v" }
   curl_cmd = vim.list_extend(curl_cmd, args)
   log.info(curl_cmd)
   opts.detach = false
@@ -43,6 +45,7 @@ curl.cli = nio.create(function(args, on_exit, opts)
   end
 end, 3)
 
+---@private
 local parser = {}
 
 ---@package
@@ -73,12 +76,12 @@ end
 ---@param line string
 ---@return {time:string,prefix:string,str:string?}|nil
 function parser.parse_verbose_line(line)
-  local time, prefix, str = line:match("(%S+) (.) ?(.*)")
-  if not time then
+  local prefix, str = line:match("(.) ?(.*)")
+  if not prefix then
+    -- TODO: parse failed
     return
   end
   return {
-    time = time,
     prefix = prefix,
     str = str,
   }
@@ -89,12 +92,31 @@ local VERBOSE_PREFIX_REQ_HEADER = ">"
 local VERBOSE_PREFIX_REQ_BODY = "}"
 local VERBOSE_PREFIX_RES_HEADER = "<"
 local VERBOSE_PREFIX_RES_BODY = "{"
+---custom prefix for statistics
+local VERBOSE_PREFIX_STAT = "?"
+
+---@package
+---@param str string
+function parser.parse_stat_pair(str)
+  local key, value = str:match("(%S+):(.*)")
+  if not key then
+    return
+  end
+  value = vim.trim(value)
+  if key:find("size") then
+    value = utils.transform_size(value)
+  elseif key:find("time") then
+    value = utils.transform_time(value)
+  end
+  return key, value
+end
 
 ---@param lines string[]
 ---@return rest.Response
 function parser.parse_verbose(lines)
   local response = {
     headers = {},
+    statistics = {},
   }
   vim.iter(lines):map(parser.parse_verbose_line):each(function(ln)
     if ln.prefix == VERBOSE_PREFIX_META then
@@ -114,10 +136,17 @@ function parser.parse_verbose(lines)
     elseif ln.prefix == VERBOSE_PREFIX_RES_BODY then
       -- we don't parse body here
       -- body is sent to stdout while other verbose logs are sent to stderr
+    elseif ln.prefix == VERBOSE_PREFIX_STAT then
+      local key, value = parser.parse_stat_pair(ln.str)
+      if key then
+        response.statistics[key] = value
+      end
     end
   end)
   return response
 end
+
+--- Builder ---
 
 ---@param kv table<string,string>
 ---@return string[]
@@ -218,25 +247,52 @@ function builder.http_version(version)
   return { "--" .. version:lower():gsub("/", "") }
 end
 
+---@return string[]? args
+function builder.statistics()
+  if vim.tbl_isempty(config.result.behavior.statistics.stats) then
+    return
+  end
+  local args = { "-w" }
+  local format = vim
+    .iter(config.result.behavior.statistics.stats)
+    :map(function(key, _style)
+      return ("? %s:%%{%s}\n"):format(key, key)
+    end)
+    :join("")
+  table.insert(args, "%{stderr}" .. format)
+  return args
+end
+
+---@package
+builder.STAT_ARGS = builder.statistics()
+
 ---build curl request arguments based on Request object
 ---@param request rest.Request
 ---@return string[] args
 function builder.build(request)
   local args = {}
-  table.insert(args, request.url)
-  table.insert(args, builder.method(request.method))
-  table.insert(args, builder.headers(request.headers))
+  ---@param list table
+  ---@param value any
+  local function insert(list, value)
+    if value then
+      table.insert(list, value)
+    end
+  end
+  insert(args, request.url)
+  insert(args, builder.method(request.method))
+  insert(args, builder.headers(request.headers))
   if request.body then
     if request.body.__TYPE == "form" then
-      table.insert(args, builder.form(request.body.data))
+      insert(args, builder.form(request.body.data))
     elseif request.body.__TYPE == "external" then
-      table.insert(args, builder.file(request.body.data.path))
+      insert(args, builder.file(request.body.data.path))
     else
-      table.insert(args, builder.raw_body(request.body.data))
+      insert(args, builder.raw_body(request.body.data))
     end
   end
   -- TODO: auth?
-  builder.http_version(request.http_version)
+  insert(args, builder.http_version(request.http_version) or {})
+  insert(args, builder.STAT_ARGS)
   return vim.iter(args):flatten():totable()
 end
 

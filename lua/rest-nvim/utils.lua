@@ -84,7 +84,7 @@ local transform = {
     local units = { "s", "ms", "µs", "ns" }
     local unit = 1
 
-    while time < 1 and unit <= #units do
+    while time < 1 and unit < #units do
       ---@diagnostic disable-next-line cast-local-type
       time = time * 1000
       unit = unit + 1
