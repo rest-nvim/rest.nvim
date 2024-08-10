@@ -61,7 +61,7 @@ function response.try_format_body(content_type, body)
       logger.info(msg)
       vim.notify(msg, vim.log.levels.INFO)
     end
-    return vim.split(body, "\n")
+    return vim.split(body, "\n", {trimempty = res_type == "json"})
   end
 end
 

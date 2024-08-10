@@ -51,7 +51,10 @@ local panes = {
         set_lines(self.bufnr, { "Loading..." })
         return
       end
-      syntax_highlight(self.bufnr, "http")
+      -- HACK: `vim.treesitter.foldexpr()` finds fold based on filetype not registered parser of
+      -- current buffer
+      vim.bo[self.bufnr].filetype = "http"
+      -- syntax_highlight(self.bufnr, "http")
       local lines = render_request(data.request)
       if data.response then
         local body = res.try_format_body(data.response.headers["content-type"], data.response.body)
@@ -166,6 +169,14 @@ local group = paneui.create_pane_group("rest_nvim_result", panes, {
     vim.keymap.set("n", "?", help.open, { buffer = self.bufnr })
     vim.bo[self.bufnr].filetype = "rest_nvim_result"
     utils.nvim_lazy_set_wo(self.bufnr, "winbar", winbar)
+    -- HACK: hack to enable fold inside buftype=nofile
+    vim.api.nvim_create_autocmd("WinEnter", {
+      buffer = self.bufnr,
+      callback = function ()
+        vim.api.nvim_set_option_value("foldmethod", "expr", { scope = "local" })
+      end,
+      once = true,
+    })
   end,
 })
 
