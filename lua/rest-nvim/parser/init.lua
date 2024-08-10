@@ -280,6 +280,8 @@ function M.parse(node, source, context)
       table.insert(handlers, M.parse_request_handler(child, source, context))
     elseif node_type == "request_separator" then
       name = get_node_field_text(child, "value", source)
+    elseif node_type == "comment" and get_node_field_text(child, "name", source) == "name" then
+      name = get_node_field_text(child, "value", source) or name
     end
   end
 
