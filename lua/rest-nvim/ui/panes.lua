@@ -1,7 +1,5 @@
 ---@mod rest-nvim.ui.panes Small internal library to create pane style window
 
-local utils = require("rest-nvim.utils")
-
 ---@class rest.ui.panes.Pane
 ---@field name string
 ---@field bufnr number

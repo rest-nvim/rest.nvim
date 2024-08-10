@@ -235,11 +235,11 @@ end
 ---failed.
 ---@param node TSNode Tree-sitter request node
 ---@param source Source
----@param context? rest.Context
+---@param ctx? rest.Context
 ---@return rest.Request|nil
-function M.parse(node, source, context)
+function M.parse(node, source, ctx)
   assert(node:type() == "section")
-  context = context or Context:new()
+  ctx = ctx or Context:new()
   -- request should not include error
   if node:has_error() then
     logger.error(utils.ts_node_error_log(node))
@@ -253,7 +253,7 @@ function M.parse(node, source, context)
   local body
   local body_node = req_node:field("body")[1]
   if body_node then
-    body = M.parse_body(body_node, source, context)
+    body = M.parse_body(body_node, source, ctx)
     if not body then
       logger.error("parsing body failed")
       return nil
@@ -266,7 +266,7 @@ function M.parse(node, source, context)
   end
   local url = expand_variables(
     assert(get_node_field_text(req_node, "url", source)),
-    context,
+    ctx,
     config.encode_url and utils.escape or nil
   )
 
@@ -275,9 +275,9 @@ function M.parse(node, source, context)
   for child, _ in node:iter_children() do
     local node_type = child:type()
     if node_type == "pre_request_script" then
-      M.parse_pre_request_script(child, source, context)
+      M.parse_pre_request_script(child, source, ctx)
     elseif node_type == "res_handler_script" then
-      table.insert(handlers, M.parse_request_handler(child, source, context))
+      table.insert(handlers, M.parse_request_handler(child, source, ctx))
     elseif node_type == "request_separator" then
       name = get_node_field_text(child, "value", source)
     elseif node_type == "comment" and get_node_field_text(child, "name", source) == "name" then
@@ -285,7 +285,7 @@ function M.parse(node, source, context)
     end
   end
 
-  local headers = parse_headers(req_node, source, context)
+  local headers = parse_headers(req_node, source, ctx)
   -- HACK: check if url doesn't have host
   if headers["host"] and url[1] == "/" then
     url = headers["host"]..url
@@ -294,7 +294,7 @@ function M.parse(node, source, context)
   ---@type rest.Request
   return {
     name = name,
-    context = context,
+    context = ctx,
     method = method,
     url = url,
     http_version = get_node_field_text(req_node, "version", source),

@@ -21,10 +21,7 @@ local progress = require("fidget.progress")
 ---@param on_exit fun(sc: vim.SystemCompleted) Called asynchronously when the luarocks command exits. asynchronously. Receives SystemCompleted object, see return of SystemObj:wait().
 ---@param opts? vim.SystemOpts
 ---@package
----@diagnostic disable-next-line: unused-local
-function curl.cli(args, on_exit, opts) end
-
-curl.cli = nio.create(function(args, on_exit, opts)
+function curl.cli(args, on_exit, opts)
   opts = opts or {}
   opts.detach = false
   opts.text = true
@@ -43,7 +40,7 @@ curl.cli = nio.create(function(args, on_exit, opts)
     }
     on_exit(sc)
   end
-end, 3)
+end
 
 ---@private
 local parser = {}
