@@ -47,6 +47,10 @@ local ui = require("rest-nvim.ui.result")
 local rest_command_tbl = {
   run = {
     impl = function(args, _opts)
+      if vim.bo.filetype ~= "http" or vim.b.__rest_no_http_file then
+        vim.notify("`:Rest run` can be only called from http file", vim.log.levels.ERROR)
+        return
+      end
       if #args > 1 then
         vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN)
         return

@@ -72,10 +72,8 @@ function M.create_pane_group(name, pane_opts, opts)
           -- unless lazy-setting winbar won't work
           vim.fn.bufload(self.bufnr)
           vim.bo[self.bufnr].swapfile = false
-          vim.bo[self.bufnr].buftype = "nofile"
           vim.b[self.bufnr].__pane_group = name
-          -- HACK: I can't set buffer name because it will allow `:edit` command
-          -- vim.api.nvim_buf_set_name(self.bufnr, name .. "#" .. self.name)
+          vim.api.nvim_buf_set_name(self.bufnr, name .. "#" .. self.name)
           if opts and opts.on_init then
             opts.on_init(self)
           end
@@ -91,6 +89,7 @@ function M.create_pane_group(name, pane_opts, opts)
           vim.bo[self.bufnr].undolevels = vim.o.undolevels
         end
         vim.bo[self.bufnr].modifiable = modifiable
+        vim.bo[self.bufnr].modified = false
       end
     }
     table.insert(group.panes, pane)
