@@ -1,5 +1,3 @@
----@diagnostic disable: lowercase-global
-
 std = "luajit+busted"
 
 -- Rerun tests only if their modification time changed
@@ -14,5 +12,3 @@ ignore = {
 read_globals = {
   "vim",
 }
-
--- vim: ft=lua

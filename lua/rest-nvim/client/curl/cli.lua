@@ -87,11 +87,13 @@ function parser.parse_verbose_line(line)
   }
 end
 
-local VERBOSE_PREFIX_META = "*"
-local VERBOSE_PREFIX_REQ_HEADER = ">"
-local VERBOSE_PREFIX_REQ_BODY = "}"
+local _VERBOSE_PREFIX_META = "*"
+local _VERBOSE_PREFIX_REQ_HEADER = ">"
+local _VERBOSE_PREFIX_REQ_BODY = "}"
 local VERBOSE_PREFIX_RES_HEADER = "<"
-local VERBOSE_PREFIX_RES_BODY = "{"
+-- NOTE: we don't parse response body with trace output. response body will
+-- be sent to `stdout` instead of `stderr`
+local _VERBOSE_PREFIX_RES_BODY = "{"
 ---custom prefix for statistics
 local VERBOSE_PREFIX_STAT = "?"
 
@@ -119,10 +121,7 @@ function parser.parse_verbose(lines)
     statistics = {},
   }
   vim.iter(lines):map(parser.parse_verbose_line):each(function(ln)
-    if ln.prefix == VERBOSE_PREFIX_META then
-    elseif ln.prefix == VERBOSE_PREFIX_REQ_HEADER then
-    elseif ln.prefix == VERBOSE_PREFIX_REQ_BODY then
-    elseif ln.prefix == VERBOSE_PREFIX_RES_HEADER then
+    if ln.prefix == VERBOSE_PREFIX_RES_HEADER then
       if not response.status then
         -- response status
         response.status = parser.parse_verbose_status(ln.str)
@@ -133,9 +132,6 @@ function parser.parse_verbose(lines)
           response.headers[key:lower()] = value
         end
       end
-    elseif ln.prefix == VERBOSE_PREFIX_RES_BODY then
-      -- we don't parse body here
-      -- body is sent to stdout while other verbose logs are sent to stderr
     elseif ln.prefix == VERBOSE_PREFIX_STAT then
       local key, value = parser.parse_stat_pair(ln.str)
       if key then
