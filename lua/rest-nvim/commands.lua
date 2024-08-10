@@ -40,6 +40,7 @@ local dotenv = require("rest-nvim.dotenv")
 local request = require("rest-nvim.request")
 local logger = require("rest-nvim.logger")
 local parser = require("rest-nvim.parser")
+local ui = require("rest-nvim.ui.result")
 
 
 ---@type table<string, RestCmd>
@@ -53,7 +54,9 @@ local rest_command_tbl = {
         request.run_by_name(args[1])
         return
       end
+      ui.clear()
       -- TODO: open result window here (use `:horizontal`)
+      ui.open_ui()
       request.run()
     end,
     ---@return string[]

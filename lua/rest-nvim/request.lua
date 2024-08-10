@@ -32,17 +32,11 @@ local function run_request(req)
   logger.debug("run_request")
   local client = require("rest-nvim.client.curl.cli")
   rest_nvim_last_request = req
+  ui.update({request=req})
 
   -- remove previous result
   response.current = nil
-  -- clear the ui
-  ui.update()
-
-  -- open result UI
-  ui.open_ui()
-
   -- TODO: set UI with request informations (e.g. method & get)
-
   nio.run(function ()
     local ok, res = pcall(client.request(req).wait)
     if not ok then
@@ -59,8 +53,10 @@ local function run_request(req)
     logger.info("handler done")
 
     -- update result UI
-    -- NOTE: wrap with schedule to set vim variable outside of lua callback loop
-    vim.schedule(ui.update)
+    -- NOTE: wrap with schedule to access vim variables outside of lua callback loop
+    vim.schedule(function ()
+      ui.update({response = res})
+    end)
   end)
   -- FIXME: return future to pass the command state
 end

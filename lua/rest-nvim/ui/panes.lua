@@ -1,5 +1,7 @@
 ---@mod rest-nvim.ui.panes Small internal library to create pane style window
 
+local utils = require("rest-nvim.utils")
+
 ---@class rest.ui.panes.Pane
 ---@field name string
 ---@field bufnr number
@@ -71,7 +73,6 @@ function M.create_pane_group(name, pane_opts, opts)
           -- small trick to ensure buffer is loaded before the `BufWinEnter` event
           -- unless lazy-setting winbar won't work
           vim.fn.bufload(self.bufnr)
-          vim.bo[self.bufnr].modifiable = false
           vim.bo[self.bufnr].swapfile = false
           vim.bo[self.bufnr].buftype = "nofile"
           vim.b[self.bufnr].__pane_group = name
@@ -88,6 +89,8 @@ function M.create_pane_group(name, pane_opts, opts)
         local modifiable = pane_opt.render(self) or false
         if not modifiable then
           vim.bo[self.bufnr].undolevels = -1
+        else
+          vim.bo[self.bufnr].undolevels = vim.o.undolevels
         end
         vim.bo[self.bufnr].modifiable = modifiable
       end

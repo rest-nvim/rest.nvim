@@ -1,9 +1,9 @@
-local M = {}
+local ui = {}
 
 local config = require("rest-nvim.config")
 local utils = require("rest-nvim.utils")
 local paneui = require("rest-nvim.ui.panes")
-local response = require("rest-nvim.response")
+local res = require("rest-nvim.response")
 
 local function set_lines(buffer, lines)
   vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
@@ -19,45 +19,66 @@ local function syntax_highlight(buffer, filetype)
   end
 end
 
+---@class rest.UIData
+local data = {
+  ---@type rest.Request?
+  request = nil,
+  ---@type rest.Response?
+  response = nil
+}
+
+---@param req rest.Request
+---@return string[]
+local function render_request(req)
+  local req_line = req.method .. " " .. req.url
+  if req.http_version then
+    req_line = req_line .. " " .. req.http_version
+  end
+  return {
+    "### " .. req.name,
+    req_line,
+    ""
+  }
+end
+
 ---@type rest.ui.panes.PaneOpts[]
 local panes = {
   {
     name = "Response",
     render = function(self)
-      local result = response.current
-      if not result then
+      if not data.request then
         vim.bo[self.bufnr].undolevels = -1
         set_lines(self.bufnr, { "Loading..." })
         return
       end
       syntax_highlight(self.bufnr, "http")
-      vim.bo[self.bufnr].undolevels = 1000
-      -- TODO: hmmmm how to bring request data here?
-      local lines = {
-        "GET" .. " " .. "TODO",
-        "",
-      }
-      local body = response.try_format_body(result.headers["content-type"], result.body)
-      vim.list_extend(lines, body)
+      local lines = render_request(data.request)
+      if data.response then
+        local body = res.try_format_body(data.response.headers["content-type"], data.response.body)
+        table.insert(lines, "#+RES")
+        vim.list_extend(lines, body)
+        table.insert(lines, "#+END")
+      else
+        vim.list_extend(lines, { "# Loading..." })
+      end
       set_lines(self.bufnr, lines)
-      return true
+      return false
     end,
   },
   {
     name = "Statistics",
     render = function(self)
-      local result = response.current
-      if not result then
+      if not data.response then
         set_lines(self.bufnr, { "Loading..." })
         return
       end
       local lines = {}
-      if not result.statistics then
+      if not data.response.statistics then
         set_lines(self.bufnr, { "No Statistics" })
         return
       end
       syntax_highlight(self.bufnr, "jproperties")
-      for key, value in pairs(result.statistics) do
+      for key, value in pairs(data.response.statistics) do
         local skip_cookie = config.result.window.cookies and key == "set-cookies"
         if not skip_cookie then
           table.insert(lines, ("%s: %s"):format(key, value))
@@ -71,14 +92,13 @@ if config.result.window.cookies then
   table.insert(panes, 2, {
     name = "Cookies",
     render = function(self)
-      local result = response.current
-      if not result then
+      if not data.response then
         set_lines(self.bufnr, { "Loading..." })
         return
       end
       local lines = {}
       ---@type string?
-      local cookies_raw = vim.tbl_get(result, "headers", "set-cookies")
+      local cookies_raw = vim.tbl_get(data.response, "headers", "set-cookies")
       if not cookies_raw then
         set_lines(self.bufnr, { "No Cookies" })
         return
@@ -93,14 +113,13 @@ if config.result.window.headers then
   table.insert(panes, 2, {
     name = "Headers",
     render = function(self)
-      local result = response.current
-      if not result then
+      if not data.response then
         set_lines(self.bufnr, { "Loading..." })
         return
       end
       syntax_highlight(self.bufnr, "jproperties")
       local lines = {}
-      local headers = vim.iter(result.headers):totable()
+      local headers = vim.iter(data.response.headers):totable()
       table.sort(headers, function(b, a) return a[1] > b[1] end)
       for _, pair in ipairs(headers) do
         table.insert(lines, ("%s: %s"):format(pair[1], pair[2]))
@@ -115,13 +134,12 @@ winbar = winbar .. "%=%<"
 winbar = winbar .. "%{%v:lua.require('rest-nvim.ui.result').stat_winbar()%}"
 winbar = winbar .. " %#RestText#|%#Normal# "
 winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
-function M.stat_winbar()
+function ui.stat_winbar()
   local content = ""
-  local stats = vim.tbl_get(response, "current", "statistics")
-  if not stats then
+  if not data.response then
     return "Loading...%#Normal#"
   end
-  for stat_name, stat_value in pairs(stats) do
+  for stat_name, stat_value in pairs(data.response.statistics) do
     local style = config.result.behavior.statistics.stats[stat_name] or {}
     if style.winbar then
       local title = type(style.winbar) == "string" and style.winbar or (style.title or stat_name):lower()
@@ -168,7 +186,7 @@ vim.api.nvim_set_hl(0, "RestPaneTitle", {
 })
 
 ---@param horizontal? boolean
-function M.open_ui(horizontal)
+function ui.open_ui(horizontal)
   local winnr = vim.iter(vim.api.nvim_tabpage_list_wins(0)):find(function(id)
     local buf = vim.api.nvim_win_get_buf(id)
     return vim.b[buf].__pane_group == group.name
@@ -180,8 +198,15 @@ function M.open_ui(horizontal)
   end
 end
 
-function M.update()
+function ui.clear()
+  data = {}
   group:render()
 end
 
-return M
+---@param new_data rest.UIData
+function ui.update(new_data)
+  data = vim.tbl_deep_extend("force", data, new_data)
+  group:render()
+end
+
+return ui
