@@ -6,11 +6,8 @@ local logger = require("rest-nvim.logger")
 ---@class rest.Response
 ---@field status rest.Response.status
 ---@field body string?
----@field headers table<string,string>
+---@field headers table<string,string[]>
 ---@field statistics table<string,string>
-
----@type rest.Response?
-response.current = nil
 
 ---@class rest.Response.status
 ---@field code number

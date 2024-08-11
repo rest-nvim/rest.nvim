@@ -27,6 +27,7 @@ describe("parser", function()
       method = "GET",
       url = "https://github.com",
       headers = {},
+      cookies = {},
       handlers = {},
     }, parser.parse(req_node, source))
   end)
@@ -39,8 +40,9 @@ describe("parser", function()
       method = "GET",
       url = "https://api.github.com/users/boltlessengineer",
       headers = {
-        ["user-agent"] = "neovim"
+        ["user-agent"] = { "neovim" }
       },
+      cookies = {},
       handlers = {},
     }, parser.parse(req_node, source))
   end)
@@ -53,6 +55,7 @@ describe("parser", function()
       method = "POST",
       url = "https://example.com",
       headers = {},
+      cookies = {},
       handlers = {},
       body = {
         __TYPE = "json",
@@ -84,6 +87,7 @@ describe("parser", function()
       method = "POST",
       url = "https://example.com",
       headers = {},
+      cookies = {},
       handlers = {},
       body = {
         __TYPE = "xml",
@@ -114,10 +118,10 @@ X-DATE: {{$date}}
     assert.not_nil(req)
     ---@cast req rest.Request
     assert.same({
-      ["x-date"] = os.date("%Y-%m-%d")
+      ["x-date"] = { os.date("%Y-%m-%d") }
     }, req.headers)
   end)
-  it("parse with variables in header", function ()
+  it("parse with variables in body", function ()
     vim.env["DATE"] = "2024-07-28"
     local source = [[POST https://example.com
 

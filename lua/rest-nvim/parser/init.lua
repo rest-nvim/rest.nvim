@@ -7,6 +7,7 @@ local script = require("rest-nvim.script")
 local utils   = require("rest-nvim.utils")
 local logger   = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
+local jar = require("rest-nvim.cookie_jar")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
@@ -53,9 +54,9 @@ end
 ---@param req_node TSNode Tree-sitter request node
 ---@param source Source
 ---@param context rest.Context
----@return table<string,string> headers
+---@return table<string,string[]> headers
 local function parse_headers(req_node, source, context)
-  local headers = {}
+  local headers = vim.defaulttable(function () return {} end)
   local header_nodes = req_node:field("header")
   for _, node in ipairs(header_nodes) do
     local key = assert(get_node_field_text(node, "name", source))
@@ -63,9 +64,9 @@ local function parse_headers(req_node, source, context)
     key = expand_variables(key, context)
     value = expand_variables(value, context)
     key = string.lower(key)
-    headers[key] = value
+    table.insert(headers[key], value)
   end
-  return headers
+  return setmetatable(headers, nil)
 end
 
 ---@param body_node TSNode
@@ -292,16 +293,19 @@ function M.parse(node, source, ctx)
     headers["host"] = nil
   end
   ---@type rest.Request
-  return {
+  local req = {
     name = name,
     context = ctx,
     method = method,
     url = url,
     http_version = get_node_field_text(req_node, "version", source),
     headers = headers,
+    cookies = {},
     body = body,
     handlers = handlers,
   }
+  jar.load_cookies(req)
+  return req
 end
 
 return M

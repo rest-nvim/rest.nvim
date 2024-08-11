@@ -18,9 +18,23 @@ describe("curl cli builder", function()
       method = "GET",
       url = "http://localhost:8000",
       headers = {},
+      cookies = {},
       handlers = {},
     })
     assert.same({ "http://localhost:8000", "-X", "GET", "-w", STAT_FORMAT }, args)
+  end)
+  it("from GET request with headers", function()
+    local args = builder.build({
+      context = Context:new(),
+      method = "GET",
+      url = "http://localhost:8000",
+      headers = {
+        ["x-foo"] = { "bar" },
+      },
+      cookies = {},
+      handlers = {},
+    })
+    assert.same({ "http://localhost:8000", "-X", "GET", "-H", "X-Foo: bar", "-w", STAT_FORMAT }, args)
   end)
   it("from POST request with form body", function ()
     local args = builder.build({
@@ -28,6 +42,7 @@ describe("curl cli builder", function()
       method = "POST",
       url = "http://localhost:8000",
       headers = {},
+      cookies = {},
       handlers = {},
       body = {
         __TYPE = "form",
@@ -44,8 +59,8 @@ describe("curl cli builder", function()
       context = Context:new(),
       method = "POST",
       url = "http://localhost:8000",
-      headers = {
-      },
+      headers = {},
+      cookies = {},
       handlers = {},
       body = {
         __TYPE = "json",
@@ -59,8 +74,8 @@ describe("curl cli builder", function()
       context = Context:new(),
       method = "POST",
       url = "http://localhost:8000",
-      headers = {
-      },
+      headers = {},
+      cookies = {},
       handlers = {},
       body = {
         __TYPE = "external",
@@ -103,9 +118,9 @@ describe("curl cli response parser", function()
       },
       statistics = {},
       headers = {
-        ["content-type"] = "text/plain",
-        date = "Tue, 06 Aug 2024 12:22:44 GMT",
-        ["content-length"] = "15",
+        ["content-type"] = { "text/plain" },
+        date = { "Tue, 06 Aug 2024 12:22:44 GMT" },
+        ["content-length"] = { "15" },
       },
     }, response)
   end)
@@ -118,6 +133,7 @@ describe("curl cli request", function()
         url = "https://reqres.in/api/users?page=5",
         handlers = {},
         headers = {},
+        cookies = {},
         method = "GET",
       })
       .wait()

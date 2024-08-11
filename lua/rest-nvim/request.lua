@@ -8,7 +8,7 @@ local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
 local ui     = require("rest-nvim.ui.result")
 local nio    = require("nio")
-local response = require("rest-nvim.response")
+local jar    = require("rest-nvim.cookie_jar")
 
 ---@class rest.Request.Body
 ---@field __TYPE BodyType
@@ -20,7 +20,8 @@ local response = require("rest-nvim.response")
 ---@field method string The request method
 ---@field url string The request URL
 ---@field http_version? string The request HTTP protocol
----@field headers table<string,string>
+---@field headers table<string,string[]>
+---@field cookies rest.Cookie[]
 ---@field body? rest.Request.Body
 ---@field handlers fun()[]
 
@@ -34,8 +35,6 @@ local function run_request(req)
   rest_nvim_last_request = req
   ui.update({request=req})
 
-  -- remove previous result
-  response.current = nil
   -- TODO: set UI with request informations (e.g. method & get)
   nio.run(function ()
     local ok, res = pcall(client.request(req).wait)
@@ -46,11 +45,13 @@ local function run_request(req)
     end
     ---@cast res rest.Response
     logger.info("request success")
-    response.current = res
 
     -- run request handler scripts
     vim.iter(req.handlers):each(function (f) f() end)
     logger.info("handler done")
+
+    -- update cookie jar
+    jar.update_jar(req.url, res)
 
     -- update result UI
     -- NOTE: wrap with schedule to access vim variables outside of lua callback loop

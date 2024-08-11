@@ -12,5 +12,9 @@ if not vim.treesitter.language.get_lang("http") then
 end
 vim.opt.runtimepath:append(rest_nvim_dir)
 vim.g.rest_nvim = {
-  _log_level = vim.log.levels.INFO
+  _log_level = vim.log.levels.INFO,
+  cookies = {
+    path = "/tmp/rest-nvim.cookies"
+  }
 }
+vim.uv.fs_unlink(vim.g.rest_nvim.cookies.path)

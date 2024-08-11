@@ -66,7 +66,7 @@ function parser.parse_header_pair(str)
   if not key then
     return
   end
-  return key, vim.trim(value)
+  return key:lower(), vim.trim(value)
 end
 
 ---@package
@@ -126,7 +126,10 @@ function parser.parse_verbose(lines)
         -- response header
         local key, value = parser.parse_header_pair(ln.str)
         if key then
-          response.headers[key:lower()] = value
+          if not response.headers[key] then
+            response.headers[key] = {}
+          end
+          table.insert(response.headers[key], value)
         end
       end
     elseif ln.prefix == VERBOSE_PREFIX_STAT then
@@ -166,23 +169,27 @@ function builder.method(method)
 end
 
 ---@package
----@param header table<string,string>
+---@param header table<string,string[]>
 ---@return string[] args
 function builder.headers(header)
-  return kv_to_list(
-    (function()
-      local upper = function(str)
-        return string.gsub(" " .. str, "%W%l", string.upper):sub(2)
-      end
-      local normilzed = {}
-      for k, v in pairs(header) do
-        normilzed[upper(k:gsub("_", "%-"))] = v
-      end
-      return normilzed
-    end)(),
-    "-H",
-    ": "
-  )
+  local args = {}
+  local upper = function(str)
+    return string.gsub(" " .. str, "%W%l", string.upper):sub(2)
+  end
+  for key, values in pairs(header) do
+    for _, value in ipairs(values) do
+      vim.list_extend(args, { "-H", upper(key) .. ": " .. value })
+    end
+  end
+  return args
+end
+
+---@param cookies rest.Cookie[]
+---@return string[] args
+function builder.cookies(cookies)
+  return vim.iter(cookies):map(function (cookie)
+    return { "-b", cookie.name .. "=" .. cookie.value }
+  end):totable()
 end
 
 ---@param body string?
@@ -260,9 +267,9 @@ end
 builder.STAT_ARGS = builder.statistics()
 
 ---build curl request arguments based on Request object
----@param request rest.Request
+---@param req rest.Request
 ---@return string[] args
-function builder.build(request)
+function builder.build(req)
   local args = {}
   ---@param list table
   ---@param value any
@@ -271,22 +278,23 @@ function builder.build(request)
       table.insert(list, value)
     end
   end
-  insert(args, request.url)
-  insert(args, builder.method(request.method))
-  insert(args, builder.headers(request.headers))
-  if request.body then
-    if request.body.__TYPE == "form" then
-      insert(args, builder.form(request.body.data))
-    elseif request.body.__TYPE == "external" then
-      insert(args, builder.file(request.body.data.path))
+  insert(args, req.url)
+  insert(args, builder.method(req.method))
+  insert(args, builder.headers(req.headers))
+  insert(args, builder.cookies(req.cookies))
+  if req.body then
+    if req.body.__TYPE == "form" then
+      insert(args, builder.form(req.body.data))
+    elseif req.body.__TYPE == "external" then
+      insert(args, builder.file(req.body.data.path))
     else
-      insert(args, builder.raw_body(request.body.data))
+      insert(args, builder.raw_body(req.body.data))
     end
   end
   -- TODO: auth?
-  insert(args, builder.http_version(request.http_version) or {})
+  insert(args, builder.http_version(req.http_version) or {})
   insert(args, builder.STAT_ARGS)
-  return vim.iter(args):flatten():totable()
+  return vim.iter(args):flatten(math.huge):totable()
 end
 
 ---returns future containing Result

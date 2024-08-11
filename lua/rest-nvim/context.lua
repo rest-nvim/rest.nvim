@@ -6,8 +6,6 @@ local M = {}
 
 ---@class rest.Context
 ---@field vars table<string,string>
----@field files string[]
----@field request? rest.Request
 ---@field response? rest.Response
 local Context = {}
 Context.__index = Context
@@ -46,7 +44,6 @@ function Context:new()
   local obj = {
     __index = self,
     vars = {},
-    files = {},
     ---@diagnostic disable-next-line: missing-fields
     response = {}, -- create response table here to pass the reference first
   }
@@ -56,7 +53,6 @@ end
 
 ---@param filepath string
 function Context:load_file(filepath)
-  table.insert(self.files, filepath)
   dotenv.load_file(filepath, function (key, value)
     self:set(key, value)
   end)

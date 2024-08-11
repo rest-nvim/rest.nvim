@@ -66,6 +66,26 @@ function utils.read_file(path)
   return content
 end
 
+function utils.parse_http_time(time_str)
+  local pattern = "(%a+), (%d+) (%a+) (%d+) (%d+):(%d+):(%d+) GMT"
+  local _, day, month_name, year, hour, min, sec = time_str:match(pattern)
+  -- stylua: ignore
+  local months = {
+    Jan = 1, Feb = 2, Mar = 3, Apr = 4, May = 5, Jun = 6,
+    Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12,
+  }
+  local time_table = {
+    year = tonumber(year),
+    month = months[month_name],
+    day = tonumber(day),
+    hour = tonumber(hour),
+    min = tonumber(min),
+    sec = tonumber(sec),
+    isdst = false,
+  }
+  return os.time(time_table)
+end
+
 --- Default transformers for statistics
 local transform = {
   ---Transform `time` into a readable typed time (e.g. 200ms)

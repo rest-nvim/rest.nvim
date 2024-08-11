@@ -58,7 +58,8 @@ local panes = {
       -- syntax_highlight(self.bufnr, "http")
       local lines = render_request(data.request)
       if data.response then
-        local body = res.try_format_body(data.response.headers["content-type"], data.response.body)
+        local content_type = data.response.headers["content-type"]
+        local body = res.try_format_body(content_type and content_type[1], data.response.body)
         table.insert(lines, "#+RES")
         vim.list_extend(lines, body)
         table.insert(lines, "#+END")
@@ -83,10 +84,7 @@ local panes = {
       end
       syntax_highlight(self.bufnr, "jproperties")
       for key, value in pairs(data.response.statistics) do
-        local skip_cookie = config.result.window.cookies and key == "set-cookies"
-        if not skip_cookie then
-          table.insert(lines, ("%s: %s"):format(key, value))
-        end
+        table.insert(lines, ("%s: %s"):format(key, value))
       end
       set_lines(self.bufnr, lines)
     end,
@@ -101,14 +99,15 @@ if config.result.window.cookies then
         return
       end
       local lines = {}
-      ---@type string?
-      local cookies_raw = vim.tbl_get(data.response, "headers", "set-cookies")
-      if not cookies_raw then
+      ---@type string[]?
+      local cookie_headers = vim.tbl_get(data.response, "headers", "set-cookie")
+      if not cookie_headers then
         set_lines(self.bufnr, { "No Cookies" })
         return
       end
       syntax_highlight(self.bufnr, "jproperties")
-      -- TODO: parse cookies from header value, write them
+      table.sort(cookie_headers)
+      vim.list_extend(lines, cookie_headers)
       set_lines(self.bufnr, lines)
     end,
   })
@@ -125,8 +124,13 @@ if config.result.window.headers then
       local lines = {}
       local headers = vim.iter(data.response.headers):totable()
       table.sort(headers, function(b, a) return a[1] > b[1] end)
-      for _, pair in ipairs(headers) do
-        table.insert(lines, ("%s: %s"):format(pair[1], pair[2]))
+      for _, header in ipairs(headers) do
+        local skip_cookie = config.result.window.cookies and header[1] == "set-cookie"
+        if not skip_cookie then
+          vim.list_extend(lines, vim.iter(header[2]):map(function (value)
+            return header[1] .. ": " .. value
+          end):totable())
+        end
       end
       set_lines(self.bufnr, lines)
     end,

@@ -49,7 +49,16 @@ local config
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
 
+---@class rest.Opts.Cookies
+--- Whether to enable cookies support (Default: `true`)
+---@field enable? boolean
+--- File path to save cookies file
+--- (Default: `"stdpath("data")/rest-nvim.cookies"`)
+---@field path? string
+
 ---@class rest.Opts
+--- Cookies config
+---@field cookies? rest.Opts.Cookies
 --- Environment variables file pattern for telescope.nvim
 --- (Default: `".*env.*$"`)
 ---@field env_pattern? string
@@ -70,6 +79,13 @@ vim.g.rest_nvim = vim.g.rest_nvim
 ---rest.nvim default configuration
 ---@class rest.Config
 local default_config = {
+  ---@class rest.Config.Cookies
+  cookies = {
+    ---@type boolean Whether enable cookies support or not
+    enable = true,
+    ---@type string Cookies file path
+    path = vim.fs.joinpath(vim.fn.stdpath("data") --[[@as string]], "rest-nvim.cookies")
+  },
   ---@type string Environment variables file pattern for telescope.nvim
   env_pattern = ".*env.*$",
 
