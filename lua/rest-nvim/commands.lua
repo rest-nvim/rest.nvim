@@ -41,6 +41,7 @@ local request = require("rest-nvim.request")
 local logger = require("rest-nvim.logger")
 local parser = require("rest-nvim.parser")
 local ui = require("rest-nvim.ui.result")
+local config = require("rest-nvim.config")
 
 
 ---@type table<string, RestCmd>
@@ -90,6 +91,19 @@ local rest_command_tbl = {
       else
         ---@diagnostic disable-next-line: invisible
         vim.cmd.edit(logger.get_logfile())
+      end
+    end,
+  },
+  cookies = {
+    impl = function(_, opts)
+      local is_split = opts.smods.vertiacal or opts.smods.horizontal
+      local is_tab = opts.smods.tab ~= -1
+      if is_split or is_tab then
+        ---@diagnostic disable-next-line: invisible
+        vim.cmd(opts.mods .. " split " .. config.cookies.path)
+      else
+        ---@diagnostic disable-next-line: invisible
+        vim.cmd.edit(config.cookies.path)
       end
     end,
   },
