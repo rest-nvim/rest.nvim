@@ -40,14 +40,14 @@ local function run_request(req)
     local ok, res = pcall(client.request(req).wait)
     if not ok then
       logger.error("request failed")
-      -- TODO: should return here
+      vim.notify("request failed", vim.log.levels.ERROR)
       return
     end
     ---@cast res rest.Response
     logger.info("request success")
 
     -- run request handler scripts
-    vim.iter(req.handlers):each(function (f) f() end)
+    vim.iter(req.handlers):each(function (f) f(res) end)
     logger.info("handler done")
 
     -- update cookie jar

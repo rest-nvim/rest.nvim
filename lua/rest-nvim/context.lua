@@ -6,7 +6,6 @@ local M = {}
 
 ---@class rest.Context
 ---@field vars table<string,string>
----@field response? rest.Response
 local Context = {}
 Context.__index = Context
 

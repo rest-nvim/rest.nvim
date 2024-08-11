@@ -15,6 +15,11 @@ vim.g.rest_nvim = {
   _log_level = vim.log.levels.INFO,
   cookies = {
     path = "/tmp/rest-nvim.cookies"
+  },
+  result = {
+    behavior = {
+      formatters = {}
+    },
   }
 }
 vim.uv.fs_unlink(vim.g.rest_nvim.cookies.path)

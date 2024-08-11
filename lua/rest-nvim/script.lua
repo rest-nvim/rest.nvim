@@ -33,14 +33,13 @@ function M.create_prescript_env(ctx)
 end
 
 ---@param ctx rest.Context
+---@param res rest.Response
 ---@return rest.HandlerEnv
-function M.create_handler_env(ctx)
+function M.create_handler_env(ctx, res)
   ---@class rest.HandlerEnv
   local env = {
     ---@class rest.HandlerEnv.Client
     client = {
-      test = function () end,
-      assert = function () end,
       ---@type rest.Env.Request.Variables
       global = {
         ---set global variable (this overwrites `vim.env`)
@@ -55,11 +54,6 @@ function M.create_handler_env(ctx)
     },
     ---@class rest.HandlerEnv.Request
     request = {
-      body = {},
-      environment = {},
-      headers = {},
-      method = "GET",
-      url = "",
       ---@type rest.Env.Request.Variables
       variables = {
         ---sets request-local variable
@@ -73,7 +67,7 @@ function M.create_handler_env(ctx)
       }
     },
     -- TODO: create wrapper class for response
-    response = ctx.response,
+    response = res,
     vim = vim
   }
   return env
@@ -101,7 +95,9 @@ end
 ---@param ctx rest.Context
 ---@return function
 function M.load_handler(script, ctx)
-  return M.load(script, M.create_handler_env(ctx))
+  return function (res)
+    M.load(script, M.create_handler_env(ctx, res))()
+  end
 end
 
 return M
