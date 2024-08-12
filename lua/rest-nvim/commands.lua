@@ -36,13 +36,15 @@
 
 local commands = {}
 
-local dotenv = require("rest-nvim.dotenv")
-local request = require("rest-nvim.request")
-local logger = require("rest-nvim.logger")
-local parser = require("rest-nvim.parser")
-local ui = require("rest-nvim.ui.result")
-local config = require("rest-nvim.config")
-
+-- Lazy load
+-- stylua: ignore start
+local function dotenv() return require("rest-nvim.dotenv") end
+local function request() return require("rest-nvim.request") end
+local function logger() return require("rest-nvim.logger") end
+local function parser() return require("rest-nvim.parser") end
+local function ui() return require("rest-nvim.ui.result") end
+local function config() return require("rest-nvim.config") end
+-- stylua: ignore end
 
 ---@type table<string, RestCmd>
 local rest_command_tbl = {
@@ -56,17 +58,17 @@ local rest_command_tbl = {
         vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN)
         return
       elseif #args == 1 then
-        request.run_by_name(args[1])
+        request().run_by_name(args[1])
         return
       end
-      ui.clear()
+      ui().clear()
       -- TODO: open result window here (use `:horizontal`)
-      ui.open_ui()
-      request.run()
+      ui().open_ui()
+      request().run()
     end,
     ---@return string[]
     complete = function (args)
-      local names = parser.get_request_names(0)
+      local names = parser().get_request_names(0)
       local matches = vim.iter(names):filter(function (name)
         return name:find("^" .. vim.pesc(args))
       end):map(function (name)
@@ -78,7 +80,7 @@ local rest_command_tbl = {
   },
   last = {
     impl = function(_, _)
-      request.run_last()
+      request().run_last()
     end,
   },
   logs = {
@@ -87,10 +89,10 @@ local rest_command_tbl = {
       local is_tab = opts.smods.tab ~= -1
       if is_split or is_tab then
         ---@diagnostic disable-next-line: invisible
-        vim.cmd(opts.mods .. " split " .. logger.get_logfile())
+        vim.cmd(opts.mods .. " split " .. logger().get_logfile())
       else
         ---@diagnostic disable-next-line: invisible
-        vim.cmd.edit(logger.get_logfile())
+        vim.cmd.edit(logger().get_logfile())
       end
     end,
   },
@@ -100,26 +102,26 @@ local rest_command_tbl = {
       local is_tab = opts.smods.tab ~= -1
       if is_split or is_tab then
         ---@diagnostic disable-next-line: invisible
-        vim.cmd(opts.mods .. " split " .. config.cookies.path)
+        vim.cmd(opts.mods .. " split " .. config().cookies.path)
       else
         ---@diagnostic disable-next-line: invisible
-        vim.cmd.edit(config.cookies.path)
+        vim.cmd.edit(config().cookies.path)
       end
     end,
   },
   env = {
     impl = function(args, _)
       if not args[1] or args[1] == "show" then
-        dotenv.show_registered_file()
+        dotenv().show_registered_file()
         return
       elseif args[1] == "set" then
         if #args < 2 then
           vim.notify("Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed", vim.log.levels.ERROR)
           return
         end
-        dotenv.register_file(args[2])
+        dotenv().register_file(args[2])
       elseif args[1] == "select" then
-        dotenv.select_file()
+        dotenv().select_file()
       else
         vim.notify("Invalid action '" .. args[1] .. "' provided to 'env' command", vim.log.levels.ERROR)
       end
@@ -138,7 +140,7 @@ local rest_command_tbl = {
       -- If the completion arguments is a table and `set` is the desired action then
       -- return a list of files in the current working directory for completion
       if type(args) == "table" and args[1]:match("set") then
-        return dotenv.find_env_files()
+        return dotenv().find_env_files()
       end
 
       local match = vim.tbl_filter(function(action)
@@ -160,7 +162,7 @@ local function rest(opts)
   local command = rest_command_tbl[cmd]
 
   if not command then
-    logger.error("Unknown command: " .. cmd)
+    logger().error("Unknown command: " .. cmd)
     vim.notify("Unknown command: " .. cmd)
     return
   end
@@ -168,9 +170,8 @@ local function rest(opts)
   command.impl(args, opts)
 end
 
----@package
-function commands.init(bufnr)
-  vim.api.nvim_buf_create_user_command(bufnr, "Rest", rest, {
+function commands.setup()
+  vim.api.nvim_create_user_command("Rest", rest, {
     nargs = "+",
     desc = "Run your HTTP requests",
     complete = function(arg_lead, cmdline, _)

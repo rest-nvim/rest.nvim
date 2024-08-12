@@ -66,5 +66,6 @@ end
 vim.g.rest_nvim_deps = rest_nvim_deps
 
 require("rest-nvim.autocmds").setup()
+require("rest-nvim.commands").setup()
 
 vim.g.loaded_rest_nvim = true
