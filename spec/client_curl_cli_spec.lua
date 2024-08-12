@@ -115,6 +115,7 @@ describe("curl cli response parser", function()
       status = {
         version = "HTTP/1.1",
         code = 200,
+        text = "OK",
       },
       statistics = {},
       headers = {
@@ -126,6 +127,7 @@ describe("curl cli response parser", function()
   end)
 end)
 describe("curl cli request", function()
+  -- TODO: don't send actual request on test
   nio.tests.it("basic GET request", function()
     local response = curl
       .request({
@@ -144,6 +146,7 @@ describe("curl cli request", function()
     assert.same({
         version = "HTTP/2",
         code = 200,
+        text = ""
     }, response.status)
     -- HACK: have no idea how to make sure it is table<string,string>
     assert.are_table(response.headers)

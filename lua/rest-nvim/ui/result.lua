@@ -37,7 +37,6 @@ local function render_request(req)
   return {
     "### " .. req.name,
     req_line,
-    ""
   }
 end
 
@@ -58,13 +57,15 @@ local panes = {
       -- syntax_highlight(self.bufnr, "http")
       local lines = render_request(data.request)
       if data.response then
+        table.insert(lines, ("%d %s %s"):format(data.response.status.code, data.response.status.version, data.response.status.text))
         local content_type = data.response.headers["content-type"]
         local body = res.try_format_body(content_type and content_type[1], data.response.body)
+        table.insert(lines, "")
         table.insert(lines, "#+RES")
         vim.list_extend(lines, body)
         table.insert(lines, "#+END")
       else
-        vim.list_extend(lines, { "# Loading..." })
+        vim.list_extend(lines, { "", "# Loading..." })
       end
       set_lines(self.bufnr, lines)
       return false

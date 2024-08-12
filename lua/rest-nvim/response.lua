@@ -12,6 +12,7 @@ local logger = require("rest-nvim.logger")
 ---@class rest.Response.status
 ---@field code number
 ---@field version string
+---@field text string
 
 -- TODO: format asynchronously
 

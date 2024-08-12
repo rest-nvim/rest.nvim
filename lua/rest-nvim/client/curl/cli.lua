@@ -49,11 +49,11 @@ local parser = {}
 ---@param str string
 ---@return rest.Response.status
 function parser.parse_verbose_status(str)
-  local version, code = str:match("^(%S+) (%d+)")
+  local version, code, text = str:match("^(%S+) (%d+) ?(.*)")
   return {
     version = version,
     code = tonumber(code),
-    -- status = status,
+    text = text,
   }
 end
 
