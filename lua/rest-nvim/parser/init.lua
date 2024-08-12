@@ -285,6 +285,14 @@ function M.parse(node, source, ctx)
       name = get_node_field_text(child, "value", source) or name
     end
   end
+  if not name then
+    if type(source) == "number" then
+      local filename = vim.api.nvim_buf_get_name(source)
+      name = filename:match(".*/%.?(.*).http$") or filename
+      name = name .. "#" .. vim.b[source]._rest_nvim_count
+      vim.b[source]._rest_nvim_count = vim.b[source]._rest_nvim_count + 1
+    end
+  end
 
   local headers = parse_headers(req_node, source, ctx)
   -- HACK: check if url doesn't have host
