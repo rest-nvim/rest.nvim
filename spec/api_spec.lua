@@ -218,4 +218,14 @@ GET http://localhost:80
     local names = parser.get_request_names(source)
     assert.same({"first named request", "second named request"}, names)
   end)
+  it("parse request with host header", function ()
+    local source = [[
+GET /some/path
+HOST: localhost:8000
+]]
+    local _, tree = utils.ts_parse_source(source)
+    local req_node = assert(tree:root():child(0))
+    local req = assert(parser.parse(req_node, source))
+    assert.same("http://localhost:8000/some/path", req.url)
+  end)
 end)

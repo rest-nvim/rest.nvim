@@ -288,9 +288,9 @@ function M.parse(node, source, ctx)
 
   local headers = parse_headers(req_node, source, ctx)
   -- HACK: check if url doesn't have host
-  if headers["host"] and url[1] == "/" then
-    url = headers["host"]..url
-    headers["host"] = nil
+  if headers["host"] and vim.startswith(url, "/") then
+    url = "http://" ..headers["host"][1]..url
+    table.remove(headers["host"], 1)
   end
   ---@type rest.Request
   local req = {
