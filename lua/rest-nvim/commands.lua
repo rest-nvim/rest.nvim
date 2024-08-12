@@ -46,10 +46,28 @@ local function ui() return require("rest-nvim.ui.result") end
 local function config() return require("rest-nvim.config") end
 -- stylua: ignore end
 
+---Open window based on command mods and return new window identifier
+---@param opts table
+---@return integer winnr
+local function split_open_cmd(opts)
+  local is_split = opts.smods.vertical or opts.smods.horizontal
+  local is_tab = opts.smods.tab ~= -1
+  if is_split or is_tab then
+    vim.cmd(opts.mods .. " split")
+  end
+  return vim.api.nvim_get_current_win()
+end
+
 ---@type table<string, RestCmd>
 local rest_command_tbl = {
+  open = {
+    impl = function (_, opts)
+      local winnr = split_open_cmd(opts)
+      ui().enter(winnr)
+    end
+  },
   run = {
-    impl = function(args, _opts)
+    impl = function(args, _)
       if vim.bo.filetype ~= "http" or vim.b.__rest_no_http_file then
         vim.notify("`:Rest run` can be only called from http file", vim.log.levels.ERROR)
         return
@@ -62,8 +80,11 @@ local rest_command_tbl = {
         return
       end
       ui().clear()
-      -- TODO: open result window here (use `:horizontal`)
-      ui().open_ui()
+      if not ui().is_open() then
+        vim.cmd.wincmd("v")
+        ui().enter(0)
+        vim.cmd.wincmd("p")
+      end
       request().run()
     end,
     ---@return string[]
@@ -85,28 +106,19 @@ local rest_command_tbl = {
   },
   logs = {
     impl = function(_, opts)
-      local is_split = opts.smods.vertiacal or opts.smods.horizontal
-      local is_tab = opts.smods.tab ~= -1
-      if is_split or is_tab then
-        ---@diagnostic disable-next-line: invisible
-        vim.cmd(opts.mods .. " split " .. logger().get_logfile())
-      else
+      local winnr = split_open_cmd(opts)
+      vim.api.nvim_win_call(winnr, function ()
         ---@diagnostic disable-next-line: invisible
         vim.cmd.edit(logger().get_logfile())
-      end
+      end)
     end,
   },
   cookies = {
     impl = function(_, opts)
-      local is_split = opts.smods.vertiacal or opts.smods.horizontal
-      local is_tab = opts.smods.tab ~= -1
-      if is_split or is_tab then
-        ---@diagnostic disable-next-line: invisible
-        vim.cmd(opts.mods .. " split " .. config().cookies.path)
-      else
-        ---@diagnostic disable-next-line: invisible
+      local winnr = split_open_cmd(opts)
+      vim.api.nvim_win_call(winnr, function ()
         vim.cmd.edit(config().cookies.path)
-      end
+      end)
     end,
   },
   env = {

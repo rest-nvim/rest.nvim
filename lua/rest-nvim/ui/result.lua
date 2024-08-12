@@ -194,17 +194,18 @@ vim.api.nvim_set_hl(0, "RestPaneTitle", {
   underline = true,
 })
 
----@param horizontal? boolean
-function ui.open_ui(horizontal)
+---@return boolean
+function ui.is_open()
   local winnr = vim.iter(vim.api.nvim_tabpage_list_wins(0)):find(function(id)
     local buf = vim.api.nvim_win_get_buf(id)
     return vim.b[buf].__pane_group == group.name
   end)
-  if not winnr then
-    vim.cmd.wincmd(horizontal and "s" or "v")
-    group:enter(0)
-    vim.cmd.wincmd("p")
-  end
+  return winnr ~= nil
+end
+
+---@param winnr integer
+function ui.enter(winnr)
+  group:enter(winnr)
 end
 
 function ui.clear()
