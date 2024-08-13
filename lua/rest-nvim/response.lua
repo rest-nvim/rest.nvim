@@ -14,8 +14,6 @@ local logger = require("rest-nvim.logger")
 ---@field version string
 ---@field text string
 
--- TODO: format asynchronously
-
 ---Try format the result body
 ---@param content_type string?
 ---@param body string

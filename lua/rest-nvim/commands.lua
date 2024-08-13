@@ -7,32 +7,41 @@
 --- command                         action
 ---------------------------------------------------------------------------------
 ---
---- run {scope?}                    Execute one or several HTTP requests depending
----                                 on given `scope`. This scope can be either `last`,
----                                 `cursor` (default) or `document`.
+--- open                            Open result pane.
+---
+--- run {name?}                     Execute a HTTP request with given `name`. If no name is
+---                                 provideded, run request under the cursor
 ---
 --- last                            Re-run the last executed request, alias to `run last`
 ---                                 to retain backwards compatibility with the old keybinds
 ---                                 layout.
 ---
---- logs                            Open the rest.nvim logs file in a new tab.
+--- logs                            Open the rest.nvim logs file.
 ---
---- env {action?} {path?}           Manage the environment file that is currently in use while
----                                 running requests. If you choose to `set` the environment,
----                                 you must provide a `path` to the environment file. The
----                                 default action is `show`, which displays the current
----                                 environment file path.
+--- cookies                         Open the rest.nvim cookies file.
 ---
---- result {direction?}             Cycle through the results buffer winbar panes. The cycle
----                                 direction can be either `next` or `prev`.
+--- env show                        Show environment file registered to current `.http` file.
+---                                 (Just `:Rest env` also work)
+---
+--- env select                      Select and register environment file to current `.http`
+---                                 file via |vim.ui.select()|
+---
+--- env set {path}                  Register environment file to current `.http` file.
+---                                 `path` should be relative to Neovim's cwd
+---
+--- NOTE: All `:Rest` commands opening new window supports |command-modifiers|.
+--- For example, you can run `:hor Rest open` to open result pane in horizontal
+--- split
 ---
 ---@brief ]]
 
 -- HACK: what is the type of opts here?
 
 ---@class RestCmd
----@field impl fun(args:string[], opts: table?) The command implementation
----@field complete? fun(subcmd_arg_lead: string): string[] Command completions callback, taking the lead of the subcommand's argument
+---The command implementation
+---@field impl fun(args:string[], opts: table?)
+---Command completions callback, taking the lead of the subcommand's argument
+---@field complete? fun(subcmd_arg_lead: string): string[]
 
 local commands = {}
 

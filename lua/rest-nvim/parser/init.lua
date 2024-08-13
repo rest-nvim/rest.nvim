@@ -1,12 +1,18 @@
----@mod rest-nvim.pparser rest.nvim tree-sitter parsing module
+---@mod rest-nvim.parser rest.nvim http syntax parsing module
+---
+---@brief [[
+---
+--- rest.nvim `.http` syntax parsing module.
+--- rest.nvim uses `tree-sitter-http` as a core parser for `.http` syntax
+---
+---@brief ]]
 
-local M = {}
+local parser = {}
 
 local Context = require("rest-nvim.context").Context
 local script = require("rest-nvim.script")
 local utils   = require("rest-nvim.utils")
 local logger   = require("rest-nvim.logger")
-local config = require("rest-nvim.config")
 local jar = require("rest-nvim.cookie_jar")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
@@ -73,7 +79,7 @@ end
 ---@param source Source
 ---@param context rest.Context
 ---@return rest.Request.Body|nil
-function M.parse_body(body_node, source, context)
+function parser.parse_body(body_node, source, context)
   local body = {}
   body.__TYPE = body_node:type():gsub("_%w+", "")
   ---@cast body rest.Request.Body
@@ -90,8 +96,8 @@ function M.parse_body(body_node, source, context)
     body.data = expand_variables(body.data, context)
     local xml2lua = require("xml2lua")
     local handler = require("xmlhandler.tree"):new()
-    local parser = xml2lua.parser(handler)
-    local ok = pcall(function (t) return parser:parse(t) end, body.data)
+    local xml_parser = xml2lua.parser(handler)
+    local ok = pcall(function (t) return xml_parser:parse(t) end, body.data)
     if not ok then
       logger.warn("invalid xml: '" .. body.data .. "'")
       return nil
@@ -126,20 +132,20 @@ local IN_PLACE_VARIABLE_QUERY = "(variable_declaration) @inplace_variable"
 ---parse all in-place variables from source
 ---@param source Source
 ---@return rest.Context ctx
-function M.create_context(source)
+function parser.create_context(source)
   local query = vim.treesitter.query.parse("http", IN_PLACE_VARIABLE_QUERY)
   local ctx = Context:new()
   local _, tree = utils.ts_parse_source(source)
   for _, node in query:iter_captures(tree:root(), source) do
     if node:type() == "variable_declaration" then
-      M.parse_variable_declaration(node, source, ctx)
+      parser.parse_variable_declaration(node, source, ctx)
     end
   end
   return ctx
 end
 
 ---@return TSNode? node TSNode with type `section`
-function M.get_cursor_request_node()
+function parser.get_cursor_request_node()
   local node = vim.treesitter.get_node()
   if node then
     node = utils.ts_find(node, "section")
@@ -151,7 +157,7 @@ function M.get_cursor_request_node()
 end
 
 ---@return TSNode[]
-function M.get_all_request_node()
+function parser.get_all_request_node()
   local source = 0
   local _, tree = utils.ts_parse_source(source)
   local reqs = {}
@@ -164,7 +170,7 @@ function M.get_all_request_node()
 end
 
 ---@return TSNode?
-function M.get_request_node_by_name(name)
+function parser.get_request_node_by_name(name)
   local source = 0
   local _, tree = utils.ts_parse_source(source)
   local query = NAMED_REQUEST_QUERY
@@ -182,7 +188,7 @@ end
 ---@param vd_node TSNode
 ---@param source Source
 ---@param ctx rest.Context
-function M.parse_variable_declaration(vd_node, source, ctx)
+function parser.parse_variable_declaration(vd_node, source, ctx)
   vim.validate({ node = utils.ts_node_spec(vd_node, "variable_declaration") })
   local name = assert(get_node_field_text(vd_node, "name", source))
   local value = vim.trim(assert(get_node_field_text(vd_node, "value", source)))
@@ -202,7 +208,7 @@ end
 ---@param script_node TSNode
 ---@param source Source
 ---@param context rest.Context
-function M.parse_pre_request_script(script_node, source, context)
+function parser.parse_pre_request_script(script_node, source, context)
   local node = assert(script_node:named_child(0))
   local str = parse_script(node, source)
   script.load_prescript(str, context)()
@@ -211,7 +217,7 @@ end
 ---@param handler_node TSNode
 ---@param source Source
 ---@param context rest.Context
-function M.parse_request_handler(handler_node, source, context)
+function parser.parse_request_handler(handler_node, source, context)
   local node = assert(handler_node:named_child(0))
   local str = parse_script(node, source)
   return script.load_handler(str, context)
@@ -219,7 +225,7 @@ end
 
 ---@param source Source
 ---@return string[]
-function M.get_request_names(source)
+function parser.get_request_names(source)
   local _, tree = utils.ts_parse_source(source)
   local query = NAMED_REQUEST_QUERY
   local result = {}
@@ -238,7 +244,7 @@ end
 ---@param source Source
 ---@param ctx? rest.Context
 ---@return rest.Request|nil
-function M.parse(node, source, ctx)
+function parser.parse(node, source, ctx)
   assert(node:type() == "section")
   ctx = ctx or Context:new()
   -- request should not include error
@@ -254,7 +260,7 @@ function M.parse(node, source, ctx)
   local body
   local body_node = req_node:field("body")[1]
   if body_node then
-    body = M.parse_body(body_node, source, ctx)
+    body = parser.parse_body(body_node, source, ctx)
     if not body then
       logger.error("parsing body failed")
       return nil
@@ -276,9 +282,9 @@ function M.parse(node, source, ctx)
   for child, _ in node:iter_children() do
     local node_type = child:type()
     if node_type == "pre_request_script" then
-      M.parse_pre_request_script(child, source, ctx)
+      parser.parse_pre_request_script(child, source, ctx)
     elseif node_type == "res_handler_script" then
-      table.insert(handlers, M.parse_request_handler(child, source, ctx))
+      table.insert(handlers, parser.parse_request_handler(child, source, ctx))
     elseif node_type == "request_separator" then
       name = get_node_field_text(child, "value", source)
     elseif node_type == "comment" and get_node_field_text(child, "name", source) == "name" then
@@ -316,4 +322,4 @@ function M.parse(node, source, ctx)
   return req
 end
 
-return M
+return parser

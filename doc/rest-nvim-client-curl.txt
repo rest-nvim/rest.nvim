@@ -1,0 +1,30 @@
+==============================================================================
+rest.nvim cURL cli client                            *rest-nvim.client.curl.cli*
+
+
+ rest.nvim cURL cli client implementation
+ heavily inspired by plenary.nvim
+
+
+curl.request({request})                                           *curl.request*
+    returns future containing Result
+
+    Parameters: ~
+        {request}  (rest.Request)  Request data to be passed to cURL
+
+    Returns: ~
+        (nio.control.Future)  future containing rest.Response
+
+
+utils.curl_error({code})                                      *utils.curl_error*
+    Return the status code and the meaning of an curl error
+    see man curl for reference
+
+    Parameters: ~
+        {code}  (number)  The exit code of curl
+
+    Returns: ~
+        (string)  curl error message
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

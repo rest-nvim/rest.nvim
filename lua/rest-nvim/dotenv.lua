@@ -1,4 +1,4 @@
----@mode rest-nvim.dotenv_ dotenv management module
+---@mode rest-nvim.dotenv dotenv management module
 
 local M = {}
 

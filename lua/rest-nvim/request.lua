@@ -1,4 +1,4 @@
----@mod rest-nvim.request_ rest.nvim request APIs
+---@mod rest-nvim.request rest.nvim request APIs
 
 local M = {}
 
@@ -42,7 +42,6 @@ local function run_request(req)
 
   ui.update({request=req})
 
-  -- TODO: set UI with request informations (e.g. method & get)
   nio.run(function ()
     local ok, res = pcall(client.request(req).wait)
     if not ok then

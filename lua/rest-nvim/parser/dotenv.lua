@@ -62,7 +62,6 @@ function M.parse(path, setter)
       end
     end
   else
-    -- FIXME: handle other newline characters
     local vars_tbl = vim.split(file_contents, "\n")
     table.remove(vars_tbl, #vars_tbl)
     for _, var in ipairs(vars_tbl) do

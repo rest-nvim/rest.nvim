@@ -4,6 +4,13 @@
 ---
 --- rest.nvim configuration options
 ---
+--- You can set rest.nvim configuration options via `vim.g.rest_nvim`.
+---
+--->
+--- ---@type rest.Opts
+--- vim.g.rest_nvim
+---<
+---
 ---@brief ]]
 
 ---@type rest.Config
@@ -18,6 +25,8 @@ local config
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
 
+---@tag vim.g.rest_nvim
+---@tag g:rest_nvim
 ---@class rest.Opts
 --- Table of custom dynamic variables
 ---@field custom_dynamic_variables? table<string, fun():string>

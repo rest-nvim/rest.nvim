@@ -32,12 +32,13 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 ## Features
 
 - Easy to use
-- Friendly and organized request results window
+- Friendly, organized and featureful request results window
 - Fast runtime with statistics about your request
 - Set custom pre-request and post-request hooks to dynamically interact with the data
 - Easily set environment variables based on the response to re-use the data later
 - Tree-sitter based parsing and syntax highlighting for speed and perfect accuracy
 - Possibility of using dynamic/environment variables and Lua scripting in HTTP files
+- Save received cookies and load them automatically
 
 ## Install
 
@@ -208,12 +209,12 @@ request and run the <kbd>:Rest run</kbd> command.
 >    request in the current cursor line, no matters the position as long as
 >    the cursor is on a request tree-sitter node.
 
-## Keybindings
+### Keybindings
 
 By default `rest.nvim` does not have any key mappings except the result buffers so you will not have
 conflicts with any of your existing ones.
 
-## Commands
+### Commands
 
 | User Command           | Behavior                                             |
 |------------------------|------------------------------------------------------|
@@ -226,6 +227,8 @@ conflicts with any of your existing ones.
 | `:Rest env show`       | Show dotenv file registered to current `.http` file  |
 | `:Rest env select`     | Select & register `.env` file with `vim.ui.select()` |
 | `:Rest env set {path}` | Register `.env` file to current `.http` file         |
+
+See `:h rest-nvim.commands` for more info
 
 ## Extensions
 

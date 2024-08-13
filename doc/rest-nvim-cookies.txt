@@ -1,0 +1,39 @@
+==============================================================================
+Cookie handler module                                     *rest-nvim.cookie_jar*
+
+rest.Cookie                                                        *rest.Cookie*
+
+    Fields: ~
+        {name}      (string)
+        {value}     (string)
+        {domain}    (string)
+        {path}      (string)
+        {expires}   (integer)
+        {max_date}  (integer)
+
+
+M.load_jar()                                                        *M.load_jar*
+    Load Cookie jar from rest-nvim.cookies file
+
+
+M.update_jar({req_url}, {res})                                    *M.update_jar*
+    Save cookies from response
+    Request is provided as a context
+
+    Parameters: ~
+        {req_url}  (string)
+        {res}      (rest.Response)
+
+
+M.save_jar()                                                        *M.save_jar*
+    Save current cookie jar to cookies file
+
+
+M.load_cookies({req})                                           *M.load_cookies*
+    Load cookies for request
+
+    Parameters: ~
+        {req}  (rest.Request)
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
