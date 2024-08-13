@@ -29,7 +29,7 @@
 --- env set {path}                  Register environment file to current `.http` file.
 ---                                 `path` should be relative to Neovim's cwd
 ---
---- NOTE: All `:Rest` commands opening new window supports |command-modifiers|.
+--- NOTE: All `:Rest` commands opening new window support |command-modifiers|.
 --- For example, you can run `:hor Rest open` to open result pane in horizontal
 --- split
 ---

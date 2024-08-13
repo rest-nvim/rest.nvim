@@ -228,6 +228,10 @@ conflicts with any of your existing ones.
 | `:Rest env select`     | Select & register `.env` file with `vim.ui.select()` |
 | `:Rest env set {path}` | Register `.env` file to current `.http` file         |
 
+> [!INFO]
+> All `:Rest` subcommands opening new window support `command-modifiers` (`:h command-modifiers`.)
+> For example, you can run `:hor Rest open` to open result pane in horizontal split.
+
 See `:h rest-nvim.commands` for more info
 
 ## Extensions
