@@ -31,7 +31,7 @@ local function get_or_create_buf()
   if not existing_buf then
     -- Create a new buffer
     local new_bufnr = vim.api.nvim_create_buf(false, true)
-    local keybinds = config.result.keybinds
+    local keybinds = config.ui.keybinds
     vim.api.nvim_buf_set_name(new_bufnr, tmp_name)
     vim.api.nvim_set_option_value("ft", "markdown", { buf = new_bufnr })
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = new_bufnr })

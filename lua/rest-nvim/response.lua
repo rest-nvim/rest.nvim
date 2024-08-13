@@ -45,7 +45,7 @@ function response.try_format_body(content_type, body)
           body = sc.stdout --[[@as string]]
         else
           logger.error("Error running formatter '" .. fmt .. "' on response body:\n" .. sc.stderr)
-          vim.notify("Formatting response body failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
+          vim.notify("[rest.nvim] Formatting response body failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
         end
       end
     elseif res_type ~= nil then

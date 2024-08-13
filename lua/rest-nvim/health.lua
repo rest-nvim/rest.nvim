@@ -19,7 +19,7 @@ local function install_health()
   local found_luarocks_nvim = package.searchpath("luarocks", package.path)
 
   if vim.fn.executable("luarocks") ~= 1 and not vim.g.rocks_nvim_loaded and not found_luarocks_nvim then
-    vim.health.error("`Luarocks` is not installed in your system")
+    vim.health.warn("`Luarocks` is not installed in your system", "Are you sure you installed all needed dependencies properly?")
   else
     vim.health.ok("Found `luarocks` installed in your system")
   end
@@ -66,7 +66,7 @@ local function configuration_health()
   end
 
   -- Formatters
-  local formatters = config.result.behavior.formatters
+  local formatters = config.response.formatters
   for ft, formatter in pairs(formatters) do
     if type(formatter) == "string" then
       if vim.fn.executable(formatter) ~= 1 then
@@ -83,7 +83,7 @@ local function configuration_health()
         )
       end
     elseif type(formatter) == "function" then
-      local _, fmt_meta = formatter()
+      local _, fmt_meta = formatter("")
       if not fmt_meta.found then
         vim.health.warn(
           "Formatter for `"

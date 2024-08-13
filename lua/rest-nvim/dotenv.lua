@@ -22,7 +22,7 @@ function M.load_file(path, setter)
   end
   local ok = dotenv_parser.parse(path, setter)
   if not ok then
-    vim.notify("failed to load file '" .. path .. "'", vim.log.levels.WARN)
+    vim.notify("[rest.nvim] failed to load file '" .. path .. "'", vim.log.levels.WARN)
   end
 end
 
@@ -35,7 +35,7 @@ function M.register_file(path, bufnr)
   -- TODO: validate file extension
   bufnr = bufnr or 0
   vim.b[bufnr]._rest_nvim_env_file = path
-  vim.notify("Env file '" .. path .. "' has been registered")
+  vim.notify("[rest.nvim] Env file '" .. path .. "' has been registered")
 end
 
 ---show registered dotenv file for current buffer
@@ -43,9 +43,9 @@ end
 function M.show_registered_file(bufnr)
   bufnr = bufnr or 0
   if not vim.b[bufnr]._rest_nvim_env_file then
-    vim.notify("No env file is used in current buffer", vim.log.levels.WARN)
+    vim.notify("[rest.nvim] No env file is used in current buffer", vim.log.levels.WARN)
   else
-    vim.notify("Current env file in use: " .. vim.b._rest_nvim_env_file, vim.log.levels.INFO)
+    vim.notify("[rest.nvim] Current env file in use: " .. vim.b._rest_nvim_env_file, vim.log.levels.INFO)
   end
 end
 

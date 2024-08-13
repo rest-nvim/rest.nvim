@@ -219,12 +219,12 @@ config = vim.tbl_deep_extend("force", {
 local ok, err = check.validate(config)
 
 if not ok then
-  vim.notify("Rest.nvim: " .. err, vim.log.levels.ERROR)
+  vim.notify("[rest.nvim] " .. err, vim.log.levels.ERROR)
 end
 
 if #config._debug_info.unrecognized_configs > 0 then
   vim.notify(
-    "Unrecognized configs found in setup: " .. vim.inspect(config._debug_info.unrecognized_configs),
+    "[rest.nvim] Unrecognized configs found in setup: " .. vim.inspect(config._debug_info.unrecognized_configs),
     vim.log.levels.WARN
   )
 end
