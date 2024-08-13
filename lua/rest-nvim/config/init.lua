@@ -9,69 +9,87 @@
 ---@type rest.Config
 local config
 
----@alias RestResultFormatters string|fun(body:string):string,table
+---@alias RestResultFormatter string|fun(body:string):string,table
 
----@class rest.Opts.Highlight
---- Whether current request highlighting is enabled or not (Default: `true`)
----@field enable? boolean
---- Duration time of the request highlighting in milliseconds (Default: `250`)
----@field timeout? number
-
----@class rest.Opts.Result
----@field window? rest.Opts.Result.Window
----@field behavior? rest.Opts.Result.Behavior
----@field keybinds? rest.Opts.Result.Keybinds
-
----@class rest.Opts.Result.Window
---- Open request results in a horizontal split (Default: `false`)
----@field horizontal? boolean
----@field enter? boolean
-
----@class rest.Opts.Result.Behavior
----@field decode_url boolean
----@field statistics rest.Opts.Statistics
----@field formatters table<string,RestResultFormatters>
-
----@class rest.Opts.Statistics
----@field enable boolean
----@field stats table<string,rest.Opts.Result.Stat.Style>
-
----@class rest.Opts.Result.Keybinds
---- Mapping for cycle to previous result pane (Default: `"H"`)
----@field prev? string
---- Mapping for cycle to next result pane (Default: `"L"`)
----@field next? string
-
----@class rest.Opts.Result.Stat.Style
---- Title used on result pane
+---@class RestStatisticsStyle
+--- Title used on Statistics pane
 ---@field title? string
 --- Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
 
+---@class rest.Opts
+--- Table of custom dynamic variables
+---@field custom_dynamic_variables? table<string, fun():string>
+---@field request? rest.Opts.Request
+---@field response? rest.Opts.Response
+---@field clients? rest.Opts.Clients
+---@field cookies? rest.Opts.Cookies
+---@field env? rest.Opts.Env
+---@field ui? rest.Opts.UI
+---@field highlight? rest.Opts.Highlight
+
+---@class rest.Opts.Request
+--- Skip SSL verification, useful for unknown certificates (Default: `false`)
+---@field skip_ssl_verification? boolean
+--- Default request hooks (aka. pre-request scripts) configuration
+---@field hooks? rest.Opts.Request.Hooks
+
+---@class rest.Opts.Request.Hooks
+--- Encode URL before making request (Default: `true`)
+---@field encode_url? boolean
+
+---@class rest.Opts.Response
+--- Default response hooks (aka. request handlers) configuration
+---@field hooks? rest.Opts.Response.Hooks
+--- Formatters used for response format hook
+---@field formatters? table<string,RestResultFormatter>
+
+---@class rest.Opts.Response.Hooks
+--- Decode url segments on response UI too improve readability (Default: `true`)
+---@field decode_url? boolean
+--- Format the response body (Default: `true`)
+---@field format? boolean
+
+---@class rest.Opts.Clients
+---@field curl? rest.Opts.Clients.Curl
+
+---@class rest.Opts.Clients.Curl
+--- Statistics to parse from curl request output
+--- Key is a string value of format used in `--write-out` option
+--- See `man curl` for more info
+---@field statistics? table<string,RestStatisticsStyle>
+
 ---@class rest.Opts.Cookies
---- Whether to enable cookies support (Default: `true`)
+--- Enable the cookies support (Default: `true`)
 ---@field enable? boolean
 --- File path to save cookies file
 --- (Default: `"stdpath("data")/rest-nvim.cookies"`)
 ---@field path? string
 
----@class rest.Opts
---- Cookies config
----@field cookies? rest.Opts.Cookies
---- Environment variables file pattern for telescope.nvim
---- (Default: `".*env.*$"`)
----@field env_pattern? string
---- Encode URL before making request (Default: `true`)
----@field encode_url? boolean
---- Skip SSL verification, useful for unknown certificates (Default: `false`)
----@field skip_ssl_verification? boolean
---- Table of custom dynamic variables
----@field custom_dynamic_variables? table<string, fun():string>
---- Request highlighting config
----@field highlight? rest.Opts.Highlight
---- Result view config
----@field result? rest.Opts.Result
+---@class rest.Opts.Env
+--- Enable the `.env` files support (Default: `true`)
+---@field enable? boolean
+--- Environment variables file pattern for telescope.nvim (Default: `"%.env.*"`)
+---@field pattern? string
+
+---@class rest.Opts.UI
+--- Set winbar in result pane (Default: `true`)
+---@field winbar? boolean
+--- Default mappings for result pane
+---@field keybinds? rest.Opts.UI.Keybinds
+
+---@class rest.Opts.UI.Keybinds
+--- Mapping for cycle to previous result pane (Default: `"H"`)
+---@field prev? string
+--- Mapping for cycle to next result pane (Default: `"L"`)
+---@field next? string
+
+---@class rest.Opts.Highlight
+--- Enable highlight-on-request (Default: `true`)
+---@field enable? boolean
+--- Duration time of the request highlighting in milliseconds (Default: `750`)
+---@field timeout? number
 
 ---@type rest.Opts
 vim.g.rest_nvim = vim.g.rest_nvim
@@ -79,6 +97,64 @@ vim.g.rest_nvim = vim.g.rest_nvim
 ---rest.nvim default configuration
 ---@class rest.Config
 local default_config = {
+  ---@type table<string, fun():string> Table of custom dynamic variables
+  custom_dynamic_variables = {},
+  ---@class rest.Config.Request
+  request = {
+    ---@type boolean Skip SSL verification, useful for unknown certificates
+    skip_ssl_verification = false,
+    ---Default request hooks
+    ---@class rest.Config.Request.Hooks
+    hooks = {
+      ---@type boolean Encode URL before making request
+      encode_url = true,
+    },
+  },
+  ---@class rest.Config.Response
+  response = {
+    ---@class rest.Config.Response.Hooks
+    hooks = {
+      ---@type boolean Decode the request URL segments on response UI to improve readability
+      decode_url = true,
+      ---@type boolean Format the response body
+      format = true,
+    },
+    ---@type table<string,RestResultFormatter>
+    formatters = {
+      json = "jq",
+      html = function(body)
+        if vim.fn.executable("tidy") == 0 then
+          return body, { found = false, name = "tidy" }
+        end
+        -- stylua: ignore
+        local fmt_body = vim.fn.system({
+          "tidy",
+          "-i",
+          "-q",
+          "--tidy-mark",      "no",
+          "--show-body-only", "auto",
+          "--show-errors",    "0",
+          "--show-warnings",  "0",
+          "-",
+        }, body):gsub("\n$", "")
+
+        return fmt_body, { found = true, name = "tidy" }
+      end,
+    },
+  },
+  ---@class rest.Config.Clients
+  clients = {
+    ---@class rest.Config.Clients.Curl
+    curl = {
+      ---Statistics to be shown, takes cURL's `--write-out` flag variables
+      ---See `man curl` for `--write-out` flag
+      ---@type table<string,RestStatisticsStyle>
+      statistics = {
+        time_total = { winbar = "take", title = "Time taken" },
+        size_download = { winbar = "size", title = "Download size" },
+      },
+    },
+  },
   ---@class rest.Config.Cookies
   cookies = {
     ---@type boolean Whether enable cookies support or not
@@ -86,71 +162,18 @@ local default_config = {
     ---@type string Cookies file path
     path = vim.fs.joinpath(vim.fn.stdpath("data") --[[@as string]], "rest-nvim.cookies")
   },
-  ---@type string Environment variables file pattern for telescope.nvim
-  env_pattern = ".*env.*$",
-
-  ---@type boolean Encode URL before making request
-  encode_url = true,
-  ---@type boolean Skip SSL verification, useful for unknown certificates
-  skip_ssl_verification = false,
-  ---@type table<string, fun():string> Table of custom dynamic variables
-  custom_dynamic_variables = {},
-
-  ---@class rest.Config.Result
-  result = {
-    ---@class rest.Cnofig.Result.Window
-    window = {
-      -- TODO: use `:horizontal` instead. see `:h command-modifiers` and opts.smods
-      ---@type boolean Open request results in a horizontal split
-      horizontal = false,
-      ---@type boolean Change the focus to the results window or stay in the current window (HTTP file)
-      enter = false,
-      ---@type boolean
-      headers = true,
-      ---@type boolean
-      cookies = true,
-    },
-    ---@class rest.Config.Result.Behavior
-    behavior = {
-      ---@type boolean Whether to decode the request URL query parameters to improve readability
-      decode_url = true,
-      ---@class rest.Config.Result.Stats
-      statistics = {
-        ---@type boolean Whether enable statistics or not
-        enable = true,
-        ---Statistics to be shown, takes cURL's easy getinfo constants name
-        ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
-        ---@type table<string,rest.Opts.Result.Stat.Style>
-        stats = {
-          -- TODO: use `curl --write-out` instead
-          time_total = { winbar = "take", title = "Time taken" },
-          size_download = { winbar = "size", title = "Download size" },
-        },
-      },
-      ---@type table<string,RestResultFormatters>
-      formatters = {
-        json = "jq",
-        html = function(body)
-          if vim.fn.executable("tidy") == 0 then
-            return body, { found = false, name = "tidy" }
-          end
-          -- stylua: ignore
-          local fmt_body = vim.fn.system({
-            "tidy",
-            "-i",
-            "-q",
-            "--tidy-mark",      "no",
-            "--show-body-only", "auto",
-            "--show-errors",    "0",
-            "--show-warnings",  "0",
-            "-",
-          }, body):gsub("\n$", "")
-
-          return fmt_body, { found = true, name = "tidy" }
-        end,
-      },
-    },
-    ---@class rest.Config.Result.Keybinds
+  ---@class rest.Config.Env
+  env = {
+    ---@type boolean
+    enable = true,
+    ---@type string
+    pattern = "%.env.*"
+  },
+  ---@class rest.Config.UI
+  ui = {
+    ---@type boolean Whether to set winbar to result panes
+    winbar = true,
+    ---@class rest.Config.UI.Keybinds
     keybinds = {
       ---@type string Mapping for cycle to previous result pane
       prev = "H",

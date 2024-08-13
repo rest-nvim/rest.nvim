@@ -14,10 +14,6 @@
 
 </div>
 
-# ⚠️ NOTICE
-
-Currently my focus is university and other projects, which is why I have no interest in rest.nvim and it's extremely difficult for me to work on bugs or features of a plugin that I have not used for a long time and that in the time that I've used it, it works perfectly on my computer. That said, I have looked for another maintainer for the project but I have never been able to find it, so I have decided that it's best to archive it and hope that in the future someone makes better software than me and is willing to maintain it.
-
 ---
 
 A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
@@ -52,18 +48,10 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 ### Dependencies
 
 - System-wide
-  - `Python` (only if you are using `packer.nvim` or `lazy.nvim` plus `luarocks.nvim` for the installation)
-  - `cURL` development headers (usually called `libcurl-dev` or `libcurl-devel` depending on your Linux distribution)
+  - `curl`
 - Optional [can be changed, see config below](#default-configuration)
   - `jq`   (to format JSON output)
   - `tidy` (to format HTML output)
-
-> [!NOTE]
->
-> 1. Python will be unnecessary once `luarocks.nvim` gets rid of it as a dependency in the `go-away-python` branch.
->
-> 2. I will be working on making a binary rock of `Lua-cURL` so that the `cURL` development headers are not
-> necessary for the installation process.
 
 ### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
 
@@ -75,38 +63,16 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 
 ```lua
 {
-  "vhyrro/luarocks.nvim",
-  priority = 1000,
-  config = true,
-  opts = {
-    rocks = { "lua-curl", "nvim-nio", "mimetypes", "xml2lua" }
-  }
-},
-{
   "rest-nvim/rest.nvim",
-  ft = "http",
-  dependencies = { "luarocks.nvim" },
-  config = function()
-    require("rest-nvim").setup()
-  end,
 }
 ```
-
-> [!NOTE]
->
-> There's a `build.lua` file in the repository that `lazy.nvim` will find and source to install the
-> luarocks dependencies for you by using `luarocks.nvim`. You don't need to specify a rock list
-> by yourself.
 
 ### [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
   "rest-nvim/rest.nvim",
-  rocks = { "lua-curl", "nvim-nio", "mimetypes", "xml2lua" },
-  config = function()
-    require("rest-nvim").setup()
-  end,
+  rocks = { "nvim-nio", "mimetypes", "xml2lua", "fidget.nvim" },
 }
 ```
 
@@ -120,66 +86,98 @@ get a good experience during autocompletion :)
 > You can also check out `:h rest-nvim.config` for documentation.
 
 ```lua
+---rest.nvim default configuration
+---@class rest.Config
 local default_config = {
-  env_pattern = "\\.env$",
-  env_edit_command = "tabedit",
-  encode_url = true,
-  skip_ssl_verification = false,
+  ---@type table<string, fun():string> Table of custom dynamic variables
   custom_dynamic_variables = {},
-  logs = {
-    level = "info",
-    save = true,
+  ---@class rest.Config.Request
+  request = {
+    ---@type boolean Skip SSL verification, useful for unknown certificates
+    skip_ssl_verification = false,
+    ---Default request hooks
+    ---@class rest.Config.Request.Hooks
+    hooks = {
+      ---@type boolean Encode URL before making request
+      encode_url = true,
+    },
   },
-  result = {
-    split = {
-      horizontal = false,
-      in_place = false,
-      stay_in_current_window_after_split = true,
-    },
-    behavior = {
+  ---@class rest.Config.Response
+  response = {
+    ---@class rest.Config.Response.Hooks
+    hooks = {
+      ---@type boolean Decode the request URL segments on response UI to improve readability
       decode_url = true,
-      show_info = {
-        url = true,
-        headers = true,
-        http_info = true,
-        curl_command = true,
-      },
-      statistics = {
-        enable = true,
-        ---@see https://curl.se/libcurl/c/curl_easy_getinfo.html
-        stats = {
-          { "total_time", title = "Time taken:" },
-          { "size_download_t", title = "Download size:" },
-        },
-      },
-      formatters = {
-        json = "jq",
-        html = function(body)
-          if vim.fn.executable("tidy") == 0 then
-            return body, { found = false, name = "tidy" }
-          end
-          local fmt_body = vim.fn.system({
-            "tidy",
-            "-i",
-            "-q",
-            "--tidy-mark",      "no",
-            "--show-body-only", "auto",
-            "--show-errors",    "0",
-            "--show-warnings",  "0",
-            "-",
-          }, body):gsub("\n$", "")
+      ---@type boolean Format the response body
+      format = true,
+    },
+    ---@type table<string,RestResultFormatter>
+    formatters = {
+      json = "jq",
+      html = function(body)
+        if vim.fn.executable("tidy") == 0 then
+          return body, { found = false, name = "tidy" }
+        end
+        -- stylua: ignore
+        local fmt_body = vim.fn.system({
+          "tidy",
+          "-i",
+          "-q",
+          "--tidy-mark",      "no",
+          "--show-body-only", "auto",
+          "--show-errors",    "0",
+          "--show-warnings",  "0",
+          "-",
+        }, body):gsub("\n$", "")
 
-          return fmt_body, { found = true, name = "tidy" }
-        end,
+        return fmt_body, { found = true, name = "tidy" }
+      end,
+    },
+  },
+  ---@class rest.Config.Clients
+  clients = {
+    ---@class rest.Config.Clients.Curl
+    curl = {
+      ---Statistics to be shown, takes cURL's `--write-out` flag variables
+      ---See `man curl` for `--write-out` flag
+      ---@type table<string,RestStatisticsStyle>
+      statistics = {
+        time_total = { winbar = "take", title = "Time taken" },
+        size_download = { winbar = "size", title = "Download size" },
       },
     },
+  },
+  ---@class rest.Config.Cookies
+  cookies = {
+    ---@type boolean Whether enable cookies support or not
+    enable = true,
+    ---@type string Cookies file path
+    path = vim.fs.joinpath(vim.fn.stdpath("data") --[[@as string]], "rest-nvim.cookies")
+  },
+  ---@class rest.Config.Env
+  env = {
+    ---@type boolean
+    enable = true,
+    ---@type string
+    pattern = "%.env.*"
+  },
+  ---@class rest.Config.UI
+  ui = {
+    ---@type boolean Whether to set winbar to result panes
+    winbar = true,
+    ---@class rest.Config.UI.Keybinds
     keybinds = {
+      ---@type string Mapping for cycle to previous result pane
       prev = "H",
+      ---@type string Mapping for cycle to next result pane
       next = "L",
     },
   },
+  ---@class rest.Config.Highlight
   highlight = {
+    ---@type boolean Whether current request highlighting is enabled or not
     enable = true,
+    ---@type number Duration time of the request highlighting in milliseconds
     timeout = 750,
   },
 }
@@ -197,37 +195,6 @@ ensure_installed = { "lua", "xml", "http", "json", "graphql" }
 
 Or manually run `:TSInstall lua xml http json graphql`.
 
-## Keybindings
-
-By default `rest.nvim` does not have any key mappings so you will not have
-conflicts with any of your existing ones.
-
-However, `rest.nvim` exposes a `:Rest` command in HTTP files that you can use to create your
-keybinds easily. For example:
-
-```lua
-keybinds = {
-  {
-    "<localleader>rr", "<cmd>Rest run<cr>", "Run request under the cursor",
-  },
-  {
-    "<localleader>rl", "<cmd>Rest run last<cr>", "Re-run latest request",
-  },
-}
-```
-
-You can still also use the legacy `<Plug>RestNvim` commands for mappings:
-- `<Plug>RestNvim`, run the request under the cursor
-- `<Plug>RestNvimLast`, re-run the last request
-
-> [!NOTE]
->
-> 1. `<Plug>RestNvimPreview` has been removed, as we can no longer implement it with the current
->    cURL implementation.
->
-> 2. The legacy `<Plug>` mappings will raise a deprecation warning suggesting you to switch to
->    the `:Rest` command, as they are going to be completely removed in the next version.
-
 ## Usage
 
 Create a new http file or open an existing one and place the cursor over the
@@ -235,14 +202,32 @@ request and run the <kbd>:Rest run</kbd> command.
 
 > [!NOTE]
 >
-> 1. You can find examples of use in the [tests](./tests) directory.
+> 1. You can find examples of use in the [spec/examples](./spec/examples) directory.
 >
 > 2. `rest.nvim` supports multiple HTTP requests in one file. It selects the
 >    request in the current cursor line, no matters the position as long as
 >    the cursor is on a request tree-sitter node.
 
+## Keybindings
 
----
+By default `rest.nvim` does not have any key mappings except the result buffers so you will not have
+conflicts with any of your existing ones.
+
+## Commands
+
+| User Command           | Behavior                                             |
+|------------------------|------------------------------------------------------|
+| `:Rest open`           | Open result pane                                     |
+| `:Rest run`            | Run request under the cursor                         |
+| `:Rest run {name}`     | Run request with name `{name}`                       |
+| `:Rest last`           | Run last request                                     |
+| `:Rest logs`           | Edit logs file                                       |
+| `:Rest cookies`        | Edit cookies file                                    |
+| `:Rest env show`       | Show dotenv file registered to current `.http` file  |
+| `:Rest env select`     | Select & register `.env` file with `vim.ui.select()` |
+| `:Rest env set {path}` | Register `.env` file to current `.http` file         |
+
+## Extensions
 
 ### Telescope Extension
 
@@ -256,56 +241,20 @@ require("telescope").load_extension("rest")
 require("telescope").extensions.rest.select_env()
 ```
 
-If running Ubuntu or Debian based systems you might need to run `ln -s $(which fdfind) ~/.local/bin/fd` to get extension to work. This is becuase extension runs the [fd](https://github.com/sharkdp/fd?tab=readme-ov-file#installation) command.
-
 Here is a preview of the extension working :)
 
 ![telescope rest extension demo](https://github.com/rest-nvim/rest.nvim/assets/36456999/a810954f-b45c-44ee-854d-94039de8e2fc)
 
-### Mappings
+#### Mappings
 
 - <kbd>Enter</kbd>: Select Env file
 - <kbd>Ctrl + O</kbd>: Edit Env file
 
-### Config
+#### Config
 
-- `env_pattern`: For env file pattern
-- `env_edit_command`: For env file edit command
+- `config.env.pattern`: For env file pattern (lua-pattern)
 
-
-### Select environment alternative
-
-If you are not using telescope, this custom keybind can let you select an environment
-
-```lua
-vim.keymap.set('n', ',q', function()
-  local pattern = _G._rest_nvim.env_pattern
-  local command = string.format("fd -HI '%s'", pattern)
-  local result = io.popen(command):read('*a')
-
-  local env_list = {}
-  for line in result:gmatch('[^\r\n]+') do
-    table.insert(env_list, line)
-  end
-
-  local rest_functions = require('rest-nvim.functions')
-
-  vim.ui.select(env_list, {
-    prompt = 'Select env file ',
-    format_item = function(item)
-      return item
-    end,
-  }, function(choice)
-    if choice == nil then
-      return
-    end
-    rest_functions.env('set', choice)
-  end)
-end, { desc = '[q]uery envs' })
-```
-
-
-## Lualine
+### Lualine Component
 
 We also have lualine component to get what env file you select!
 
@@ -353,9 +302,8 @@ Here is a preview of the component working :)
 > semantic versioning and these help with automatic releases, please use this type of convention
 > when submitting changes to the project.
 
-Tests can be ran via `make test`. You must have `luarocks` installed and `lua5.1` or `luajit` to
-install dependencies. The test runner through `make test` will automatically install all required
-dependencies.
+Tests can be ran via `make test`. You must have `luarocks` installed to install dependencies. The
+test runner through `make test` will automatically install all required dependencies.
 
 ## Related software
 

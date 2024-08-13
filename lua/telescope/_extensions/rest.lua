@@ -1,37 +1,27 @@
-local has_telescope, telescope = pcall(require, "telescope")
-
-if not has_telescope then
-  return
-end
-
-local dotenv = require("rest-nvim.dotenv")
-local config = require("rest-nvim.config")
+local telescope = require("telescope")
 
 local state = require("telescope.actions.state")
-
 local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local conf = require("telescope.config").values
+local make_entry = require("telescope.make_entry")
 
 local function rest_env_select(_)
-  local pattern = config.env_pattern
+  local dotenv = require("rest-nvim.dotenv")
 
-  -- TODO: use dotenv.find_env_files instead
-  local command = string.format("fd -HI '%s'", pattern)
-  local result = io.popen(command):read("*a")
+  local lines = dotenv.find_env_files()
 
-  local lines = {}
-  for line in result:gmatch("[^\r\n]+") do
-    table.insert(lines, line)
-  end
+  local opts = {}
+  opts.entry_maker = make_entry.gen_from_file(opts)
 
   pickers
-    .new({}, {
+    .new(opts, {
       prompt_title = "Select Env File",
       finder = finders.new_table({
         results = lines,
+        entry_maker = make_entry.gen_from_file(),
       }),
       attach_mappings = function(prompt_bufnr, map)
         actions.select_default:replace(function()
@@ -44,7 +34,7 @@ local function rest_env_select(_)
         end)
         map("i", "<c-o>", function()
           actions.close(prompt_bufnr)
-          local selection = state.get_selected_entry(prompt_bufnr)
+          local selection = state.get_selected_entry()
           if selection == nil then
             return
           end
@@ -52,7 +42,7 @@ local function rest_env_select(_)
         end)
         return true
       end,
-      previewer = conf.grep_previewer({}),
+      previewer = conf.file_previewer(opts),
     })
     :find()
 end

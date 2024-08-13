@@ -23,34 +23,31 @@ end
 ---@return string|nil error_message
 function check.validate(cfg)
   local ok, err = validate({
-    env_pattern = { cfg.env_pattern, "string" },
-    encode_url = { cfg.encode_url, "boolean" },
-    skip_ssl_verification = { cfg.skip_ssl_verification, "boolean" },
     custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
-    -- RestConfigResult
-    result = { cfg.result, "table" },
-    -- RestConfigResultWindow
-    window = { cfg.result.window, "table" },
-    horizontal = { cfg.result.window.horizontal, "boolean" },
-    enter = { cfg.result.window.enter, "boolean" },
-    -- RestConfigResultBehavior
-    behavior = { cfg.result.behavior, "table" },
-    decode_url = { cfg.result.behavior.decode_url, "boolean" },
-    -- RestConfigResultStats
-    statistics = { cfg.result.behavior.statistics, "table" },
-    statistics_enable = { cfg.result.behavior.statistics.enable, "boolean" },
-    stats = { cfg.result.behavior.statistics.stats, "table" },
-    -- RestConfigResultFormatters
-    formatters = { cfg.result.behavior.formatters, "table" },
-    json = { cfg.result.behavior.formatters.json, { "string", "function" } },
-    html = { cfg.result.behavior.formatters.html, { "string", "function" } },
-    -- RestConfigResultKeybinds
-    result_keybinds = { cfg.result.keybinds, "table" },
-    prev = { cfg.result.keybinds.prev, "string" },
-    next = { cfg.result.keybinds.next, "string" },
-    -- RestConfigHighlight
-    highlight_enable = { cfg.highlight.enable, "boolean" },
-    timeout = { cfg.highlight.timeout, "number" },
+    request = { cfg.request, "table" },
+    ["request.skip_ssl_verification"] = { cfg.request.skip_ssl_verification, "boolean" },
+    ["request.hooks"] = { cfg.request.hooks, "table" },
+    ["request.hooks.encode_url"] = { cfg.request.hooks.encode_url, "boolean" },
+    response = { cfg.response, "table" },
+    ["response.hooks"] = { cfg.response.hooks, "table" },
+    ["response.formatters"] = { cfg.response.formatters, "table" },
+    clients = { cfg.clients, "table" },
+    ["clients.curl"] = { cfg.clients.curl, "table" },
+    ["clients.curl.statistics"] = { cfg.clients.curl.statistics, "table" },
+    cookies = { cfg.cookies, "table" },
+    ["cookies.enable"] = { cfg.cookies.enable, "boolean" },
+    ["cookies.path"] = { cfg.cookies.path, "string" },
+    env = { cfg.env, "table" },
+    ["env.enable"] = { cfg.env.enable, "boolean" },
+    ["env.path"] = { cfg.env.pattern, "string" },
+    ui = { cfg.ui, "table" },
+    ["ui.winbar"] = { cfg.ui.winbar, "boolean" },
+    ["ui.keybinds"] = { cfg.ui.keybinds, "table" },
+    ["ui.keybinds.prev"] = { cfg.ui.keybinds.prev, "string" },
+    ["ui.keybinds.next"] = { cfg.ui.keybinds.next, "string" },
+    highlight = { cfg.highlight, "table" },
+    ["highlight.enable"] = { cfg.highlight.enable, "boolean" },
+    ["highlight.timeout"] = { cfg.highlight.timeout, "number" },
   })
 
   if not ok then

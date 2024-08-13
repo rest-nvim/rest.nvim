@@ -11,6 +11,30 @@ local autocmds = {}
 ---Set up Rest autocommands group
 function autocmds.setup()
   vim.api.nvim_create_augroup("Rest", { clear = true })
+
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "RestRequestPre",
+    callback = function (_ev)
+      local config = require("rest-nvim.config")
+      local utils = require("rest-nvim.utils")
+      local req = _G.rest_request
+      if config.request.hooks.encode_url then
+        req.url = utils.escape(req.url, true)
+      end
+    end
+  })
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "RestResponsePre",
+    callback = function (_ev)
+      local config = require("rest-nvim.config")
+      local utils = require("rest-nvim.utils")
+      local req = _G.rest_request
+      local _res = _G.rest_response
+      if config.response.hooks.decode_url then
+        req.url = utils.url_decode(req.url)
+      end
+    end
+  })
 end
 
 ---Register a new autocommand in the `Rest` augroup
@@ -30,7 +54,6 @@ function autocmds.register_autocmd(events, cb, description)
 
   local autocmd_opts = {
     group = vim.api.nvim_create_augroup("Rest", { clear = false }),
-    pattern = "*.http",
     desc = description,
   }
 

@@ -33,6 +33,13 @@ local function run_request(req)
   logger.debug("run_request")
   local client = require("rest-nvim.client.curl.cli")
   rest_nvim_last_request = req
+
+  _G.rest_request = req
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = { "RestRequest", "RestRequestPre" },
+  })
+  _G.rest_request = nil
+
   ui.update({request=req})
 
   -- TODO: set UI with request informations (e.g. method & get)
@@ -53,9 +60,18 @@ local function run_request(req)
     -- update cookie jar
     jar.update_jar(req.url, res)
 
-    -- update result UI
-    -- NOTE: wrap with schedule to access vim variables outside of lua callback loop
+    -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
+    -- callback from `vim.system()` call)
     vim.schedule(function ()
+      _G.rest_request = req
+      _G.rest_response = res
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = { "RestResponse", "RestResponsePre" },
+      })
+      _G.rest_request = nil
+      _G.rest_response = nil
+
+      -- update result UI
       ui.update({response = res})
     end)
   end)

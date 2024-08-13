@@ -66,7 +66,7 @@ end
 ---@param key string
 ---@return nil|fun():string
 local function get_dynamic_vars(key)
-  local user_variables = config.custom_dynamic_variables or {}
+  local user_variables = config.custom_dynamic_variables
   return user_variables[key] or rest_variables[key]
 end
 

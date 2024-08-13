@@ -17,7 +17,6 @@ description = {
 dependencies = {
   "lua >= 5.1, < 5.4",
   "nvim-nio",
-  "lua-curl",
   "mimetypes",
   "xml2lua",
   "fidget.nvim",
@@ -26,7 +25,6 @@ dependencies = {
 test_dependencies = {
   "lua >= 5.1, < 5.4",
   "nvim-nio",
-  "lua-curl",
   "mimetypes",
   "xml2lua",
   "fidget.nvim",

@@ -268,7 +268,7 @@ function M.parse(node, source, ctx)
   local url = expand_variables(
     assert(get_node_field_text(req_node, "url", source)),
     ctx,
-    config.encode_url and utils.escape or nil
+    utils.escape
   )
 
   local name

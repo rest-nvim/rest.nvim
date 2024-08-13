@@ -249,12 +249,12 @@ end
 
 ---@return string[]? args
 function builder.statistics()
-  if vim.tbl_isempty(config.result.behavior.statistics.stats) then
+  if vim.tbl_isempty(config.clients.curl.statistics) then
     return
   end
   local args = { "-w" }
   local format = vim
-    .iter(config.result.behavior.statistics.stats)
+    .iter(config.clients.curl.statistics)
     :map(function(key, _style)
       return ("? %s:%%{%s}\n"):format(key, key)
     end)
@@ -290,6 +290,9 @@ function builder.build(req)
     else
       insert(args, builder.raw_body(req.body.data))
     end
+  end
+  if config.request.skip_ssl_verification then
+    insert(args, "-k")
   end
   -- TODO: auth?
   insert(args, builder.http_version(req.http_version) or {})

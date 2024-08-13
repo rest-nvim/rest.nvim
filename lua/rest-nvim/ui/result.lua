@@ -47,7 +47,7 @@ local panes = {
     render = function(self)
       if not data.request then
         vim.bo[self.bufnr].undolevels = -1
-        set_lines(self.bufnr, { "Loading..." })
+        set_lines(self.bufnr, { "No Request running" })
         return
       end
       -- HACK: `vim.treesitter.foldexpr()` finds fold based on filetype not registered parser of
@@ -72,6 +72,47 @@ local panes = {
     end,
   },
   {
+    name = "Headers",
+    render = function(self)
+      if not data.response then
+        set_lines(self.bufnr, { "Loading..." })
+        return
+      end
+      syntax_highlight(self.bufnr, "jproperties")
+      local lines = {}
+      local headers = vim.iter(data.response.headers):totable()
+      table.sort(headers, function(b, a) return a[1] > b[1] end)
+      for _, header in ipairs(headers) do
+        if header[1] == "set-cookie" then
+          vim.list_extend(lines, vim.iter(header[2]):map(function (value)
+            return header[1] .. ": " .. value
+          end):totable())
+        end
+      end
+      set_lines(self.bufnr, lines)
+    end,
+  },
+  {
+    name = "Cookies",
+    render = function(self)
+      if not data.response then
+        set_lines(self.bufnr, { "Loading..." })
+        return
+      end
+      local lines = {}
+      ---@type string[]?
+      local cookie_headers = vim.tbl_get(data.response, "headers", "set-cookie")
+      if not cookie_headers then
+        set_lines(self.bufnr, { "No Cookies" })
+        return
+      end
+      syntax_highlight(self.bufnr, "jproperties")
+      table.sort(cookie_headers)
+      vim.list_extend(lines, cookie_headers)
+      set_lines(self.bufnr, lines)
+    end,
+  },
+  {
     name = "Statistics",
     render = function(self)
       if not data.response then
@@ -91,52 +132,6 @@ local panes = {
     end,
   },
 }
-if config.result.window.cookies then
-  table.insert(panes, 2, {
-    name = "Cookies",
-    render = function(self)
-      if not data.response then
-        set_lines(self.bufnr, { "Loading..." })
-        return
-      end
-      local lines = {}
-      ---@type string[]?
-      local cookie_headers = vim.tbl_get(data.response, "headers", "set-cookie")
-      if not cookie_headers then
-        set_lines(self.bufnr, { "No Cookies" })
-        return
-      end
-      syntax_highlight(self.bufnr, "jproperties")
-      table.sort(cookie_headers)
-      vim.list_extend(lines, cookie_headers)
-      set_lines(self.bufnr, lines)
-    end,
-  })
-end
-if config.result.window.headers then
-  table.insert(panes, 2, {
-    name = "Headers",
-    render = function(self)
-      if not data.response then
-        set_lines(self.bufnr, { "Loading..." })
-        return
-      end
-      syntax_highlight(self.bufnr, "jproperties")
-      local lines = {}
-      local headers = vim.iter(data.response.headers):totable()
-      table.sort(headers, function(b, a) return a[1] > b[1] end)
-      for _, header in ipairs(headers) do
-        local skip_cookie = config.result.window.cookies and header[1] == "set-cookie"
-        if not skip_cookie then
-          vim.list_extend(lines, vim.iter(header[2]):map(function (value)
-            return header[1] .. ": " .. value
-          end):totable())
-        end
-      end
-      set_lines(self.bufnr, lines)
-    end,
-  })
-end
 
 local winbar = "%#Normal# %{%v:lua.require('rest-nvim.ui.panes').winbar()%}"
 winbar = winbar .. "%=%<"
@@ -149,7 +144,7 @@ function ui.stat_winbar()
     return "Loading...%#Normal#"
   end
   for stat_name, stat_value in pairs(data.response.statistics) do
-    local style = config.result.behavior.statistics.stats[stat_name] or {}
+    local style = config.clients.curl.statistics[stat_name] or {}
     if style.winbar then
       local title = type(style.winbar) == "string" and style.winbar or (style.title or stat_name):lower()
       if title ~= "" then
@@ -166,10 +161,10 @@ end
 local group = paneui.create_pane_group("rest_nvim_result", panes, {
   on_init = function(self)
     local help = require("rest-nvim.ui.help")
-    vim.keymap.set("n", config.result.keybinds.prev, function()
+    vim.keymap.set("n", config.ui.keybinds.prev, function()
       self.group:cycle(-1)
     end, { buffer = self.bufnr })
-    vim.keymap.set("n", config.result.keybinds.next, function()
+    vim.keymap.set("n", config.ui.keybinds.next, function()
       self.group:cycle(1)
     end, { buffer = self.bufnr })
     vim.keymap.set("n", "?", help.open, { buffer = self.bufnr })

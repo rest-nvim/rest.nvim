@@ -29,7 +29,7 @@ function response.try_format_body(content_type, body)
   if res_type == "octet-stream" then
     return { "Binary answer" }
   else
-    local formatters = config.result.behavior.formatters
+    local formatters = config.response.formatters
     local fmt = formatters[res_type]
     if fmt then
       if type(fmt) == "function" then

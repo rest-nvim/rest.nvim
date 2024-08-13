@@ -15,15 +15,32 @@ local utils = {}
 local uv = vim.uv or vim.loop
 
 ---Encodes a string into its escaped hexadecimal representation
----taken from Lua Socket and added underscore to ignore
 ---@param str string Binary string to be encoded
+---@param only_necessary? boolean Encode only necessary characters
 ---@return string
-function utils.escape(str)
-  local encoded = string.gsub(str, "([^A-Za-z0-9_])", function(c)
+function utils.escape(str, only_necessary)
+  local ignore = "%w%-%.%_%~%+"
+  if only_necessary then
+    ignore = ignore .. "%:%/%?%=%&%#"
+  end
+  local pattern = "([^" .. ignore .. "])"
+  local encoded = string.gsub(str, pattern, function(c)
+    if c == " " then
+      return "+"
+    end
     return string.format("%%%02x", string.byte(c))
   end)
 
   return encoded
+end
+
+---@param str string
+function utils.url_decode(str)
+  str = string.gsub(str, "%+", " ")
+  str = string.gsub(str, "%%(%x%x)", function(hex)
+    return string.char(tonumber(hex, 16))
+  end)
+  return str
 end
 
 ---Check if a file exists in the given `path`
