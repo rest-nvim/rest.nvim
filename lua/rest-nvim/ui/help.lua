@@ -88,7 +88,7 @@ function help.open()
 
   -- Always conceal the markdown content
   vim.api.nvim_set_option_value("conceallevel", 2, { win = help_win })
-  vim.api.nvim_set_option_value("concealcursor", "n", { win = help_win })
+  vim.api.nvim_set_option_value("concealcursor", "nc", { win = help_win })
 end
 
 ---Close the request results help window
