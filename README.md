@@ -234,6 +234,22 @@ conflicts with any of your existing ones.
 
 See `:h rest-nvim.commands` for more info
 
+### Lua scripting
+
+```http
+http://localhost:8000
+
+# @lang=lua
+> {%
+local json = vim.json.decode(response.body)
+json.data = "overwritten"
+response.body = vim.json.encode(json)
+%}
+```
+
+Put `# @lang=lua` comment just above any script elements.
+Scripts without `@lang` will be parsed as javascript code to match with [http spec](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#response-handling)
+
 ## Extensions
 
 ### Telescope Extension
