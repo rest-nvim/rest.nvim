@@ -1,5 +1,6 @@
 vim.bo.commentstring = "# %s"
 vim.wo.conceallevel = 0
+vim.opt.comments:remove("n:>")
 
 local dotenv = require("rest-nvim.dotenv")
 
