@@ -218,6 +218,19 @@ function utils.ts_find(node, type)
 end
 
 ---@param node TSNode
+function utils.ts_upper_node(node)
+  local start_row, _, _, _ = node:range()
+  local end_row = start_row
+  start_row = start_row - 1
+  local start_col = 0
+  local end_col = 0
+  -- HACK: root node type might not be "document"
+  local root_node = assert(utils.ts_find(node, "document"))
+  local min_node = root_node:named_descendant_for_range(start_row, start_col, end_row, end_col)
+  return min_node
+end
+
+---@param node TSNode
 ---@param expected_type string
 ---@return table
 function utils.ts_node_spec(node, expected_type)

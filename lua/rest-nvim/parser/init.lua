@@ -10,7 +10,6 @@
 local parser = {}
 
 local Context = require("rest-nvim.context").Context
-local script = require("rest-nvim.script")
 local utils   = require("rest-nvim.utils")
 local logger   = require("rest-nvim.logger")
 local jar = require("rest-nvim.cookie_jar")
@@ -195,29 +194,49 @@ end
 
 ---@param node TSNode
 ---@param source Source
+---@return string lang
 ---@return string str
 local function parse_script(node, source)
-  vim.validate({ node = utils.ts_node_spec(node, "script") })
-  local str = vim.treesitter.get_node_text(node, source):sub(3,-3)
-  return str
+  local lang = "javascript"
+  local prev_node = utils.ts_upper_node(node)
+  if prev_node and prev_node:type() == "comment" and get_node_field_text(prev_node, "name", source) == "lang" then
+    local value = get_node_field_text(prev_node, "value", source)
+    if value then
+      lang = value
+    end
+  end
+  local script_node = assert(node:named_child(0))
+  local str = vim.treesitter.get_node_text(script_node, source):sub(3,-3)
+  return lang, str
 end
 
----@param script_node TSNode
+---@param node TSNode
 ---@param source Source
 ---@param context rest.Context
-function parser.parse_pre_request_script(script_node, source, context)
-  local node = assert(script_node:named_child(0))
-  local str = parse_script(node, source)
-  script.load_prescript(str, context)()
+function parser.parse_pre_request_script(node, source, context)
+  local lang, str = parse_script(node, source)
+  local ok, script = pcall(require, "rest-nvim.script." .. lang)
+  if not ok then
+    logger.error(("failed to load script with language '%s'. Can't find script runner client."):format(lang))
+    return
+  end
+  ---@cast script rest.ScriptClient
+  script:load_pre_req_hook(str, context)()
 end
 
----@param handler_node TSNode
+---@param node TSNode
 ---@param source Source
 ---@param context rest.Context
-function parser.parse_request_handler(handler_node, source, context)
-  local node = assert(handler_node:named_child(0))
-  local str = parse_script(node, source)
-  return script.load_handler(str, context)
+---@return function?
+function parser.parse_request_handler(node, source, context)
+  local lang, str = parse_script(node, source)
+  local ok, script = pcall(require, "rest-nvim.script." .. lang)
+  if not ok then
+    logger.error(("failed to load script with language '%s'. Can't find script runner client."):format(lang))
+    return
+  end
+  ---@cast script rest.ScriptClient
+  return script:load_post_req_hook(str, context)
 end
 
 ---@param source Source
@@ -281,7 +300,10 @@ function parser.parse(node, source, ctx)
     if node_type == "pre_request_script" then
       parser.parse_pre_request_script(child, source, ctx)
     elseif node_type == "res_handler_script" then
-      table.insert(handlers, parser.parse_request_handler(child, source, ctx))
+      local handler = parser.parse_request_handler(child, source, ctx)
+      if handler then
+        table.insert(handlers, handler)
+      end
     elseif node_type == "request_separator" then
       name = get_node_field_text(child, "value", source)
     elseif node_type == "comment" and get_node_field_text(child, "name", source) == "name" then

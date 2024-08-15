@@ -168,10 +168,10 @@ X-DATE: {{$date}}
     }, c.vars)
   end)
   it("parse pre-request script", function ()
-    local source = "< {%\nrequest.variables.set('foo', 'bar')\n%}\n"
+    local source = "# @lang=lua\n< {%\nrequest.variables.set('foo', 'bar')\n%}\n"
     local _, tree = utils.ts_parse_source(source)
     local c = context:new()
-    local script_node = tree:root():child(0):child(0)
+    local script_node = tree:root():child(0):child(1)
     assert(script_node)
     assert.same("pre_request_script", script_node:type())
     parser.parse_pre_request_script(script_node, source, c)
@@ -202,7 +202,7 @@ X-DATE: {{$date}}
     request.variables.set("bar", "new")
     request.variables.set("baz", "new")
     ]]
-    local h = require("rest-nvim.script.lua").load_handler(script, ctx)
+    local h = require("rest-nvim.script.lua"):load_post_req_hook(script, ctx)
     h()
     assert.same("new", vim.env["foo"])
     assert.same("new", ctx:resolve("bar"))

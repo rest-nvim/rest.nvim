@@ -67,6 +67,31 @@ client:request({req})                                           *client:request*
 
 
 ==============================================================================
+script runner client for rest.nvim                            *rest-nvim.script*
+
+
+ Script runner client for rest.nvim.
+ This can be external module like `rest.client`
+
+
+rest.ScriptClient                                            *rest.ScriptClient*
+
+
+script:load_pre_req_hook({str}, {ctx})                *script:load_pre_req_hook*
+
+    Parameters: ~
+        {str}  (string)
+        {ctx}  (rest.Context)
+
+
+script:load_post_req_hook({str}, {ctx})              *script:load_post_req_hook*
+
+    Parameters: ~
+        {str}  (string)
+        {ctx}  (rest.Context)
+
+
+==============================================================================
 rest.nvim result UI module                                 *rest-nvim.ui.result*
 
 
@@ -179,6 +204,12 @@ utils.ts_find({node}, {type})                                    *utils.ts_find*
     Parameters: ~
         {node}  (TSNode)
         {type}  (string)  @return TSNode?
+
+
+utils.ts_upper_node({node})                                *utils.ts_upper_node*
+
+    Parameters: ~
+        {node}  (TSNode)
 
 
                                                             *utils.ts_node_spec*

@@ -4,14 +4,13 @@ require("spec.minimum_init")
 
 local parser = require("rest-nvim.parser")
 local utils = require("rest-nvim.utils")
--- local context = require("rest-nvim.context").Context
--- local logger = require("rest-nvim.logger")
 
 describe("handler script", function ()
   it("alter response body", function ()
     local source = [[
 http://localhost:8000
 
+# @lang=lua
 > {%
 local json = vim.json.decode(response.body)
 json.data = "overwritten"
@@ -33,6 +32,7 @@ response.body = vim.json.encode(json)
     local source = [[
 http://localhost:8000
 
+# @lang=lua
 > {%
 local json = vim.json.decode(response.body)
 client.global.set("MYVAR", json.var)
