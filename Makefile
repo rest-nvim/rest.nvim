@@ -16,5 +16,5 @@ docgen:
 	lemmy-help lua/rest-nvim/config/init.lua > doc/rest-nvim-config.txt
 	lemmy-help lua/rest-nvim/cookie_jar.lua > doc/rest-nvim-cookies.txt
 	lemmy-help lua/rest-nvim/script.lua > doc/rest-nvim-script.txt
-	lemmy-help lua/rest-nvim/api.lua lua/rest-nvim/ui/result.lua lua/rest-nvim/utils.lua > doc/rest-nvim-api.txt
+	lemmy-help lua/rest-nvim/api.lua lua/rest-nvim/client/init.lua lua/rest-nvim/ui/result.lua lua/rest-nvim/utils.lua > doc/rest-nvim-api.txt
 	lemmy-help lua/rest-nvim/client/curl/cli.lua lua/rest-nvim/client/curl/utils.lua > doc/rest-nvim-client-curl.txt

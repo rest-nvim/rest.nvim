@@ -31,7 +31,20 @@ local rest_nvim_last_request = nil
 ---@param req rest.Request
 local function run_request(req)
   logger.debug("run_request")
-  local client = require("rest-nvim.client.curl.cli")
+  ---@type rest.Client
+  local client
+  if req.method == "WEBSOCKET" then
+    logger.error("method: websocket isn't supported yet")
+    return
+  elseif req.method == "GRPC" then
+    logger.error("method: grpc isn't supported yet")
+    return
+  elseif req.method == "GRAPHQL" then
+    logger.error("method: graphql isn't supported yet")
+    return
+  else
+    client = require("rest-nvim.client.curl.cli")
+  end
   rest_nvim_last_request = req
 
   _G.rest_request = req

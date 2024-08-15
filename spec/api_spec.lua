@@ -8,6 +8,8 @@ local context = require("rest-nvim.context").Context
 local logger = require("rest-nvim.logger")
 
 local spy = require("luassert.spy")
+---@diagnostic disable-next-line: inject-field
+assert.spy = assert.spy
 
 local function open(path)
   vim.cmd.edit(path)

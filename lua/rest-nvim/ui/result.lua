@@ -1,3 +1,11 @@
+---@mod rest-nvim.ui.result rest.nvim result UI module
+---
+---@brief [[
+---
+--- rest.nvim result UI implmentation
+---
+---@brief ]]
+
 local ui = {}
 
 local config = require("rest-nvim.config")
@@ -19,6 +27,7 @@ local function syntax_highlight(buffer, filetype)
   end
 end
 
+---data used to render the UI
 ---@class rest.UIData
 local data = {
   ---@type rest.Request?

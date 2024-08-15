@@ -1,4 +1,4 @@
----@mod rest-nvim.client.curl.libcurl rest.nvim cURL client
+---@mod rest-nvim.client.curl.libcurl rest.nvim cURL client using libcurl (deprecated)
 ---
 ---@brief [[
 ---

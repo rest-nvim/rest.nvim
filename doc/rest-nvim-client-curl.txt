@@ -7,13 +7,13 @@ rest.nvim cURL cli client                            *rest-nvim.client.curl.cli*
 
 
 curl.request({request})                                           *curl.request*
-    returns future containing Result
+    Send request via `curl` cli
 
     Parameters: ~
         {request}  (rest.Request)  Request data to be passed to cURL
 
     Returns: ~
-        (nio.control.Future)  future containing rest.Response
+        (nio.control.Future)  Future containing rest.Response
 
 
 utils.curl_error({code})                                      *utils.curl_error*

@@ -300,9 +300,9 @@ function builder.build(req)
   return vim.iter(args):flatten(math.huge):totable()
 end
 
----returns future containing Result
+---Send request via `curl` cli
 ---@param request rest.Request Request data to be passed to cURL
----@return nio.control.Future future future containing rest.Response
+---@return nio.control.Future future Future containing rest.Response
 function curl.request(request)
   local progress_handle = progress.handle.create({
     title = "Fetching",

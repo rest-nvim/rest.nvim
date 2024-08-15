@@ -46,6 +46,69 @@ api.register_rest_subcommand({name}, {cmd})
 
 
 ==============================================================================
+rest.nvim client module                                       *rest-nvim.client*
+
+
+ Mainly about `rest.Client` type requirements
+
+
+rest.Client                                                        *rest.Client*
+    Client to send request
+
+
+client:request({req})                                           *client:request*
+    Sends request and return the response asynchronously
+
+    Parameters: ~
+        {req}  (rest.Request)
+
+    Returns: ~
+        (nio.control.Future)  Future containing `rest.Response`
+
+
+==============================================================================
+rest.nvim result UI module                                 *rest-nvim.ui.result*
+
+
+ rest.nvim result UI implmentation
+
+
+rest.UIData                                                        *rest.UIData*
+    data used to render the UI
+
+
+ui.stat_winbar()                                                *ui.stat_winbar*
+    Winbar component showing response statistics
+
+    Returns: ~
+        (string)
+
+
+ui.is_open()                                                        *ui.is_open*
+    Check if UI window is shown in current tabpage
+
+    Returns: ~
+        (boolean)
+
+
+ui.enter({winnr})                                                     *ui.enter*
+
+    Parameters: ~
+        {winnr}  (integer)
+
+
+ui.clear()                                                            *ui.clear*
+    Clear the UI
+
+
+ui.update({new_data})                                                *ui.update*
+    Update data and rerender the UI
+
+    Parameters: ~
+        {new_data}  (rest.UIData)
+
+
+==============================================================================
 rest.nvim utilities                                            *rest-nvim.utils*
 
 
