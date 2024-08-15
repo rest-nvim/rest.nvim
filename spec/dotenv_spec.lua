@@ -2,8 +2,6 @@
 
 require("spec.minimum_init")
 
-local dotenv = require("rest-nvim.dotenv")
-
 local function open(path)
   vim.cmd.edit(path)
   vim.cmd.source("ftplugin/http.lua")

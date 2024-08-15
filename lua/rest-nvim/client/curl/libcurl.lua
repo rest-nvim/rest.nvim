@@ -6,6 +6,8 @@
 ---
 ---@brief ]]
 
+---@diagnostic disable: undefined-field
+
 local client = {}
 
 local found_curl, curl = pcall(require, "cURL.safe")
@@ -58,7 +60,7 @@ end
 function client.request_(request)
   logger.info("sending request to: " .. request.url)
   -- write to `Context.response` without altering the reference
-  local info = request.context.response
+  local info = request.context.aesponse
   if not found_curl then
     ---@diagnostic disable-next-line need-check-nil
     logger.error("lua-curl could not be found, therefore the cURL client will not work.")

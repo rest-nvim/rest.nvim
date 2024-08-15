@@ -30,6 +30,7 @@ api.namespace = vim.api.nvim_create_namespace("rest-nvim")
 ---@param cb string|fun(args: table) Autocommand lua callback, runs a Vimscript command instead if it is a `string`
 ---@param description string Autocommand description
 function api.register_rest_autocmd(events, cb, description)
+---@diagnostic disable-next-line: invisible
   autocmds.register_autocmd(events, cb, description)
 end
 
@@ -37,6 +38,7 @@ end
 ---@param name string The name of the subcommand to register
 ---@param cmd RestCmd
 function api.register_rest_subcommand(name, cmd)
+---@diagnostic disable-next-line: invisible
   commands.register_subcommand(name, cmd)
 end
 

@@ -8,8 +8,6 @@ local context = require("rest-nvim.context").Context
 local logger = require("rest-nvim.logger")
 
 local spy = require("luassert.spy")
----@diagnostic disable-next-line: inject-field
-assert.spy = assert.spy
 
 local function open(path)
   vim.cmd.edit(path)
@@ -73,6 +71,7 @@ describe("parser", function()
     local req_node = assert(tree:root():child(0))
     local spy_log_warn = spy.on(logger, "warn")
     parser.parse(req_node, source)
+    ---@diagnostic disable-next-line: undefined-field
     assert.spy(spy_log_warn).called_with("invalid json: '{\n\t\"blah\": 1'")
   end)
   it("parse xml", function ()
@@ -110,6 +109,7 @@ describe("parser", function()
     local req_node = assert(tree:root():child(0))
     local spy_log_warn = spy.on(logger, "warn")
     parser.parse(req_node, source)
+    ---@diagnostic disable-next-line: undefined-field
     assert.spy(spy_log_warn).called_with("invalid xml: '<?xml'")
   end)
   it("parse with variables in header", function ()
@@ -202,7 +202,7 @@ X-DATE: {{$date}}
     request.variables.set("bar", "new")
     request.variables.set("baz", "new")
     ]]
-    local h = require("rest-nvim.script").load_handler(script, ctx)
+    local h = require("rest-nvim.script.lua").load_handler(script, ctx)
     h()
     assert.same("new", vim.env["foo"])
     assert.same("new", ctx:resolve("bar"))
