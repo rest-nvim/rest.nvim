@@ -71,6 +71,35 @@ function M.find_env_files()
   return files
 end
 
+---@return string? dotenv file
+function M.find_relevent_env_file()
+  local filename = vim.fn.expand("%:t:r")
+  if filename == "" then
+    return nil
+  end
+  filename = filename:gsub("%.http$", "")
+  ---@type string?
+  local env_file
+  -- search for `/same/path/filename.env`
+  env_file = vim.fs.find(filename .. ".env", { type = "file" })[1]
+  if env_file then
+    return env_file
+  end
+  -- search upward for `.env` file
+  env_file = vim.fs.find(function (name, _)
+    return name == ".env"
+  end, {
+    path = vim.fn.expand("%:h"),
+    upward = true,
+    stop = vim.fn.getcwd(),
+    type = "file",
+    limit = math.huge,
+  })[1]
+  if env_file then
+    return env_file
+  end
+end
+
 ---@param bufnr number? buffer identifier, default to current buffer
 ---@return string? path
 function M.select_file(bufnr)
