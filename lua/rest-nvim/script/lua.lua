@@ -96,14 +96,14 @@ end
 ---@param s string
 ---@param ctx rest.Context
 ---@return function
-function script:load_pre_req_hook(s, ctx)
+function script.load_pre_req_hook(s, ctx)
   return script.load(s, script.create_prescript_env(ctx))
 end
 
 ---@param s string
 ---@param ctx rest.Context
 ---@return function
-function script:load_post_req_hook(s, ctx)
+function script.load_post_req_hook(s, ctx)
   return function (res)
     script.load(s, script.create_handler_env(ctx, res))()
   end

@@ -15,7 +15,7 @@ local client = {}
 ---@return nio.control.Future future Future containing `rest.Response`
 function client:request(req)
   local future = require("nio").control.future()
-  vim.print(req)
+  vim.print(self, req)
   return future
 end
 

@@ -221,7 +221,7 @@ function parser.parse_pre_request_script(node, source, context)
     return
   end
   ---@cast script rest.ScriptClient
-  script:load_pre_req_hook(str, context)()
+  script.load_pre_req_hook(str, context)()
 end
 
 ---@param node TSNode
@@ -236,7 +236,7 @@ function parser.parse_request_handler(node, source, context)
     return
   end
   ---@cast script rest.ScriptClient
-  return script:load_post_req_hook(str, context)
+  return script.load_post_req_hook(str, context)
 end
 
 ---@param source Source

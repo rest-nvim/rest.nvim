@@ -202,7 +202,7 @@ X-DATE: {{$date}}
     request.variables.set("bar", "new")
     request.variables.set("baz", "new")
     ]]
-    local h = require("rest-nvim.script.lua"):load_post_req_hook(script, ctx)
+    local h = require("rest-nvim.script.lua").load_post_req_hook(script, ctx)
     h()
     assert.same("new", vim.env["foo"])
     assert.same("new", ctx:resolve("bar"))
