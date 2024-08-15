@@ -30,10 +30,10 @@ local rest_variables = {
     return os.date("%Y-%m-%d") --[[@as string]]
   end,
   ["$timestamp"] = function()
-    return string(os.time()) or ""
+    return tostring(os.time()) or ""
   end,
   ["$randomInt"] = function()
-    return string(math.random(0, 1000))
+    return tostring(math.random(0, 1000))
   end,
 }
 

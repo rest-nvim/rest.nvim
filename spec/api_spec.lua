@@ -33,11 +33,11 @@ describe("parser", function()
     }, parser.parse(req_node, source))
   end)
   it("parse from http file", function()
-    local source = open "spec/api.http"
+    local source = open "spec/examples/basic_get.http"
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     assert.same({
-      name = "api#1",
+      name = "basic_get#1",
       context = context:new(),
       method = "GET",
       url = "https://api.github.com/users/boltlessengineer",

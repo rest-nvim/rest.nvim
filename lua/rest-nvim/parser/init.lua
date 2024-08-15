@@ -115,7 +115,6 @@ function parser.parse_body(body_node, source, context)
     end
   elseif body.__TYPE == "external" then
     local path = assert(get_node_field_text(body_node, "path", source))
-    -- TODO: make sure expand happens in `.http` file
     path = vim.fs.normalize(vim.fs.joinpath(vim.fn.expand("%:h"), path))
     body.data = {
       name = get_node_field_text(body_node, "name", source),

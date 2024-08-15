@@ -59,9 +59,15 @@ local panes = {
       if data.response then
         table.insert(lines, ("%d %s %s"):format(data.response.status.code, data.response.status.version, data.response.status.text))
         local content_type = data.response.headers["content-type"]
-        local body = res.try_format_body(content_type and content_type[1], data.response.body)
         table.insert(lines, "")
         table.insert(lines, "#+RES")
+        ---@type string[]
+        local body
+        if config.response.hooks.format then
+          body = res.try_format_body(content_type and content_type[1], data.response.body)
+        else
+          body = vim.split(data.response.body, "\n")
+        end
         vim.list_extend(lines, body)
         table.insert(lines, "#+END")
       else
@@ -138,6 +144,9 @@ winbar = winbar .. "%=%<"
 winbar = winbar .. "%{%v:lua.require('rest-nvim.ui.result').stat_winbar()%}"
 winbar = winbar .. " %#RestText#|%#Normal# "
 winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
+
+---Winbar component showing response statistics
+---@return string
 function ui.stat_winbar()
   local content = ""
   if not data.response then
@@ -169,7 +178,9 @@ local group = paneui.create_pane_group("rest_nvim_result", panes, {
     end, { buffer = self.bufnr })
     vim.keymap.set("n", "?", help.open, { buffer = self.bufnr })
     vim.bo[self.bufnr].filetype = "rest_nvim_result"
-    utils.nvim_lazy_set_wo(self.bufnr, "winbar", winbar)
+    if config.ui.winbar then
+      utils.nvim_lazy_set_wo(self.bufnr, "winbar", winbar)
+    end
   end,
 })
 
@@ -189,6 +200,7 @@ vim.api.nvim_set_hl(0, "RestPaneTitle", {
   underline = true,
 })
 
+---Check if UI window is shown in current tabpage
 ---@return boolean
 function ui.is_open()
   local winnr = vim.iter(vim.api.nvim_tabpage_list_wins(0)):find(function(id)
@@ -203,11 +215,13 @@ function ui.enter(winnr)
   group:enter(winnr)
 end
 
+---Clear the UI
 function ui.clear()
   data = {}
   group:render()
 end
 
+---Update data and rerender the UI
 ---@param new_data rest.UIData
 function ui.update(new_data)
   data = vim.tbl_deep_extend("force", data, new_data)

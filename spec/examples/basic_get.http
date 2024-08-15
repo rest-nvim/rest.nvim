@@ -1,5 +1,2 @@
 GET https://api.github.com/users/boltlessengineer
 user-agent: neovim
-###
-GET https://api.github.com/users/NTBBloodbath
-user-agent: neovim

@@ -75,7 +75,7 @@ end
 function parser.parse_verbose_line(line)
   local prefix, str = line:match("(.) ?(.*)")
   if not prefix then
-    -- TODO: parse failed
+    log.error("Error while parsing verbose curl output:\n" .. line)
     return
   end
   return {

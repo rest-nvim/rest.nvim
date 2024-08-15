@@ -52,16 +52,16 @@ local function run_request(req)
     ---@cast res rest.Response
     logger.info("request success")
 
-    -- run request handler scripts
-    vim.iter(req.handlers):each(function (f) f(res) end)
-    logger.info("handler done")
-
-    -- update cookie jar
-    jar.update_jar(req.url, res)
-
     -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
     -- callback from `vim.system()` call)
     vim.schedule(function ()
+      -- run request handler scripts
+      vim.iter(req.handlers):each(function (f) f(res) end)
+      logger.info("handler done")
+
+      -- update cookie jar
+      jar.update_jar(req.url, res)
+
       _G.rest_request = req
       _G.rest_response = res
       vim.api.nvim_exec_autocmds("User", {
@@ -87,7 +87,7 @@ function M.run()
     return
   end
   local ctx = parser.create_context(0)
-  if vim.b._rest_nvim_env_file then
+  if config.env.enable and vim.b._rest_nvim_env_file then
     ctx:load_file(vim.b._rest_nvim_env_file)
   end
   local req = parser.parse(req_node, 0, ctx)
@@ -112,7 +112,7 @@ function M.run_by_name(name)
     return
   end
   local ctx = parser.create_context(0)
-  if vim.b._rest_nvim_env_file then
+  if config.env.enable and vim.b._rest_nvim_env_file then
     ctx:load_file(vim.b._rest_nvim_env_file)
   end
   local req = parser.parse(req_node, 0, ctx)

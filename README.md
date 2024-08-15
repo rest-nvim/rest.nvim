@@ -44,7 +44,7 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 
 > [!NOTE]
 >
-> rest.nvim requires Neovim >= 0.9.2 to work.
+> rest.nvim requires Neovim >= 0.10.1 to work.
 
 ### Dependencies
 

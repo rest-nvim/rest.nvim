@@ -126,8 +126,9 @@ describe("curl cli response parser", function()
     }, response)
   end)
 end)
+
+-- don't run real request on test by default
 describe("curl cli request", function()
-  -- TODO: don't send actual request on test
   nio.tests.it("basic GET request", function()
     local response = curl
       .request({
@@ -141,6 +142,35 @@ describe("curl cli request", function()
       .wait()
     assert.same(
       '{"page":5,"per_page":6,"total":12,"total_pages":2,"data":[],"support":{"url":"https://reqres.in/#support-heading","text":"To keep ReqRes free, contributions towards server costs are appreciated!"}}',
+      response.body
+    )
+    assert.same({
+        version = "HTTP/2",
+        code = 200,
+        text = ""
+    }, response.status)
+    -- HACK: have no idea how to make sure it is table<string,string>
+    assert.are_table(response.headers)
+  end)
+  nio.tests.it("basic POST request", function()
+    local response = curl
+      .request({
+        context = Context:new(),
+        url = "https://reqres.in/api/register",
+        handlers = {},
+        headers = {
+          ["content-type"] = { "application/json" }
+        },
+        cookies = {},
+        method = "POST",
+        body = {
+          __TYPE = "json",
+          data = '{ "email": "eve.holt@reqres.in", "password": "pistol" }',
+        }
+      })
+      .wait()
+    assert.same(
+      '{"id":4,"token":"QpwL5tke4Pnpja7X4"}',
       response.body
     )
     assert.same({

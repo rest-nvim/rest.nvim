@@ -1,0 +1,11 @@
+### post-request script
+GET https://jsonplaceholder.typicode.com/posts/3
+
+> {%
+local body = vim.json.decode(response.body)
+client.global.set("postId", body.id)
+%}
+
+### run request with variable
+
+GET https://jsonplaceholder.typicode.com/posts/{{postId}}
