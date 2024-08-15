@@ -176,7 +176,7 @@ local default_config = {
     ---@type boolean
     enable = true,
     ---@type string
-    pattern = "%.env.*"
+    pattern = ".*%.env.*"
   },
   ---@class rest.Config.UI
   ui = {

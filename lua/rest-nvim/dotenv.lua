@@ -78,7 +78,9 @@ function M.select_file(bufnr)
   vim.ui.select(M.find_env_files(), {
      prompt = 'Select env files',
   }, function (item, _idx)
-    M.register_file(item, bufnr)
+    if item then
+      M.register_file(item, bufnr)
+    end
   end)
 end
 
