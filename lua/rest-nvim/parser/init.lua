@@ -17,8 +17,6 @@ local jar = require("rest-nvim.cookie_jar")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
----@alias BodyType "json"|"xml"|"external"|"form"|"graphql"
-
 local NAMED_REQUEST_QUERY = vim.treesitter.query.parse("http", [[
 (section
   (request_separator

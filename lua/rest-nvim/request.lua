@@ -11,7 +11,7 @@ local nio    = require("nio")
 local jar    = require("rest-nvim.cookie_jar")
 
 ---@class rest.Request.Body
----@field __TYPE BodyType
+---@field __TYPE "json"|"xml"|"external"|"form"|"graphql"
 ---@field data any
 
 ---@class rest.Request
