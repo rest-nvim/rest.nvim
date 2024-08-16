@@ -1,0 +1,9 @@
+### multi-line url
+// reference: https://www.jetbrains.com/help/idea/exploring-http-syntax.html#break-long-requests-into-several-lines
+// Using line breaks with indent
+GET http://example.com:8080
+    /api
+    /html
+    /get
+    ?id=123
+    &value=content

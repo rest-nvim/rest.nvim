@@ -292,6 +292,7 @@ function parser.parse(node, source, ctx)
     ctx,
     utils.escape
   )
+  url = url:gsub("\n%s+", "")
 
   local name
   local handlers = {}
