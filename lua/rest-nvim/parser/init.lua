@@ -152,17 +152,17 @@ function parser.get_cursor_request_node()
   return node
 end
 
+---@param source Source
 ---@return TSNode[]
-function parser.get_all_request_node()
-  local source = 0
+function parser.get_all_request_nodes(source)
   local _, tree = utils.ts_parse_source(source)
-  local reqs = {}
+  local result = {}
   for node, _ in tree:root():iter_children() do
-    if node:type() == "request" then
-      table.insert(reqs, node)
+    if node:type() == "section" then
+      table.insert(result, node)
     end
   end
-  return reqs
+  return result
 end
 
 ---@return TSNode?
@@ -321,9 +321,17 @@ function parser.parse(node, source, ctx)
   end
 
   local headers = parse_headers(req_node, source, ctx)
-  -- HACK: check if url doesn't have host
   if headers["host"] and vim.startswith(url, "/") then
-    url = "http://" ..headers["host"][1]..url
+    local host = headers["host"][1]
+    if not host:match("^https?://") then
+      local port = host:match(":(%d%d+)$")
+      local protocol = "http://"
+      if not port or port == "443" then
+        protocol = "https://"
+      end
+      host = protocol .. host
+    end
+    url = host..url
     table.remove(headers["host"], 1)
   end
   ---@type rest.Request

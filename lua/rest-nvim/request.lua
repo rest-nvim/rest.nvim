@@ -153,7 +153,7 @@ end
 
 ---run all requests in current file with same context
 function M.run_all()
-  local reqs = parser.get_all_request_node()
+  local reqs = parser.get_all_request_nodes()
   local ctx = parser.create_context(0)
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)

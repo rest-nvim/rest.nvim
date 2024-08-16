@@ -1,0 +1,15 @@
+### host with non-secure port
+GET /api
+HOST: example.com:8080
+
+### host with secure port
+GET /api
+HOST: example.com:443
+
+### host with protocol
+GET /api
+HOST: http://example.com
+
+### host without protocol
+GET /api
+HOST: example.com
