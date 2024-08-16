@@ -268,8 +268,9 @@ builder.STAT_ARGS = builder.statistics()
 
 ---build curl request arguments based on Request object
 ---@param req rest.Request
+---@param ignore_stats? boolean
 ---@return string[] args
-function builder.build(req)
+function builder.build(req, ignore_stats)
   local args = {}
   ---@param list table
   ---@param value any
@@ -296,8 +297,21 @@ function builder.build(req)
   end
   -- TODO: auth?
   insert(args, builder.http_version(req.http_version) or {})
-  insert(args, builder.STAT_ARGS)
+  if not ignore_stats then
+    insert(args, builder.STAT_ARGS)
+  end
   return vim.iter(args):flatten(math.huge):totable()
+end
+
+---Generate curl command equivelant to given request.
+---This command doesn't include verbose/trace options
+---@param req rest.Request
+function builder.build_command(req)
+  local base_cmd = "curl -sL"
+  local args = vim.iter(builder.build(req, true)):map(function (a)
+    return vim.fn.shellescape(a)
+  end)
+  return base_cmd .. " " .. args:join(" ")
 end
 
 ---Send request via `curl` cli

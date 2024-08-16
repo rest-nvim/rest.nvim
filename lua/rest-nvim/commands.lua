@@ -29,6 +29,14 @@
 --- env set {path}                  Register environment file to current `.http` file.
 ---                                 `path` should be relative to Neovim's cwd
 ---
+--- curl yank {name?}               (experimental) Copy curl command equivelant to HTTP
+---                                 request with given `name`. If no name is provided, copy
+---                                 from request under the cursor.
+---
+--- curl comment {name?}            (experimental) Similar to `:Rest curl yank` but instead
+---                                 copying command to clipboard, directly insert curl
+---                                 command as a comment.
+---
 --- NOTE: All `:Rest` commands opening new window support |command-modifiers|.
 --- For example, you can run `:hor Rest open` to open result pane in horizontal
 --- split
@@ -174,6 +182,76 @@ local rest_command_tbl = {
       return match
     end,
   },
+  -- TODO(boltless): complete curl command
+  curl = {
+    impl = function (args, _)
+      if args[1] == "yank" then
+        local req_node
+        if not args[2] then
+          req_node = parser().get_cursor_request_node()
+          if not req_node then
+            logger().error("failed to find request at cursor position")
+            vim.notify("[rest.nvim] failed to find request at cursor position", vim.log.levels.ERROR)
+            return
+          end
+        else
+          req_node = parser().get_request_node_by_name(args[2])
+          if not req_node then
+            logger().error("failed to find request with name:" .. args[2])
+            vim.notify("[rest.nvim] failed to find request with name:" .. args[2], vim.log.levels.ERROR)
+            return
+          end
+        end
+        local req = parser().parse(req_node, 0)
+        if not req then
+          logger().error("failed to parse request")
+          vim.notify("[rest.nvim] failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR)
+          return
+        end
+        local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
+        vim.fn.setreg("+", curl_command)
+        vim.notify("[rest.nvim] Copied curl command to clipboard", vim.log.levels.INFO)
+      elseif args[1] == "comment" then
+        local req_node
+        if not args[2] then
+          req_node = parser().get_cursor_request_node()
+          if not req_node then
+            logger().error("failed to find request at cursor position")
+            vim.notify("[rest.nvim] failed to find request at cursor position", vim.log.levels.ERROR)
+            return
+          end
+        else
+          req_node = parser().get_request_node_by_name(args[2])
+          if not req_node then
+            logger().error("failed to find request with name:" .. args[2])
+            vim.notify("[rest.nvim] failed to find request with name:" .. args[2], vim.log.levels.ERROR)
+            return
+          end
+        end
+        local req = parser().parse(req_node, 0)
+        if not req then
+          logger().error("failed to parse request")
+          vim.notify("[rest.nvim] failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR)
+          return
+        end
+        local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
+        local start = req_node:range()
+        local end_ = start
+        vim.api.nvim_buf_set_lines(0, start, end_, false, vim.tbl_map(function (line) return "# " .. line end, vim.split(curl_command, "\n")))
+      -- elseif args[1] == "to-http" then
+      --   -- TODO: convert comment with curl to http request and insert it below
+      else
+        vim.notify("Invalid action '" .. args[1] .. "' provided to 'curl' command", vim.log.levels.ERROR)
+      end
+    end,
+    complete = function (_args)
+      return {
+        "yank",
+        "comment",
+        -- "to-http",
+      }
+    end
+  }
 }
 
 local function rest(opts)
