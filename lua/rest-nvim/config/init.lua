@@ -16,8 +16,6 @@
 ---@type rest.Config
 local config
 
----@alias RestResultFormatter string|fun(body:string):string,table
-
 ---@class RestStatisticsStyle
 --- Title used on Statistics pane
 ---@field title? string
@@ -51,8 +49,6 @@ local config
 ---@class rest.Opts.Response
 --- Default response hooks (aka. request handlers) configuration
 ---@field hooks? rest.Opts.Response.Hooks
---- Formatters used for response format hook
----@field formatters? table<string,RestResultFormatter>
 
 ---@class rest.Opts.Response.Hooks
 --- Decode url segments on response UI too improve readability (Default: `true`)
@@ -125,30 +121,8 @@ local default_config = {
     hooks = {
       ---@type boolean Decode the request URL segments on response UI to improve readability
       decode_url = true,
-      ---@type boolean Format the response body
+      ---@type boolean Format the response body using `gq` command
       format = true,
-    },
-    ---@type table<string,RestResultFormatter>
-    formatters = {
-      json = "jq",
-      html = function(body)
-        if vim.fn.executable("tidy") == 0 then
-          return body, { found = false, name = "tidy" }
-        end
-        -- stylua: ignore
-        local fmt_body = vim.fn.system({
-          "tidy",
-          "-i",
-          "-q",
-          "--tidy-mark",      "no",
-          "--show-body-only", "auto",
-          "--show-errors",    "0",
-          "--show-warnings",  "0",
-          "-",
-        }, body):gsub("\n$", "")
-
-        return fmt_body, { found = true, name = "tidy" }
-      end,
     },
   },
   ---@class rest.Config.Clients

@@ -11,7 +11,6 @@ local ui = {}
 local config = require("rest-nvim.config")
 local utils = require("rest-nvim.utils")
 local paneui = require("rest-nvim.ui.panes")
-local res = require("rest-nvim.response")
 
 local function set_lines(buffer, lines)
   vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
@@ -70,12 +69,12 @@ local panes = {
         local content_type = data.response.headers["content-type"]
         table.insert(lines, "")
         table.insert(lines, "#+RES")
-        ---@type string[]
-        local body
-        if config.response.hooks.format then
-          body = res.try_format_body(content_type and content_type[1], data.response.body)
-        else
-          body = vim.split(data.response.body, "\n")
+        local body = vim.split(data.response.body, "\n")
+        local res_type = content_type[1]:match(".*/([^;]+)")
+        if res_type == "octet_stream" then
+          body = { "Binary answer" }
+        elseif config.response.hooks.format then
+          body = utils.gq_lines(body, res_type)
         end
         vim.list_extend(lines, body)
         table.insert(lines, "#+END")

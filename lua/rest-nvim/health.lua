@@ -64,41 +64,6 @@ local function configuration_health()
   else
     vim.health.ok("No unrecognized configuration options were found")
   end
-
-  -- Formatters
-  local formatters = config.response.formatters
-  for ft, formatter in pairs(formatters) do
-    if type(formatter) == "string" then
-      if vim.fn.executable(formatter) ~= 1 then
-        vim.health.warn(
-          "Formatter for `"
-            .. ft
-            .. "` is set to `"
-            .. formatter
-            .. "`, however, rest.nvim could not find it in your system"
-        )
-      else
-        vim.health.ok(
-          "Formatter for `" .. ft .. "` is set to `" .. formatter .. "` and rest.nvim found it in your system"
-        )
-      end
-    elseif type(formatter) == "function" then
-      local _, fmt_meta = formatter("")
-      if not fmt_meta.found then
-        vim.health.warn(
-          "Formatter for `"
-            .. ft
-            .. "` is set to `"
-            .. fmt_meta.name
-            .. "`, however, rest.nvim could not find it in your system"
-        )
-      else
-        vim.health.ok(
-          "Formatter for `" .. ft .. "` is set to `" .. fmt_meta.name .. "` and rest.nvim found it in your system"
-        )
-      end
-    end
-  end
 end
 
 function health.check()

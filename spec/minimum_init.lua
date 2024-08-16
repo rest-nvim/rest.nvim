@@ -16,9 +16,6 @@ vim.g.rest_nvim = {
   cookies = {
     path = "/tmp/rest-nvim.cookies"
   },
-  response = {
-    formatters = {}
-  },
 }
 ---@diagnostic disable-next-line: undefined-field
 vim.uv.fs_unlink(vim.g.rest_nvim.cookies.path)

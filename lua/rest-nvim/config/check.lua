@@ -30,7 +30,6 @@ function check.validate(cfg)
     ["request.hooks.encode_url"] = { cfg.request.hooks.encode_url, "boolean" },
     response = { cfg.response, "table" },
     ["response.hooks"] = { cfg.response.hooks, "table" },
-    ["response.formatters"] = { cfg.response.formatters, "table" },
     clients = { cfg.clients, "table" },
     ["clients.curl"] = { cfg.clients.curl, "table" },
     ["clients.curl.statistics"] = { cfg.clients.curl.statistics, "table" },

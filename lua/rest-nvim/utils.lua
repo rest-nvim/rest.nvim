@@ -276,4 +276,19 @@ function utils.nvim_lazy_set_wo(bufnr, name, value)
   })
 end
 
+---format lines using native vim `gq` command
+---@param lines string[]
+---@param filetype string
+---@return string[]
+function utils.gq_lines(lines, filetype)
+  local format_buf = vim.api.nvim_create_buf(false, true)
+  vim.bo[format_buf].filetype = filetype
+  vim.api.nvim_buf_set_lines(format_buf, 0, -1, false, lines)
+  vim.api.nvim_buf_call(format_buf, function ()
+    vim.cmd("normal gg")
+    vim.cmd("normal gqG")
+  end)
+  return vim.api.nvim_buf_get_lines(format_buf, 0, -1, false)
+end
+
 return utils

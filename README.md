@@ -37,6 +37,7 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 - Set custom pre-request and post-request hooks to dynamically interact with the data
 - Easily set environment variables based on the response to re-use the data later
 - Tree-sitter based parsing and syntax highlighting for speed and perfect accuracy
+- Format response body with native `gq` command
 - Possibility of using dynamic/environment variables and Lua scripting in HTTP files
 - Save received cookies and load them automatically
 
@@ -48,11 +49,7 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 
 ### Dependencies
 
-- System-wide
-  - `curl`
-- Optional [can be changed, see config below](#default-configuration)
-  - `jq`   (to format JSON output)
-  - `tidy` (to format HTML output)
+- `curl`
 
 ### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
 
@@ -109,30 +106,8 @@ local default_config = {
     hooks = {
       ---@type boolean Decode the request URL segments on response UI to improve readability
       decode_url = true,
-      ---@type boolean Format the response body
+      ---@type boolean Format the response body using `gq` command
       format = true,
-    },
-    ---@type table<string,RestResultFormatter>
-    formatters = {
-      json = "jq",
-      html = function(body)
-        if vim.fn.executable("tidy") == 0 then
-          return body, { found = false, name = "tidy" }
-        end
-        -- stylua: ignore
-        local fmt_body = vim.fn.system({
-          "tidy",
-          "-i",
-          "-q",
-          "--tidy-mark",      "no",
-          "--show-body-only", "auto",
-          "--show-errors",    "0",
-          "--show-warnings",  "0",
-          "-",
-        }, body):gsub("\n$", "")
-
-        return fmt_body, { found = true, name = "tidy" }
-      end,
     },
   },
   ---@class rest.Config.Clients
@@ -160,7 +135,7 @@ local default_config = {
     ---@type boolean
     enable = true,
     ---@type string
-    pattern = "%.env.*"
+    pattern = ".*%.env.*"
   },
   ---@class rest.Config.UI
   ui = {
