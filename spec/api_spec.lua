@@ -24,7 +24,6 @@ describe("parser", function()
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     assert.same({
-      context = context:new(),
       method = "GET",
       url = "https://github.com",
       headers = {},
@@ -38,7 +37,6 @@ describe("parser", function()
     local req_node = assert(tree:root():child(0))
     assert.same({
       name = "basic_get#1",
-      context = context:new(),
       method = "GET",
       url = "https://api.github.com/users/boltlessengineer",
       headers = {
@@ -53,7 +51,6 @@ describe("parser", function()
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     assert.same({
-      context = context:new(),
       method = "POST",
       url = "https://example.com",
       headers = {},
@@ -86,7 +83,6 @@ describe("parser", function()
     local _, tree = utils.ts_parse_source(source)
     local req_node = assert(tree:root():child(0))
     assert.same({
-      context = context:new(),
       method = "POST",
       url = "https://example.com",
       headers = {},

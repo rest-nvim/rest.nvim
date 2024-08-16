@@ -337,7 +337,6 @@ function parser.parse(node, source, ctx)
   ---@type rest.Request
   local req = {
     name = name,
-    context = ctx,
     method = method,
     url = url,
     http_version = get_node_field_text(req_node, "version", source),

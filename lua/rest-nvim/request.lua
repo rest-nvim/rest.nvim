@@ -15,7 +15,6 @@ local jar    = require("rest-nvim.cookie_jar")
 ---@field data any
 
 ---@class rest.Request
----@field context rest.Context
 ---@field name? string The request identifier
 ---@field method string The request method
 ---@field url string The request URL

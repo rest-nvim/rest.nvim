@@ -1,4 +1,4 @@
----@mod rest-nvim.context_ rest.nvim context (mainly contains variables)
+---@mod rest-nvim.context rest.nvim context (mainly about variables)
 
 local dotenv = require("rest-nvim.dotenv")
 local config = require("rest-nvim.config")
@@ -43,8 +43,6 @@ function Context:new()
   local obj = {
     __index = self,
     vars = {},
-    ---@diagnostic disable-next-line: missing-fields
-    response = {}, -- create response table here to pass the reference first
   }
   setmetatable(obj, self)
   return obj
