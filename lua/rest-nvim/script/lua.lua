@@ -1,5 +1,7 @@
----@mod rest-nvim.script rest.nvim pre-request/request handler module
+---@mod rest-nvim.script.lua rest.nvim lua script runner
+---@diagnostic disable: duplicate-set-field
 
+---@type rest.ScriptClient
 local script = {}
 
 local logger = require("rest-nvim.logger")
@@ -12,7 +14,7 @@ local logger = require("rest-nvim.logger")
 
 ---@param ctx rest.Context
 ---@return rest.PreScriptEnv
-function script.create_prescript_env(ctx)
+local function create_prescript_env(ctx)
   ---Global Environment variables passed to pre-request scripts
   ---@class rest.PreScriptEnv
   local env = {
@@ -39,7 +41,7 @@ end
 ---@param ctx rest.Context
 ---@param res rest.Response
 ---@return rest.HandlerEnv
-function script.create_handler_env(ctx, res)
+local function create_handler_env(ctx, res)
   ---Global Environment variables passed to response handler scripts
   ---@class rest.HandlerEnv
   local env = {
@@ -85,7 +87,7 @@ end
 ---@param s string
 ---@param env table
 ---@return function
-function script.load(s, env)
+local function load_lua(s, env)
   local f, error_msg = load(s, "script_variable", "bt", env)
   if error_msg then
     logger.error(error_msg)
@@ -97,7 +99,7 @@ end
 ---@param ctx rest.Context
 ---@return function
 function script.load_pre_req_hook(s, ctx)
-  return script.load(s, script.create_prescript_env(ctx))
+  return load_lua(s, create_prescript_env(ctx))
 end
 
 ---@param s string
@@ -105,7 +107,7 @@ end
 ---@return function
 function script.load_post_req_hook(s, ctx)
   return function (res)
-    script.load(s, script.create_handler_env(ctx, res))()
+    return load_lua(s, create_handler_env(ctx, res))()
   end
 end
 
