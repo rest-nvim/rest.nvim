@@ -16,8 +16,7 @@ local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
 local curl_utils = require("rest-nvim.client.curl.utils")
-
--- TODO: add support for submitting forms in the `client.request` function
+local curl_cli = require("rest-nvim.client.curl.cli")
 
 ---Get request statistics
 ---@param req table cURL request class
@@ -46,7 +45,6 @@ local function get_stats(req, statistics_tbl)
   local stats = {}
 
   for name, _ in pairs(statistics_tbl) do
-    -- stats[name] = style.title .. " " .. get_stat(req, name)
     stats[name] = get_stat(req, name)
   end
 
@@ -55,33 +53,33 @@ end
 
 ---Execute an HTTP request using cURL
 ---return return nil if execution failed
----@param request rest.Request Request data to be passed to cURL
----@return table? info The request information (url, method, headers, body, etc)
-function client.request_(request)
-  logger.info("sending request to: " .. request.url)
-  -- write to `Context.response` without altering the reference
-  local info = request.context.aesponse
+---@param req rest.Request Request data to be passed to cURL
+---@return rest.Response? info The request information (url, method, headers, body, etc)
+function client.request(req)
+  logger.info("sending request to: " .. req.url)
   if not found_curl then
     ---@diagnostic disable-next-line need-check-nil
     logger.error("lua-curl could not be found, therefore the cURL client will not work.")
     return
   end
-  local host = request.headers["host"]
+  local host = req.headers["host"]
   if host then
-    request.url = host .. request.url
+    req.url = host .. req.url
   end
 
   -- We have to concat request headers to a single string, e.g. ["Content-Type"]: "application/json" -> "Content-Type: application/json"
   local headers = {}
-  for name, value in pairs(request.headers) do
-    table.insert(headers, name .. ": " .. value)
+  for name, values in pairs(req.headers) do
+    for _, value in ipairs(values) do
+      table.insert(headers, name .. ": " .. value)
+    end
   end
 
   -- Whether to skip SSL host and peer verification
   local skip_ssl_verification = config.skip_ssl_verification
-  local req = curl.easy_init()
-  req:setopt({
-    url = request.url,
+  local req_ = curl.easy_init()
+  req_:setopt({
+    url = req.url,
     -- verbose = true,
     httpheader = headers,
     ssl_verifyhost = skip_ssl_verification,
@@ -92,89 +90,100 @@ function client.request_(request)
   local should_encode_url = config.encode_url
   if should_encode_url then
     -- Create a new URL as we cannot extract the URL from the req object
-    local _url = curl.url()
-    _url:set_url(request.url)
+    local url_ = curl.url()
+    url_:set_url(req.url)
     -- Re-add the request query with the encoded parameters
-    local query = _url:get_query()
+    local query = url_:get_query()
     if type(query) == "string" then
-      _url:set_query("")
+      url_:set_query("")
       for param in vim.gsplit(query, "&") do
-        _url:set_query(param, curl.U_URLENCODE + curl.U_APPENDQUERY)
+        url_:set_query(param, curl.U_URLENCODE + curl.U_APPENDQUERY)
       end
     end
     -- Re-add the request URL to the req object
-    req:setopt_url(_url:get_url())
+    req_:setopt_url(url_:get_url())
   end
 
   -- Set request HTTP version, defaults to HTTP/1.1
-  if request.http_version then
-    local http_version = request.http_version:gsub("%.", "_")
-    req:setopt_http_version(curl["HTTP_VERSION_" .. http_version])
+  if req.http_version then
+    local http_version = req.http_version:gsub("%.", "_")
+    req_:setopt_http_version(curl["HTTP_VERSION_" .. http_version])
   else
-    req:setopt_http_version(curl.HTTP_VERSION_1_1)
+    req_:setopt_http_version(curl.HTTP_VERSION_1_1)
   end
 
   -- If the request method is not GET then we have to build the method in our own
   -- See: https://github.com/Lua-cURL/Lua-cURLv3/issues/156
-  local method = request.method
+  local method = req.method
   if vim.tbl_contains({ "POST", "PUT", "PATCH", "TRACE", "OPTIONS", "DELETE" }, method) then
-    req:setopt_post(true)
-    req:setopt_customrequest(method)
+    req_:setopt_post(true)
+    req_:setopt_customrequest(method)
   end
 
   -- local body = vim.deepcopy(request.body)
-  if request.body then
-    if request.body.__TYPE == "json" then
-      req:setopt_postfields(request.body.data)
-    elseif request.body.__TYPE == "xml" then
-      req:setopt_postfields(request.body.data)
-    elseif request.body.__TYPE == "external" then
+  if req.body then
+    if req.body.__TYPE == "json" then
+      req_:setopt_postfields(req.body.data)
+    elseif req.body.__TYPE == "xml" then
+      req_:setopt_postfields(req.body.data)
+    elseif req.body.__TYPE == "external" then
       local mimetypes = require("mimetypes")
-      local body_mimetype = mimetypes.guess(request.body.data.path)
+      local body_mimetype = mimetypes.guess(req.body.data.path)
       local post_data = {
-        [request.body.data.name and request.body.data.name or "body"] = {
-          file = request.body.data.path,
+        [req.body.data.name and req.body.data.name or "body"] = {
+          file = req.body.data.path,
           type = body_mimetype,
         },
       }
-      req:post(post_data)
-    elseif request.body.__TYPE == "form" then
+      req_:post(post_data)
+    elseif req.body.__TYPE == "form" then
       local form = curl.form()
-      for k, v in pairs(request.body.data) do
+      for k, v in pairs(req.body.data) do
         form:add_content(k, v)
       end
-      req:setopt_httppost(form)
+      req_:setopt_httppost(form)
     else
-      logger.error(("'%s' type body is not supported yet"):format(request.body.__TYPE))
+      logger.error(("'%s' type body is not supported yet"):format(req.body.__TYPE))
       return
     end
   end
 
   -- Request execution
   local res_result = {}
-  local res_headers = {}
-  req:setopt_writefunction(table.insert, res_result)
-  req:setopt_headerfunction(table.insert, res_headers)
+  ---@type table<string, string[]>
+  local res_raw_headers = {}
+  req_:setopt_writefunction(table.insert, res_result)
+  req_:setopt_headerfunction(table.insert, res_raw_headers)
 
-  local ok, err = req:perform()
-  if ok then
-    -- Get request statistics if they are enabled
-    local stats_config = config.result.behavior.statistics
-    if stats_config.enable then
-      info.statistics = get_stats(req, stats_config.stats)
-    end
-
-    info.url = req:getinfo_effective_url()
-    info.code = req:getinfo_response_code()
-    info.method = req:getinfo_effective_method()
-    info.headers = table.concat(res_headers):gsub("\r", "")
-    info.body = table.concat(res_result)
-  else
+  local ok, err = req_:perform()
+  if not ok then
     logger.error("Something went wrong when making the request with cURL:\n" .. curl_utils.curl_error(err:no()))
     return
   end
-  req:close()
-  return info
+  ---@diagnostic disable-next-line: invisible
+  local status = curl_cli.parser.parse_verbose_status(table.remove(res_raw_headers, 1))
+  local res_headers = {}
+  for _, header in ipairs(res_raw_headers) do
+    ---@diagnostic disable-next-line: invisible
+    local key, value = curl_cli.parser.parse_header_pair(header)
+    if key then
+      if not res_headers[key] then
+        res_headers[key] = {}
+      end
+      table.insert(res_headers[key], value)
+    end
+  end
+  ---@type rest.Response
+  local res = {
+    status = status,
+    headers = res_headers,
+    body = table.concat(res_result),
+    statistics = get_stats(req_, {})
+  }
+  logger.debug(vim.inspect(res.headers))
+  res.status.text = vim.trim(res.status.text)
+  req_:close()
+  return res
 end
 
 return client

@@ -9,6 +9,7 @@ local config = require("rest-nvim.config")
 local ui     = require("rest-nvim.ui.result")
 local nio    = require("nio")
 local jar    = require("rest-nvim.cookie_jar")
+local clients = require("rest-nvim.client")
 
 ---@class rest.Request.Body
 ---@field __TYPE "json"|"xml"|"external"|"form"|"graphql"
@@ -30,19 +31,10 @@ local rest_nvim_last_request = nil
 ---@param req rest.Request
 local function run_request(req)
   logger.debug("run_request")
-  ---@type rest.Client
-  local client
-  if req.method == "WEBSOCKET" then
-    logger.error("method: websocket isn't supported yet")
-    return
-  elseif req.method == "GRPC" then
-    logger.error("method: grpc isn't supported yet")
-    return
-  elseif req.method == "GRAPHQL" then
-    logger.error("method: graphql isn't supported yet")
-    return
-  else
-    client = require("rest-nvim.client.curl.cli")
+  local client = clients.get_available_clients(req)[1]
+  if not client then
+    logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
+    vim.notify("[rest.nvim] Can't find registered client available for request", vim.log.levels.ERROR)
   end
   rest_nvim_last_request = req
 

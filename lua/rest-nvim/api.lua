@@ -11,6 +11,7 @@ local api = {}
 
 local autocmds = require("rest-nvim.autocmds")
 local commands = require("rest-nvim.commands")
+local client = require("rest-nvim.client")
 
 ---rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
 ---@type string
@@ -40,6 +41,10 @@ end
 function api.register_rest_subcommand(name, cmd)
 ---@diagnostic disable-next-line: invisible
   commands.register_subcommand(name, cmd)
+end
+
+function api.register_rest_client(c)
+  client.register_client(c)
 end
 
 return api
