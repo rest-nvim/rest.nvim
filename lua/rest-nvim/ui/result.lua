@@ -11,6 +11,7 @@ local ui = {}
 local config = require("rest-nvim.config")
 local utils = require("rest-nvim.utils")
 local paneui = require("rest-nvim.ui.panes")
+local logger = require("rest-nvim.logger")
 
 local function set_lines(buffer, lines)
   vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
@@ -65,16 +66,19 @@ local panes = {
       -- syntax_highlight(self.bufnr, "http")
       local lines = render_request(data.request)
       if data.response then
+        logger.debug(data.response.status)
         table.insert(lines, ("%d %s %s"):format(data.response.status.code, data.response.status.version, data.response.status.text))
         local content_type = data.response.headers["content-type"]
         table.insert(lines, "")
         table.insert(lines, "#+RES")
         local body = vim.split(data.response.body, "\n")
-        local res_type = content_type[1]:match(".*/([^;]+)")
-        if res_type == "octet_stream" then
-          body = { "Binary answer" }
-        elseif config.response.hooks.format then
-          body = utils.gq_lines(body, res_type)
+        if content_type then
+          local res_type = content_type[1]:match(".*/([^;]+)")
+          if res_type == "octet_stream" then
+            body = { "Binary answer" }
+          elseif config.response.hooks.format then
+            body = utils.gq_lines(body, res_type)
+          end
         end
         vim.list_extend(lines, body)
         table.insert(lines, "#+END")
@@ -94,10 +98,12 @@ local panes = {
       end
       syntax_highlight(self.bufnr, "jproperties")
       local lines = {}
+      logger.debug(data.response.headers)
       local headers = vim.iter(data.response.headers):totable()
       table.sort(headers, function(b, a) return a[1] > b[1] end)
+      logger.debug(headers)
       for _, header in ipairs(headers) do
-        if header[1] == "set-cookie" then
+        if header[1] ~= "set-cookie" then
           vim.list_extend(lines, vim.iter(header[2]):map(function (value)
             return header[1] .. ": " .. value
           end):totable())
