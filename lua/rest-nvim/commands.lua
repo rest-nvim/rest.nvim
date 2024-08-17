@@ -275,11 +275,11 @@ function commands.setup()
     desc = "Run your HTTP requests",
     complete = function(arg_lead, cmdline, _)
       local rest_commands = vim.tbl_keys(rest_command_tbl)
-      local subcmd, subcmd_arg_lead = cmdline:match("^Rest*%s(%S+)%s(.*)$")
+      local subcmd, subcmd_arg_lead = cmdline:match("Rest*%s(%S+)%s(.*)$")
       if subcmd and subcmd_arg_lead and rest_command_tbl[subcmd] and rest_command_tbl[subcmd].complete then
         return rest_command_tbl[subcmd].complete(subcmd_arg_lead)
       end
-      if cmdline:match("^Rest*%s+%w*$") then
+      if cmdline:match("Rest*%s+%w*$") then
         return vim.tbl_filter(function(cmd)
           if string.find(cmd, "^" .. arg_lead) then
             return cmd
