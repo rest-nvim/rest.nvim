@@ -50,7 +50,7 @@ local function open_logfile()
   logfile, openerr = io.open(logger.get_logfile(), "w+")
   if not logfile then
     local err_msg = string.format("Failed to open rest.nvim log file: %s", openerr)
-    vim.notify(err_msg, vim.log.levels.ERROR)
+    vim.notify(err_msg, vim.log.levels.ERROR, { title = "rest.nvim" })
     return false
   end
 
@@ -58,7 +58,7 @@ local function open_logfile()
   if log_info and log_info.size > LARGE then
     local warn_msg =
       string.format("rest.nvim log is large (%d MB): %s", log_info.size / (1000 * 1000), logger.get_logfile())
-    vim.notify(warn_msg, vim.log.levels.WARN)
+    vim.notify(warn_msg, vim.log.levels.WARN, { title = "rest.nvim" })
   end
 
   -- Start message for logging

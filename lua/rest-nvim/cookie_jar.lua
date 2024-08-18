@@ -29,7 +29,7 @@ function M.load_jar()
   local file, openerr = io.open(config.cookies.path, "r")
   if not file then
     local err_msg = string.format("Failed to open rest.nvim cookies file: %s", openerr)
-    vim.notify(err_msg, vim.log.levels.ERROR)
+    vim.notify(err_msg, vim.log.levels.ERROR, { title = "rest.nvim" })
     logger.error(err_msg)
     return
   end
@@ -38,7 +38,7 @@ function M.load_jar()
     if seps[1] ~= "" and not vim.startswith(seps[1], "#") then
       if #seps ~= 5 then
         local err_msg = "error while parsing cookies file at line:\n" .. line .. "\n"
-        vim.notify("[rest.nvim] " .. err_msg, vim.log.levels.ERROR)
+        vim.notify(err_msg, vim.log.levels.ERROR, { title = "rest.nvim" })
         logger.error(err_msg)
         return
       end
@@ -161,7 +161,7 @@ function M.save_jar()
   local file, openerr = io.open(config.cookies.path, "w")
   if not file then
     local err_msg = string.format("Failed to open rest.nvim cookies file: %s", openerr)
-    vim.notify("[rest.nvim] " ..err_msg, vim.log.levels.ERROR)
+    vim.notify(err_msg, vim.log.levels.ERROR, { title = "rest.nvim" })
     logger.error(err_msg)
     return
   end

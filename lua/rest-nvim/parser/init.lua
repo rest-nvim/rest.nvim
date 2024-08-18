@@ -384,7 +384,7 @@ function parser.parse(node, source, ctx)
     body = parser.parse_body(content_type, body_node, source, ctx)
     if not body then
       logger.error("parsing body failed")
-      vim.notify("[rest.nvim] parsing request body failed. See `:Rest logs` for more info.", vim.log.levels.ERROR)
+      vim.notify("parsing request body failed. See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
       return nil
     end
   end

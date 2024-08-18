@@ -49,7 +49,7 @@ for dep, err in pairs(dependencies) do
       error = err,
     }
     if not found_dep2 then
-      vim.notify("[rest.nvim] WARN: Dependency '" .. dep .. "' was not found. " .. err, vim.log.levels.ERROR)
+      vim.notify("WARN: Dependency '" .. dep .. "' was not found. " .. err, vim.log.levels.ERROR, { title = "rest.nvim" })
     else
       rest_nvim_deps[dep] = {
         found = true,

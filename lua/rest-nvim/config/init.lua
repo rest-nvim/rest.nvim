@@ -193,7 +193,7 @@ config = vim.tbl_deep_extend("force", {
 local ok, err = check.validate(config)
 
 if not ok then
-  vim.notify("[rest.nvim] " .. err, vim.log.levels.ERROR)
+  vim.notify(err, vim.log.levels.ERROR, { title = "rest.nvim" })
 end
 
 if #config._debug_info.unrecognized_configs > 0 then

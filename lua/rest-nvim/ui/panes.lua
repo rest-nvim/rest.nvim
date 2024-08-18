@@ -24,7 +24,7 @@ function RestUIPaneGroup:cycle(direction)
       return
     end
   end
-  vim.notify("`cycle()` can only be called inside the pane buffer", vim.log.levels.WARN)
+  vim.notify("`cycle()` can only be called inside the pane buffer", vim.log.levels.WARN, { title = "rest.nvim" })
 end
 function RestUIPaneGroup:render()
   for _, pane in ipairs(self.panes) do

@@ -86,11 +86,11 @@ local rest_command_tbl = {
   run = {
     impl = function(args, _)
       if vim.bo.filetype ~= "http" or vim.b.__rest_no_http_file then
-        vim.notify("`:Rest run` can be only called from http file", vim.log.levels.ERROR)
+        vim.notify("`:Rest run` can be only called from http file", vim.log.levels.ERROR, { title = "rest.nvim" })
         return
       end
       if #args > 1 then
-        vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN)
+        vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN, { title = "rest.nvim" })
         return
       elseif #args == 1 then
         request().run_by_name(args[1])
@@ -145,14 +145,14 @@ local rest_command_tbl = {
         return
       elseif args[1] == "set" then
         if #args < 2 then
-          vim.notify("Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed", vim.log.levels.ERROR)
+          vim.notify("Not enough arguments were passed to the 'env' command: 2 argument were expected, 1 was passed", vim.log.levels.ERROR, { title = "rest.nvim" })
           return
         end
         dotenv().register_file(args[2])
       elseif args[1] == "select" then
         dotenv().select_file()
       else
-        vim.notify("Invalid action '" .. args[1] .. "' provided to 'env' command", vim.log.levels.ERROR)
+        vim.notify("Invalid action '" .. args[1] .. "' provided to 'env' command", vim.log.levels.ERROR, { title = "rest.nvim" })
       end
     end,
     ---@return string[]
@@ -191,47 +191,47 @@ local rest_command_tbl = {
           req_node = parser().get_cursor_request_node()
           if not req_node then
             logger().error("failed to find request at cursor position")
-            vim.notify("[rest.nvim] failed to find request at cursor position", vim.log.levels.ERROR)
+            vim.notify("failed to find request at cursor position", vim.log.levels.ERROR, { title = "rest.nvim" })
             return
           end
         else
           req_node = parser().get_request_node_by_name(args[2])
           if not req_node then
             logger().error("failed to find request with name:" .. args[2])
-            vim.notify("[rest.nvim] failed to find request with name:" .. args[2], vim.log.levels.ERROR)
+            vim.notify("failed to find request with name:" .. args[2], vim.log.levels.ERROR, { title = "rest.nvim" })
             return
           end
         end
         local req = parser().parse(req_node, 0)
         if not req then
           logger().error("failed to parse request")
-          vim.notify("[rest.nvim] failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR)
+          vim.notify("failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
           return
         end
         local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
         vim.fn.setreg("+", curl_command)
-        vim.notify("[rest.nvim] Copied curl command to clipboard", vim.log.levels.INFO)
+        vim.notify("Copied curl command to clipboard", vim.log.levels.INFO, { title = "rest.nvim" })
       elseif args[1] == "comment" then
         local req_node
         if not args[2] then
           req_node = parser().get_cursor_request_node()
           if not req_node then
             logger().error("failed to find request at cursor position")
-            vim.notify("[rest.nvim] failed to find request at cursor position", vim.log.levels.ERROR)
+            vim.notify("failed to find request at cursor position", vim.log.levels.ERROR, { title = "rest.nvim" })
             return
           end
         else
           req_node = parser().get_request_node_by_name(args[2])
           if not req_node then
             logger().error("failed to find request with name:" .. args[2])
-            vim.notify("[rest.nvim] failed to find request with name:" .. args[2], vim.log.levels.ERROR)
+            vim.notify("failed to find request with name:" .. args[2], vim.log.levels.ERROR, { title = "rest.nvim" })
             return
           end
         end
         local req = parser().parse(req_node, 0)
         if not req then
           logger().error("failed to parse request")
-          vim.notify("[rest.nvim] failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR)
+          vim.notify("failed to parse request. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
           return
         end
         local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
@@ -241,7 +241,7 @@ local rest_command_tbl = {
       -- elseif args[1] == "to-http" then
       --   -- TODO: convert comment with curl to http request and insert it below
       else
-        vim.notify("Invalid action '" .. args[1] .. "' provided to 'curl' command", vim.log.levels.ERROR)
+        vim.notify("Invalid action '" .. args[1] .. "' provided to 'curl' command", vim.log.levels.ERROR, { title = "rest.nvim" })
       end
     end,
     complete = function (_args)
@@ -262,7 +262,7 @@ local function rest(opts)
 
   if not command then
     logger().error("Unknown command: " .. cmd)
-    vim.notify("Unknown command: " .. cmd)
+    vim.notify("Unknown command: " .. cmd, vim.log.levels.WARN, { title = "rest.nvim" })
     return
   end
 

@@ -34,7 +34,7 @@ local function run_request(req)
   local client = clients.get_available_clients(req)[1]
   if not client then
     logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
-    vim.notify("[rest.nvim] Can't find registered client available for request", vim.log.levels.ERROR)
+    vim.notify("Can't find registered client available for request", vim.log.levels.ERROR, { title = "rest.nvim" })
   end
   rest_nvim_last_request = req
 
@@ -50,7 +50,7 @@ local function run_request(req)
     local ok, res = pcall(client.request(req).wait)
     if not ok then
       logger.error("request failed")
-      vim.notify("[rest.nvim] request failed", vim.log.levels.ERROR)
+      vim.notify("request failed", vim.log.levels.ERROR, { title = "rest.nvim" })
       return
     end
     ---@cast res rest.Response
@@ -87,7 +87,7 @@ function M.run()
   local req_node = parser.get_cursor_request_node()
   if not req_node then
     logger.error("failed to find request at cursor position")
-    vim.notify("[rest.nvim] failed to find request at cursor position", vim.log.levels.ERROR)
+    vim.notify("failed to find request at cursor position", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local ctx = parser.create_context(0)
@@ -97,7 +97,7 @@ function M.run()
   local req = parser.parse(req_node, 0, ctx)
   if not req then
     logger.error("failed to parse request")
-    vim.notify("[rest.nvim] failed to parse request", vim.log.levels.ERROR)
+    vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local highlight = config.highlight
@@ -112,7 +112,7 @@ function M.run_by_name(name)
   local req_node = parser.get_request_node_by_name(name)
   if not req_node then
     logger.error("failed to find request by name: " .. name)
-    vim.notify("[rest.nvim] failed to find request by name: " .. name, vim.log.levels.ERROR)
+    vim.notify("failed to find request by name: " .. name, vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local ctx = parser.create_context(0)
@@ -122,7 +122,7 @@ function M.run_by_name(name)
   local req = parser.parse(req_node, 0, ctx)
   if not req then
     logger.error("failed to parse request")
-    vim.notify("[rest.nvim] failed to parse request", vim.log.levels.ERROR)
+    vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local highlight = config.highlight
@@ -136,7 +136,7 @@ end
 function M.run_last()
   local req = rest_nvim_last_request
   if not req then
-    vim.notify("[rest.nvim] No last request found", vim.log.levels.WARN)
+    vim.notify("No last request found", vim.log.levels.WARN, { title = "rest.nvim" })
     return false
   end
   run_request(req)
@@ -149,13 +149,13 @@ function M.run_all()
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
     if not req then
-      vim.notify("[rest.nvim] Parsing request failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
+      vim.notify("Parsing request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
       return false
     end
     -- FIXME: wait for previous request ends
     local ok = run_request(req)
     if not ok then
-      vim.notify("[rest.nvim] Running request failed. See `:Rest logs` for more info", vim.log.levels.ERROR)
+      vim.notify("Running request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
       return
     end
   end
