@@ -70,7 +70,7 @@ local panes = {
         table.insert(lines, ("%s %d %s"):format(data.response.status.version, data.response.status.code, data.response.status.text))
         local content_type = data.response.headers["content-type"]
         table.insert(lines, "")
-        table.insert(lines, "#+RES")
+        table.insert(lines, "# @_RES")
         local body = vim.split(data.response.body, "\n")
         if content_type then
           local res_type = content_type[1]:match(".*/([^;]+)")
@@ -81,7 +81,7 @@ local panes = {
           end
         end
         vim.list_extend(lines, body)
-        table.insert(lines, "#+END")
+        table.insert(lines, "# @_END")
       else
         vim.list_extend(lines, { "", "# Loading..." })
       end

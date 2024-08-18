@@ -9,17 +9,16 @@
 (variable_declaration
   name: (identifier) @variable)
 
-; Parameters
-(query_param
-  key: (_) @variable.parameter)
-
 ; Operators
-[
-  "="
-  "&"
-  "@"
-  "<"
-] @operator
+(comment
+  "=" @operator)
+(variable_declaration
+  "=" @operator)
+
+; keywords
+(comment
+  "@" @keyword
+  name: (_) @keyword)
 
 ; Literals
 (request
@@ -37,7 +36,8 @@
   "}}"
 ] @punctuation.bracket
 
-":" @punctuation.delimiter
+(header
+  ":" @punctuation.delimiter)
 
 ; external JSON body
 (external_body

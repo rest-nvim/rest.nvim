@@ -72,52 +72,99 @@ local function parse_headers(req_node, source, context)
   return setmetatable(headers, nil)
 end
 
+---@param str string
+---@return boolean
+local function validate_json(str)
+  local ok, _ = pcall(vim.json.decode, str)
+  return ok
+end
+
+---@param str string
+---@return boolean
+local function validate_xml(str)
+  local xml2lua = require("xml2lua")
+  local handler = require("xmlhandler.tree"):new()
+  local xml_parser = xml2lua.parser(handler)
+  local ok = pcall(function (t) return xml_parser:parse(t) end, str)
+  return ok
+end
+
+---@param str string
+---@return table<string,string>?
+local function parse_urlencoded_form(str)
+  local form = {}
+  local query_pairs = vim.split(str, "&")
+  for _, query in ipairs(query_pairs) do
+    local key, value = query:match("([^=]+)=?(.*)")
+    if not key then
+      -- TODO: error
+      return nil
+    end
+    form[vim.trim(key)] = vim.trim(value)
+  end
+  return form
+end
+
+---@param content_type string?
 ---@param body_node TSNode
 ---@param source Source
 ---@param context rest.Context
----@return rest.Request.Body|nil
-function parser.parse_body(body_node, source, context)
+---@return rest.Request.Body?
+function parser.parse_body(content_type, body_node, source, context)
   local body = {}
-  body.__TYPE = body_node:type():gsub("_%w+", "")
+  local node_type = body_node:type()
   ---@cast body rest.Request.Body
-  if body.__TYPE == "json" then
-    body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
-    body.data = expand_variables(body.data, context)
-    local ok, _ = pcall(vim.json.decode, body.data)
-    if not ok then
-      logger.warn("invalid json: '" .. body.data .. "'")
-      return nil
-    end
-  elseif body.__TYPE == "xml" then
-    body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
-    body.data = expand_variables(body.data, context)
-    local xml2lua = require("xml2lua")
-    local handler = require("xmlhandler.tree"):new()
-    local xml_parser = xml2lua.parser(handler)
-    local ok = pcall(function (t) return xml_parser:parse(t) end, body.data)
-    if not ok then
-      logger.warn("invalid xml: '" .. body.data .. "'")
-      return nil
-    end
-  elseif body.__TYPE == "form" then
-    body.data = {}
-    for pair, _ in body_node:iter_children() do
-      if pair:type() == "query" then
-        local key = assert(get_node_field_text(pair, "key", source))
-        local value = assert(get_node_field_text(pair, "value", source))
-        key = expand_variables(key, context)
-        value = expand_variables(value, context)
-        body.data[key] = value
-      end
-    end
-  elseif body.__TYPE == "external" then
+  if node_type == "external_body" then
+    body.__TYPE = "external"
     local path = assert(get_node_field_text(body_node, "path", source))
-    path = vim.fs.normalize(vim.fs.joinpath(vim.fn.expand("%:h"), path))
+    if type(source) ~= "number" then
+      logger.error("can't parse external body on non-existing http file")
+      return
+    end
+    ---@cast source integer
+    local basepath = vim.api.nvim_buf_get_name(source):match("(.*)/.*")
+    path = vim.fs.normalize(vim.fs.joinpath(basepath, path))
     body.data = {
       name = get_node_field_text(body_node, "name", source),
       path = path,
     }
-  elseif body.__TYPE == "graphql" then
+  elseif node_type == "json_body" or content_type == "application/json" then
+    body.__TYPE = "json"
+    body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
+    body.data = expand_variables(body.data, context)
+    local ok = validate_json(body.data)
+    if not ok then
+      logger.warn("invalid json: '" .. body.data .. "'")
+      return nil
+    end
+  elseif node_type == "xml_body" or content_type == "application/xml" then
+    body.__TYPE = "xml"
+    body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
+    body.data = expand_variables(body.data, context)
+    local ok = validate_xml(body.data)
+    if not ok then
+      logger.warn("invalid xml: '" .. body.data .. "'")
+      return nil
+    end
+  elseif node_type == "raw_body" then
+    -- TODO: exclude comments from text
+    local text = vim.treesitter.get_node_text(body_node, source)
+    if content_type and vim.startswith(content_type, "application/x-www-form-urlencoded") then
+      body.__TYPE = "form"
+      body.data = parse_urlencoded_form(text)
+      if not body.data then
+        -- TODO: parsing urlencoded form failed
+        return nil
+      end
+    else
+      body.__TYPE = "raw"
+      body.data = text
+    end
+  elseif node_type == "multipart_form_data" then
+    body.__TYPE = "multipart_form_data"
+    -- TODO:
+    logger.error("multipart form data is not supported yet")
+  elseif node_type == "graphql_body" then
     logger.error("graphql body is not supported yet")
   end
   return body
@@ -273,15 +320,6 @@ function parser.parse(node, source, ctx)
     logger.error("request section doesn't have request node")
     return nil
   end
-  local body
-  local body_node = req_node:field("body")[1]
-  if body_node then
-    body = parser.parse_body(body_node, source, ctx)
-    if not body then
-      logger.error("parsing body failed")
-      return nil
-    end
-  end
   local method = get_node_field_text(req_node, "method", source)
   if not method then
     logger.info("no method provided, falling back to 'GET'")
@@ -334,6 +372,23 @@ function parser.parse(node, source, ctx)
     url = host..url
     table.remove(headers["host"], 1)
   end
+
+  ---@type string?
+  local content_type
+  if headers["content-type"] then
+    content_type = headers["content-type"][1]:match("([^;]+)")
+  end
+  local body
+  local body_node = req_node:field("body")[1]
+  if body_node then
+    body = parser.parse_body(content_type, body_node, source, ctx)
+    if not body then
+      logger.error("parsing body failed")
+      vim.notify("[rest.nvim] parsing request body failed. See `:Rest logs` for more info.", vim.log.levels.ERROR)
+      return nil
+    end
+  end
+
   ---@type rest.Request
   local req = {
     name = name,

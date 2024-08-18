@@ -1,0 +1,5 @@
+// The request body is read from a file
+POST https://example.com:8080/api/html/post
+Content-Type: application/json
+
+< ./input.json

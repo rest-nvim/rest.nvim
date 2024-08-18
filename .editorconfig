@@ -11,6 +11,9 @@ trim_trailing_whitespace = true
 [*.lua]
 indent_size = 2
 
+[*.scm]
+indent_size = 2
+
 [*.{md,lua}]
 max_line_length = 100
 
