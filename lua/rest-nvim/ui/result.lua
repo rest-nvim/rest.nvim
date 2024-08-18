@@ -67,7 +67,7 @@ local panes = {
       local lines = render_request(data.request)
       if data.response then
         logger.debug(data.response.status)
-        table.insert(lines, ("%d %s %s"):format(data.response.status.code, data.response.status.version, data.response.status.text))
+        table.insert(lines, ("%s %d %s"):format(data.response.status.version, data.response.status.code, data.response.status.text))
         local content_type = data.response.headers["content-type"]
         table.insert(lines, "")
         table.insert(lines, "#+RES")
