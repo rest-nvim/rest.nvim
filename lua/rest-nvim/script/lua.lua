@@ -24,7 +24,7 @@ local function create_prescript_env(ctx)
       variables = {
         ---Set request-local variable
         set = function (key, value)
-          ctx:set(key, value)
+          ctx:set_local(key, value)
         end,
         ---Retrieve variable in current request scope
         get = function (key)
@@ -65,7 +65,7 @@ local function create_handler_env(ctx, res)
       variables = {
         ---Set request-local variable
         set = function (key, value)
-          ctx:set(key, value)
+          ctx:set_local(key, value)
         end,
         ---Retrieve variable in current request scope
         get = function (key)

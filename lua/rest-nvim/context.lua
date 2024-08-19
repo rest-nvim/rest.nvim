@@ -5,7 +5,10 @@ local config = require("rest-nvim.config")
 local M = {}
 
 ---@class rest.Context
+---global variables
 ---@field vars table<string,string>
+---local variables
+---@field lv table<string,string>
 local Context = {}
 Context.__index = Context
 
@@ -43,6 +46,7 @@ function Context:new()
   local obj = {
     __index = self,
     vars = {},
+    lv = {},
   }
   setmetatable(obj, self)
   return obj
@@ -51,14 +55,28 @@ end
 ---@param filepath string
 function Context:load_file(filepath)
   dotenv.load_file(filepath, function (key, value)
-    self:set(key, value)
+    self:set_global(key, value)
   end)
 end
 
 ---@param key string
 ---@param value string
-function Context:set(key, value)
+function Context:set_global(key, value)
+  vim.validate("key", key, "string")
+  vim.validate("value", value, "string")
   self.vars[key] = value
+end
+
+---@param key string
+---@param value string
+function Context:set_local(key, value)
+  vim.validate("key", key, "string")
+  vim.validate("value", value, "string")
+  self.lv[key] = value
+end
+
+function Context:clear_local()
+  self.lv = {}
 end
 
 ---@param key string
@@ -79,7 +97,7 @@ function Context:resolve(key)
   -- find from dynamic variables
   local var = get_dynamic_vars(key)
   -- find from local variable table or vim.env
-  return var and var() or self.vars[key] or vim.env[key] or ""
+  return var and var() or self.lv[key] or self.vars[key] or vim.env[key] or ""
 end
 
 M.Context = Context

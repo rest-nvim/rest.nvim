@@ -11,7 +11,7 @@ describe("handler script", function ()
     local ctx = Context:new()
     vim.env["foo"] = "old"
     vim.env["baz"] = "old"
-    ctx:set("bar", "old")
+    ctx:set_global("bar", "old")
     local script = [[
     client.global.set("foo", "new")
     request.variables.set("bar", "new")

@@ -246,7 +246,7 @@ function parser.parse_variable_declaration(vd_node, source, ctx)
   local name = assert(get_node_field_text(vd_node, "name", source))
   local value = vim.trim(assert(get_node_field_text(vd_node, "value", source)))
   value = expand_variables(value, ctx)
-  ctx:set(name, value)
+  ctx:set_global(name, value)
 end
 
 ---@param node TSNode
@@ -410,6 +410,7 @@ function parser.parse(node, source, ctx)
     body = body,
     handlers = handlers,
   }
+  ctx:clear_local()
   jar.load_cookies(req)
   return req
 end

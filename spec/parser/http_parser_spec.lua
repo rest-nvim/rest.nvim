@@ -255,7 +255,7 @@ X-DATE: {{$date}}
     parser.parse_pre_request_script(script_node, source, c)
     assert.same({
       foo = "bar",
-    }, c.vars)
+    }, c.lv)
   end)
 
   it("create context from source", function()
