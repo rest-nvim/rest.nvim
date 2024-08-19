@@ -179,6 +179,7 @@ function parser.create_context(source)
   local query = vim.treesitter.query.parse("http", IN_PLACE_VARIABLE_QUERY)
   local ctx = Context:new()
   local _, tree = utils.ts_parse_source(source)
+  -- TODO: capture variable_decalarations in section without request
   for _, node in query:iter_captures(tree:root(), source) do
     if node:type() == "variable_declaration" then
       parser.parse_variable_declaration(node, source, ctx)
@@ -192,7 +193,14 @@ function parser.get_cursor_request_node()
   local node = vim.treesitter.get_node()
   if node then
     node = utils.ts_find(node, "section")
-    if not node or #node:field("request") < 1 then
+    if not node then
+      logger.error("can't find request section node")
+      return
+    elseif node:has_error() then
+      logger.error(utils.ts_node_error_log(node))
+      return
+    elseif #node:field("request") < 1 then
+      logger.error("request section doesn't have request node")
       return
     end
   end
@@ -309,17 +317,11 @@ end
 ---@return rest.Request|nil
 function parser.parse(node, source, ctx)
   assert(node:type() == "section")
-  ctx = ctx or Context:new()
-  -- request should not include error
-  if node:has_error() then
-    logger.error(utils.ts_node_error_log(node))
-    return nil
-  end
+  assert(not node:has_error())
   local req_node = node:field("request")[1]
-  if not req_node then
-    logger.error("request section doesn't have request node")
-    return nil
-  end
+  assert(req_node)
+
+  ctx = ctx or Context:new()
   local method = get_node_field_text(req_node, "method", source)
   if not method then
     logger.info("no method provided, falling back to 'GET'")

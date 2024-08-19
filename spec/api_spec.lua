@@ -202,6 +202,7 @@ X-DATE: {{$date}}
     request.variables.set("baz", "new")
     ]]
     local h = require("rest-nvim.script.lua").load_post_req_hook(script, ctx)
+    ---@diagnostic disable-next-line: missing-parameter
     h()
     assert.same("new", vim.env["foo"])
     assert.same("new", ctx:resolve("bar"))

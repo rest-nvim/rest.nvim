@@ -313,7 +313,8 @@ end
 ---@return nio.control.Future future Future containing rest.Response
 function curl.request(request)
   local progress_handle = progress.handle.create({
-    title = "Fetching",
+    title = "Executing",
+    message = "Executing request...",
     lsp_client = { name = "rest.nvim" },
   })
   local future = nio.control.future()
@@ -328,14 +329,15 @@ function curl.request(request)
     end
     vim.schedule(function ()
       progress_handle:report({
-        message = "parsing response",
+        message = "Parsing response...",
       })
-    end)
-    local response = parser.parse_verbose(vim.split(sc.stderr, "\n"))
-    response.body = sc.stdout
-    future.set(response)
-    vim.schedule(function ()
-    progress_handle:finish()
+      local response = parser.parse_verbose(vim.split(sc.stderr, "\n"))
+      response.body = sc.stdout
+      future.set(response)
+      progress_handle:report({
+        message = "Success",
+      })
+      progress_handle:finish()
     end)
   end, {
     -- TODO(boltless): parse by chunk from here

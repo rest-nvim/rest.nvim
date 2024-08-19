@@ -86,8 +86,8 @@ function M.run()
   logger.info("starting request")
   local req_node = parser.get_cursor_request_node()
   if not req_node then
-    logger.error("failed to find request at cursor position")
-    vim.notify("failed to find request at cursor position", vim.log.levels.ERROR, { title = "rest.nvim" })
+    logger.error("Failed to find request at cursor position")
+    vim.notify("Failed to find request at cursor position. See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local ctx = parser.create_context(0)
@@ -111,8 +111,8 @@ end
 function M.run_by_name(name)
   local req_node = parser.get_request_node_by_name(name)
   if not req_node then
-    logger.error("failed to find request by name: " .. name)
-    vim.notify("failed to find request by name: " .. name, vim.log.levels.ERROR, { title = "rest.nvim" })
+    logger.error("Failed to find request by name: " .. name)
+    vim.notify("Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
   local ctx = parser.create_context(0)
@@ -144,7 +144,7 @@ end
 
 ---run all requests in current file with same context
 function M.run_all()
-  local reqs = parser.get_all_request_nodes()
+  local reqs = parser.get_all_request_nodes(0)
   local ctx = parser.create_context(0)
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
