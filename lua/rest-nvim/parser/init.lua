@@ -23,10 +23,16 @@ local NAMED_REQUEST_QUERY = vim.treesitter.query.parse("http", [[
   request: (_)) @request
 (section
   (comment
-    name: (_) @keyword
+    name: (_) @_keyword
     value: (_) @name
-    (#eq? @keyword "name"))
+    (#eq? @_keyword "name"))
   request: (_)) @request
+]])
+
+local IN_PLACE_VARIABLE_QUERY = vim.treesitter.query.parse("http", [[
+(section
+  !request
+  (variable_declaration)+ @inplace_variable)
 ]])
 
 ---@param node TSNode
@@ -96,7 +102,7 @@ local function parse_urlencoded_form(str)
   return vim.iter(query_pairs):map(function (query)
     local key, value = query:match("([^=]+)=?(.*)")
     if not key then
-      -- TODO: error
+      logger.error(("Error while parsing query '%s' from urlencoded form '%s'"):format(query_pairs, str))
       return nil
     end
     return vim.trim(key) .. "=" .. vim.trim(value)
@@ -147,13 +153,12 @@ function parser.parse_body(content_type, body_node, source, context)
       return nil
     end
   elseif node_type == "raw_body" then
-    -- TODO: exclude comments from text
     local text = vim.treesitter.get_node_text(body_node, source)
     if content_type and vim.startswith(content_type, "application/x-www-form-urlencoded") then
       body.__TYPE = "raw"
       body.data = parse_urlencoded_form(text)
       if not body.data then
-        -- TODO: parsing urlencoded form failed
+        logger.error("Error while parsing urlencoded form")
         return nil
       end
     else
@@ -170,16 +175,13 @@ function parser.parse_body(content_type, body_node, source, context)
   return body
 end
 
-local IN_PLACE_VARIABLE_QUERY = "(variable_declaration) @inplace_variable"
-
 ---parse all in-place variables from source
 ---@param source Source
 ---@return rest.Context ctx
 function parser.create_context(source)
-  local query = vim.treesitter.query.parse("http", IN_PLACE_VARIABLE_QUERY)
+  local query = IN_PLACE_VARIABLE_QUERY
   local ctx = Context:new()
   local _, tree = utils.ts_parse_source(source)
-  -- TODO: capture variable_decalarations in section without request
   for _, node in query:iter_captures(tree:root(), source) do
     if node:type() == "variable_declaration" then
       parser.parse_variable_declaration(node, source, ctx)
@@ -213,7 +215,7 @@ function parser.get_all_request_nodes(source)
   local _, tree = utils.ts_parse_source(source)
   local result = {}
   for node, _ in tree:root():iter_children() do
-    if node:type() == "section" then
+    if node:type() == "section" and #node:field("request") > 0 then
       table.insert(result, node)
     end
   end
@@ -327,28 +329,34 @@ function parser.parse(node, source, ctx)
     logger.info("no method provided, falling back to 'GET'")
     method = "GET"
   end
-  local url = expand_variables(
-    assert(get_node_field_text(req_node, "url", source)),
-    ctx,
-    utils.escape
-  )
-  url = url:gsub("\n%s+", "")
+  -- NOTE: url will be parsed after because in-place variables should be parsed
+  -- first
+  local url
 
   local name
   local handlers = {}
   for child, _ in node:iter_children() do
-    local node_type = child:type()
-    if node_type == "pre_request_script" then
+    local child_type = child:type()
+    if child_type == "request" then
+      url = expand_variables(
+        assert(get_node_field_text(req_node, "url", source)),
+        ctx,
+        utils.escape
+      )
+      url = url:gsub("\n%s+", "")
+    elseif child_type == "pre_request_script" then
       parser.parse_pre_request_script(child, source, ctx)
-    elseif node_type == "res_handler_script" then
+    elseif child_type == "res_handler_script" then
       local handler = parser.parse_request_handler(child, source, ctx)
       if handler then
         table.insert(handlers, handler)
       end
-    elseif node_type == "request_separator" then
+    elseif child_type == "request_separator" then
       name = get_node_field_text(child, "value", source)
-    elseif node_type == "comment" and get_node_field_text(child, "name", source) == "name" then
+    elseif child_type == "comment" and get_node_field_text(child, "name", source) == "name" then
       name = get_node_field_text(child, "value", source) or name
+    elseif child_type == "variable_declaration" then
+      parser.parse_variable_declaration(child, source, ctx)
     end
   end
   if not name then

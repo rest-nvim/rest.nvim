@@ -6,6 +6,7 @@ local function open(path)
   vim.cmd.edit(path)
   -- FIXME: why runtimepath is not working?
   vim.bo.filetype = "http"
+  vim.cmd.source("ftplugin/http.lua")
   return 0
 end
 

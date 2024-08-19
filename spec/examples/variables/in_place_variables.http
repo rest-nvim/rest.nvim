@@ -1,0 +1,21 @@
+# this is a valid in-place variable syntax
+@myhost = example.org
+
+# this is not a in-place variable
+# @myhost = example.org
+
+###
+GET {{myhost}}/users
+
+###
+# you can also define variables here
+# all in-place variables are global
+@myhost=example.net
+GET {{myhost}}/users
+
+###
+# so `myhost` here is now `example.net`
+GET {{myhost}}/stats
+
+###
+# check `spec/examples/script/pre_request_script.http` for variable local to each requests

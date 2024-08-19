@@ -1,7 +1,11 @@
 ### run request with variable set via pre-request script
 
+# @lang lua
 < {%
 request.variables.set("postId", "3")
 %}
 
+GET https://jsonplaceholder.typicode.com/posts/{{postId}}
+
+### pre-request script result is local to each requests
 GET https://jsonplaceholder.typicode.com/posts/{{postId}}
