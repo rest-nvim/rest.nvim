@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [*.lua]
 indent_size = 2
 
-[*.scm]
+[*.{scm,nix}]
 indent_size = 2
 
 [*.{md,lua}]

@@ -8,8 +8,9 @@ format:
 	stylua .
 
 test:
-	eval "$(shell luarocks path --no-bin)"
-	luarocks test --local
+	LUA_PATH="$(shell luarocks path --lr-path --lua-version 5.1 --local)" \
+	LUA_CPATH="$(shell luarocks path --lr-cpath --lua-version 5.1 --local)" \
+	luarocks test --local --lua-version 5.1
 
 docgen:
 	lemmy-help lua/rest-nvim/commands.lua > doc/rest-nvim-commands.txt
