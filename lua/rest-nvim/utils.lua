@@ -100,7 +100,9 @@ function utils.parse_http_time(time_str)
     sec = tonumber(sec),
     isdst = false,
   }
-  return os.time(time_table)
+  ---@diagnostic disable-next-line: param-type-mismatch
+  local gmt_offset = os.difftime(os.time(), os.time(os.date("!*t")))
+  return os.time(time_table) + gmt_offset
 end
 
 --- Default transformers for statistics

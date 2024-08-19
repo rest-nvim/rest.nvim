@@ -15,6 +15,9 @@ local function open(path)
   return 0
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
+vim.notify = function () end
+
 describe("parser", function()
   it("validate http parser", function()
     assert.same("http", vim.treesitter.language.get_lang("http"))

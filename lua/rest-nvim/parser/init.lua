@@ -120,7 +120,9 @@ function parser.parse_body(content_type, body_node, source, context)
       return
     end
     ---@cast source integer
-    local basepath = vim.api.nvim_buf_get_name(source):match("(.*)/.*")
+    local basepath = vim.fs.dirname(vim.api.nvim_buf_get_name(source))
+    ---@diagnostic disable-next-line: undefined-field
+    basepath = basepath:gsub("^" .. vim.pesc(vim.uv.cwd() .. "/"), "")
     path = vim.fs.normalize(vim.fs.joinpath(basepath, path))
     body.data = {
       name = get_node_field_text(body_node, "name", source),

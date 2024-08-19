@@ -4,7 +4,7 @@ local rest_nvim_dir = vim.fn.fnamemodify(test_dir, ":h")
 vim.opt.rtp:prepend(vim.fs.normalize("/home/ubuntu/projects/tree-sitter-http"))
 local parser_dir = "$HOME/.cache/tree-sitter/lib/http.so"
 if vim.fn.has("macunix") == 1 then
-  parser_dir = "$HOME/Library/Caches/tree-sitter/lib/http.so"
+  parser_dir = "$HOME/Library/Caches/tree-sitter/lib/http.dylib"
 end
 vim.treesitter.language.add("http", { path = vim.fs.normalize(parser_dir) })
 if not vim.treesitter.language.get_lang("http") then
