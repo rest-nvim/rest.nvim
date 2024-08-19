@@ -45,13 +45,11 @@ describe("curl cli builder", function()
       cookies = {},
       handlers = {},
       body = {
-        __TYPE = "form",
-        data = {
-          foo = "bar",
-        },
+        __TYPE = "raw",
+        data = "field1=value1&field2=value2",
       },
     })
-    assert.same({ "http://localhost:8000", "-X", "POST", "-F", "foo=bar", "-w", STAT_FORMAT }, args)
+    assert.same({ "http://localhost:8000", "-X", "POST", "--data-raw", "field1=value1&field2=value2", "-w", STAT_FORMAT }, args)
   end)
   it("from POST request with json body", function ()
     local json_text = [[{ "string": "foo", "number": 100, "array":  [1, 2, 3], "json": { "key": "value" } }]]

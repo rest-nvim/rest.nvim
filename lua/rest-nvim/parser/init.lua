@@ -90,19 +90,17 @@ local function validate_xml(str)
 end
 
 ---@param str string
----@return table<string,string>?
+---@return string?
 local function parse_urlencoded_form(str)
-  local form = {}
   local query_pairs = vim.split(str, "&")
-  for _, query in ipairs(query_pairs) do
+  return vim.iter(query_pairs):map(function (query)
     local key, value = query:match("([^=]+)=?(.*)")
     if not key then
       -- TODO: error
       return nil
     end
-    form[vim.trim(key)] = vim.trim(value)
-  end
-  return form
+    return vim.trim(key) .. "=" .. vim.trim(value)
+  end):join("&")
 end
 
 ---@param content_type string?
@@ -150,7 +148,7 @@ function parser.parse_body(content_type, body_node, source, context)
     -- TODO: exclude comments from text
     local text = vim.treesitter.get_node_text(body_node, source)
     if content_type and vim.startswith(content_type, "application/x-www-form-urlencoded") then
-      body.__TYPE = "form"
+      body.__TYPE = "raw"
       body.data = parse_urlencoded_form(text)
       if not body.data then
         -- TODO: parsing urlencoded form failed

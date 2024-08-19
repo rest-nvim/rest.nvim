@@ -211,16 +211,6 @@ function builder.data_body(body)
   return kv_to_list(body, "-d", "=")
 end
 
----@package
----@param form table<string,string>?
----@return string[]? args
-function builder.form(form)
-  if not form then
-    return
-  end
-  return kv_to_list(form, "-F", "=")
-end
-
 function builder.file(file)
   if not file then
     return
@@ -284,12 +274,16 @@ function builder.build(req, ignore_stats)
   insert(args, builder.headers(req.headers))
   insert(args, builder.cookies(req.cookies))
   if req.body then
-    if req.body.__TYPE == "form" then
-      insert(args, builder.form(req.body.data))
-    elseif req.body.__TYPE == "external" then
+    if req.body.__TYPE == "external" then
       insert(args, builder.file(req.body.data.path))
-    else
+    elseif req.body.__TYPE == "graphql" then
+      log.error("graqphql body is not supportted yet")
+    elseif req.body.__TYPE == "multipart_form_data" then
+      log.error("multipart-form-data body is not supportted yet")
+    elseif vim.list_contains({ "json", "xml", "raw" }, req.body.__TYPE) then
       insert(args, builder.raw_body(req.body.data))
+    else
+      log.error(("unkown body type: '%s'"):format(req.body.__TYPE))
     end
   end
   if config.request.skip_ssl_verification then

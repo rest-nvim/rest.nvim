@@ -12,7 +12,7 @@ local jar    = require("rest-nvim.cookie_jar")
 local clients = require("rest-nvim.client")
 
 ---@class rest.Request.Body
----@field __TYPE "json"|"xml"|"raw"|"graphql"|"multipart_form_data"|"form"|"external"
+---@field __TYPE "json"|"xml"|"raw"|"graphql"|"multipart_form_data"|"external"
 ---@field data any
 
 ---@class rest.Request
