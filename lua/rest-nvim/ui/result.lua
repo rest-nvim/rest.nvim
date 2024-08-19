@@ -73,8 +73,10 @@ local panes = {
         table.insert(lines, "# @_RES")
         local body = vim.split(data.response.body, "\n")
         if content_type then
-          local res_type = content_type[1]:match(".*/([^;]+)")
-          if res_type == "octet_stream" then
+          local base_type, res_type = content_type[1]:match("(.*)/([^;]+)")
+          if base_type == "image" then
+            body = { "Binary(image) answer" }
+          elseif res_type == "octet_stream" then
             body = { "Binary answer" }
           elseif config.response.hooks.format then
             body = utils.gq_lines(body, res_type)
