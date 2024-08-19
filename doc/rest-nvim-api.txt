@@ -45,25 +45,32 @@ api.register_rest_subcommand({name}, {cmd})
         {cmd}   (RestCmd)
 
 
+api.register_rest_client()                            *api.register_rest_client*
+
+
 ==============================================================================
 rest.nvim client module                                       *rest-nvim.client*
-
-
- Mainly about `rest.Client` type requirements
-
 
 rest.Client                                                        *rest.Client*
     Client to send request
 
+    Fields: ~
+        {name}       (string)                                    name of the client
+        {request}    (fun(req:rest.Request):nio.control.Future)  Sends request and return the response asynchronously
+        {available}  (fun(req:rest.Request):boolean)             Check if client can handle given request
 
-client:request({req})                                           *client:request*
-    Sends request and return the response asynchronously
+
+clients.register_client()                              *clients.register_client*
+
+
+clients.get_available_clients({req})             *clients.get_available_clients*
+    Find all registered clients available for given request
 
     Parameters: ~
         {req}  (rest.Request)
 
     Returns: ~
-        (nio.control.Future)  Future containing `rest.Response`
+        (rest.Client[])
 
 
 ==============================================================================
@@ -77,14 +84,14 @@ script runner client for rest.nvim                            *rest-nvim.script*
 rest.ScriptClient                                            *rest.ScriptClient*
 
 
-script:load_pre_req_hook({str}, {ctx})                *script:load_pre_req_hook*
+script.load_pre_req_hook({str}, {ctx})                *script.load_pre_req_hook*
 
     Parameters: ~
         {str}  (string)
         {ctx}  (rest.Context)
 
 
-script:load_post_req_hook({str}, {ctx})              *script:load_post_req_hook*
+script.load_post_req_hook({str}, {ctx})              *script.load_post_req_hook*
 
     Parameters: ~
         {str}  (string)
@@ -92,45 +99,41 @@ script:load_post_req_hook({str}, {ctx})              *script:load_post_req_hook*
 
 
 ==============================================================================
-rest.nvim result UI module                                 *rest-nvim.ui.result*
+Cookie handler module                                     *rest-nvim.cookie_jar*
+
+rest.Cookie                                                        *rest.Cookie*
+
+    Fields: ~
+        {name}      (string)
+        {value}     (string)
+        {domain}    (string)
+        {path}      (string)
+        {expires}   (integer)
+        {max_date}  (integer)
 
 
- rest.nvim result UI implmentation
+M.load_jar()                                                        *M.load_jar*
+    Load Cookie jar from rest-nvim.cookies file
 
 
-rest.UIData                                                        *rest.UIData*
-    data used to render the UI
-
-
-ui.stat_winbar()                                                *ui.stat_winbar*
-    Winbar component showing response statistics
-
-    Returns: ~
-        (string)
-
-
-ui.is_open()                                                        *ui.is_open*
-    Check if UI window is shown in current tabpage
-
-    Returns: ~
-        (boolean)
-
-
-ui.enter({winnr})                                                     *ui.enter*
+M.update_jar({req_url}, {res})                                    *M.update_jar*
+    Save cookies from response
+    Request is provided as a context
 
     Parameters: ~
-        {winnr}  (integer)
+        {req_url}  (string)
+        {res}      (rest.Response)
 
 
-ui.clear()                                                            *ui.clear*
-    Clear the UI
+M.save_jar()                                                        *M.save_jar*
+    Save current cookie jar to cookies file
 
 
-ui.update({new_data})                                                *ui.update*
-    Update data and rerender the UI
+M.load_cookies({req})                                           *M.load_cookies*
+    Load cookies for request
 
     Parameters: ~
-        {new_data}  (rest.UIData)
+        {req}  (rest.Request)
 
 
 ==============================================================================
@@ -243,6 +246,46 @@ utils.nvim_lazy_set_wo({bufnr}, {name}, {value})
         {bufnr}  (number)
         {name}   (string)
         {value}  (any)
+
+
+utils.gq_lines({lines}, {filetype})                             *utils.gq_lines*
+    format lines using native vim `gq` command
+
+    Parameters: ~
+        {lines}     (string[])
+        {filetype}  (string)
+
+    Returns: ~
+        (string[])
+
+
+==============================================================================
+rest.nvim logger                                              *rest-nvim.logger*
+
+
+Logging library for rest.nvim, inspired by nvim-neorocks/rocks.nvim
+Intended for use by internal and third-party modules.
+
+
+logger.trace()                                                    *logger.trace*
+
+
+logger.debug()                                                    *logger.debug*
+
+
+logger.info()                                                      *logger.info*
+
+
+logger.warn()                                                      *logger.warn*
+
+
+logger.error()                                                    *logger.error*
+
+
+logger.set_log_level()                                    *logger.set_log_level*
+
+    See: ~
+        |vim.log.levels|
 
 
 vim:tw=78:ts=8:noet:ft=help:norl:

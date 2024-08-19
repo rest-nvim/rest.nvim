@@ -6,21 +6,27 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     neorocks.url = "github:nvim-neorocks/neorocks";
     flake-utils.url = "github:numtide/flake-utils";
+    cats-doc.url = "github:mrcjkb/cats-doc";
   };
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
     neorocks,
     flake-utils,
     ...
-  }:
+  }: let
+    test-overlay = import ./nix/test-overlay.nix {
+      inherit self inputs;
+    };
+  in
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
             neorocks.overlays.default
+            test-overlay
           ];
         };
 
@@ -31,6 +37,7 @@
           buildInputs = [
             pkgs.sumneko-lua-language-server
             pkgs.stylua
+            pkgs.docgen
             (pkgs.lua5_1.withPackages (ps: with ps; [luarocks luacheck]))
           ];
         };
@@ -39,6 +46,10 @@
         packages = {
           default = self.packages.${system}.luarocks-51;
           luarocks-51 = pkgs.lua51Packages.luarocks;
+          inherit
+            (pkgs)
+            docgen
+            ;
         };
 
         devShells = {

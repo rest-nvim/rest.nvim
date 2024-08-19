@@ -1,4 +1,73 @@
 ==============================================================================
+rest.nvim                                                            *rest-nvim*
+
+
+ A fast and asynchronous Neovim HTTP client written in Lua
+
+
+rest.setup({user_configs?})                                         *rest.setup*
+    @deprecated
+    Set up rest.nvim
+    This api does nothing but set `vim.g.rest_nvim` to `user_configs`
+
+    Parameters: ~
+        {user_configs?}  (rest.Opts)  User configurations
+
+
+==============================================================================
+rest.nvim commands                                          *rest-nvim.commands*
+
+
+ `:Rest {command {args?}}`
+
+ command                         action
+------------------------------------------------------------------------------
+
+ open                            Open result pane.
+
+ run {name?}                     Execute a HTTP request with given `name`. If no name is
+                                 provideded, run request under the cursor
+
+ last                            Re-run the last executed request, alias to `run last`
+                                 to retain backwards compatibility with the old keybinds
+                                 layout.
+
+ logs                            Open the rest.nvim logs file.
+
+ cookies                         Open the rest.nvim cookies file.
+
+ env show                        Show environment file registered to current `.http` file.
+                                 (Just `:Rest env` also work)
+
+ env select                      Select and register environment file to current `.http`
+                                 file via |vim.ui.select()|
+
+ env set {path}                  Register environment file to current `.http` file.
+                                 `path` should be relative to Neovim's cwd
+
+ curl yank {name?}               (experimental) Copy curl command equivelant to HTTP
+                                 request with given `name`. If no name is provided, copy
+                                 from request under the cursor.
+
+ curl comment {name?}            (experimental) Similar to `:Rest curl yank` but instead
+                                 copying command to clipboard, directly insert curl
+                                 command as a comment.
+
+ NOTE: All `:Rest` commands opening new window support |command-modifiers|.
+ For example, you can run `:hor Rest open` to open result pane in horizontal
+ split
+
+
+RestCmd                                                                *RestCmd*
+
+    Fields: ~
+        {impl}  (fun)  The command implementation
+
+
+commands.setup()                                                *commands.setup*
+
+
+==============================================================================
 rest.nvim configuration                                       *rest-nvim.config*
 
 
@@ -6,24 +75,10 @@ rest.nvim configuration                                       *rest-nvim.config*
 
  You can set rest.nvim configuration options via `vim.g.rest_nvim`.
 
->
+>lua
  ---@type rest.Opts
  vim.g.rest_nvim
 <
-
-
-RestResultFormatter                                        *RestResultFormatter*
-
-    Type: ~
-        string|fun(body:string):string,table
-
-
-RestStatisticsStyle                                        *RestStatisticsStyle*
-
-    Fields: ~
-        {title?}   (string)           Title used on Statistics pane
-        {winbar?}  (string|boolean)   Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
-                                      to hide title If true, rest.nvim will use lowered `title` field
 
 
                                                                *vim.g.rest_nvim*
@@ -57,8 +112,7 @@ rest.Opts.Request.Hooks                                *rest.Opts.Request.Hooks*
 rest.Opts.Response                                          *rest.Opts.Response*
 
     Fields: ~
-        {hooks?}       (rest.Opts.Response.Hooks)            Default response hooks (aka. request handlers) configuration
-        {formatters?}  (table<string,RestResultFormatter>)   Formatters used for response format hook
+        {hooks?}  (rest.Opts.Response.Hooks)   Default response hooks (aka. request handlers) configuration
 
 
 rest.Opts.Response.Hooks                              *rest.Opts.Response.Hooks*
@@ -80,6 +134,14 @@ rest.Opts.Clients.Curl                                  *rest.Opts.Clients.Curl*
         {statistics?}  (table<string,RestStatisticsStyle>)   Statistics to parse from curl request output
                                                              Key is a string value of format used in `--write-out` option
                                                              See `man curl` for more info
+
+
+RestStatisticsStyle                                        *RestStatisticsStyle*
+
+    Fields: ~
+        {title?}   (string)           Title used on Statistics pane
+        {winbar?}  (string|boolean)   Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
+                                      to hide title If true, rest.nvim will use lowered `title` field
 
 
 rest.Opts.Cookies                                            *rest.Opts.Cookies*
@@ -116,47 +178,6 @@ rest.Opts.Highlight                                        *rest.Opts.Highlight*
     Fields: ~
         {enable?}   (boolean)   Enable highlight-on-request (Default: `true`)
         {timeout?}  (number)    Duration time of the request highlighting in milliseconds (Default: `750`)
-
-
-rest.Config                                                        *rest.Config*
-    rest.nvim default configuration
-
-
-rest.Config.Request                                        *rest.Config.Request*
-
-
-rest.Config.Request.Hooks                            *rest.Config.Request.Hooks*
-    Default request hooks
-
-
-rest.Config.Response                                      *rest.Config.Response*
-
-
-rest.Config.Response.Hooks                          *rest.Config.Response.Hooks*
-
-
-rest.Config.Clients                                        *rest.Config.Clients*
-
-
-rest.Config.Clients.Curl                              *rest.Config.Clients.Curl*
-
-
-rest.Config.Cookies                                        *rest.Config.Cookies*
-
-
-rest.Config.Env                                                *rest.Config.Env*
-
-
-rest.Config.UI                                                  *rest.Config.UI*
-
-
-rest.Config.UI.Keybinds                                *rest.Config.UI.Keybinds*
-
-
-rest.Config.Highlight                                    *rest.Config.Highlight*
-
-
-rest.Config.DebugInfo                                    *rest.Config.DebugInfo*
 
 
 vim:tw=78:ts=8:noet:ft=help:norl:
