@@ -69,11 +69,14 @@ local function parse_headers(req_node, source, context)
   local header_nodes = req_node:field("header")
   for _, node in ipairs(header_nodes) do
     local key = assert(get_node_field_text(node, "name", source))
-    local value = assert(get_node_field_text(node, "value", source))
-    key = expand_variables(key, context)
-    value = expand_variables(value, context)
-    key = string.lower(key)
-    table.insert(headers[key], value)
+    local value = get_node_field_text(node, "value", source)
+    key = expand_variables(key, context):lower()
+    if value then
+      value = expand_variables(value, context)
+      table.insert(headers[key], value)
+    else
+      headers[key] = {}
+    end
   end
   return setmetatable(headers, nil)
 end
@@ -385,7 +388,7 @@ function parser.parse(node, source, ctx)
 
   ---@type string?
   local content_type
-  if headers["content-type"] then
+  if headers["content-type"] and #headers["content-type"] > 0 then
     content_type = headers["content-type"][1]:match("([^;]+)")
   end
   local body

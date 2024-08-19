@@ -72,6 +72,26 @@ HOST: localhost:8000
     local req = assert(parser.parse(req_node, source))
     assert.same("http://localhost:8000/some/path", req.url)
   end)
+  it("parse request with headers", function ()
+    local source = [[
+http://example.com/api
+X-Header1: value1
+X-Header2:
+X-Header1: value2
+]]
+    local _, tree = utils.ts_parse_source(source)
+    local req_node = assert(tree:root():child(0))
+    assert.same({
+      url = "http://example.com/api",
+      method = "GET",
+      headers = {
+        ["x-header1"] = { "value1", "value2" },
+        ["x-header2"] = {},
+      },
+      handlers = {},
+      cookies = {},
+    }, parser.parse(req_node, source))
+  end)
 
   describe("parse body", function()
     it("json body", function()
