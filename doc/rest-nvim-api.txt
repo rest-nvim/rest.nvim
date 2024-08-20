@@ -74,6 +74,108 @@ clients.get_available_clients({req})             *clients.get_available_clients*
 
 
 ==============================================================================
+rest.nvim http syntax parsing module                          *rest-nvim.parser*
+
+
+ rest.nvim `.http` syntax parsing module.
+ rest.nvim uses `tree-sitter-http` as a core parser for `.http` syntax
+
+
+Source                                                                  *Source*
+
+    Type: ~
+        integer|string
+
+
+                                                             *parser.parse_body*
+parser.parse_body({body_node}, {source}, {context})
+
+    Parameters: ~
+        {body_node}  (TSNode)
+        {source}     (Source)
+        {context}    (rest.Context)
+
+    Returns: ~
+        (rest.Request.Body|nil)
+
+
+                                                           *parser.eval_context*
+parser.eval_context({source}, {ctx}, {endline})
+    In-place variables can be evaluated in loaded buffers due to treesitter limitations
+
+    Parameters: ~
+        {source}   (integer)
+        {ctx}      (rest.Context)
+        {endline}  (number)        zero-based line number
+
+
+parser.get_cursor_request_node()                *parser.get_cursor_request_node*
+    @return TSNode? node TSNode with type `section`
+
+
+parser.get_all_request_nodes({source})            *parser.get_all_request_nodes*
+
+    Parameters: ~
+        {source}  (Source)
+
+    Returns: ~
+        (TSNode[])
+
+
+parser.get_request_node_by_name()              *parser.get_request_node_by_name*
+    @return TSNode?
+
+
+                                             *parser.parse_variable_declaration*
+parser.parse_variable_declaration({vd_node}, {source}, {ctx})
+
+    Parameters: ~
+        {vd_node}  (TSNode)
+        {source}   (Source)
+        {ctx}      (rest.Context)
+
+
+                                               *parser.parse_pre_request_script*
+parser.parse_pre_request_script({node}, {source}, {context})
+
+    Parameters: ~
+        {node}     (TSNode)
+        {source}   (Source)
+        {context}  (rest.Context)
+
+
+                                                  *parser.parse_request_handler*
+parser.parse_request_handler({node}, {source}, {context})
+
+    Parameters: ~
+        {node}     (TSNode)
+        {source}   (Source)
+        {context}  (rest.Context)  @return function?
+
+
+parser.get_request_names({source})                    *parser.get_request_names*
+
+    Parameters: ~
+        {source}  (Source)
+
+    Returns: ~
+        (string[])
+
+
+parser.parse({node}, {source}, {ctx?})                            *parser.parse*
+    Parse the request node and create Request object. Returns `nil` if parsing
+    failed.
+
+    Parameters: ~
+        {node}    (TSNode)        Tree-sitter request node
+        {source}  (Source)
+        {ctx?}    (rest.Context)
+
+    Returns: ~
+        (rest.Request|nil)
+
+
+==============================================================================
 script runner client for rest.nvim                            *rest-nvim.script*
 
 

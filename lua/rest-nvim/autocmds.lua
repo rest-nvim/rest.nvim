@@ -6,7 +6,7 @@
 ---
 ---rest.nvim provides several |User| |events|.
 ---
----RestRequest or RestRequestPre                   *RestRequest* *RestRequestPre*
+---RestRequest or RestRequestPre                       *RestRequest* *RestRequestPre*
 ---    Just before executing a request. The request object (with |rest.Request|
 ---    type) will be temporarily assigned to the global variable `rest_request`.
 ---    Modifing this variable will affect the actual request. Example: >lua
@@ -20,7 +20,7 @@
 ---    })
 ---<
 ---
----RestResponse or RestResponsePre               *RestResponse* *RestResponsePre*
+---RestResponse or RestResponsePre                   *RestResponse* *RestResponsePre*
 ---    After received the response and all response handlers are executed.
 ---    The request and response objects (|rest.Request| and |rest.Response|
 ---    types) will be termporarily assigned to the global variabels

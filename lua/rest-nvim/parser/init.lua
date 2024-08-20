@@ -119,7 +119,7 @@ end
 ---@param body_node TSNode
 ---@param source Source
 ---@param context rest.Context
----@return rest.Request.Body?
+---@return rest.Request.Body|nil
 function parser.parse_body(content_type, body_node, source, context)
     local body = {}
     local node_type = body_node:type()

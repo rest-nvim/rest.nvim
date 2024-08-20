@@ -73,7 +73,7 @@ end
 
 ---@package
 ---@param line string
----@return {time:string,prefix:string,str:string?}|nil
+---@return {prefix:string,str:string?}|nil
 function parser.parse_verbose_line(line)
     local prefix, str = line:match("(.) ?(.*)")
     if not prefix then

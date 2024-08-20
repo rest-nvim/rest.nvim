@@ -1,4 +1,4 @@
----@mod rest-nvim.commands rest.nvim commands
+---@mod rest-nvim.commands rest.nvim user commands
 ---
 ---@brief [[
 ---
@@ -9,33 +9,34 @@
 ---
 --- open                            Open result pane.
 ---
---- run {name?}                     Execute a HTTP request with given `name`. If no name is
----                                 provideded, run request under the cursor
+--- run {name?}                     Execute a HTTP request with given `name`. If
+---                                 no name is provided, run request under the
+---                                 cursor.
 ---
---- last                            Re-run the last executed request, alias to `run last`
----                                 to retain backwards compatibility with the old keybinds
----                                 layout.
+--- last                            Re-run the last executed request.
 ---
 --- logs                            Open the rest.nvim logs file.
 ---
 --- cookies                         Open the rest.nvim cookies file.
 ---
---- env show                        Show environment file registered to current `.http` file.
----                                 (Just `:Rest env` also work)
+--- env show                        Show environment file registered to current
+---                                 `.http` file. (Just `:Rest env` also work)
 ---
---- env select                      Select and register environment file to current `.http`
----                                 file via |vim.ui.select()|
+--- env select                      Select and register environment file to
+---                                 current `.http` file via |vim.ui.select()|.
 ---
---- env set {path}                  Register environment file to current `.http` file.
----                                 `path` should be relative to Neovim's cwd
+--- env set {path}                  Register environment file to current `.http`
+---                                 file. `path` should be relative to Neovim's
+---                                 cwd.
 ---
---- curl yank {name?}               (experimental) Copy curl command equivelant to HTTP
----                                 request with given `name`. If no name is provided, copy
----                                 from request under the cursor.
+--- curl yank {name?}               (experimental) Copy curl command equivelant
+---                                 to HTTP request with given `name`. If no name
+---                                 is provided, copy from request under the
+---                                 cursor.
 ---
---- curl comment {name?}            (experimental) Similar to `:Rest curl yank` but instead
----                                 copying command to clipboard, directly insert curl
----                                 command as a comment.
+--- curl comment {name?}            (experimental) Similar to `:Rest curl yank`
+---                                 but directly insert curl command as a comment
+---                                 instead.
 ---
 ---NOTE: All `:Rest` commands opening new window support |command-modifiers|.
 ---For example, you can run `:hor Rest open` to open result pane in horizontal

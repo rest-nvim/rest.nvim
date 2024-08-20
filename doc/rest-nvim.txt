@@ -9,7 +9,8 @@ rest.nvim                                                            *rest-nvim*
 Table of Contents                                               *rocks-contents*
 
 rest.nvim ·························································· |rest-nvim|
-rest.nvim commands ········································ |rest-nvim.commands|
+rest.nvim user commands ··································· |rest-nvim.commands|
+rest.nvim user events ······································· |rest-nvim.events|
 rest.nvim configuration ····································· |rest-nvim.config|
 
 rest.setup({user_configs?})                                         *rest.setup*
@@ -22,7 +23,7 @@ rest.setup({user_configs?})                                         *rest.setup*
 
 
 ==============================================================================
-rest.nvim commands                                          *rest-nvim.commands*
+rest.nvim user commands                                     *rest-nvim.commands*
 
 
  `:Rest {command {args?}}`
@@ -32,37 +33,80 @@ rest.nvim commands                                          *rest-nvim.commands*
 
  open                            Open result pane.
 
- run {name?}                     Execute a HTTP request with given `name`. If no name is
-                                 provideded, run request under the cursor
+ run {name?}                     Execute a HTTP request with given `name`. If
+                                 no name is provided, run request under the
+                                 cursor.
 
- last                            Re-run the last executed request, alias to `run last`
-                                 to retain backwards compatibility with the old keybinds
-                                 layout.
+ last                            Re-run the last executed request.
 
  logs                            Open the rest.nvim logs file.
 
  cookies                         Open the rest.nvim cookies file.
 
- env show                        Show environment file registered to current `.http` file.
-                                 (Just `:Rest env` also work)
+ env show                        Show environment file registered to current
+                                 `.http` file. (Just `:Rest env` also work)
 
- env select                      Select and register environment file to current `.http`
-                                 file via |vim.ui.select()|
+ env select                      Select and register environment file to
+                                 current `.http` file via |vim.ui.select()|.
 
- env set {path}                  Register environment file to current `.http` file.
-                                 `path` should be relative to Neovim's cwd
+ env set {path}                  Register environment file to current `.http`
+                                 file. `path` should be relative to Neovim's
+                                 cwd.
 
- curl yank {name?}               (experimental) Copy curl command equivelant to HTTP
-                                 request with given `name`. If no name is provided, copy
-                                 from request under the cursor.
+ curl yank {name?}               (experimental) Copy curl command equivelant
+                                 to HTTP request with given `name`. If no name
+                                 is provided, copy from request under the
+                                 cursor.
 
- curl comment {name?}            (experimental) Similar to `:Rest curl yank` but instead
-                                 copying command to clipboard, directly insert curl
-                                 command as a comment.
+ curl comment {name?}            (experimental) Similar to `:Rest curl yank`
+                                 but directly insert curl command as a comment
+                                 instead.
 
 NOTE: All `:Rest` commands opening new window support |command-modifiers|.
 For example, you can run `:hor Rest open` to open result pane in horizontal
 split or run `:tab Rest logs` to open logs file in a new tab.
+
+
+==============================================================================
+rest.nvim user events                                         *rest-nvim.events*
+
+
+ rest.nvim user events
+
+rest.nvim provides several |User| |events|.
+
+RestRequest or RestRequestPre                       *RestRequest* *RestRequestPre*
+    Just before executing a request. The request object (with |rest.Request|
+    type) will be temporarily assigned to the global variable `rest_request`.
+    Modifing this variable will affect the actual request. Example: >lua
+
+    vim.api.nvim_create_autocmd("User", {
+        pattern = "RestRequestPre",
+        callback = function()
+            local req = _G.rest_request
+            req.headers["user-agent"] = { "myneovim" }
+        end,
+    })
+<
+
+RestResponse or RestResponsePre                   *RestResponse* *RestResponsePre*
+    After received the response and all response handlers are executed.
+    The request and response objects (|rest.Request| and |rest.Response|
+    types) will be termporarily assigned to the global variabels
+    `rest_request` and `rest_response`. Modifing this variable won't affect
+    response handlers but updating cookies and rendering result UI will be
+    affected. Example: >lua
+
+    vim.api.nvim_create_autocmd("User", {
+        pattern = "RestResponsePre",
+        callback = function()
+            local req = _G.rest_request
+            local res = _G.rest_response
+            req.url = url_decode(req.url)
+            res.body = trim_trailing_whitespace(res.body)
+        end,
+    })
+<
 
 
 ==============================================================================
