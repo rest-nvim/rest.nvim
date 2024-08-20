@@ -10,6 +10,7 @@ local ui     = require("rest-nvim.ui.result")
 local nio    = require("nio")
 local jar    = require("rest-nvim.cookie_jar")
 local clients = require("rest-nvim.client")
+local Context = require("rest-nvim.context").Context
 
 ---@class rest.Request.Body
 ---@field __TYPE "json"|"xml"|"raw"|"graphql"|"multipart_form_data"|"external"
@@ -35,6 +36,7 @@ local function run_request(req)
   if not client then
     logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
     vim.notify("Can't find registered client available for request", vim.log.levels.ERROR, { title = "rest.nvim" })
+    return
   end
   rest_nvim_last_request = req
 
@@ -90,7 +92,7 @@ function M.run()
     vim.notify("Failed to find request at cursor position. See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
-  local ctx = parser.create_context(0)
+  local ctx = Context:new()
   if config.env.enable and vim.b._rest_nvim_env_file then
     ctx:load_file(vim.b._rest_nvim_env_file)
   end
@@ -115,7 +117,7 @@ function M.run_by_name(name)
     vim.notify("Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
     return
   end
-  local ctx = parser.create_context(0)
+  local ctx = Context:new()
   if config.env.enable and vim.b._rest_nvim_env_file then
     ctx:load_file(vim.b._rest_nvim_env_file)
   end
@@ -145,7 +147,7 @@ end
 ---run all requests in current file with same context
 function M.run_all()
   local reqs = parser.get_all_request_nodes(0)
-  local ctx = parser.create_context(0)
+  local ctx = Context:new()
   for _, req_node in ipairs(reqs) do
     local req = parser.parse(req_node, 0, ctx)
     if not req then

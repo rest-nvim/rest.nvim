@@ -29,12 +29,6 @@ local NAMED_REQUEST_QUERY = vim.treesitter.query.parse("http", [[
   request: (_)) @request
 ]])
 
-local IN_PLACE_VARIABLE_QUERY = vim.treesitter.query.parse("http", [[
-(section
-  !request
-  (variable_declaration)+ @inplace_variable)
-]])
-
 ---@param node TSNode
 ---@param field string
 ---@param source Source
@@ -178,19 +172,22 @@ function parser.parse_body(content_type, body_node, source, context)
   return body
 end
 
----parse all in-place variables from source
----@param source Source
----@return rest.Context ctx
-function parser.create_context(source)
-  local query = IN_PLACE_VARIABLE_QUERY
-  local ctx = Context:new()
-  local _, tree = utils.ts_parse_source(source)
-  for _, node in query:iter_captures(tree:root(), source) do
-    if node:type() == "variable_declaration" then
-      parser.parse_variable_declaration(node, source, ctx)
+---In-place variables can be evaluated in loaded buffers due to treesitter limitations
+---@param source integer
+---@param ctx rest.Context
+---@param endline number zero-based line number
+function parser.eval_context(source, ctx, endline)
+  vim.validate("source", source, "number")
+  local startline = ctx.linenr
+  for ln = startline, endline do
+    local start_node = vim.treesitter.get_node({ pos = { ln, 0 }})
+    if start_node then
+      local node = utils.ts_find(start_node, "variable_declaration", true)
+      if node then
+        parser.parse_variable_declaration(node, source, ctx)
+      end
     end
   end
-  return ctx
 end
 
 ---@return TSNode? node TSNode with type `section`
@@ -327,6 +324,12 @@ function parser.parse(node, source, ctx)
   assert(req_node)
 
   ctx = ctx or Context:new()
+  -- TODO: note that in-place variables won't be evaluated due to treesitter limitations
+  -- when source is given as raw string
+  if type(source) == "number" then
+    local start_row = node:range()
+    parser.eval_context(source, ctx, start_row)
+  end
   local method = get_node_field_text(req_node, "method", source)
   if not method then
     logger.info("no method provided, falling back to 'GET'")

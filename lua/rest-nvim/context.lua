@@ -9,6 +9,8 @@ local M = {}
 ---@field vars table<string,string>
 ---local variables
 ---@field lv table<string,string>
+---current line number (to evaluate variable declaration sequentially)
+---@field linenr number
 local Context = {}
 Context.__index = Context
 
@@ -45,6 +47,7 @@ function Context:new()
   ---@type rest.Context
   local obj = {
     __index = self,
+    linenr = 0,
     vars = {},
     lv = {},
   }

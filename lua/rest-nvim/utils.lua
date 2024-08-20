@@ -194,21 +194,34 @@ end
 
 ---@param source string|integer
 ---@return vim.treesitter.LanguageTree
+function utils.ts_get_parser(source)
+  if type(source) == "string" then
+    return vim.treesitter.get_string_parser(source, "http")
+  else
+    return vim.treesitter.get_parser(source, "http")
+  end
+end
+
+---@param source string|integer
+---@return vim.treesitter.LanguageTree
 ---@return TSTree
 function utils.ts_parse_source(source)
-  local ts_parser
-  if type(source) == "string" then
-    ts_parser = vim.treesitter.get_string_parser(source, "http")
-  else
-    ts_parser = vim.treesitter.get_parser(source, "http")
-  end
+  local ts_parser = utils.ts_get_parser(source)
   return ts_parser, assert(ts_parser:parse(false)[1])
 end
 
 ---@param node TSNode
 ---@param type string
+---@param oneline boolean?
 ---@return TSNode?
-function utils.ts_find(node, type)
+function utils.ts_find(node, type, oneline)
+  if oneline then
+    local sr, _, er, ec = node:range()
+    local is_oneline = (sr == er) or (er - sr == 1 and ec == 0)
+    if not is_oneline then
+      return nil
+    end
+  end
   if node:type() == type then
     return node
   end
