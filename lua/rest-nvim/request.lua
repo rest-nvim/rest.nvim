@@ -3,12 +3,12 @@
 local M = {}
 
 local parser = require("rest-nvim.parser")
-local utils  = require("rest-nvim.utils")
+local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local config = require("rest-nvim.config")
-local ui     = require("rest-nvim.ui.result")
-local nio    = require("nio")
-local jar    = require("rest-nvim.cookie_jar")
+local ui = require("rest-nvim.ui.result")
+local nio = require("nio")
+local jar = require("rest-nvim.cookie_jar")
 local clients = require("rest-nvim.client")
 local Context = require("rest-nvim.context").Context
 
@@ -42,136 +42,154 @@ local rest_nvim_last_request = nil
 
 ---@param req rest.Request
 local function run_request(req)
-  logger.debug("run_request")
-  local client = clients.get_available_clients(req)[1]
-  if not client then
-    logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
-    vim.notify("Can't find registered client available for request", vim.log.levels.ERROR, { title = "rest.nvim" })
-    return
-  end
-  rest_nvim_last_request = req
-
-  _G.rest_request = req
-  vim.api.nvim_exec_autocmds("User", {
-    pattern = { "RestRequest", "RestRequestPre" },
-  })
-  _G.rest_request = nil
-
-  ui.update({request=req})
-
-  nio.run(function ()
-    local ok, res = pcall(client.request(req).wait)
-    if not ok then
-      logger.error("request failed")
-      vim.notify("request failed", vim.log.levels.ERROR, { title = "rest.nvim" })
-      return
+    logger.debug("run_request")
+    local client = clients.get_available_clients(req)[1]
+    if not client then
+        logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
+        vim.notify("Can't find registered client available for request", vim.log.levels.ERROR, { title = "rest.nvim" })
+        return
     end
-    ---@cast res rest.Response
-    logger.info("request success")
+    rest_nvim_last_request = req
 
-    -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
-    -- callback from `vim.system()` call)
-    vim.schedule(function ()
-      -- run request handler scripts
-      vim.iter(req.handlers):each(function (f) f(res) end)
-      logger.info("handler done")
+    _G.rest_request = req
+    vim.api.nvim_exec_autocmds("User", {
+        pattern = { "RestRequest", "RestRequestPre" },
+    })
+    _G.rest_request = nil
 
-      _G.rest_request = req
-      _G.rest_response = res
-      vim.api.nvim_exec_autocmds("User", {
-        pattern = { "RestResponse", "RestResponsePre" },
-      })
-      _G.rest_request = nil
-      _G.rest_response = nil
+    ui.update({ request = req })
 
-      -- update cookie jar
-      jar.update_jar(req.url, res)
+    nio.run(function()
+        local ok, res = pcall(client.request(req).wait)
+        if not ok then
+            logger.error("request failed")
+            vim.notify("request failed", vim.log.levels.ERROR, { title = "rest.nvim" })
+            return
+        end
+        ---@cast res rest.Response
+        logger.info("request success")
 
-      -- update result UI
-      ui.update({response = res})
+        -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
+        -- callback from `vim.system()` call)
+        vim.schedule(function()
+            -- run request handler scripts
+            vim.iter(req.handlers):each(function(f)
+                f(res)
+            end)
+            logger.info("handler done")
+
+            _G.rest_request = req
+            _G.rest_response = res
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = { "RestResponse", "RestResponsePre" },
+            })
+            _G.rest_request = nil
+            _G.rest_response = nil
+
+            -- update cookie jar
+            jar.update_jar(req.url, res)
+
+            -- update result UI
+            ui.update({ response = res })
+        end)
     end)
-  end)
-  -- FIXME: return future to pass the command state
+    -- FIXME: return future to pass the command state
 end
 
 ---run request in current cursor position
 function M.run()
-  logger.info("starting request")
-  local req_node = parser.get_cursor_request_node()
-  if not req_node then
-    logger.error("Failed to find request at cursor position")
-    vim.notify("Failed to find request at cursor position. See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
-    return
-  end
-  local ctx = Context:new()
-  if config.env.enable and vim.b._rest_nvim_env_file then
-    ctx:load_file(vim.b._rest_nvim_env_file)
-  end
-  local req = parser.parse(req_node, 0, ctx)
-  if not req then
-    logger.error("failed to parse request")
-    vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
-    return
-  end
-  local highlight = config.highlight
-  if highlight.enable then
-    utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
-  end
-  run_request(req)
+    logger.info("starting request")
+    local req_node = parser.get_cursor_request_node()
+    if not req_node then
+        logger.error("Failed to find request at cursor position")
+        vim.notify(
+            "Failed to find request at cursor position. See `:Rest logs` for more info.",
+            vim.log.levels.ERROR,
+            { title = "rest.nvim" }
+        )
+        return
+    end
+    local ctx = Context:new()
+    if config.env.enable and vim.b._rest_nvim_env_file then
+        ctx:load_file(vim.b._rest_nvim_env_file)
+    end
+    local req = parser.parse(req_node, 0, ctx)
+    if not req then
+        logger.error("failed to parse request")
+        vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
+        return
+    end
+    local highlight = config.highlight
+    if highlight.enable then
+        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
+    end
+    run_request(req)
 end
 
 ---@param name string
 function M.run_by_name(name)
-  local req_node = parser.get_request_node_by_name(name)
-  if not req_node then
-    logger.error("Failed to find request by name: " .. name)
-    vim.notify("Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.", vim.log.levels.ERROR, { title = "rest.nvim" })
-    return
-  end
-  local ctx = Context:new()
-  if config.env.enable and vim.b._rest_nvim_env_file then
-    ctx:load_file(vim.b._rest_nvim_env_file)
-  end
-  local req = parser.parse(req_node, 0, ctx)
-  if not req then
-    logger.error("failed to parse request")
-    vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
-    return
-  end
-  local highlight = config.highlight
-  if highlight.enable then
-    utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
-  end
-  run_request(req)
+    local req_node = parser.get_request_node_by_name(name)
+    if not req_node then
+        logger.error("Failed to find request by name: " .. name)
+        vim.notify(
+            "Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.",
+            vim.log.levels.ERROR,
+            { title = "rest.nvim" }
+        )
+        return
+    end
+    local ctx = Context:new()
+    if config.env.enable and vim.b._rest_nvim_env_file then
+        ctx:load_file(vim.b._rest_nvim_env_file)
+    end
+    local req = parser.parse(req_node, 0, ctx)
+    if not req then
+        logger.error("failed to parse request")
+        vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
+        return
+    end
+    local highlight = config.highlight
+    if highlight.enable then
+        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
+    end
+    run_request(req)
 end
 
 ---run last request
 function M.run_last()
-  local req = rest_nvim_last_request
-  if not req then
-    vim.notify("No last request found", vim.log.levels.WARN, { title = "rest.nvim" })
-    return false
-  end
-  run_request(req)
+    local req = rest_nvim_last_request
+    if not req then
+        vim.notify("No last request found", vim.log.levels.WARN, { title = "rest.nvim" })
+        return false
+    end
+    run_request(req)
 end
 
 ---run all requests in current file with same context
 function M.run_all()
-  local reqs = parser.get_all_request_nodes(0)
-  local ctx = Context:new()
-  for _, req_node in ipairs(reqs) do
-    local req = parser.parse(req_node, 0, ctx)
-    if not req then
-      vim.notify("Parsing request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
-      return false
+    local reqs = parser.get_all_request_nodes(0)
+    local ctx = Context:new()
+    for _, req_node in ipairs(reqs) do
+        local req = parser.parse(req_node, 0, ctx)
+        if not req then
+            vim.notify(
+                "Parsing request failed. See `:Rest logs` for more info",
+                vim.log.levels.ERROR,
+                { title = "rest.nvim" }
+            )
+            return false
+        end
+        -- FIXME: wait for previous request ends
+        local ok = run_request(req)
+        if not ok then
+            vim.notify(
+                "Running request failed. See `:Rest logs` for more info",
+                vim.log.levels.ERROR,
+                { title = "rest.nvim" }
+            )
+            return
+        end
     end
-    -- FIXME: wait for previous request ends
-    local ok = run_request(req)
-    if not ok then
-      vim.notify("Running request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
-      return
-    end
-  end
 end
 
 return M

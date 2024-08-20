@@ -60,9 +60,9 @@ rest.nvim commands                                          *rest-nvim.commands*
                                  copying command to clipboard, directly insert curl
                                  command as a comment.
 
- NOTE: All `:Rest` commands opening new window support |command-modifiers|.
- For example, you can run `:hor Rest open` to open result pane in horizontal
- split
+NOTE: All `:Rest` commands opening new window support |command-modifiers|.
+For example, you can run `:hor Rest open` to open result pane in horizontal
+split or run `:tab Rest logs` to open logs file in a new tab.
 
 
 ==============================================================================

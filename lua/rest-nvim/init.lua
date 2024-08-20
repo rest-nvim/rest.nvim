@@ -15,8 +15,8 @@ local rest = {}
 ---This api does nothing but set `vim.g.rest_nvim` to `user_configs`
 ---@param user_configs? rest.Opts User configurations
 function rest.setup(user_configs)
-  -- Set up rest.nvim configurations
-  vim.g.rest_nvim = user_configs or {}
+    -- Set up rest.nvim configurations
+    vim.g.rest_nvim = user_configs or {}
 end
 
 return rest
