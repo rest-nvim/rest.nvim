@@ -28,7 +28,7 @@ function check.validate(cfg)
     ["request.skip_ssl_verification"] = { cfg.request.skip_ssl_verification, "boolean" },
     ["request.hooks"] = { cfg.request.hooks, "table" },
     ["request.hooks.encode_url"] = { cfg.request.hooks.encode_url, "boolean" },
-    ["request.hooks.user_agent"] = { cfg.request.hooks.user_agent, "string" },
+    ["request.hooks.user_agent"] = { cfg.request.hooks.user_agent, { "function", "string" } },
     ["request.hooks.set_content_type"] = { cfg.request.hooks.set_content_type, "boolean" },
     response = { cfg.response, "table" },
     ["response.hooks"] = { cfg.response.hooks, "table" },

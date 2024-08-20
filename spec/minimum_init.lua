@@ -15,7 +15,7 @@ vim.g.rest_nvim = {
   _log_level = vim.log.levels.INFO,
   request = {
     hooks = {
-      set_user_agent = false,
+      user_agent = "",
     }
   },
   cookies = {

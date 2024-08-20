@@ -25,7 +25,9 @@ function autocmds.setup()
       if hooks.user_agent ~= "" then
         local header_empty = not req.headers["user-agent"] or #req.headers["user-agent"] < 1
         if header_empty then
-          req.headers["user-agent"] = { hooks.user_agent }
+          local user_agent = type(hooks.user_agent) == "function" and hooks.user_agent() or hooks.user_agent
+          ---@cast user_agent string
+          req.headers["user-agent"] = { user_agent }
         end
       end
       if hooks.set_content_type then

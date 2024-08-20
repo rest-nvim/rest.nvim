@@ -1,7 +1,5 @@
 ---@mod rest-nvim.config.default rest.nvim default configuration
 
-local api = require("rest-nvim.api")
-
 ---rest.nvim default configuration
 ---@class rest.Config
 local default_config = {
@@ -16,8 +14,10 @@ local default_config = {
     hooks = {
       ---@type boolean Encode URL before making request
       encode_url = true,
-      ---@type string Set `User-Agent` header when it is empty
-      user_agent = "rest.nvim v" .. api.VERSION,
+      ---@type string|fun():string Set `User-Agent` header when it is empty
+      user_agent = function ()
+        return "rest.nvim v" .. require("rest-nvim.api").VERSION
+      end,
       ---@type boolean Set `Content-Type` header when it is empty and body is provided
       set_content_type = true,
     },
