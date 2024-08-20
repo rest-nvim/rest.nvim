@@ -162,11 +162,11 @@ utils.transform_size = transform.size
 ---@param bufnr number
 ---@param node TSNode
 ---@param ns number
-function utils.ts_highlight_node(bufnr, node, ns)
+---@param timeout number
+function utils.ts_highlight_node(bufnr, node, ns, timeout)
     if bufnr == 0 then
         bufnr = vim.api.nvim_get_current_buf()
     end
-    local highlight = require("rest-nvim.config").highlight
     local higroup = "IncSearch"
     local s_row, s_col = node:start()
     local e_row, e_col = node:end_()
@@ -182,7 +182,7 @@ function utils.ts_highlight_node(bufnr, node, ns)
         if vim.api.nvim_buf_is_valid(bufnr) then
             vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
         end
-    end, highlight.timeout)
+    end, timeout)
 end
 
 ---@param source string|integer

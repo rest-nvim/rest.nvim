@@ -200,7 +200,7 @@ function parser.eval_context(source, ctx, endline)
 end
 
 ---@return TSNode? node TSNode with type `section`
-function parser.get_cursor_request_node()
+function parser.get_request_node_by_cursor()
     local node = vim.treesitter.get_node()
     if node then
         node = utils.ts_find(node, "section")
@@ -320,6 +320,36 @@ function parser.get_request_names(source)
     return result
 end
 
+---@param name string|nil
+---@return TSNode?
+function parser.get_request_node(name)
+    local req_node
+    if not name then
+        req_node = parser.get_request_node_by_cursor()
+        if not req_node then
+            logger.error("Failed to find request at cursor position")
+            vim.notify(
+                "Failed to find request at cursor position. See `:Rest logs` for more info.",
+                vim.log.levels.ERROR,
+                { title = "rest.nvim" }
+            )
+            return
+        end
+    else
+        req_node = parser.get_request_node_by_name(name)
+        if not req_node then
+            logger.error("Failed to find request by name: " .. name)
+            vim.notify(
+                "Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.",
+                vim.log.levels.ERROR,
+                { title = "rest.nvim" }
+            )
+            return
+        end
+    end
+    return req_node
+end
+
 ---Parse the request node and create Request object. Returns `nil` if parsing
 ---failed.
 ---@param node TSNode Tree-sitter request node
@@ -348,6 +378,7 @@ function parser.parse(node, source, ctx)
     -- first
     local url
 
+    ---@type string|nil
     local name
     local handlers = {}
     for child, _ in node:iter_children() do

@@ -17,7 +17,8 @@ local Context = require("rest-nvim.context").Context
 ---@field data any
 
 ---@class rest.Request
----@field name? string The request identifier
+---The request identifier (`nil` on anonymous requests. e.g. parsed from raw string)
+---@field name? string
 ---@field method string The request method
 ---@field url string The request URL
 ---@field http_version? string The request HTTP protocol
@@ -42,7 +43,7 @@ local rest_nvim_last_request = nil
 
 ---@param req rest.Request
 local function run_request(req)
-    logger.debug("run_request")
+    logger.debug("running request:" .. req.name)
     local client = clients.get_available_clients(req)[1]
     if not client then
         logger.error("can't find registered client available for request:\n" .. vim.inspect(req))
@@ -96,17 +97,12 @@ local function run_request(req)
     -- FIXME: return future to pass the command state
 end
 
----run request in current cursor position
-function M.run()
-    logger.info("starting request")
-    local req_node = parser.get_cursor_request_node()
+---Run request in current file.
+---When `name` is not provided, run request on cursor position
+---@param name string|nil name of the request
+function M.run(name)
+    local req_node = parser.get_request_node(name)
     if not req_node then
-        logger.error("Failed to find request at cursor position")
-        vim.notify(
-            "Failed to find request at cursor position. See `:Rest logs` for more info.",
-            vim.log.levels.ERROR,
-            { title = "rest.nvim" }
-        )
         return
     end
     local ctx = Context:new()
@@ -121,36 +117,7 @@ function M.run()
     end
     local highlight = config.highlight
     if highlight.enable then
-        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
-    end
-    run_request(req)
-end
-
----@param name string
-function M.run_by_name(name)
-    local req_node = parser.get_request_node_by_name(name)
-    if not req_node then
-        logger.error("Failed to find request by name: " .. name)
-        vim.notify(
-            "Failed to find request by name: " .. name .. ". See `:Rest logs` for more info.",
-            vim.log.levels.ERROR,
-            { title = "rest.nvim" }
-        )
-        return
-    end
-    local ctx = Context:new()
-    if config.env.enable and vim.b._rest_nvim_env_file then
-        ctx:load_file(vim.b._rest_nvim_env_file)
-    end
-    local req = parser.parse(req_node, 0, ctx)
-    if not req then
-        logger.error("failed to parse request")
-        vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
-        return
-    end
-    local highlight = config.highlight
-    if highlight.enable then
-        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace)
+        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace, highlight.timeout)
     end
     run_request(req)
 end
@@ -165,31 +132,31 @@ function M.run_last()
     run_request(req)
 end
 
----run all requests in current file with same context
-function M.run_all()
-    local reqs = parser.get_all_request_nodes(0)
-    local ctx = Context:new()
-    for _, req_node in ipairs(reqs) do
-        local req = parser.parse(req_node, 0, ctx)
-        if not req then
-            vim.notify(
-                "Parsing request failed. See `:Rest logs` for more info",
-                vim.log.levels.ERROR,
-                { title = "rest.nvim" }
-            )
-            return false
-        end
-        -- FIXME: wait for previous request ends
-        local ok = run_request(req)
-        if not ok then
-            vim.notify(
-                "Running request failed. See `:Rest logs` for more info",
-                vim.log.levels.ERROR,
-                { title = "rest.nvim" }
-            )
-            return
-        end
-    end
-end
+-- ---run all requests in current file with same context
+-- function M.run_all()
+--     local reqs = parser.get_all_request_nodes(0)
+--     local ctx = Context:new()
+--     for _, req_node in ipairs(reqs) do
+--         local req = parser.parse(req_node, 0, ctx)
+--         if not req then
+--             vim.notify(
+--                 "Parsing request failed. See `:Rest logs` for more info",
+--                 vim.log.levels.ERROR,
+--                 { title = "rest.nvim" }
+--             )
+--             return false
+--         end
+--         -- FIXME: wait for previous request ends
+--         local ok = run_request(req)
+--         if not ok then
+--             vim.notify(
+--                 "Running request failed. See `:Rest logs` for more info",
+--                 vim.log.levels.ERROR,
+--                 { title = "rest.nvim" }
+--             )
+--             return
+--         end
+--     end
+-- end
 
 return M

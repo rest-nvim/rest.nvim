@@ -96,9 +96,6 @@ local rest_command_tbl = {
             if #args > 1 then
                 vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN, { title = "rest.nvim" })
                 return
-            elseif #args == 1 then
-                request().run_by_name(args[1])
-                return
             end
             ui().clear()
             if not ui().is_open() then
@@ -106,7 +103,7 @@ local rest_command_tbl = {
                 ui().enter(0)
                 vim.cmd.wincmd("p")
             end
-            request().run()
+            request().run(args[1])
         end,
         ---@return string[]
         complete = function(args)
@@ -200,30 +197,10 @@ local rest_command_tbl = {
     -- TODO(boltless): complete curl command
     curl = {
         impl = function(args, _)
-            if args[1] == "yank" then
-                local req_node
-                if not args[2] then
-                    req_node = parser().get_cursor_request_node()
-                    if not req_node then
-                        logger().error("failed to find request at cursor position")
-                        vim.notify(
-                            "failed to find request at cursor position",
-                            vim.log.levels.ERROR,
-                            { title = "rest.nvim" }
-                        )
-                        return
-                    end
-                else
-                    req_node = parser().get_request_node_by_name(args[2])
-                    if not req_node then
-                        logger().error("failed to find request with name:" .. args[2])
-                        vim.notify(
-                            "failed to find request with name:" .. args[2],
-                            vim.log.levels.ERROR,
-                            { title = "rest.nvim" }
-                        )
-                        return
-                    end
+            if args[1] == "yank" or args[1] == "copy" then
+                local req_node = parser().get_request_node(args[2])
+                if not req_node then
+                    return
                 end
                 local req = parser().parse(req_node, 0)
                 if not req then
@@ -236,32 +213,12 @@ local rest_command_tbl = {
                     return
                 end
                 local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
-                vim.fn.setreg("+", curl_command)
+                vim.fn.setreg("+", curl_command .. "\n")
                 vim.notify("Copied curl command to clipboard", vim.log.levels.INFO, { title = "rest.nvim" })
             elseif args[1] == "comment" then
-                local req_node
-                if not args[2] then
-                    req_node = parser().get_cursor_request_node()
-                    if not req_node then
-                        logger().error("failed to find request at cursor position")
-                        vim.notify(
-                            "failed to find request at cursor position",
-                            vim.log.levels.ERROR,
-                            { title = "rest.nvim" }
-                        )
-                        return
-                    end
-                else
-                    req_node = parser().get_request_node_by_name(args[2])
-                    if not req_node then
-                        logger().error("failed to find request with name:" .. args[2])
-                        vim.notify(
-                            "failed to find request with name:" .. args[2],
-                            vim.log.levels.ERROR,
-                            { title = "rest.nvim" }
-                        )
-                        return
-                    end
+                local req_node = parser().get_request_node(args[2])
+                if not req_node then
+                    return
                 end
                 local req = parser().parse(req_node, 0)
                 if not req then
@@ -275,11 +232,10 @@ local rest_command_tbl = {
                 end
                 local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
                 local start = req_node:range()
-                local end_ = start
                 vim.api.nvim_buf_set_lines(
                     0,
                     start,
-                    end_,
+                    start,
                     false,
                     vim.tbl_map(function(line)
                         return "# " .. line
