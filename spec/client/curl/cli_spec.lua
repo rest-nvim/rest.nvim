@@ -7,7 +7,6 @@ local Context = require("rest-nvim.context").Context
 local curl = require("rest-nvim.client.curl.cli")
 local builder = curl.builder
 local parser = curl.parser
-local nio = require("nio")
 
 local STAT_FORMAT = builder.STAT_ARGS[2]
 

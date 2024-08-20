@@ -19,8 +19,9 @@ local client = {
   request = curl_cli.request,
   available = function (req)
     local method_ok = vim.list_contains(COMPATIBLE_METHODS, req.method)
-    local url_ok = req.url:match("^https?://")
-    return method_ok and url_ok
+    local scheme = req.url:match("^(.+)://")
+    local scheme_ok = (not scheme) or scheme == "http" or scheme == "https"
+    return method_ok and scheme_ok
   end
 }
 

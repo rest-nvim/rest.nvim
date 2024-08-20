@@ -2,7 +2,7 @@
 @myhost = example.org
 
 # this is not a in-place variable
-# @myhost = example.org
+# @myhost = example.net
 
 ###
 GET {{myhost}}/users
@@ -19,3 +19,4 @@ GET {{myhost}}/stats
 
 ###
 # check `spec/examples/script/pre_request_script.http` for variable local to each requests
+@myhost=bruh

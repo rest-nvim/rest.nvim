@@ -18,7 +18,7 @@ local function value_tostring(value)
     value = {
       value,
       function (v)
-        return v == vim.NIL or vim.tbl_contains({ "nil", "number", "string", "boolean" }, value)
+        return v == vim.NIL or vim.tbl_contains({ "nil", "number", "string", "boolean" }, type(value))
       end,
       "vim.NIL|nil|bumber|string|boolean"
     }
