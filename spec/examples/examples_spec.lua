@@ -8,8 +8,6 @@ local Context = require("rest-nvim.context").Context
 
 local function open(path)
     vim.cmd.edit(path)
-    vim.bo.filetype = "http"
-    vim.cmd.source("ftplugin/http.lua")
     return 0
 end
 

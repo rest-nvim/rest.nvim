@@ -84,18 +84,15 @@ describe("curl cli builder", function()
                 },
             },
         })
-        assert.same(
-            {
-                "http://localhost:8000",
-                "-X",
-                "POST",
-                "--data-binary",
-                "@spec/test_server/post_json.json",
-                "-w",
-                STAT_FORMAT,
-            },
-            args
-        )
+        assert.same({
+            "http://localhost:8000",
+            "-X",
+            "POST",
+            "--data-binary",
+            "@spec/test_server/post_json.json",
+            "-w",
+            STAT_FORMAT,
+        }, args)
     end)
 end)
 

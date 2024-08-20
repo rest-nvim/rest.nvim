@@ -11,7 +11,6 @@ local spy = require("luassert.spy")
 
 local function open(path)
     vim.cmd.edit(path)
-    vim.cmd.source("ftplugin/http.lua")
     return 0
 end
 
@@ -39,7 +38,7 @@ describe("http parser", function()
         local _, tree = utils.ts_parse_source(source)
         local req_node = assert(tree:root():child(0))
         assert.same({
-            name = "basic_get#1",
+            name = "basic get statement",
             method = "GET",
             url = "https://api.github.com/users/boltlessengineer",
             headers = {

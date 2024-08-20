@@ -1,2 +1,3 @@
+### basic get statement
 GET https://api.github.com/users/boltlessengineer
 user-agent: neovim

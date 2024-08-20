@@ -4,13 +4,8 @@ require("spec.minimum_init")
 
 local function open(path)
     vim.cmd.edit(path)
-    -- FIXME: why runtimepath is not working?
-    vim.bo.filetype = "http"
-    vim.cmd.source("ftplugin/http.lua")
     return 0
 end
-
-vim.cmd.source("plugin/rest-nvim.lua")
 
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.notify = function() end

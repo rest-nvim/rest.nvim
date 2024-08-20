@@ -4,7 +4,6 @@ require("spec.minimum_init")
 
 local function open(path)
     vim.cmd.edit(path)
-    vim.cmd.source("ftplugin/http.lua")
     return 0
 end
 
