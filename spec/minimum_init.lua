@@ -13,6 +13,11 @@ end
 vim.opt.runtimepath:append(rest_nvim_dir)
 vim.g.rest_nvim = {
   _log_level = vim.log.levels.INFO,
+  request = {
+    hooks = {
+      set_user_agent = false,
+    }
+  },
   cookies = {
     path = "/tmp/rest-nvim.cookies"
   },

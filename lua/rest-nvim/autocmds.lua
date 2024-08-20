@@ -18,8 +18,26 @@ function autocmds.setup()
       local config = require("rest-nvim.config")
       local utils = require("rest-nvim.utils")
       local req = _G.rest_request
-      if config.request.hooks.encode_url then
+      local hooks = config.request.hooks
+      if hooks.encode_url then
         req.url = utils.escape(req.url, true)
+      end
+      if hooks.user_agent ~= "" then
+        local header_empty = not req.headers["user-agent"] or #req.headers["user-agent"] < 1
+        if header_empty then
+          req.headers["user-agent"] = { hooks.user_agent }
+        end
+      end
+      if hooks.set_content_type then
+        local header_empty = not req.headers["content-type"] or #req.headers["content-type"] < 1
+        if header_empty and req.body then
+          if req.body.__TYPE == "json" then
+            req.headers["content-type"] = { "application/json" }
+          elseif req.body.__TYPE == "xml" then
+            req.headers["content-type"] = { "application/xml" }
+            -- TODO: auto-set content-type header for external body
+          end
+        end
       end
     end
   })

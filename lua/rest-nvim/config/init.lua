@@ -38,6 +38,11 @@ local config
 ---@class rest.Opts.Request.Hooks
 --- Encode URL before making request (Default: `true`)
 ---@field encode_url? boolean
+--- Set `User-Agent` header when it is empty. Set as empty string to disable.
+--- (Default: `rest.nvim {version}`)
+---@field user_agent? string
+--- Set `Content-Type` header when it is empty but request body is provided
+---@field set_content_type? boolean
 
 ---@class rest.Opts.Response
 --- Default response hooks (aka. request handlers) configuration
