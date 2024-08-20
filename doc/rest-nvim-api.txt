@@ -192,6 +192,15 @@ utils.ts_highlight_node({bufnr}, {node}, {ns})
         {ns}     (number)
 
 
+utils.ts_get_parser({source})                              *utils.ts_get_parser*
+
+    Parameters: ~
+        {source}  (string|integer)
+
+    Returns: ~
+        (vim.treesitter.LanguageTree)
+
+
 utils.ts_parse_source({source})                          *utils.ts_parse_source*
 
     Parameters: ~
@@ -202,11 +211,8 @@ utils.ts_parse_source({source})                          *utils.ts_parse_source*
         (TSTree)
 
 
-utils.ts_find({node}, {type})                                    *utils.ts_find*
-
-    Parameters: ~
-        {node}  (TSNode)
-        {type}  (string)  @return TSNode?
+utils.ts_find()                                                  *utils.ts_find*
+    @return TSNode?
 
 
 utils.ts_upper_node({node})                                *utils.ts_upper_node*

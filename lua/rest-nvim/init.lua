@@ -6,9 +6,11 @@
 ---
 ---@brief ]]
 
+---@toc rocks-contents
+
 local rest = {}
 
----@deprecated
+---@deprecated use `vim.g.rest_nvim` instead
 ---Set up rest.nvim
 ---This api does nothing but set `vim.g.rest_nvim` to `user_configs`
 ---@param user_configs? rest.Opts User configurations

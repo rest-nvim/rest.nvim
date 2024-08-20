@@ -5,8 +5,15 @@ rest.nvim                                                            *rest-nvim*
  A fast and asynchronous Neovim HTTP client written in Lua
 
 
+==============================================================================
+Table of Contents                                               *rocks-contents*
+
+rest.nvim ·························································· |rest-nvim|
+rest.nvim commands ········································ |rest-nvim.commands|
+rest.nvim configuration ····································· |rest-nvim.config|
+
 rest.setup({user_configs?})                                         *rest.setup*
-    @deprecated
+    @deprecated use `vim.g.rest_nvim` instead
     Set up rest.nvim
     This api does nothing but set `vim.g.rest_nvim` to `user_configs`
 
@@ -58,15 +65,6 @@ rest.nvim commands                                          *rest-nvim.commands*
  split
 
 
-RestCmd                                                                *RestCmd*
-
-    Fields: ~
-        {impl}  (fun)  The command implementation
-
-
-commands.setup()                                                *commands.setup*
-
-
 ==============================================================================
 rest.nvim configuration                                       *rest-nvim.config*
 
@@ -106,7 +104,10 @@ rest.Opts.Request                                            *rest.Opts.Request*
 rest.Opts.Request.Hooks                                *rest.Opts.Request.Hooks*
 
     Fields: ~
-        {encode_url?}  (boolean)   Encode URL before making request (Default: `true`)
+        {encode_url?}        (boolean)   Encode URL before making request (Default: `true`)
+        {user_agent?}        (string)    Set `User-Agent` header when it is empty. Set as empty string to disable.
+                                         (Default: `rest.nvim {version}`)
+        {set_content_type?}  (boolean)   Set `Content-Type` header when it is empty but request body is provided
 
 
 rest.Opts.Response                                          *rest.Opts.Response*

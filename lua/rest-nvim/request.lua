@@ -26,6 +26,17 @@ local Context = require("rest-nvim.context").Context
 ---@field body? rest.Request.Body
 ---@field handlers fun()[]
 
+---@class rest.Response
+---@field status rest.Response.status Status information from response
+---@field body string? Raw response body
+---@field headers table<string,string[]> Response headers
+---@field statistics table<string,string> Response statistics
+
+---@class rest.Response.status
+---@field code number
+---@field version string
+---@field text string
+
 ---@type rest.Request|nil
 local rest_nvim_last_request = nil
 
@@ -65,9 +76,6 @@ local function run_request(req)
       vim.iter(req.handlers):each(function (f) f(res) end)
       logger.info("handler done")
 
-      -- update cookie jar
-      jar.update_jar(req.url, res)
-
       _G.rest_request = req
       _G.rest_response = res
       vim.api.nvim_exec_autocmds("User", {
@@ -75,6 +83,9 @@ local function run_request(req)
       })
       _G.rest_request = nil
       _G.rest_response = nil
+
+      -- update cookie jar
+      jar.update_jar(req.url, res)
 
       -- update result UI
       ui.update({response = res})

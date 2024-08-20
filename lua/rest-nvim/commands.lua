@@ -37,14 +37,13 @@
 ---                                 copying command to clipboard, directly insert curl
 ---                                 command as a comment.
 ---
---- NOTE: All `:Rest` commands opening new window support |command-modifiers|.
---- For example, you can run `:hor Rest open` to open result pane in horizontal
---- split
+---NOTE: All `:Rest` commands opening new window support |command-modifiers|.
+---For example, you can run `:hor Rest open` to open result pane in horizontal
+---split or run `:tab Rest logs` to open logs file in a new tab.
 ---
 ---@brief ]]
 
--- HACK: what is the type of opts here?
-
+---@package
 ---@class RestCmd
 ---The command implementation
 ---@field impl fun(args:string[], opts: table?)
@@ -269,6 +268,7 @@ local function rest(opts)
   command.impl(args, opts)
 end
 
+---@package
 function commands.setup()
   vim.api.nvim_create_user_command("Rest", rest, {
     nargs = "+",

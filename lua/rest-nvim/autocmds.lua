@@ -1,14 +1,52 @@
 ---@mod rest-nvim.autocmds rest.nvim autocommands
 ---
+---@mod rest-nvim.autocmds rest.nvim autocommands
+---
 ---@brief [[
 ---
---- rest.nvim autocommands
+--- rest.nvim user events
+---
+---rest.nvim provides several |User| |events|.
+---
+---RestRequest or RestRequestPre                   *RestRequest* *RestRequestPre*
+---    Just before executing a request. The request object (with |rest.Request|
+---    type) will be temporarily assigned to the global variable `rest_request`.
+---    Modifing this variable will affect the actual request. Example: >lua
+---
+---    vim.api.nvim_create_autocmd("User", {
+---        pattern = "RestRequestPre",
+---        callback = function()
+---            local req = _G.rest_request
+---            req.headers["user-agent"] = { "myneovim" }
+---        end,
+---    })
+---<
+---
+---RestResponse or RestResponsePre               *RestResponse* *RestResponsePre*
+---    After received the response and all response handlers are executed.
+---    The request and response objects (|rest.Request| and |rest.Response|
+---    types) will be termporarily assigned to the global variabels
+---    `rest_request` and `rest_response`. Modifing this variable won't affect
+---    response handlers but updating cookies and rendering result UI will be
+---    affected. Example: >lua
+---
+---    vim.api.nvim_create_autocmd("User", {
+---        pattern = "RestResponsePre",
+---        callback = function()
+---            local req = _G.rest_request
+---            local res = _G.rest_response
+---            req.url = url_decode(req.url)
+---            res.body = trim_trailing_whitespace(res.body)
+---        end,
+---    })
+---<
 ---
 ---@brief ]]
 
 local autocmds = {}
 
 ---Set up Rest autocommands group
+---@package
 function autocmds.setup()
   vim.api.nvim_create_augroup("Rest", { clear = true })
 

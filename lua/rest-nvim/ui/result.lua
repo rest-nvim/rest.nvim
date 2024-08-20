@@ -79,6 +79,7 @@ local panes = {
           elseif res_type == "octet_stream" then
             body = { "Binary answer" }
           elseif config.response.hooks.format then
+            -- NOTE: format hook runs here because it should be done last.
             body = utils.gq_lines(body, res_type)
           end
         end

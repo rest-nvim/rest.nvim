@@ -1,3 +1,4 @@
+---@diagnostic disable: invisible
 if vim.fn.has("nvim-0.9.0") ~= 1 then
   vim.notify_once("[rest.nvim] rest.nvim requires at least Neovim >= 0.9 in order to work")
   return
