@@ -103,3 +103,20 @@ describe("pre-request script", function()
         assert.same("https://jsonplaceholder.typicode.com/posts/", req2.url)
     end)
 end)
+
+describe("builtin request hooks", function ()
+    describe("set_content_type", function ()
+        it("with external body", function ()
+            local source = open("spec/examples/post_with_external_body.http")
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(0))
+            local req = assert(parser.parse(req_node, source))
+            _G.rest_request = req
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = { "RestRequest", "RestRequestPre" },
+            })
+            _G.rest_request = nil
+            assert.same({ "application/json" }, req.headers["content-type"])
+        end)
+    end)
+end)

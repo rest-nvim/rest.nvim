@@ -73,7 +73,10 @@ function autocmds.setup()
                         req.headers["content-type"] = { "application/json" }
                     elseif req.body.__TYPE == "xml" then
                         req.headers["content-type"] = { "application/xml" }
-                        -- TODO: auto-set content-type header for external body
+                    elseif req.body.__TYPE == "external" then
+                        local mimetypes = require("mimetypes")
+                        local body_mimetype = mimetypes.guess(req.body.data.path)
+                        req.headers["content-type"] = { body_mimetype }
                     end
                 end
             end

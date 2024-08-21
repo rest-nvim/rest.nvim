@@ -190,12 +190,10 @@ key5 = value5
             assert.same({
                 method = "POST",
                 url = "https://example.com:8080/api/html/post",
-                headers = {
-                    ["content-type"] = { "application/json" },
-                },
+                headers = {},
                 cookies = {},
                 handlers = {},
-                name = "post_with_external_body#1",
+                name = "The request body is read from a file",
                 body = {
                     __TYPE = "external",
                     data = {

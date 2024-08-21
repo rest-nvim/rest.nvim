@@ -1,5 +1,5 @@
-// The request body is read from a file
+### The request body is read from a file
 POST https://example.com:8080/api/html/post
-Content-Type: application/json
+# rest.nvim can guess the Content-Type from file path
 
 < ./input.json
