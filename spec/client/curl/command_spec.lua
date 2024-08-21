@@ -16,7 +16,7 @@ describe(":Rest curl", function()
         open("spec/examples/basic_get.http")
         vim.cmd("Rest curl yank")
         assert.same(
-            "curl -sL 'https://api.github.com/users/boltlessengineer' '-X' 'GET' '-H' 'User-Agent: neovim'",
+            "curl -sL 'https://api.github.com/users/boltlessengineer' '-X' 'GET' '-H' 'User-Agent: neovim'\n",
             vim.fn.getreg("+")
         )
     end)
