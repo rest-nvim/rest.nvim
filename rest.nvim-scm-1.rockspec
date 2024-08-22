@@ -24,12 +24,6 @@ dependencies = {
 }
 
 test_dependencies = {
-  "lua >= 5.1, < 5.4",
-  "nvim-nio",
-  "mimetypes",
-  "xml2lua",
-  "fidget.nvim",
-  "tree-sitter-http >= scm",
   "nlua",
 }
 

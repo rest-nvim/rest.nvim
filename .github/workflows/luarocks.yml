@@ -29,5 +29,7 @@ jobs:
             xml2lua
             fidget.nvim
             tree-sitter-http >= scm
+          test_dependencies: |
+            nlua
           copy_directories: |
             {{ neovim.plugin.dirs }}
