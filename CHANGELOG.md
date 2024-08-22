@@ -1,5 +1,120 @@
 # Changelog
 
+## [3.0.0](https://github.com/rest-nvim/rest.nvim/compare/v2.0.1...v3.0.0) (2024-08-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* format to indent-size 4
+* **script:** modularize script runner client
+* **config:** rewrite config structures
+* **config:** rewrite configs
+* big rewrite
+* add archiving notice
+
+### ref
+
+* **config:** rewrite config structures ([6583234](https://github.com/rest-nvim/rest.nvim/commit/65832343cbc1b73330891e30132e8a0af477aa9a))
+* **script:** modularize script runner client ([c6173ec](https://github.com/rest-nvim/rest.nvim/commit/c6173ecaeff0000e8143a2d02e6867899e331b94))
+
+
+### Features
+
+* add `tree-sitter-http` submodule ([76d868c](https://github.com/rest-nvim/rest.nvim/commit/76d868c106446c8db46533e39293e15b14405025))
+* add nix. I have no idea what I'm doing but it works ([434927d](https://github.com/rest-nvim/rest.nvim/commit/434927d6234783718531e54f71873c5047a865a1))
+* automatically name request by file name ([ff9cf3d](https://github.com/rest-nvim/rest.nvim/commit/ff9cf3dd21fe02a83c82fd81a77e8ae1db1d7602))
+* basic `:Rest curl` command ([6a7699b](https://github.com/rest-nvim/rest.nvim/commit/6a7699bae02caf5bc98e229fd1216aa16a3e7bb3))
+* better progress handlers ([27d0faf](https://github.com/rest-nvim/rest.nvim/commit/27d0faf4458a788badf3bb2e054ec34783192484))
+* bump version of tree-sitter-http parser ([6ab4cb0](https://github.com/rest-nvim/rest.nvim/commit/6ab4cb0f9667eeca3e7fa0d067454b2ce78655c2))
+* client selector & libcurl client ([bf41cbf](https://github.com/rest-nvim/rest.nvim/commit/bf41cbf07b1fb8b2883641728942d1920216ac99))
+* **commands:** `:Rest cookies` ([ee05dc5](https://github.com/rest-nvim/rest.nvim/commit/ee05dc503353df8deac223ddf81c893b1e5ba3e7))
+* **commands:** `:Rest open` ([0fbef12](https://github.com/rest-nvim/rest.nvim/commit/0fbef1276e58f223a68c2c6edce068222d5b329b))
+* **commands:** use command-modifiers like `:tab` ([ce55212](https://github.com/rest-nvim/rest.nvim/commit/ce552128f21b1ea2dfaafa7b9480b1e855d0340a))
+* **config:** ensure all options are working ([0aa1c42](https://github.com/rest-nvim/rest.nvim/commit/0aa1c422d18ed77eeffe0cc9191e4622641465c6))
+* **config:** more builtin request hooks ([5880134](https://github.com/rest-nvim/rest.nvim/commit/58801349da987d6a1d02f36e30c5f4563e3c5268))
+* cookies ([611450a](https://github.com/rest-nvim/rest.nvim/commit/611450a38a81f64bd1334b8b6a909b762f6790be))
+* **curl.cli:** basic body support ([3200046](https://github.com/rest-nvim/rest.nvim/commit/3200046f9400245907f832905b5afd33391b5f2d))
+* **curl.cli:** parse statistics ([306975a](https://github.com/rest-nvim/rest.nvim/commit/306975ae2cb9b15c7f34cfc346220075660aa629))
+* custom mappings for result window ([8f62a29](https://github.com/rest-nvim/rest.nvim/commit/8f62a290be397a1e4a2778330f026f731251f197))
+* delete unused `syntax/` and `tests/` dir ([e62fcc1](https://github.com/rest-nvim/rest.nvim/commit/e62fcc18dc8b80f7b30885114e4b34c720e9c655))
+* **dotenv:** auto-register matching dotenv file ([025c9d4](https://github.com/rest-nvim/rest.nvim/commit/025c9d4127905b7fa8e8929ba41222a27123b2f2))
+* evaluate context sequentially ([95f810a](https://github.com/rest-nvim/rest.nvim/commit/95f810a71091b6f62c5a8f5eef391b2d84e8dce4))
+* external body support ([51d115e](https://github.com/rest-nvim/rest.nvim/commit/51d115e49b699de5d48b7052ad4577d93183d378))
+* **ftplugin:** remove `n:&gt;` from `'comments'` ([968c15b](https://github.com/rest-nvim/rest.nvim/commit/968c15bc101c2138009997aa387e7ea69915b085))
+* get rid of `_G` usage ([16ba718](https://github.com/rest-nvim/rest.nvim/commit/16ba7185adcfa12306344ee6de7de1558e12334e))
+* guess content-type for external bodies ([7c100f2](https://github.com/rest-nvim/rest.nvim/commit/7c100f2ccedf4ae7a0bacd401c339b78ec2f7ea6))
+* handler script support ([e721684](https://github.com/rest-nvim/rest.nvim/commit/e721684b759e8acc5c5b23885b6155d8356d3e9c))
+* lazy-loading & global user commands ([47beb74](https://github.com/rest-nvim/rest.nvim/commit/47beb74b22f3602ebb13060bb1a05c21a72801c4))
+* parse & render status text ([100626e](https://github.com/rest-nvim/rest.nvim/commit/100626e21c48988f163b3b957f0f275e215896bf))
+* pre-script & handler-scripts ([2fec5f9](https://github.com/rest-nvim/rest.nvim/commit/2fec5f9d6c3549eebff7adcdeb0e82fbe0a118a7))
+* print request name, url, and version in UI ([01c661b](https://github.com/rest-nvim/rest.nvim/commit/01c661b185a5876c8ee3ff5e5dcd162e66a41461))
+* **queries:** add empty `fold.scm` to enable fold ([3a18c92](https://github.com/rest-nvim/rest.nvim/commit/3a18c927baa9cc2f0e3d5605b644f126d4ba273a))
+* remove external formatter, use `gq` instead ([1741ed8](https://github.com/rest-nvim/rest.nvim/commit/1741ed8f6cb94c019b2a584477275a7e92ba80a0))
+* run request by name ([70eefb5](https://github.com/rest-nvim/rest.nvim/commit/70eefb5e843adcc030dd0878fb8921b1bae2f99c))
+* separate context from request object ([1e92829](https://github.com/rest-nvim/rest.nvim/commit/1e928294ed6b2e752f0d4c4238dacd68d887913b))
+* set concealcursor to `nc` on help window ([3af7b3e](https://github.com/rest-nvim/rest.nvim/commit/3af7b3e99b7e60760a123501e13037d2b161b729))
+* treat form-urlencoded as raw-body ([90c46f7](https://github.com/rest-nvim/rest.nvim/commit/90c46f700edd05974714e8cc9ab92cc65a240719))
+* **ts:** match queries to v3 parser version ([c15b81f](https://github.com/rest-nvim/rest.nvim/commit/c15b81f63b7cf66fa61467ab1af6e166fa2df01c))
+* upgrade `tree-sitter-http` ([a9040da](https://github.com/rest-nvim/rest.nvim/commit/a9040da711ed5bad50009ccbe580f7cd9e7fac17))
+
+
+### Bug Fixes
+
+* `rest-nvim.result` is removed ([78ad115](https://github.com/rest-nvim/rest.nvim/commit/78ad1152ea4b1f9eaeec066453ac76dc06cd8c40))
+* allow to abort `:Rest env select` command ([2f04e29](https://github.com/rest-nvim/rest.nvim/commit/2f04e293794d991f774006e7a1c6b896171d28fe))
+* **build:** proper require for luarocks.nvim breaking changes ([5300ae0](https://github.com/rest-nvim/rest.nvim/commit/5300ae0b111dbee1322949a197cc424eac6b849f))
+* case-insensitive header ([fc9b1f6](https://github.com/rest-nvim/rest.nvim/commit/fc9b1f65d695a012475d5634415be296b1fb7ffe))
+* change default HL behavior ([31a5665](https://github.com/rest-nvim/rest.nvim/commit/31a56656f374625c012ff0c411da1593e7c8cd8a))
+* **commands:** complete on command with mods ([c3ff445](https://github.com/rest-nvim/rest.nvim/commit/c3ff445bdf8b6919f35eb206e6a461c2106a58f6))
+* **config:** require loop ([9346bcc](https://github.com/rest-nvim/rest.nvim/commit/9346bcc0c9210e1cceda8ecd3633ee5be388b84f))
+* correctly urlencode query parameters (fixes [#317](https://github.com/rest-nvim/rest.nvim/issues/317)) ([38ceda9](https://github.com/rest-nvim/rest.nvim/commit/38ceda9bc3e4dc17aa67dcd1a17829e0d3c2334b))
+* don't conceal result pane ([2737024](https://github.com/rest-nvim/rest.nvim/commit/273702404e838ae9fc9e3427918170263ecbb1d4))
+* don't try to highlight over the last line ([826118b](https://github.com/rest-nvim/rest.nvim/commit/826118b5bc47d0ba179c8261b824c4783d66d7eb))
+* enable fold in result UI ([cbe31e7](https://github.com/rest-nvim/rest.nvim/commit/cbe31e724c1837b7ff865956f693f150e37e9892))
+* **functions:** handle highlights of winbar result with prefixed zeros ([1bad966](https://github.com/rest-nvim/rest.nvim/commit/1bad966117230e173e31f503c9718f9eb145388f))
+* H and L keymaps are buffer local ([21a9ae3](https://github.com/rest-nvim/rest.nvim/commit/21a9ae3e48d188df5330c14dda40e8f6244eac68))
+* handle `HOST` header ([828cf52](https://github.com/rest-nvim/rest.nvim/commit/828cf521cd2b915bef22040c02c611d3f1771040))
+* handle multiple space between command args ([5dc89bb](https://github.com/rest-nvim/rest.nvim/commit/5dc89bbed213345282457f677df48752696aa263))
+* **health:** recommend using the `--lua-version` flag in luarocks commands ([9b9ad65](https://github.com/rest-nvim/rest.nvim/commit/9b9ad6529d4026c4a18b23c60c6d6923c8109bb3))
+* injection queries ([58e8bca](https://github.com/rest-nvim/rest.nvim/commit/58e8bca41ac29b9717a0bf00307fbe67d393979a))
+* match lowercase content-type header ([20c5b52](https://github.com/rest-nvim/rest.nvim/commit/20c5b5259afa7f4867474cc463211d64c93ba371))
+* minor issues ([0258236](https://github.com/rest-nvim/rest.nvim/commit/0258236adad8b98f2b5acb35040b4c9ce3593311))
+* minor issues ([ec41cec](https://github.com/rest-nvim/rest.nvim/commit/ec41cec7af68f945130265f322fc7b3157c16dff))
+* minor issues ([c2d41e5](https://github.com/rest-nvim/rest.nvim/commit/c2d41e507ab1942e0f21c5a1e27d1017e425ca00))
+* minor type issues ([7ab1007](https://github.com/rest-nvim/rest.nvim/commit/7ab100700b5e8766d8b8e888b60f4f9ec4dba6a1))
+* **parser:** handle reqeust name from comment ([fed6d4a](https://github.com/rest-nvim/rest.nvim/commit/fed6d4a78877a60ff8de31d9a844df9e55eefe06))
+* **parser:** handler heading without value ([e795f7c](https://github.com/rest-nvim/rest.nvim/commit/e795f7c93bbaed84ac977d491aef8ef2aae60dd5))
+* **parser:** remove line breaks from url ([6af0022](https://github.com/rest-nvim/rest.nvim/commit/6af002292969a5b6c92fc7d17824a8e8028dc770))
+* **parser:** set host based on header of strings ([f01fb8e](https://github.com/rest-nvim/rest.nvim/commit/f01fb8e0679e7447acd1ccb427523e3912f9a7d4))
+* pre-request script sets variable locally ([c2e7ab4](https://github.com/rest-nvim/rest.nvim/commit/c2e7ab4170197aa7d550f91c01ad30ab620d3c3a))
+* response buffer fold issue ([7fbc292](https://github.com/rest-nvim/rest.nvim/commit/7fbc292f72bce3b1895ff18e6b3d531d3af6edb5))
+* **run last:** not modify body in order to use it again ([9598c89](https://github.com/rest-nvim/rest.nvim/commit/9598c893ac8e6aee2e3e0dc526f2c44bc4889ba9))
+* set host in the context of port ([3c13242](https://github.com/rest-nvim/rest.nvim/commit/3c132425239dd35ce97dbdd1fe0a7f8aa75cb30c))
+* **test:** don't run real request on test ([2b61cec](https://github.com/rest-nvim/rest.nvim/commit/2b61cec012ad678fde7f41084677482a69a04e0b))
+* **test:** issues from different machine ([e04f2c9](https://github.com/rest-nvim/rest.nvim/commit/e04f2c923d294bb6427dfa31b0f94ed766cdf27b))
+* **ui.panes:** handle unloaded buffer ([a88b0f8](https://github.com/rest-nvim/rest.nvim/commit/a88b0f8afdf06ca7382fd6a252dd66cb96d5b741))
+* **ui:** don't try to render image ([061f65d](https://github.com/rest-nvim/rest.nvim/commit/061f65d1305ee0630de1c7a5033263c8f259c58d))
+* **ui:** handle when content-type is not provided ([b8a1bf8](https://github.com/rest-nvim/rest.nvim/commit/b8a1bf8335248058fdefecec0c958789d99ed954))
+* **ui:** http_version comes before code ([377ad65](https://github.com/rest-nvim/rest.nvim/commit/377ad65877cc972aa2be3fe0cc793f2fe19d9c96))
+* use `title` field instead of manual prefix ([7d1058f](https://github.com/rest-nvim/rest.nvim/commit/7d1058ffe312117515c98a269e779af6571cb817))
+* use `vim.notify` instead of `logger` ([09358a3](https://github.com/rest-nvim/rest.nvim/commit/09358a3afc94d24f3bd84d67d92072755d5f1b83))
+
+
+### Documentation
+
+* add archiving notice ([e7843c5](https://github.com/rest-nvim/rest.nvim/commit/e7843c55f9df6a9db9f97dac180035c6ff895a90))
+
+
+### Styles
+
+* format to indent-size 4 ([8369aa1](https://github.com/rest-nvim/rest.nvim/commit/8369aa1a535fd1b30ebe195e0927649aa8a54494))
+
+
+### Code Refactoring
+
+* big rewrite ([f16b420](https://github.com/rest-nvim/rest.nvim/commit/f16b4208bda93bc5f3e13cb3c2c16af91aa5dc37))
+* **config:** rewrite configs ([a6cf82b](https://github.com/rest-nvim/rest.nvim/commit/a6cf82be777d0aea5878c6c31023489f0ff51202))
+
 ## [2.0.1](https://github.com/rest-nvim/rest.nvim/compare/v2.0.0...v2.0.1) (2024-03-19)
 
 
