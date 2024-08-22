@@ -84,7 +84,7 @@ function utils.read_file(path)
 end
 
 function utils.parse_http_time(time_str)
-    local pattern = "(%a+), (%d+)[\\s-](%a+)[\\s-](%d+) (%d+):(%d+):(%d+) GMT"
+    local pattern = "(%a+), (%d+)[%s-](%a+)[%s-](%d+) (%d+):(%d+):(%d+) GMT"
     local _, day, month_name, year, hour, min, sec = time_str:match(pattern)
   -- stylua: ignore
   local months = {
