@@ -1,6 +1,7 @@
 ### post-request script
 GET https://jsonplaceholder.typicode.com/posts/3
 
+# @lang=lua
 > {%
 local body = vim.json.decode(response.body)
 client.global.set("postId", body.id)

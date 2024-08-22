@@ -52,5 +52,6 @@ build = {
     "plugin",
     "ftdetect",
     "ftplugin",
+    "queries",
   }
 }
