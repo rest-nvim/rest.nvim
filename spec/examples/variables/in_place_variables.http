@@ -15,8 +15,8 @@ GET {{myhost}}/users
 
 ###
 # so `myhost` here is now `example.net`
+# check `spec/examples/script/pre_request_script.http` for variable local to each requests
 GET {{myhost}}/stats
 
 ###
-# check `spec/examples/script/pre_request_script.http` for variable local to each requests
-@myhost=bruh
+@myhost=this won't affect above request

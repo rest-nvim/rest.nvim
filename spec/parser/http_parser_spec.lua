@@ -206,8 +206,9 @@ key5 = value5
 
     describe("variables", function()
         it("parse with variables in header", function()
+            vim.env["TOKEN"] = "xxx"
             local source = [[POST https://example.com
-X-DATE: {{$date}}
+Authorization: Bearer {{TOKEN}}
 ]]
             local _, tree = utils.ts_parse_source(source)
             local req_node = assert(tree:root():child(0))
@@ -215,7 +216,7 @@ X-DATE: {{$date}}
             assert.not_nil(req)
             ---@cast req rest.Request
             assert.same({
-                ["x-date"] = { os.date("%Y-%m-%d") },
+                ["authorization"] = { "Bearer xxx" },
             }, req.headers)
         end)
         it("parse with variables in body", function()
@@ -223,7 +224,7 @@ X-DATE: {{$date}}
             local source = [[POST https://example.com
 
 {
-  "name": "{{DATE}}"
+  "date": "{{DATE}}"
 }
 ]]
             local _, tree = utils.ts_parse_source(source)
@@ -234,7 +235,7 @@ X-DATE: {{$date}}
             assert.same({
                 __TYPE = "json",
                 data = [[{
-  "name": "2024-07-28"
+  "date": "2024-07-28"
 }]],
             }, req.body)
         end)
