@@ -66,7 +66,8 @@ CLI.
 ```
 
 > [!NOTE]
-> you also need to install latest [tree-sitter-http] parser
+> you also need to install latest [tree-sitter-http] parser using
+> `:TSInstall http`
 
 <!-- TODO: I'm not sure packer supporst tree-sitter installation via luarocks -->
 <!-- ### [packer.nvim](https://github.com/wbthomason/packer.nvim) -->
