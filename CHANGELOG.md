@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/rest-nvim/rest.nvim/compare/v3.0.1...v3.0.2) (2024-08-22)
+
+
+### Bug Fixes
+
+* remove tree-sitter-http from github workflow ([0c3700c](https://github.com/rest-nvim/rest.nvim/commit/0c3700c5b86a7e991c74adc617804cb183da4fec))
+
 ## [3.0.1](https://github.com/rest-nvim/rest.nvim/compare/v3.0.0...v3.0.1) (2024-08-22)
 
 
