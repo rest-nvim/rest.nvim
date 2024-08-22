@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/rest-nvim/rest.nvim/compare/v3.0.0...v3.0.1) (2024-08-22)
+
+
+### Bug Fixes
+
+* manually run release-please ([05fe751](https://github.com/rest-nvim/rest.nvim/commit/05fe751014574dfae71c5f5331027681f7dbbb60))
+
 ## [3.0.0](https://github.com/rest-nvim/rest.nvim/compare/v2.0.1...v3.0.0) (2024-08-22)
 
 
