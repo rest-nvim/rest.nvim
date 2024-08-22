@@ -3,10 +3,8 @@
 # rest.nvim
 
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
-![Neovim version](https://img.shields.io/badge/Neovim-0.9.2-5ba246?style=for-the-badge&logo=neovim)
+![Neovim version](https://img.shields.io/badge/Neovim%200.10+-brightgreen?style=for-the-badge)
 [![LuaRocks](https://img.shields.io/luarocks/v/teto/rest.nvim?style=for-the-badge&logo=lua&color=blue)](https://luarocks.org/modules/teto/rest.nvim)
-[![Discord](https://img.shields.io/badge/discord-join-7289da?style=for-the-badge&logo=discord)](https://discord.gg/AcXkuXKj7C)
-[![Matrix](https://img.shields.io/matrix/rest.nvim%3Amatrix.org?server_fqdn=matrix.org&style=for-the-badge&logo=element&label=Matrix&color=55b394&link=https%3A%2F%2Fmatrix.to%2F%23%2F%23rest.nvim%3Amatrix.org)](https://matrix.to/#/#rest.nvim:matrix.org)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
@@ -18,12 +16,12 @@
 
 A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
 
-`rest.nvim` by default makes use of native [cURL](https://curl.se/) bindings. In this way, you get
-absolutely all the power that cURL provides from the comfort of our editor just by using a keybind
-and without wasting the precious resources of your machine.
+`rest.nvim` by default makes use of its own `curl` wrapper made in pure Lua and a [tree-sitter]
+parser to parse `http` files. So what you can run get exact and detailed result what you see from
+your editor!
 
 In addition to this, you can also write integrations with external HTTP clients, such as the postman
-CLI. For more information on this, please see this [blog post](https://amartin.codeberg.page/posts/first-look-at-thunder-rest/#third-party-clients).
+CLI.
 
 > [!IMPORTANT]
 >
@@ -65,23 +63,34 @@ CLI. For more information on this, please see this [blog post](https://amartin.c
 }
 ```
 
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+<!-- TODO: I'm not sure packer supporst tree-sitter installation via luarocks -->
+<!-- ### [packer.nvim](https://github.com/wbthomason/packer.nvim) -->
+<!---->
+<!-- ```lua -->
+<!-- use { -->
+<!--   "rest-nvim/rest.nvim", -->
+<!--   rocks = { "nvim-nio", "mimetypes", "xml2lua", "fidget.nvim", "tree-sitter-http" }, -->
+<!-- } -->
+<!-- ``` -->
+
+### Setup
+
+No `.setup()` call is needed!
+Just set your options via `vim.g.rest_nvim`. It is fully documented and typed internally so you get
+a good experience during autocompletion :)
 
 ```lua
-use {
-  "rest-nvim/rest.nvim",
-  rocks = { "nvim-nio", "mimetypes", "xml2lua", "fidget.nvim" },
+---@type rest.Opts
+vim.g.rest_nvim = {
+    -- ...
 }
 ```
-
-### Default configuration
-
-This is the default configuration of `rest.nvim`, it is fully documented and typed internally so you
-get a good experience during autocompletion :)
 
 > [!NOTE]
 >
 > You can also check out `:h rest-nvim.config` for documentation.
+
+### Default configuration
 
 ```lua
 ---rest.nvim default configuration
@@ -159,22 +168,10 @@ local default_config = {
 }
 ```
 
-### Tree-Sitter parsing
-
-`rest.nvim` uses tree-sitter as a first-class citizen, so it will not work if the required parsers are
-not installed. These parsers are as follows and you can add them to your `ensure_installed` table
-in your `nvim-treesitter` configuration.
-
-```lua
-ensure_installed = { "lua", "xml", "http", "json", "graphql" }
-```
-
-Or manually run `:TSInstall lua xml http json graphql`.
-
 ## Usage
 
-Create a new http file or open an existing one and place the cursor over the
-request and run the <kbd>:Rest run</kbd> command.
+Create a new http file or open an existing one and run the <kbd>:Rest run {name}</kbd> command, or
+just place the cursor over the request and simply run <kbd>:Rest run</kbd>.
 
 > [!NOTE]
 >
@@ -223,7 +220,7 @@ response.body = vim.json.encode(json)
 ```
 
 Put `# @lang=lua` comment just above any script elements.
-Scripts without `@lang` will be parsed as javascript code to match with [http spec](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#response-handling)
+Scripts without `@lang` will be parsed as javascript code to match with [http spec](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#response-handling).
 
 ## Extensions
 
@@ -313,3 +310,5 @@ test runner through `make test` will automatically install all required dependen
 ## License
 
 rest.nvim is [GPLv3 Licensed](./LICENSE).
+
+[tree-sitter]: https://github.com/tree-sitter/tree-sitter
