@@ -48,11 +48,13 @@ CLI.
 ### Dependencies
 
 - `curl`
+- [tree-sitter-http] (`scm` version)
 
 ### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
 
 ```vim
 :Rocks install rest.nvim
+:Rocks install tree-sitter-http dev
 ```
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -62,6 +64,9 @@ CLI.
   "rest-nvim/rest.nvim",
 }
 ```
+
+> [!NOTE]
+> you also need to install latest [tree-sitter-http] parser
 
 <!-- TODO: I'm not sure packer supporst tree-sitter installation via luarocks -->
 <!-- ### [packer.nvim](https://github.com/wbthomason/packer.nvim) -->
@@ -312,3 +317,4 @@ test runner through `make test` will automatically install all required dependen
 rest.nvim is [GPLv3 Licensed](./LICENSE).
 
 [tree-sitter]: https://github.com/tree-sitter/tree-sitter
+[tree-sitter-http]: https://github.com/rest-nvim/tree-sitter-http

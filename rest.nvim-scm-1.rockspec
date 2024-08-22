@@ -20,7 +20,6 @@ dependencies = {
   "mimetypes",
   "xml2lua",
   "fidget.nvim",
-  "tree-sitter-http >= scm",
 }
 
 test_dependencies = {
