@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.3](https://github.com/rest-nvim/rest.nvim/compare/v3.0.2...v3.0.3) (2024-08-23)
+
+
+### Bug Fixes
+
+* neovim v0.10.1 compatibility (fix [#408](https://github.com/rest-nvim/rest.nvim/issues/408)) ([7e7dcfc](https://github.com/rest-nvim/rest.nvim/commit/7e7dcfce195d67057822797f434d6e26ce00ee03))
+* **queries:** update queries ([e51fff1](https://github.com/rest-nvim/rest.nvim/commit/e51fff10f0659c141e0e91221b1f019a5ced3745))
+
 ## [3.0.2](https://github.com/rest-nvim/rest.nvim/compare/v3.0.1...v3.0.2) (2024-08-22)
 
 
