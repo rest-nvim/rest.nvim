@@ -25,8 +25,8 @@ describe(":Rest curl", function()
     end)
 end)
 
-describe(":Rest run", function ()
-    nio.tests.it("notify on request failed", function ()
+describe(":Rest run", function()
+    nio.tests.it("notify on request failed", function()
         open("spec/examples/basic_get.http")
         -- go to line number 6
         vim.cmd("6")
@@ -35,6 +35,8 @@ describe(":Rest run", function ()
         vim.cmd(":Rest run")
         nio.sleep(100)
         ---@diagnostic disable-next-line: undefined-field
-        assert.spy(spy_notify).called_with("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
+        assert
+            .spy(spy_notify)
+            .called_with("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
     end)
 end)
