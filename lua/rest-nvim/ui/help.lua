@@ -42,8 +42,6 @@ local function get_or_create_buf()
 
         -- Write to buffer
         local buf_content = {
-            "**`rest.nvim` results window help**",
-            "",
             "**Keybinds**:",
             "  - `" .. keybinds.prev .. "`: go to previous pane",
             "  - `" .. keybinds.next .. "`: go to next pane",
@@ -76,6 +74,7 @@ function help.open()
     -- Display the help buffer window
     ---@cast help_bufnr number
     local help_win = vim.api.nvim_open_win(help_bufnr, true, {
+        title = "rest.nvim results window help",
         style = "minimal",
         border = "single",
         win = winnr,
