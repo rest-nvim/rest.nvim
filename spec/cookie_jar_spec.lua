@@ -1,6 +1,6 @@
 ---@module 'luassert'
 
-require("spec.minimum_init")
+require("spec.minimal_init")
 
 local jar = require("rest-nvim.cookie_jar")
 local utils = require("rest-nvim.utils")

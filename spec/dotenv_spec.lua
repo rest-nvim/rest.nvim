@@ -1,6 +1,6 @@
 ---@module 'luassert'
 
-require("spec.minimum_init")
+require("spec.minimal_init")
 
 local function open(path)
     vim.cmd.edit(path)

@@ -1,7 +1,7 @@
 ---@diagnostic disable: invisible
 ---@module 'luassert'
 
-require("spec.minimum_init")
+require("spec.minimal_init")
 
 local Context = require("rest-nvim.context").Context
 local curl = require("rest-nvim.client.curl.cli")

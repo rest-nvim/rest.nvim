@@ -1,6 +1,6 @@
 ---@module 'luassert'
 
-require("spec.minimum_init")
+require("spec.minimal_init")
 
 local paneui = require("rest-nvim.ui.panes")
 local utils = require("rest-nvim.utils")

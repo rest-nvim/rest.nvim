@@ -1,6 +1,6 @@
 ---@module 'luassert'
 
-require("spec.minimum_init")
+require("spec.minimal_init")
 
 local parser = require("rest-nvim.parser")
 local utils = require("rest-nvim.utils")
