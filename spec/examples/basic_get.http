@@ -1,3 +1,6 @@
 ### basic get statement
 GET https://api.github.com/users/boltlessengineer
 user-agent: neovim
+
+### get statement for localhost
+GET localhost:9999

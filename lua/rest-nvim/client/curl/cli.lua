@@ -32,6 +32,7 @@ function curl.cli(args, on_exit, opts)
     curl_cmd = vim.list_extend(curl_cmd, args)
     log.info(curl_cmd)
     opts.detach = false
+    on_exit = vim.schedule_wrap(on_exit)
     local ok, e = pcall(vim.system, curl_cmd, opts, on_exit)
     if not ok then
         ---@type vim.SystemCompleted

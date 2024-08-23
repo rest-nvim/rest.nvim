@@ -57,6 +57,8 @@ describe("ui.panes", function()
         assert.not_same("this-is-a-winbar", vim.api.nvim_get_option_value("winbar", { scope = "local" }))
     end)
     it("initialize the buffer back after unloaded", function()
+        -- ensure there is only one window
+        vim.cmd("wincmd o")
         assert.same(1, vim.api.nvim_get_current_buf())
         group:enter(0)
         local pane_buf = vim.api.nvim_get_current_buf()

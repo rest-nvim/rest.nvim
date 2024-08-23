@@ -2,6 +2,9 @@
 
 require("spec.minimal_init")
 
+local nio = require("nio")
+local spy = require("luassert.spy")
+
 local function open(path)
     vim.cmd.edit(path)
     return 0
@@ -19,5 +22,19 @@ describe(":Rest curl", function()
             "curl -sL 'https://api.github.com/users/boltlessengineer' '-X' 'GET' '-H' 'User-Agent: neovim'\n",
             vim.fn.getreg("+")
         )
+    end)
+end)
+
+describe(":Rest run", function ()
+    nio.tests.it("notify on request failed", function ()
+        open("spec/examples/basic_get.http")
+        -- go to line number 6
+        vim.cmd("6")
+        local spy_notify = spy.on(vim, "notify")
+        -- run request
+        vim.cmd(":Rest run")
+        nio.sleep(100)
+        ---@diagnostic disable-next-line: undefined-field
+        assert.spy(spy_notify).called_with("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
     end)
 end)
