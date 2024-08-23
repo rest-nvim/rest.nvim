@@ -186,7 +186,7 @@ end
 ---@param ctx rest.Context
 ---@param endline number zero-based line number
 function parser.eval_context(source, ctx, endline)
-    vim.validate("source", source, "number")
+    vim.validate({ source = { source, "number" } })
     local startline = ctx.linenr
     for ln = startline, endline do
         local start_node = vim.treesitter.get_node({ pos = { ln, 0 } })

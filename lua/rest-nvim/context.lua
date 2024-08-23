@@ -65,16 +65,20 @@ end
 ---@param key string
 ---@param value string
 function Context:set_global(key, value)
-    vim.validate("key", key, "string")
-    vim.validate("value", value, "string")
+    vim.validate({
+        key = { key, "string" },
+        value = { value, "string" },
+    })
     self.vars[key] = value
 end
 
 ---@param key string
 ---@param value string
 function Context:set_local(key, value)
-    vim.validate("key", key, "string")
-    vim.validate("value", value, "string")
+    vim.validate({
+        key = { key, "string" },
+        value = { value, "string" },
+    })
     self.lv[key] = value
 end
 
