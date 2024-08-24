@@ -23,7 +23,7 @@ describe("http parser", function()
     end)
     it("parse from http string", function()
         local source = "GET https://github.com\n"
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         assert.same({
             method = "GET",
@@ -35,7 +35,7 @@ describe("http parser", function()
     end)
     it("parse from http file", function()
         local source = open("spec/examples/basic_get.http")
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         assert.same({
             name = "basic get statement",
@@ -66,7 +66,7 @@ GET http://localhost:80
 GET /some/path
 HOST: localhost:8000
 ]]
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         local req = assert(parser.parse(req_node, source))
         assert.same("http://localhost:8000/some/path", req.url)
@@ -78,7 +78,7 @@ X-Header1: value1
 X-Header2:
 X-Header1: value2
 ]]
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         assert.same({
             url = "http://example.com/api",
@@ -95,7 +95,7 @@ X-Header1: value2
     describe("parse body", function()
         it("json body", function()
             local source = 'POST https://example.com\n\n{\n\t"blah": 1}\n'
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             assert.same({
                 method = "POST",
@@ -111,7 +111,7 @@ X-Header1: value2
         end)
         it("invalid json body", function()
             local source = 'POST https://example.com\n\n{\n\t"blah": 1\n'
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             local spy_log_warn = spy.on(logger, "warn")
             parser.parse(req_node, source)
@@ -127,7 +127,7 @@ X-Header1: value2
   <Password>password</Password>
 </Request>
 ]]
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             assert.same({
                 method = "POST",
@@ -148,7 +148,7 @@ X-Header1: value2
         it("parse invalid xml", function()
             logger.info("hi")
             local source = "POST https://example.com\n\n<?xml\n"
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             local spy_log_warn = spy.on(logger, "warn")
             parser.parse(req_node, source)
@@ -166,7 +166,7 @@ key3 = value3 &
 key4 = value4 &
 key5 = value5
 ]]
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             assert.same({
                 method = "POST",
@@ -185,7 +185,7 @@ key5 = value5
         it("parse external body", function()
             -- external body can be only sourced when
             local source = open("spec/examples/post_with_external_body.http")
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             assert.same({
                 method = "POST",
@@ -210,7 +210,7 @@ key5 = value5
             local source = [[POST https://example.com
 Authorization: Bearer {{TOKEN}}
 ]]
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             local req = parser.parse(req_node, source)
             assert.not_nil(req)
@@ -227,7 +227,7 @@ Authorization: Bearer {{TOKEN}}
   "date": "{{DATE}}"
 }
 ]]
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local req_node = assert(tree:root():child(0))
             local req = parser.parse(req_node, source)
             assert.not_nil(req)
@@ -241,7 +241,7 @@ Authorization: Bearer {{TOKEN}}
         end)
         it("parse variable declaration", function()
             local source = "@foo = bar\n"
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local vd_node = assert(tree:root():child(0):child(0))
             assert.same("variable_declaration", vd_node:type())
             local c = context:new()
@@ -252,7 +252,7 @@ Authorization: Bearer {{TOKEN}}
         end)
         it("parse variable declaration with other variable", function()
             local source = "@foo = bar\n@baz = {{foo}} {{$date}}\n"
-            local _, tree = utils.ts_parse_source(source)
+            local _, tree = utils.ts_parse_source(source, "http")
             local c = context:new()
             parser.parse_variable_declaration(assert(tree:root():child(0):child(0)), source, c)
             parser.parse_variable_declaration(assert(tree:root():child(0):child(1)), source, c)
@@ -265,7 +265,7 @@ Authorization: Bearer {{TOKEN}}
 
     it("parse pre-request script", function()
         local source = "# @lang=lua\n< {%\nrequest.variables.set('foo', 'bar')\n%}\n"
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local c = context:new()
         local script_node = tree:root():child(0):child(1)
         assert(script_node)

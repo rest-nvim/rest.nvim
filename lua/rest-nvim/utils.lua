@@ -7,7 +7,6 @@
 ---@brief ]]
 
 local logger = require("rest-nvim.logger")
--- local config = require("rest-nvim.config")
 
 local utils = {}
 
@@ -86,11 +85,11 @@ end
 function utils.parse_http_time(time_str)
     local pattern = "(%a+), (%d+)[%s-](%a+)[%s-](%d+) (%d+):(%d+):(%d+) GMT"
     local _, day, month_name, year, hour, min, sec = time_str:match(pattern)
-  -- stylua: ignore
-  local months = {
-    Jan = 1, Feb = 2, Mar = 3, Apr = 4, May = 5, Jun = 6,
-    Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12,
-  }
+    -- stylua: ignore
+    local months = {
+        Jan = 1, Feb = 2, Mar = 3, Apr = 4, May = 5, Jun = 6,
+        Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12,
+    }
     local time_table = {
         year = tonumber(year),
         month = months[month_name],
@@ -186,20 +185,21 @@ function utils.ts_highlight_node(bufnr, node, ns, timeout)
 end
 
 ---@param source string|integer
+---@param lang string
 ---@return vim.treesitter.LanguageTree
-function utils.ts_get_parser(source)
+function utils.ts_get_parser(source, lang)
     if type(source) == "string" then
-        return vim.treesitter.get_string_parser(source, "http")
+        return vim.treesitter.get_string_parser(source, lang)
     else
-        return vim.treesitter.get_parser(source, "http")
+        return vim.treesitter.get_parser(source, lang)
     end
 end
 
 ---@param source string|integer
 ---@return vim.treesitter.LanguageTree
 ---@return TSTree
-function utils.ts_parse_source(source)
-    local ts_parser = utils.ts_get_parser(source)
+function utils.ts_parse_source(source, lang)
+    local ts_parser = utils.ts_get_parser(source, lang)
     return ts_parser, assert(ts_parser:parse(false)[1])
 end
 

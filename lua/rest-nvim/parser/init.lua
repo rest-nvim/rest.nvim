@@ -217,7 +217,7 @@ end
 ---@param source Source
 ---@return TSNode[]
 function parser.get_all_request_nodes(source)
-    local _, tree = utils.ts_parse_source(source)
+    local _, tree = utils.ts_parse_source(source, "http")
     local result = {}
     for node, _ in tree:root():iter_children() do
         if node:type() == "section" and #node:field("request") > 0 then
@@ -230,7 +230,7 @@ end
 ---@return TSNode?
 function parser.get_request_node_by_name(name)
     local source = 0
-    local _, tree = utils.ts_parse_source(source)
+    local _, tree = utils.ts_parse_source(source, "http")
     local query = NAMED_REQUEST_QUERY
     for id, node, _metadata, _match in query:iter_captures(tree:root(), source) do
         local capture_name = query.captures[id]
@@ -304,7 +304,7 @@ end
 ---@param source Source
 ---@return string[]
 function parser.get_request_names(source)
-    local _, tree = utils.ts_parse_source(source)
+    local _, tree = utils.ts_parse_source(source, "http")
     local query = NAMED_REQUEST_QUERY
     local result = {}
     for id, node, _metadata, _match in query:iter_captures(tree:root(), source) do

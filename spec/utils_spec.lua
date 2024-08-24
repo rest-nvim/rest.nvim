@@ -10,7 +10,7 @@ end
 describe("tree-sitter utils", function()
     local source = open("spec/examples/script/post_request_script.http")
     it("ts_parse_source", function()
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local url_node = assert(tree:root():child(0):field("request")[1]:field("url")[1])
         assert.same("target_url", url_node:type())
         assert.is_false(tree:root():has_error())
