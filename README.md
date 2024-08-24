@@ -3,12 +3,12 @@
 # rest.nvim
 
 ![License](https://img.shields.io/github/license/NTBBloodbath/rest.nvim?style=for-the-badge)
-![Neovim version](https://img.shields.io/badge/Neovim%200.10+-brightgreen?style=for-the-badge)
-[![LuaRocks](https://img.shields.io/luarocks/v/teto/rest.nvim?style=for-the-badge&logo=lua&color=blue)](https://luarocks.org/modules/teto/rest.nvim)
+![Neovim version](https://img.shields.io/badge/Neovim%200.10.1+-brightgreen?style=for-the-badge)
+[![LuaRocks](https://img.shields.io/luarocks/v/NTBBloodbath/rest.nvim?style=for-the-badge&logo=lua&color=blue)](https://luarocks.org/modules/NTBBloodbath/rest.nvim)
 
 [Features](#features) • [Install](#install) • [Usage](#usage) • [Contribute](#contribute)
 
-![Demo](https://github.com/rest-nvim/rest.nvim/assets/36456999/e9b536a5-f7b2-4cd8-88fb-fdc5409dd2a4)
+![Demo](https://github.com/user-attachments/assets/9a98c5c8-d26e-4d96-9eb7-fdc2a6f6685e)
 
 </div>
 

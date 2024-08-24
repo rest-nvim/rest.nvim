@@ -363,7 +363,7 @@ function parser.parse(node, source, ctx)
     assert(req_node)
 
     ctx = ctx or Context:new()
-    -- TODO: note that in-place variables won't be evaluated due to treesitter limitations
+    -- TODO: note that in-place variables won't be evaluated for raw string due to treesitter limitations
     -- when source is given as raw string
     if type(source) == "number" then
         local start_row = node:range()
@@ -374,8 +374,7 @@ function parser.parse(node, source, ctx)
         logger.info("no method provided, falling back to 'GET'")
         method = "GET"
     end
-    -- NOTE: url will be parsed after because in-place variables should be parsed
-    -- first
+    -- NOTE: url will be parsed after because in-place variables should be parsed first
     local url
 
     ---@type string|nil
