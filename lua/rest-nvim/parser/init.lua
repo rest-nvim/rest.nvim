@@ -32,15 +32,6 @@ local NAMED_REQUEST_QUERY = vim.treesitter.query.parse(
 ]]
 )
 
----@param node TSNode
----@param field string
----@param source Source
----@return string|nil
-local function get_node_field_text(node, field, source)
-    local n = node:field(field)[1]
-    return n and vim.treesitter.get_node_text(n, source) or nil
-end
-
 ---@param src string
 ---@param context rest.Context
 ---@return string
@@ -63,8 +54,8 @@ local function parse_headers(req_node, source, context)
     end)
     local header_nodes = req_node:field("header")
     for _, node in ipairs(header_nodes) do
-        local key = assert(get_node_field_text(node, "name", source))
-        local value = get_node_field_text(node, "value", source)
+        local key = assert(utils.ts_field_text(node, "name", source))
+        local value = utils.ts_field_text(node, "value", source)
         key = expand_variables(key, context):lower()
         if value then
             value = expand_variables(value, context)
@@ -106,6 +97,7 @@ local function parse_urlencoded_form(str)
                 logger.error(("Error while parsing query '%s' from urlencoded form '%s'"):format(query_pairs, str))
                 return nil
             end
+            -- TODO: encode value here
             return vim.trim(key) .. "=" .. vim.trim(value)
         end)
         :join("&")
@@ -122,7 +114,7 @@ function parser.parse_body(content_type, body_node, source, context)
     ---@cast body rest.Request.Body
     if node_type == "external_body" then
         body.__TYPE = "external"
-        local path = assert(get_node_field_text(body_node, "path", source))
+        local path = assert(utils.ts_field_text(body_node, "path", source))
         if type(source) ~= "number" then
             logger.error("can't parse external body on non-existing http file")
             return
@@ -133,7 +125,7 @@ function parser.parse_body(content_type, body_node, source, context)
         basepath = basepath:gsub("^" .. vim.pesc(vim.uv.cwd() .. "/"), "")
         path = vim.fs.normalize(vim.fs.joinpath(basepath, path))
         body.data = {
-            name = get_node_field_text(body_node, "name", source),
+            name = utils.ts_field_text(body_node, "name", source),
             path = path,
         }
     elseif node_type == "json_body" or content_type == "application/json" then
@@ -248,8 +240,8 @@ end
 ---@param ctx rest.Context
 function parser.parse_variable_declaration(vd_node, source, ctx)
     vim.validate({ node = utils.ts_node_spec(vd_node, "variable_declaration") })
-    local name = assert(get_node_field_text(vd_node, "name", source))
-    local value = vim.trim(assert(get_node_field_text(vd_node, "value", source)))
+    local name = assert(utils.ts_field_text(vd_node, "name", source))
+    local value = vim.trim(assert(utils.ts_field_text(vd_node, "value", source)))
     value = expand_variables(value, ctx)
     ctx:set_global(name, value)
 end
@@ -261,8 +253,8 @@ end
 local function parse_script(node, source)
     local lang = "javascript"
     local prev_node = utils.ts_upper_node(node)
-    if prev_node and prev_node:type() == "comment" and get_node_field_text(prev_node, "name", source) == "lang" then
-        local value = get_node_field_text(prev_node, "value", source)
+    if prev_node and prev_node:type() == "comment" and utils.ts_field_text(prev_node, "name", source) == "lang" then
+        local value = utils.ts_field_text(prev_node, "value", source)
         if value then
             lang = value
         end
@@ -365,7 +357,7 @@ function parser.parse(node, source, ctx)
         local start_row = node:range()
         parser.eval_context(source, ctx, start_row)
     end
-    local method = get_node_field_text(req_node, "method", source)
+    local method = utils.ts_field_text(req_node, "method", source)
     if not method then
         logger.info("no method provided, falling back to 'GET'")
         method = "GET"
@@ -379,7 +371,7 @@ function parser.parse(node, source, ctx)
     for child, _ in node:iter_children() do
         local child_type = child:type()
         if child_type == "request" then
-            url = expand_variables(assert(get_node_field_text(req_node, "url", source)), ctx)
+            url = expand_variables(assert(utils.ts_field_text(req_node, "url", source)), ctx)
             url = url:gsub("\n%s+", "")
         elseif child_type == "pre_request_script" then
             parser.parse_pre_request_script(child, source, ctx)
@@ -390,9 +382,9 @@ function parser.parse(node, source, ctx)
                 table.insert(handlers, handler)
             end
         elseif child_type == "request_separator" then
-            name = get_node_field_text(child, "value", source)
-        elseif child_type == "comment" and get_node_field_text(child, "name", source) == "name" then
-            name = get_node_field_text(child, "value", source) or name
+            name = utils.ts_field_text(child, "value", source)
+        elseif child_type == "comment" and utils.ts_field_text(child, "name", source) == "name" then
+            name = utils.ts_field_text(child, "value", source) or name
         elseif child_type == "variable_declaration" then
             parser.parse_variable_declaration(child, source, ctx)
         end
@@ -455,7 +447,7 @@ function parser.parse(node, source, ctx)
         name = name,
         method = method,
         url = url,
-        http_version = get_node_field_text(req_node, "version", source),
+        http_version = utils.ts_field_text(req_node, "version", source),
         headers = headers,
         cookies = {},
         body = body,

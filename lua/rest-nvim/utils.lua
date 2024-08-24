@@ -239,6 +239,15 @@ function utils.ts_upper_node(node)
 end
 
 ---@param node TSNode
+---@param field string
+---@param source Source
+---@return string|nil
+function utils.ts_field_text(node, field, source)
+    local n = node:field(field)[1]
+    return n and vim.treesitter.get_node_text(n, source) or nil
+end
+
+---@param node TSNode
 ---@param expected_type string
 ---@return table
 function utils.ts_node_spec(node, expected_type)
