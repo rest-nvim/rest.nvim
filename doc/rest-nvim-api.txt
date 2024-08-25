@@ -109,7 +109,7 @@ parser.eval_context({source}, {ctx}, {endline})
         {endline}  (number)        zero-based line number
 
 
-parser.get_cursor_request_node()                *parser.get_cursor_request_node*
+parser.get_request_node_by_cursor()          *parser.get_request_node_by_cursor*
     @return TSNode? node TSNode with type `section`
 
 
@@ -160,6 +160,12 @@ parser.get_request_names({source})                    *parser.get_request_names*
 
     Returns: ~
         (string[])
+
+
+parser.get_request_node({name})                        *parser.get_request_node*
+
+    Parameters: ~
+        {name}  (string|nil)  @return TSNode?
 
 
 parser.parse({node}, {source}, {ctx?})                            *parser.parse*
@@ -286,12 +292,13 @@ utils.parse_http_time()                                  *utils.parse_http_time*
 
 
                                                        *utils.ts_highlight_node*
-utils.ts_highlight_node({bufnr}, {node}, {ns})
+utils.ts_highlight_node({bufnr}, {node}, {ns}, {timeout})
 
     Parameters: ~
-        {bufnr}  (number)
-        {node}   (TSNode)
-        {ns}     (number)
+        {bufnr}    (number)
+        {node}     (TSNode)
+        {ns}       (number)
+        {timeout}  (number)
 
 
 utils.ts_get_parser({source})                              *utils.ts_get_parser*

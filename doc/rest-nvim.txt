@@ -164,7 +164,7 @@ rest.Opts.Response.Hooks                              *rest.Opts.Response.Hooks*
 
     Fields: ~
         {decode_url?}  (boolean)   Decode url segments on response UI too improve readability (Default: `true`)
-        {format?}      (boolean)   Format the response body (Default: `true`)
+        {format?}      (boolean)   Format the response body with |'formatexpr'| or |'formatprg'| (Default: `true`)
 
 
 rest.Opts.Clients                                            *rest.Opts.Clients*

@@ -192,13 +192,19 @@ local default_config = {
 Create a new http file or open an existing one and run the <kbd>:Rest run {name}</kbd> command, or
 just place the cursor over the request and simply run <kbd>:Rest run</kbd>.
 
+### HTTP file syntax
+
+```
+Method Request-URI HTTP-Version
+Header-field: Header-value
+
+Request-Body
+```
+
 > [!NOTE]
->
-> 1. You can find examples of use in the [spec/examples](./spec/examples) directory.
->
-> 2. `rest.nvim` supports multiple HTTP requests in one file. It selects the
->    request in the current cursor line, no matters the position as long as
->    the cursor is on a request tree-sitter node.
+> rest.nvim follows [intellij's http client spec](https://www.jetbrains.com/help/idea/exploring-http-syntax.html)
+> for `.http` file syntax. You can find examples of use in the [spec/examples](./spec/examples)
+> directory.
 
 ### Keybindings
 
