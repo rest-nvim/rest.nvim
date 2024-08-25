@@ -6,16 +6,17 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1719860562,
-        "narHash": "sha256-zB0xoHts0+K8dO6Gbm+v9bjKHA5POdStdBUjomZTikY=",
-        "owner": "mrcjkb",
-        "repo": "cats-doc",
-        "rev": "8c054023347c9aa577dd3bcbed26e6e0a88900ec",
+        "lastModified": 1724341905,
+        "narHash": "sha256-7Udhy+pbofsTNyMpo8jkjIUKpO1ABMf2TjiHKrhCFpU=",
+        "owner": "boltlessengineer",
+        "repo": "vimcats",
+        "rev": "44eeec734cd96a745f2bb0fd7ad5b8b410d7413e",
         "type": "github"
       },
       "original": {
-        "owner": "mrcjkb",
-        "repo": "cats-doc",
+        "owner": "boltlessengineer",
+        "ref": "feat/aarch64-linux",
+        "repo": "vimcats",
         "type": "github"
       }
     },
