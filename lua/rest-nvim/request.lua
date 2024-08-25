@@ -130,6 +130,10 @@ function M.run_last()
     run_request(req)
 end
 
+function M.last_request()
+    return rest_nvim_last_request
+end
+
 -- ---run all requests in current file with same context
 -- function M.run_all()
 --     local reqs = parser.get_all_request_nodes(0)

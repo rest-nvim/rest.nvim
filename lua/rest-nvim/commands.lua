@@ -149,6 +149,10 @@ local rest_command_tbl = {
                 )
                 return
             end
+            if not request().last_request() then
+                vim.notify("No last request found", vim.log.levels.WARN, { title = "rest.nvim" })
+                return
+            end
             ui().clear()
             open_result_ui(opts)
             request().run_last()
