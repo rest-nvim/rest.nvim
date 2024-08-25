@@ -66,13 +66,28 @@ local function config() return require("rest-nvim.config") end
 ---Open window based on command mods and return new window identifier
 ---@param opts table
 ---@return integer winnr
+---@return boolean did_split
 local function split_open_cmd(opts)
     local is_split = opts.smods.vertical or opts.smods.horizontal
     local is_tab = opts.smods.tab ~= -1
     if is_split or is_tab then
         vim.cmd(opts.mods .. " split")
     end
-    return vim.api.nvim_get_current_win()
+    return vim.api.nvim_get_current_win(), (is_split or is_tab)
+end
+
+---@param opts table
+local function open_result_ui(opts)
+    if ui().is_open() then
+        return
+    end
+    local winnr, did_split = split_open_cmd(opts)
+    if not did_split then
+        vim.cmd.wincmd("v")
+        winnr = vim.api.nvim_get_current_win()
+    end
+    ui().enter(winnr)
+    vim.cmd.wincmd("p")
 end
 
 ---@type table<string, RestCmd>
@@ -84,7 +99,7 @@ local rest_command_tbl = {
         end,
     },
     run = {
-        impl = function(args, _)
+        impl = function(args, opts)
             if vim.bo.filetype ~= "http" or vim.b.__rest_no_http_file then
                 vim.notify(
                     "`:Rest run` can be only called from http file",
@@ -97,12 +112,16 @@ local rest_command_tbl = {
                 vim.notify("Running multiple request isn't supported yet", vim.log.levels.WARN, { title = "rest.nvim" })
                 return
             end
-            ui().clear()
-            if not ui().is_open() then
-                vim.cmd.wincmd("v")
-                ui().enter(0)
-                vim.cmd.wincmd("p")
+            if opts.smods.tab ~= -1 then
+                vim.notify(
+                    "`:Rest run` cannot be run with `:tab` command modifier",
+                    vim.log.levels.ERROR,
+                    { title = "rest.nvim" }
+                )
+                return
             end
+            ui().clear()
+            open_result_ui(opts)
             request().run(args[1])
         end,
         ---@return string[]
@@ -121,7 +140,17 @@ local rest_command_tbl = {
         end,
     },
     last = {
-        impl = function(_, _)
+        impl = function(_, opts)
+            if opts.smods.tab ~= -1 then
+                vim.notify(
+                    "`:Rest last` cannot be run with `:tab` command modifier",
+                    vim.log.levels.ERROR,
+                    { title = "rest.nvim" }
+                )
+                return
+            end
+            ui().clear()
+            open_result_ui(opts)
             request().run_last()
         end,
     },
@@ -281,6 +310,7 @@ function commands.setup()
     vim.api.nvim_create_user_command("Rest", rest, {
         nargs = "+",
         desc = "Run your HTTP requests",
+        bar = true,
         complete = function(arg_lead, cmdline, _)
             local rest_commands = vim.tbl_keys(rest_command_tbl)
             local subcmd, subcmd_arg_lead = cmdline:match("Rest*%s(%S+)%s(.*)$")
