@@ -40,9 +40,9 @@ describe("gq_lines", function()
         }
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "text",
-            callback = function (ev)
+            callback = function(ev)
                 vim.bo[ev.buf].formatprg = "fmt"
-            end
+            end,
         })
         assert.same({
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla id nisl",
@@ -52,16 +52,16 @@ describe("gq_lines", function()
             "urna. Maecenas vitae tortor ut mi convallis volutpat. Nam.",
         }, utils.gq_lines(lines, "text"))
     end)
-    it("json with jq", function ()
+    it("json with jq", function()
         local lines = {
-            ' {',
+            " {",
             '         "foo"    : 123      }',
         }
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "json",
-            callback = function (ev)
+            callback = function(ev)
                 vim.bo[ev.buf].formatprg = "jq --indent 4"
-            end
+            end,
         })
         assert.same({
             "{",
@@ -69,7 +69,7 @@ describe("gq_lines", function()
             "}",
         }, utils.gq_lines(lines, "json"))
     end)
-    it("xml with xmlformat#Format()", function ()
+    it("xml with xmlformat#Format()", function()
         local lines = {
             "<note>",
             "<to>User</to>",
