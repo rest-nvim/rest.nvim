@@ -38,12 +38,53 @@ describe("gq_lines", function()
             "ipsum dolor sit amet, consectetur adipiscing elit. Nulla id nisl ut sapien ullamcorper congue non in ipsum",
             ". Phasellus efficitur metus lectus, sed placerat eros mollis varius. Praesent egestas sapien vel auctor egestas. Praesent ac lacus consequat, rhoncus libero et, ultricies urna. Maecenas vitae tortor ut mi convallis volutpat. Nam.",
         }
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "text",
+            callback = function (ev)
+                vim.bo[ev.buf].formatprg = "fmt"
+            end
+        })
         assert.same({
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla id nisl ut",
-            "sapien ullamcorper congue non in ipsum . Phasellus efficitur metus lectus, sed",
-            "placerat eros mollis varius. Praesent egestas sapien vel auctor egestas.",
-            "Praesent ac lacus consequat, rhoncus libero et, ultricies urna. Maecenas vitae",
-            "tortor ut mi convallis volutpat. Nam.",
-        }, utils.gq_lines(lines, ""))
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla id nisl",
+            "ut sapien ullamcorper congue non in ipsum . Phasellus efficitur metus",
+            "lectus, sed placerat eros mollis varius. Praesent egestas sapien vel",
+            "auctor egestas. Praesent ac lacus consequat, rhoncus libero et, ultricies",
+            "urna. Maecenas vitae tortor ut mi convallis volutpat. Nam.",
+        }, utils.gq_lines(lines, "text"))
+    end)
+    it("json with jq", function ()
+        local lines = {
+            ' {',
+            '         "foo"    : 123      }',
+        }
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "json",
+            callback = function (ev)
+                vim.bo[ev.buf].formatprg = "jq --indent 4"
+            end
+        })
+        assert.same({
+            "{",
+            '    "foo": 123',
+            "}",
+        }, utils.gq_lines(lines, "json"))
+    end)
+    it("xml with xmlformat#Format()", function ()
+        local lines = {
+            "<note>",
+            "<to>User</to>",
+            "<from>Bob</from>",
+            "<heading>Reminder</heading>",
+            "<body>Don't forget to complete your tasks today!</body>",
+            "</note>",
+        }
+        assert.same({
+            "<note>",
+            "        <to>User</to>",
+            "        <from>Bob</from>",
+            "        <heading>Reminder</heading>",
+            "        <body>Don't forget to complete your tasks today!</body>",
+            "</note>",
+        }, utils.gq_lines(lines, "xml"))
     end)
 end)
