@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/rest-nvim/rest.nvim/compare/v3.0.3...v3.1.0) (2024-08-25)
+
+
+### Features
+
+* use float titles for help UI (fix [#291](https://github.com/rest-nvim/rest.nvim/issues/291)) ([fafa283](https://github.com/rest-nvim/rest.nvim/commit/fafa2830c469bb0ee8fad6bd1101a1560de2cea2))
+
 ## [3.0.3](https://github.com/rest-nvim/rest.nvim/compare/v3.0.2...v3.0.3) (2024-08-23)
 
 
