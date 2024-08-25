@@ -51,7 +51,7 @@ local config
 ---@class rest.Opts.Response.Hooks
 --- Decode url segments on response UI too improve readability (Default: `true`)
 ---@field decode_url? boolean
---- Format the response body (Default: `true`)
+--- Format the response body with |'formatexpr'| or |'formatprg'| (Default: `true`)
 ---@field format? boolean
 
 ---@class rest.Opts.Clients
