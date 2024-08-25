@@ -9,14 +9,16 @@
 
 local api = {}
 
-local autocmds = require("rest-nvim.autocmds")
-local commands = require("rest-nvim.commands")
-local client = require("rest-nvim.client")
+-- stylua: ignore start
+local autocmds = function() return require("rest-nvim.client") end
+local commands = function() return require("rest-nvim.client") end
+local client = function() return require("rest-nvim.client") end
+-- stylua: ignore end
 
 ---rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
 ---@type string
 ---@see vim.version
-api.VERSION = "3.0.0"
+api.VERSION = "3.1.0"
 
 ---rest.nvim namespace used for buffer highlights
 ---@type number
@@ -32,7 +34,7 @@ api.namespace = vim.api.nvim_create_namespace("rest-nvim")
 ---@param description string Autocommand description
 function api.register_rest_autocmd(events, cb, description)
     ---@diagnostic disable-next-line: invisible
-    autocmds.register_autocmd(events, cb, description)
+    autocmds().register_autocmd(events, cb, description)
 end
 
 ---Register a new `:Rest` subcommand
@@ -40,11 +42,11 @@ end
 ---@param cmd RestCmd
 function api.register_rest_subcommand(name, cmd)
     ---@diagnostic disable-next-line: invisible
-    commands.register_subcommand(name, cmd)
+    commands().register_subcommand(name, cmd)
 end
 
 function api.register_rest_client(c)
-    client.register_client(c)
+    client().register_client(c)
 end
 
 return api
