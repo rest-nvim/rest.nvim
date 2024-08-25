@@ -10,6 +10,7 @@ local panes = {
     {
         name = "First",
         render = function(self)
+            vim.bo[self.bufnr].filetype = "local"
             vim.b[self.bufnr].name = "first"
             return true
         end,
@@ -24,6 +25,7 @@ local panes = {
 
 local group = paneui.create_pane_group("test_panes_1", panes, {
     on_init = function(self)
+        vim.bo[self.bufnr].filetype = "global"
         utils.nvim_lazy_set_wo(self.bufnr, "winbar", "this-is-a-winbar")
     end,
 })
@@ -38,6 +40,7 @@ describe("ui.panes", function()
         -- enter the pane
         group:enter(0)
         assert.same("first", vim.b.name)
+        assert.same("local", vim.bo.filetype)
         assert.same("this-is-a-winbar", vim.api.nvim_get_option_value("winbar", { scope = "local" }))
 
         -- cycle to second pane
@@ -58,7 +61,7 @@ describe("ui.panes", function()
     end)
     it("initialize the buffer back after unloaded", function()
         -- ensure there is only one window
-        vim.cmd("wincmd o")
+        vim.cmd("silent wincmd o")
         assert.same(1, vim.api.nvim_get_current_buf())
         group:enter(0)
         local pane_buf = vim.api.nvim_get_current_buf()
