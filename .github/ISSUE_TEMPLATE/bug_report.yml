@@ -1,0 +1,82 @@
+name: Bug Report
+description: Report a problem in Rest.nvim
+labels: [bug]
+body:
+
+  - type: checkboxes
+    id: faq-prerequisite
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I am using the latest stable release of Neovim
+          required: true
+        - label: I am using the latest version of the plugin
+          required: true
+
+  - type: input
+    attributes:
+      label: "Neovim Version"
+      description: "`nvim --version`:"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: "Operating system/version"
+      placeholder: "MacOS 11.5"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Actual behavior"
+      description: "A description of actual behavior. Extra points if it includes images or videos."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Expected behavior"
+      description: "A description of the behavior you expected."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Steps to reproduce"
+      description: "Please describe how we can reproduce the issue."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Other information"
+      description: "Other information that could be helpful with debugging."
+
+  - type: textarea
+    attributes:
+      label: Repro (`lazy.nvim`)
+      description: Minimal `init.lua` using `lazy.nvim` to reproduce this issue. Save as `repro.lua` and run with `nvim -u repro.lua`
+      render: lua
+      value: |
+        vim.env.LAZY_STDPATH = ".repro"
+        load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua"))()
+
+        require("lazy.minit").repro({
+            spec = {
+                "rest-nvim/rest.nvim",
+                {
+                    "nvim-treesitter/nvim-treesitter",
+                    build = ":TSUpdate",
+                    main = "nvim-treesitter.configs",
+                    opts = {
+                        ensure_installed = { "http" },
+                        sync_install = false,
+                        highlight = { enable = true },
+                        indent = { enable = true },
+                    },
+                },
+            },
+        })
+    validations:
+      required: false
