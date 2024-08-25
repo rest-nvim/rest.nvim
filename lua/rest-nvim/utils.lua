@@ -295,9 +295,19 @@ function utils.gq_lines(lines, filetype)
     vim.api.nvim_buf_set_lines(format_buf, 0, -1, false, lines)
     local formatexpr = vim.bo[format_buf].formatexpr
     local formatprg = vim.bo[format_buf].formatprg
-    if vim.bo[format_buf].formatexpr ~= "" then
+    if formatexpr:match("^v:lua%.vim%.lsp%.formatexpr%(.*%)$") then
+        local clients_count = #vim.lsp.get_clients({ bufnr = format_buf })
+        logger.warn(("formatexpr is set to `%s` but %d clients are attached to the buffer %d."):format(
+            formatexpr,
+            clients_count,
+            format_buf
+        ))
+        logger.warn("Skipping lsp formatexpr")
+        formatexpr = ""
+    end
+    if formatexpr ~= "" then
         logger.debug(("formatting %s filetype with formatexpr=%s"):format(filetype, formatexpr))
-    elseif vim.bo[format_buf].formatprg ~= "" then
+    elseif formatprg ~= "" then
         logger.debug(("formatting %s filetype with formatprg=%s"):format(filetype, formatprg))
     else
         logger.debug(("can't find formatexpr or formatprg for %s filetype. Formatting is canceled"):format(filetype))
