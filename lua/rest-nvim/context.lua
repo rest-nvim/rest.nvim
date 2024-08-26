@@ -2,6 +2,7 @@
 
 local dotenv = require("rest-nvim.dotenv")
 local config = require("rest-nvim.config")
+local logger = require("rest-nvim.logger")
 local M = {}
 
 ---@class rest.Context
@@ -57,6 +58,7 @@ end
 
 ---@param filepath string
 function Context:load_file(filepath)
+    logger.debug(("load file `%s` to context"):format(filepath))
     dotenv.load_file(filepath, function(key, value)
         self:set_global(key, value)
     end)

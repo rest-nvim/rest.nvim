@@ -62,20 +62,16 @@ function M.parse(path, setter)
             end
         end
     else
-        local vars_tbl = vim.split(file_contents, "\n")
-        table.remove(vars_tbl, #vars_tbl)
+        -- TODO: rewrite the parser with tree-sitter-bash instead
+        local vars_tbl = vim.split(file_contents, "\n", { trimempty = true })
+        logger.debug(vars_tbl)
         for _, var in ipairs(vars_tbl) do
-            local variable = vim.split(var, "=")
-            local variable_name = variable[1]
-            local variable_value
-            -- In case some weirdo adds a `=` character to his ENV value
-            if #variable > 2 then
-                table.remove(variable, 1)
-                variable_value = table.concat(variable, "=")
-            else
-                variable_value = variable[2]
+            local variable_name, variable_value = var:match("([^#=%s]+)%s*=%s*([^#]*)")
+            if variable_name then
+                variable_value = variable_value:match('^"(.*)"$') or variable_value:match("^'(.*)'$") or variable_value
+                logger.debug("set " .. variable_name .. "=" .. variable_value)
+                setter(variable_name, value_tostring(variable_value))
             end
-            setter(variable_name, value_tostring(variable_value))
         end
     end
     return true, vars

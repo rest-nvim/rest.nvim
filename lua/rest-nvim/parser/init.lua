@@ -43,16 +43,12 @@ end
 
 ---@param src string
 ---@param context rest.Context
----@param encoder? fun(s:string):string
 ---@return string
 ---@return integer
-local function expand_variables(src, context, encoder)
+local function expand_variables(src, context)
     return src:gsub("{{(.-)}}", function(name)
         name = vim.trim(name)
         local res = context:resolve(name)
-        if encoder then
-            res = encoder(res)
-        end
         return res
     end)
 end
@@ -383,7 +379,7 @@ function parser.parse(node, source, ctx)
     for child, _ in node:iter_children() do
         local child_type = child:type()
         if child_type == "request" then
-            url = expand_variables(assert(get_node_field_text(req_node, "url", source)), ctx, utils.escape)
+            url = expand_variables(assert(get_node_field_text(req_node, "url", source)), ctx)
             url = url:gsub("\n%s+", "")
         elseif child_type == "pre_request_script" then
             parser.parse_pre_request_script(child, source, ctx)
