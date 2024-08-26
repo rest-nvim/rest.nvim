@@ -6,7 +6,7 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     neorocks.url = "github:nvim-neorocks/neorocks";
     flake-utils.url = "github:numtide/flake-utils";
-    cats-doc.url = "github:boltlessengineer/vimcats?ref=feat/aarch64-linux";
+    cats-doc.url = "github:mrcjkb/vimcats";
   };
 
   outputs = inputs @ {

@@ -6,16 +6,15 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1724341905,
-        "narHash": "sha256-7Udhy+pbofsTNyMpo8jkjIUKpO1ABMf2TjiHKrhCFpU=",
-        "owner": "boltlessengineer",
+        "lastModified": 1724663048,
+        "narHash": "sha256-QWry7jMdrEXZShZPb9pbMxWCgOGGTWTD7k9+6QfcVSQ=",
+        "owner": "mrcjkb",
         "repo": "vimcats",
-        "rev": "44eeec734cd96a745f2bb0fd7ad5b8b410d7413e",
+        "rev": "5ddcbca614e8dd4b80fec2b20ce97c1a9ede51ce",
         "type": "github"
       },
       "original": {
-        "owner": "boltlessengineer",
-        "ref": "feat/aarch64-linux",
+        "owner": "mrcjkb",
         "repo": "vimcats",
         "type": "github"
       }
