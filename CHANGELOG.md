@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0](https://github.com/rest-nvim/rest.nvim/compare/v3.1.0...v3.2.0) (2024-08-26)
+
+
+### Features
+
+* command-modifiers in more subcommands (fix [#419](https://github.com/rest-nvim/rest.nvim/issues/419)) ([75c4856](https://github.com/rest-nvim/rest.nvim/commit/75c485647979963bcbd6cc5c16fcd4bcffdf83d6))
+
+
+### Bug Fixes
+
+* check if last request exist before running `:Rest last` ([311e7da](https://github.com/rest-nvim/rest.nvim/commit/311e7da6900d5c8b3901526c70903ea85d7e80e1))
+* **parser:** handle variables in URI ([2402414](https://github.com/rest-nvim/rest.nvim/commit/2402414aeb270b09f6f218d59246450c97c19ab3))
+* **utils:** skip lsp formatexpr ([#414](https://github.com/rest-nvim/rest.nvim/issues/414)) ([b7ab923](https://github.com/rest-nvim/rest.nvim/commit/b7ab923cd1940715c3dc9899c4e07b92af9ef115))
+
 ## [3.1.0](https://github.com/rest-nvim/rest.nvim/compare/v3.0.3...v3.1.0) (2024-08-25)
 
 
