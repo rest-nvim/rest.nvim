@@ -52,6 +52,8 @@ local config
 --- Decode url segments on response UI too improve readability (Default: `true`)
 ---@field decode_url? boolean
 --- Format the response body with |'formatexpr'| or |'formatprg'| (Default: `true`)
+--- NOTE: |vim.lsp.formatexpr()| won't work (see
+--- <https://github.com/rest-nvim/rest.nvim/issues/414#issuecomment-2308910953>)
 ---@field format? boolean
 
 ---@class rest.Opts.Clients
