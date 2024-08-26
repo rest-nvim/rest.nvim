@@ -297,11 +297,13 @@ function utils.gq_lines(lines, filetype)
     local formatprg = vim.bo[format_buf].formatprg
     if formatexpr:match("^v:lua%.vim%.lsp%.formatexpr%(.*%)$") then
         local clients_count = #vim.lsp.get_clients({ bufnr = format_buf })
-        logger.warn(("formatexpr is set to `%s` but %d clients are attached to the buffer %d."):format(
-            formatexpr,
-            clients_count,
-            format_buf
-        ))
+        logger.warn(
+            ("formatexpr is set to `%s` but %d clients are attached to the buffer %d."):format(
+                formatexpr,
+                clients_count,
+                format_buf
+            )
+        )
         logger.warn("Skipping lsp formatexpr")
         formatexpr = ""
     end
