@@ -61,18 +61,17 @@ local config
 
 ---@class rest.Opts.Clients.Curl
 --- Statistics to parse from curl request output
---- Key is a string value of format used in `--write-out` option
---- See `man curl` for more info
----@field statistics? table<string,RestStatisticsStyle>
+---@field statistics? RestStatisticsStyle[]
 
 ---@class RestStatisticsStyle
+--- Identifier used used in curl's `--write-out` option
+--- See `man curl` for more info
+---@field id string
 --- Title used on Statistics pane
 ---@field title? string
 --- Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
---- Order position from low to high
----@field order? number
 
 ---@class rest.Opts.Cookies
 --- Enable the cookies support (Default: `true`)

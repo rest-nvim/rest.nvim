@@ -17,11 +17,29 @@ local function validate(tbl)
     return ok or false, "Invalid config" .. (err and ": " .. err or "")
 end
 
+---@param cfg rest.Config
+local function compat_deprecated(cfg)
+    local curl_statistics = cfg.clients.curl.statistics
+    if not vim.islist(curl_statistics) then
+        vim.deprecate("Map style `clients.curl.statistics` option", "List with `id` field", "4.0.0", "rest.nvim", false)
+        local new_statistics = vim.iter(curl_statistics):map(function (id, style)
+            style.id = id
+            return style
+        end):totable()
+        table.sort(new_statistics, function (a, b)
+            return a.id < b.id
+        end)
+        ---@diagnostic disable-next-line: inject-field
+        cfg.clients.curl.statistics = new_statistics
+    end
+end
+
 ---Validates the configuration
 ---@param cfg rest.Config
 ---@return boolean is_valid
 ---@return string|nil error_message
 function check.validate(cfg)
+    compat_deprecated(cfg)
     local ok, err = validate({
         custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
         request = { cfg.request, "table" },

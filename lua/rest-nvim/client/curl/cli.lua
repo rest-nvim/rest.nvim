@@ -247,14 +247,12 @@ function builder.statistics()
     if vim.tbl_isempty(config.clients.curl.statistics) then
         return
     end
-    local args = { "-w" }
     local format = vim.iter(config.clients.curl.statistics)
-        :map(function(key, _style)
-            return ("? %s:%%{%s}\n"):format(key, key)
+        :map(function(style)
+            return ("? %s:%%{%s}\n"):format(style.id, style.id)
         end)
         :join("")
-    table.insert(args, "%{stderr}" .. format)
-    return args
+    return { "-w", "%{stderr}" .. format }
 end
 
 ---@package
