@@ -1,5 +1,6 @@
 ---@mod rest-nvim.config.default rest.nvim default configuration
 
+---@comment default-config:start
 ---rest.nvim default configuration
 ---@class rest.Config
 local default_config = {
@@ -86,5 +87,6 @@ local default_config = {
         unrecognized_configs = nil,
     },
 }
+---@comment default-config:end
 
 return default_config
