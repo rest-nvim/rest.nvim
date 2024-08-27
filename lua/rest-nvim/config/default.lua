@@ -39,8 +39,8 @@ local default_config = {
             ---See `man curl` for `--write-out` flag
             ---@type table<string,RestStatisticsStyle>
             statistics = {
-                time_total = { winbar = "take", title = "Time taken" },
-                size_download = { winbar = "size", title = "Download size" },
+                time_total = { winbar = "take", title = "Time taken", order = 1 },
+                size_download = { winbar = "size", title = "Download size", order = 2 },
             },
         },
     },

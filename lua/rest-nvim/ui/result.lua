@@ -2,7 +2,7 @@
 ---
 ---@brief [[
 ---
---- rest.nvim result UI implmentation
+--- rest.nvim result UI implementation
 ---
 ---@brief ]]
 
@@ -161,9 +161,23 @@ local panes = {
                 set_lines(self.bufnr, { "No Statistics" })
                 return
             end
-            syntax_highlight(self.bufnr, "jproperties")
+            vim.bo[self.bufnr].syntax = "http_stat"
+
+            local ordered = {}
             for key, value in pairs(data.response.statistics) do
-                table.insert(lines, ("%s: %s"):format(key, value))
+                local style = config.clients.curl.statistics[key] or {}
+                local title = style["title"] or key
+
+                table.insert(ordered, {
+                    order = style.order or 0,
+                    val = ("%s: %s"):format(title, value),
+                })
+            end
+            table.sort(ordered, function(a, b)
+                return a.order < b.order
+            end)
+            for _, v in ipairs(ordered) do
+                table.insert(lines, v.val)
             end
             set_lines(self.bufnr, lines)
         end,
@@ -179,20 +193,32 @@ winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
 ---Winbar component showing response statistics
 ---@return string
 function ui.stat_winbar()
-    local content = ""
     if not data.response then
         return "Loading...%#Normal#"
     end
-    for stat_name, stat_value in pairs(data.response.statistics) do
-        local style = config.clients.curl.statistics[stat_name] or {}
+    local ordered = {}
+    for stat_name, style in pairs(config.clients.curl.statistics) do
+        local stat_value = data.response.statistics[stat_name] or ""
         if style.winbar then
             local title = type(style.winbar) == "string" and style.winbar or (style.title or stat_name):lower()
             if title ~= "" then
                 title = title .. ": "
             end
-            local value, representation = vim.split(stat_value, " ")[1], vim.split(stat_value, " ")[2]
-            content = content .. "  %#RestText#" .. title .. "%#Number#" .. value .. " %#Normal#" .. representation
+            table.insert(ordered, {
+                order = style.order or 0,
+                val = string.format("%%#RestText#%s%%#Normal#%s", title, stat_value),
+            })
         end
+    end
+    if #ordered == 0 then
+        return ""
+    end
+    table.sort(ordered, function(a, b)
+        return a.order < b.order
+    end)
+    local content = ""
+    for _, v in ipairs(ordered) do
+        content = content .. " " .. v.val
     end
     return content
 end

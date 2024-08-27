@@ -86,6 +86,11 @@ function check.get_unrecognized_keys(tbl, default_tbl)
             end
         end
     end
+    for k, _ in pairs(ret) do
+        if k:find("statistics") then
+            ret[k] = nil
+        end
+    end
 
     return vim.tbl_keys(ret)
 end

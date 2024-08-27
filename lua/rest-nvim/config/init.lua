@@ -71,6 +71,8 @@ local config
 --- Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
 --- to hide title If true, rest.nvim will use lowered `title` field
 ---@field winbar? string|boolean
+--- Order position from low to high
+---@field order? number
 
 ---@class rest.Opts.Cookies
 --- Enable the cookies support (Default: `true`)
