@@ -98,6 +98,7 @@ vim.g.rest_nvim = {
 
 ### Default configuration
 
+<!-- default-config:start -->
 ```lua
 ---rest.nvim default configuration
 ---@class rest.Config
@@ -186,6 +187,7 @@ local default_config = {
     },
 }
 ```
+<!-- default-config:end -->
 
 ## Usage
 
