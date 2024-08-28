@@ -105,7 +105,7 @@ function check.get_unrecognized_keys(tbl, default_tbl)
         end
     end
     for k, _ in pairs(ret) do
-        if k:find("statistics") then
+        if type(k) == "string" and k:find("statistics") then
             ret[k] = nil
         end
     end
