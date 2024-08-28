@@ -17,6 +17,7 @@ jobs:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
           version: scm
+          specrev: 2 # FIXME: auto increment this!
           detailed_description: |
             rest.nvim makes use of Lua cURL bindings to make HTTP requests so you don't have to leave Neovim to test your back-end codebase!
           dependencies: |
