@@ -13,7 +13,6 @@ jobs:
           fetch-depth: 0 # Required to count the commits
       - name: LuaRocks Upload SCM
         uses: nvim-neorocks/luarocks-tag-release@v7
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
