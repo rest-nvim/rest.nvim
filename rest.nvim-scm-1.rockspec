@@ -34,7 +34,6 @@ source = {
 if MAJOR == "scm" then
   source = {
     url = "git://github.com/rest-nvim/rest.nvim",
-    branch = "dev",
   }
 end
 
