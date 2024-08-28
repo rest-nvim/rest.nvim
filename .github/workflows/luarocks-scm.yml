@@ -1,3 +1,5 @@
+name: Luarocks release SCM
+
 on:
   workflow_dispatch: # allows manual triggering
   # TODO: run on scm file has been changed
