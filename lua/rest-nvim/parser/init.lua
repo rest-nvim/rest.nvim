@@ -383,6 +383,7 @@ function parser.parse(node, source, ctx)
             url = url:gsub("\n%s+", "")
         elseif child_type == "pre_request_script" then
             parser.parse_pre_request_script(child, source, ctx)
+        -- won't be a case anymore with latest tree-sitter-http parser. just for backward compatibility
         elseif child_type == "res_handler_script" then
             local handler = parser.parse_request_handler(child, source, ctx)
             if handler then
@@ -394,6 +395,15 @@ function parser.parse(node, source, ctx)
             name = get_node_field_text(child, "value", source) or name
         elseif child_type == "variable_declaration" then
             parser.parse_variable_declaration(child, source, ctx)
+        end
+    end
+    for child, _ in req_node:iter_children() do
+        local child_type = child:type()
+        if child_type == "res_handler_script" then
+            local handler = parser.parse_request_handler(child, source, ctx)
+            if handler then
+                table.insert(handlers, handler)
+            end
         end
     end
     if not name then

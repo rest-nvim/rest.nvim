@@ -2,31 +2,29 @@
 
 local utils = require("rest-nvim.utils")
 
-describe("tree-sitter utils", function()
-    local source = [[
-http://localhost:8000
+local function open(path)
+    vim.cmd.edit(path)
+    return 0
+end
 
-# @lang=lua
-> {%
-local json = vim.json.decode(response.body)
-json.data = "overwritten"
-response.body = vim.json.encode(json)
-%}
-]]
-    local script_node
+describe("tree-sitter utils", function()
+    local source = open("spec/examples/script/post_request_script.http")
     it("ts_parse_source", function()
         local _, tree = utils.ts_parse_source(source)
-        script_node = assert(tree:root():child(0):child(1))
-        assert.same("res_handler_script", script_node:type())
+        local url_node = assert(tree:root():child(0):field("request")[1]:field("url")[1])
+        assert.same("target_url", url_node:type())
+        assert.is_false(tree:root():has_error())
     end)
     it("ts_find", function()
-        local section_node = assert(utils.ts_find(script_node, "section"))
-        assert.same("section", section_node:type())
-        local sr, sc, er, ec = section_node:range()
-        assert.same({ 0, 0, 8, 0 }, { sr, sc, er, ec })
+        local start_node = assert(vim.treesitter.get_node({pos={4, 3}, lang="http"}))
+        local script_node = assert(utils.ts_find(start_node, "script"))
+        assert.same("script", script_node:type())
+        local sr, sc, er, ec = script_node:range()
+        assert.same({ 4, 2, 7, 2 }, { sr, sc, er, ec })
     end)
     it("ts_upper_node", function()
-        local comment_node = assert(utils.ts_upper_node(script_node))
+        local start_node = assert(vim.treesitter.get_node({pos={4, 3}, lang="http"}))
+        local comment_node = assert(utils.ts_upper_node(start_node))
         assert.same("comment", comment_node:type())
     end)
 end)
