@@ -2,7 +2,9 @@ name: Luarocks release SCM
 
 on:
   workflow_dispatch: # allows manual triggering
-  # TODO: run on scm file has been changed
+  schedule:
+    - cron: '0 0 * * *' # runs daily at 00:00
+  pull_request: # Will test a local install without uploading to luarocks.org
 
 jobs:
   luarocks-upload:
@@ -11,15 +13,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Required to count the commits
-      - name: LuaRocks Upload SCM
+      - name: Set luarocks version
+        run: echo "LUAROCKS_SPECREV=$(git log --oneline | wc -l)" >> $GITHUB_ENV
+      - name: Get new commits
+        run: echo "NEW_COMMIT_COUNT=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_ENV
+      - name: LuaRocks Upload (scm)
         uses: nvim-neorocks/luarocks-tag-release@v7
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
           version: scm
-          specrev: 2 # FIXME: auto increment this!
+          specrev: ${{ env.LUAROCKS_SPECREV }}
           detailed_description: |
-            rest.nvim makes use of Lua cURL bindings to make HTTP requests so you don't have to leave Neovim to test your back-end codebase!
+            A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
+            rest.nvim by default makes use of its own `curl` wrapper to make requests and a tree-sitter parser to parse http files.
           dependencies: |
             nvim-nio
             mimetypes

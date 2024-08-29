@@ -23,6 +23,9 @@ jobs:
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
+          detailed_description: |
+            A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
+            rest.nvim by default makes use of its own `curl` wrapper to make requests and a tree-sitter parser to parse http files.
           dependencies: |
             nvim-nio
             mimetypes

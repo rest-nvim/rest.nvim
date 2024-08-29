@@ -1,3 +1,7 @@
+-- HACK: this file isn't really needed for release because rest.nvim uses
+-- luarocks-tags-relase github action for actual relaeses, but it is here to be
+-- used for local testing
+
 ---@diagnostic disable: lowercase-global
 local MAJOR, REV = "scm", "-1"
 rockspec_format = "3.0"
@@ -8,7 +12,8 @@ description = {
   summary = "A fast and asynchronous Neovim HTTP client written in Lua",
   labels = { "neovim", "rest" },
   detailed = [[
-    rest.nvim makes use of Lua cURL bindings to make HTTP requests so you don't have to leave Neovim to test your back-end codebase!
+    A very fast, powerful, extensible and asynchronous Neovim HTTP client written in Lua.
+    rest.nvim by default makes use of its own `curl` wrapper to make requests and a tree-sitter parser to parse http files.
   ]],
   homepage = "https://github.com/rest-nvim/rest.nvim",
   license = "GPLv3",
