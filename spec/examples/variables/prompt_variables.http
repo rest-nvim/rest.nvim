@@ -1,0 +1,20 @@
+### basic get statement
+
+# Basic syntax of prompt variable:
+
+# @prompt user Username to search from github
+#         ---- ------------------------------
+#         |    |
+#         |    `- variable description (optional)
+#         |
+#         `- variable name
+
+# If variable with same key already exists, existing value will be the default value
+
+@host = https://api.github.com
+
+# @prompt host Host to send the request
+
+GET /users/{{user}}
+Host: {{host}}
+user-agent: neovim

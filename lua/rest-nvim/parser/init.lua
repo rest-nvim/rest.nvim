@@ -391,8 +391,23 @@ function parser.parse(node, source, ctx)
             end
         elseif child_type == "request_separator" then
             name = get_node_field_text(child, "value", source)
-        elseif child_type == "comment" and get_node_field_text(child, "name", source) == "name" then
-            name = get_node_field_text(child, "value", source) or name
+        elseif child_type == "comment" and child:field("name")[1] then
+            local comment_name = get_node_field_text(child, "name", source)
+            local comment_value = get_node_field_text(child, "value", source)
+            if comment_name == "name" then
+                name = comment_value or name
+            elseif comment_name == "prompt" and comment_value then
+                local var_name, var_description = comment_value:match("(%S+)%s*(.*)")
+                if var_description == "" then
+                    var_description = nil
+                end
+                vim.ui.input({
+                    prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
+                    default = ctx:resolve(var_name),
+                }, function (input)
+                    ctx:set_local(var_name, input)
+                end)
+            end
         elseif child_type == "variable_declaration" then
             parser.parse_variable_declaration(child, source, ctx)
         end
