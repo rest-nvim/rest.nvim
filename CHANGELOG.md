@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.2.1](https://github.com/rest-nvim/rest.nvim/compare/v3.2.0...v3.2.1) (2024-08-30)
+
+
+### Bug Fixes
+
+* **statistics:** allow all curl statistics, ordering, highlight ([344fdff](https://github.com/rest-nvim/rest.nvim/commit/344fdffb11493edbcf6f9932fd98d8ca4df79928))
+* **statistics:** change statistics option to list ([6fc08c9](https://github.com/rest-nvim/rest.nvim/commit/6fc08c9020028ad6a53af48833a428a3d9109489))
+* **statistics:** fix skip curl.statistics key ([1eb44cd](https://github.com/rest-nvim/rest.nvim/commit/1eb44cd33b8e51424f001f4050aeec86a1b2ccd2))
+
 ## [3.2.0](https://github.com/rest-nvim/rest.nvim/compare/v3.1.0...v3.2.0) (2024-08-26)
 
 
