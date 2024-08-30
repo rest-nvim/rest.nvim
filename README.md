@@ -136,10 +136,10 @@ local default_config = {
         curl = {
             ---Statistics to be shown, takes cURL's `--write-out` flag variables
             ---See `man curl` for `--write-out` flag
-            ---@type table<string,RestStatisticsStyle>
+            ---@type RestStatisticsStyle[]
             statistics = {
-                time_total = { winbar = "take", title = "Time taken" },
-                size_download = { winbar = "size", title = "Download size" },
+                { id = "time_total", winbar = "take", title = "Time taken" },
+                { id = "size_download", winbar = "size", title = "Download size" },
             },
         },
     },

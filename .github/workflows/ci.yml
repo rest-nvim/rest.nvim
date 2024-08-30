@@ -10,30 +10,31 @@ permissions:
   contents: write
   pull-requests: write
 
+# TODO: this conflicts with format.yml
 jobs:
-  sync-readme:
-    name: sync readme codes
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: run substitution
-        run: |
-          vimcmd="/default-config:start/+1,/default-config:end/-1y a |\
-          e README.md |\
-          /default-config:start/+2,/default-config:end/-2d |\
-          /default-config:start/+1put a |\
-          wq"; vim lua/rest-nvim/config/default.lua -c "$vimcmd"
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "docs: update README default config section"
-          branch: ${{ github.ref }}
+  # sync-readme:
+  #   name: sync readme codes
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: run substitution
+  #       run: |
+  #         vimcmd="/default-config:start/+1,/default-config:end/-1y a |\
+  #         e README.md |\
+  #         /default-config:start/+2,/default-config:end/-2d |\
+  #         /default-config:start/+1put a |\
+  #         wq"; vim lua/rest-nvim/config/default.lua -c "$vimcmd"
+  #     - name: Commit changes
+  #       uses: stefanzweifel/git-auto-commit-action@v5
+  #       with:
+  #         commit_message: "docs: update README default config section"
+  #         branch: ${{ github.ref }}
 
   release:
     name: release
     runs-on: ubuntu-latest
-    needs: [sync-readme]
+    # needs: [sync-readme]
     steps:
       - uses: googleapis/release-please-action@v4
         with:
