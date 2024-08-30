@@ -36,7 +36,7 @@ json.data = "overwritten"
 response.body = vim.json.encode(json)
 %}
 ]]
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         local req = assert(parser.parse(req_node, source))
         ---fake response
@@ -60,7 +60,7 @@ local json = vim.json.decode(response.body)
 client.global.set("MYVAR", json.var)
 %}
 ]]
-        local _, tree = utils.ts_parse_source(source)
+        local _, tree = utils.ts_parse_source(source, "http")
         local req_node = assert(tree:root():child(0))
         local ctx = Context:new()
         local req = assert(parser.parse(req_node, source, ctx))
