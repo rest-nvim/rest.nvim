@@ -404,7 +404,7 @@ function parser.parse(node, source, ctx)
                 vim.ui.input({
                     prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
                     default = ctx:resolve(var_name),
-                }, function (input)
+                }, function(input)
                     if input then
                         ctx:set_local(var_name, input)
                     end
