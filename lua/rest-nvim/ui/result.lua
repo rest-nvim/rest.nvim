@@ -20,9 +20,11 @@ end
 ---@param buffer integer
 ---@param filetype string
 local function syntax_highlight(buffer, filetype)
+    -- manually stop any attached tree-sitter parsers (#424, #429)
+    vim.treesitter.stop(buffer)
     local lang = vim.treesitter.language.get_lang(filetype)
     local ok = pcall(vim.treesitter.start, buffer, lang)
-    if not ok then
+    if not lang or not ok then
         vim.bo[buffer].syntax = filetype
     end
 end
@@ -59,11 +61,7 @@ local panes = {
                 set_lines(self.bufnr, { "No Request running" })
                 return
             end
-            -- HACK: `vim.treesitter.foldexpr()` finds fold based on filetype not registered parser of
-            -- current buffer
-            vim.bo[self.bufnr].filetype = "http"
-            vim.b[self.bufnr].__rest_no_http_file = true
-            -- syntax_highlight(self.bufnr, "http")
+            syntax_highlight(self.bufnr, "rest_nvim_result")
             local lines = render_request(data.request)
             if data.response then
                 logger.debug(data.response.status)
