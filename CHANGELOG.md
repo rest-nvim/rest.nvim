@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.3.0](https://github.com/rest-nvim/rest.nvim/compare/v3.2.1...v3.3.0) (2024-09-01)
+
+
+### Features
+
+* prompt variables (close [#238](https://github.com/rest-nvim/rest.nvim/issues/238)) ([0438864](https://github.com/rest-nvim/rest.nvim/commit/043886421e97dc9c74539c371164849c6c5af902))
+
+
+### Bug Fixes
+
+* handle input cancel ([5ce671e](https://github.com/rest-nvim/rest.nvim/commit/5ce671e06b349c55e22a6841a33cf20347413ea5))
+
 ## [3.2.1](https://github.com/rest-nvim/rest.nvim/compare/v3.2.0...v3.2.1) (2024-08-30)
 
 
