@@ -100,7 +100,7 @@ local rest_command_tbl = {
     },
     run = {
         impl = function(args, opts)
-            if vim.bo.filetype ~= "http" or vim.b.__rest_no_http_file then
+            if vim.bo.filetype ~= "http" then
                 vim.notify(
                     "`:Rest run` can be only called from http file",
                     vim.log.levels.ERROR,

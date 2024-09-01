@@ -9,15 +9,15 @@
 
 local logger = {}
 
----@type fun(any)
+---@type fun(...)
 function logger.trace(_) end
----@type fun(any)
+---@type fun(...)
 function logger.debug(_) end
----@type fun(any)
+---@type fun(...)
 function logger.info(_) end
----@type fun(any)
+---@type fun(...)
 function logger.warn(_) end
----@type fun(any)
+---@type fun(...)
 function logger.error(_) end
 
 local default_log_path = vim.fn.stdpath("log") --[[@as string]]

@@ -72,5 +72,6 @@ vim.g.rest_nvim_deps = rest_nvim_deps
 
 require("rest-nvim.autocmds").setup()
 require("rest-nvim.commands").setup()
+vim.treesitter.language.register("http", "rest_nvim_result")
 
 vim.g.loaded_rest_nvim = true
