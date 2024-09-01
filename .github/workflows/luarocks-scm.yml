@@ -2,8 +2,8 @@ name: Luarocks release SCM
 
 on:
   workflow_dispatch: # allows manual triggering
-  schedule:
-    - cron: '0 0 * * *' # runs daily at 00:00
+  # schedule:
+  #   - cron: '0 0 * * *' # runs daily at 00:00
   pull_request: # Will test a local install without uploading to luarocks.org
 
 jobs:
