@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.2](https://github.com/rest-nvim/rest.nvim/compare/v3.3.1...v3.3.2) (2024-09-01)
+
+
+### Reverts
+
+* "fix(ui): use `rest_nvim_result` filetype for all panes (fix [#424](https://github.com/rest-nvim/rest.nvim/issues/424))" ([4044d85](https://github.com/rest-nvim/rest.nvim/commit/4044d85131506ccea433ea037ac44e2ce9a9e5f5))
+
 ## [3.3.1](https://github.com/rest-nvim/rest.nvim/compare/v3.3.0...v3.3.1) (2024-09-01)
 
 
