@@ -9,15 +9,15 @@
 
 local logger = {}
 
----@type fun(any)
+---@type fun(...)
 function logger.trace(_) end
----@type fun(any)
+---@type fun(...)
 function logger.debug(_) end
----@type fun(any)
+---@type fun(...)
 function logger.info(_) end
----@type fun(any)
+---@type fun(...)
 function logger.warn(_) end
----@type fun(any)
+---@type fun(...)
 function logger.error(_) end
 
 local default_log_path = vim.fn.stdpath("log") --[[@as string]]
@@ -54,6 +54,7 @@ local function open_logfile()
         return false
     end
 
+    ---@diagnostic disable-next-line: undefined-field
     local log_info = vim.uv.fs_stat(logger.get_logfile())
     if log_info and log_info.size > LARGE then
         local warn_msg =
