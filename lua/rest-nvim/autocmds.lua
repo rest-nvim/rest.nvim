@@ -46,10 +46,11 @@ local autocmds = {}
 ---Set up Rest autocommands group
 ---@package
 function autocmds.setup()
-    vim.api.nvim_create_augroup("Rest", { clear = true })
+    local augroup = vim.api.nvim_create_augroup("Rest", { clear = true })
 
     vim.api.nvim_create_autocmd("User", {
         pattern = "RestRequestPre",
+        group = augroup,
         callback = function(_ev)
             local config = require("rest-nvim.config")
             local utils = require("rest-nvim.utils")
@@ -84,6 +85,7 @@ function autocmds.setup()
     })
     vim.api.nvim_create_autocmd("User", {
         pattern = "RestResponsePre",
+        group = augroup,
         callback = function(_ev)
             local config = require("rest-nvim.config")
             local utils = require("rest-nvim.utils")
