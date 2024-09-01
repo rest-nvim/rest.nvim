@@ -405,7 +405,9 @@ function parser.parse(node, source, ctx)
                     prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
                     default = ctx:resolve(var_name),
                 }, function (input)
-                    ctx:set_local(var_name, input)
+                    if input then
+                        ctx:set_local(var_name, input)
+                    end
                 end)
             end
         elseif child_type == "variable_declaration" then
