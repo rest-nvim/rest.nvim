@@ -2,11 +2,9 @@ local test_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
 local rest_nvim_dir = vim.fn.fnamemodify(test_dir, ":h")
 
 -- TODO: find `LUA_LIBDIR`
-vim.system({ "luarocks", "install", "--local", "--lua-version", "5.1", "--dev", "tree-sitter-http" }):wait()
 vim.treesitter.language.add("http", { path = vim.fs.normalize("~/.luarocks/lib/lua/5.1/parser/http.so") })
-if not vim.treesitter.language.get_lang("http") then
-    vim.treesitter.language.register("http", "http")
-end
+vim.treesitter.language.register("http", "http")
+vim.treesitter.language.register("http", "rest_nvim_result")
 vim.opt.runtimepath:append(rest_nvim_dir)
 vim.cmd("runtime! ftplugin.vim")
 vim.cmd("runtime! ftdetect/*.{vim,lua}")
