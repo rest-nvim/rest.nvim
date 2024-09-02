@@ -314,6 +314,41 @@ function parser.parse_request_handler(node, source, context)
     return script.load_post_req_hook(str, context)
 end
 
+---@param node TSNode
+---@param source Source
+---@param ctx rest.Context
+---@return function?
+function parser.parse_redirect_path(node, source, ctx)
+    local force = vim.treesitter.get_node_text(node, source):match("^>>!")
+    local path = get_node_field_text(node, "path", source)
+    if path then
+        path = expand_variables(path, ctx)
+        return function (res)
+            if not res.body then
+                return
+            end
+            logger.debug("save response body to:", path)
+            if not force then
+                local suffix_idx = 1
+                while utils.file_exists(path) do
+                    local pathname, pathext = path:match("([^.]+)(.*)")
+                    path = ("%s_%d%s"):format(pathname, suffix_idx, pathext)
+                    suffix_idx = suffix_idx + 1
+                end
+            end
+            local respfile, openerr = io.open(path, "w+")
+            if not respfile then
+                local err_msg = string.format("Failed to open response file (%s): %s", path, openerr)
+                vim.notify(err_msg, vim.log.levels.ERROR, { title = "rest.nvim" })
+                return
+            end
+            respfile:write(res.body)
+            respfile:close()
+            logger.debug("response body saved done")
+        end
+    end
+end
+
 ---@param source Source
 ---@return string[]
 function parser.get_request_names(source)
@@ -433,7 +468,14 @@ function parser.parse(node, source, ctx)
     for child, _ in req_node:iter_children() do
         local child_type = child:type()
         if child_type == "res_handler_script" then
+            logger.debug("find request node child:", child_type)
             local handler = parser.parse_request_handler(child, source, ctx)
+            if handler then
+                table.insert(handlers, handler)
+            end
+        elseif child_type == "res_redirect" then
+            logger.debug("find request node child:", child_type)
+            local handler = parser.parse_redirect_path(child, source, ctx)
             if handler then
                 table.insert(handlers, handler)
             end

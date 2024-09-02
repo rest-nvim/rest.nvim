@@ -311,6 +311,14 @@ Authorization: Bearer {{TOKEN}}
         }, c.lv)
     end)
 
+    it("parse response-redirect syntax", function ()
+        local source = "GET localhost:3000\n\n>> path/to/file.json\n"
+        local _, tree = utils.ts_parse_source(source)
+        local node = assert(tree:root():child(0))
+        local req = assert(parser.parse(node, source))
+        assert.same(1, #req.handlers)
+    end)
+
     -- TODO: update this testcase
     --   it("create context from source", function()
     --     local source = [[

@@ -73,6 +73,7 @@ local function run_request(req)
         logger.info("request success")
 
         -- run request handler scripts
+        logger.debug(("run %d handers"):format(#req.handlers))
         vim.iter(req.handlers):each(function(f)
             f(res)
         end)
