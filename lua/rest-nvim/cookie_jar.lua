@@ -15,7 +15,6 @@ local config = require("rest-nvim.config")
 ---@field domain string
 ---@field path string
 ---@field expires integer
----@field max_date integer?
 ---@field secure boolean?
 ---@field httponly boolean?
 ---@field samesite string?
@@ -61,9 +60,9 @@ end
 ---@return string domain
 ---@return string path
 local function parse_url(url)
-    local domain, path = url:match("^https?://([^/]+)(/[^?#]*)$")
+    local domain, path = url:match("^%a+://([^/]+)(/[^?#]*)$")
     if not path then
-        domain = url:match("^https?://([^/]+)")
+        domain = url:match("^%a+://([^/]+)")
         path = "/"
     end
     return domain, path
@@ -80,10 +79,12 @@ function M.parse_set_cookie(req_url, header)
         logger.error("Invalid Set-Cookie header: " .. header)
         return
     end
+    logger.debug("parsing set-cookie:", name, value)
     local cookie = {
         name = name,
         value = value or "",
     }
+    local max_age
     for attr, val in header:gmatch(";%s*([^=]+)=?([^;]*)") do
         attr = attr:lower()
         if attr == "domain" then
@@ -93,7 +94,7 @@ function M.parse_set_cookie(req_url, header)
         elseif attr == "expires" then
             cookie.expires = utils.parse_http_time(val)
         elseif attr == "max-age" then
-            cookie.max_age = tonumber(val)
+            max_age = tonumber(val)
         elseif attr == "secure" then
             cookie.secure = true
         elseif attr == "httponly" then
@@ -104,10 +105,15 @@ function M.parse_set_cookie(req_url, header)
             cookie.priority = val
         end
     end
-    cookie.domain = cookie.domain or req_url:match("^https?://([^/]+)")
-    cookie.domain = "." .. cookie.domain
+    cookie.domain = cookie.domain or ("." .. req_url:match("^%a+://([^/]+)"))
     cookie.path = cookie.path or "/"
+    if max_age == -1 then
+        cookie.expires = -1
+    elseif max_age then
+        cookie.expires = os.time() + max_age
+    end
     cookie.expires = cookie.expires or -1
+    logger.debug("cookie parsed from Set-Cookie Header:", cookie)
     return cookie
 end
 
@@ -149,7 +155,7 @@ end
 function M.clean()
     M.jar = vim.iter(M.jar)
         :filter(function(cookie)
-            return cookie.max_age == 0 or cookie.expires < os.time()
+            return cookie.expires == -1 or cookie.expires > os.time()
         end)
         :totable()
 end

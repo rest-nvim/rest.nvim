@@ -29,7 +29,7 @@ describe("Cookies unit tests", function()
             domain = ".example.com",
             path = "/",
             expires = -1,
-        }, jar.parse_set_cookie(url, "cookie3=value3;domain=example.com"))
+        }, jar.parse_set_cookie(url, "cookie3=value3;domain=.example.com"))
         assert.is_same({
             name = "cookie4",
             value = "value4",
