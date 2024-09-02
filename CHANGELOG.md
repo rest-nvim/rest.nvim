@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.3](https://github.com/rest-nvim/rest.nvim/compare/v3.3.2...v3.3.3) (2024-09-02)
+
+
+### Bug Fixes
+
+* **cookie:** `clean()` should keep cookies (fix [#434](https://github.com/rest-nvim/rest.nvim/issues/434)) ([e2f13a2](https://github.com/rest-nvim/rest.nvim/commit/e2f13a2705b9e5d698b0d868678a4eecd9e9305e))
+
 ## [3.3.2](https://github.com/rest-nvim/rest.nvim/compare/v3.3.1...v3.3.2) (2024-09-01)
 
 
