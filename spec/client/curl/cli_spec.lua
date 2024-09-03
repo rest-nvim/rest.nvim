@@ -7,9 +7,9 @@ vim.g.rest_nvim = vim.tbl_deep_extend("force", {
         curl = {
             opts = {
                 set_compressed = true,
-            }
-        }
-    }
+            },
+        },
+    },
 }, vim.g.rest_nvim)
 
 local Context = require("rest-nvim.context").Context
@@ -103,7 +103,7 @@ describe("curl cli builder", function()
             STAT_FORMAT,
         }, args)
     end)
-    it("with opts.set_compressed", function ()
+    it("with opts.set_compressed", function()
         local args = builder.build({
             context = Context:new(),
             method = "POST",
