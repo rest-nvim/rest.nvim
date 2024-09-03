@@ -178,14 +178,14 @@ rest.Opts.Clients                                            *rest.Opts.Clients*
 rest.Opts.Clients.Curl                                  *rest.Opts.Clients.Curl*
 
     Fields: ~
-        {statistics?}  (table<string,RestStatisticsStyle>)   Statistics to parse from curl request output
-                                                             Key is a string value of format used in `--write-out` option
-                                                             See `man curl` for more info
+        {statistics?}  (RestStatisticsStyle[])   Statistics to parse from curl request output
 
 
 RestStatisticsStyle                                        *RestStatisticsStyle*
 
     Fields: ~
+        {id}       (string)           Identifier used used in curl's `--write-out` option
+                                      See `man curl` for more info
         {title?}   (string)           Title used on Statistics pane
         {winbar?}  (string|boolean)   Winbar title. Set to `false` or `nil` to not show for winbar, set to empty string
                                       to hide title If true, rest.nvim will use lowered `title` field

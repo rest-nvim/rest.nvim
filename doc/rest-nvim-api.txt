@@ -212,12 +212,12 @@ Cookie handler module                                     *rest-nvim.cookie_jar*
 rest.Cookie                                                        *rest.Cookie*
 
     Fields: ~
-        {name}      (string)
-        {value}     (string)
-        {domain}    (string)
-        {path}      (string)
-        {expires}   (integer)
-        {max_date}  (integer)
+        {name}     (string)
+        {value}    (string)
+        {domain}   (string)
+        {path}     (string)
+        {expires}  (integer)
+        {secure}   (boolean)
 
 
 M.load_jar()                                                        *M.load_jar*
