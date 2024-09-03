@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.4.0](https://github.com/rest-nvim/rest.nvim/compare/v3.3.4...v3.4.0) (2024-09-03)
+
+
+### Features
+
+* **curl:** add opt-in option to add `--compressed` ([96a3a15](https://github.com/rest-nvim/rest.nvim/commit/96a3a153e8cffe69b7ac7d4923809749e9ba7079))
+* use curl --compressed argument if Accept-Encoding includes gzip ([6822112](https://github.com/rest-nvim/rest.nvim/commit/6822112d719b0f28168efc89bfe7da094101eff9))
+
 ## [3.3.4](https://github.com/rest-nvim/rest.nvim/compare/v3.3.3...v3.3.4) (2024-09-03)
 
 
