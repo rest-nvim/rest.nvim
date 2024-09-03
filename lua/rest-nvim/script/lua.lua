@@ -32,8 +32,6 @@ local function create_prescript_env(ctx)
                 end,
             },
         },
-        ---Global variable `vim` you are familiar of
-        vim = vim,
     }
     return env
 end
@@ -77,8 +75,6 @@ local function create_handler_env(ctx, res)
         ---Raw response object
         ---@type rest.Response
         response = res,
-        ---Global variable `vim` you are familiar of
-        vim = vim,
     }
     return env
 end
@@ -88,6 +84,7 @@ end
 ---@param env table
 ---@return function
 local function load_lua(s, env)
+    env = setmetatable(env, { __index = _G })
     local f, error_msg = load(s, "script_variable", "bt", env)
     if error_msg then
         logger.error(error_msg)

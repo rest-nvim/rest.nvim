@@ -74,4 +74,15 @@ client.global.set("MYVAR", json.var)
         end)
         assert.same("boo", ctx:resolve("MYVAR"))
     end)
+    it("use lua stdlib from script", function ()
+        local ctx = Context:new()
+        local res = {}
+        local script = [[
+        local a = 123
+        vim.env["__TEST"] = tostring(a)
+        ]]
+        local h = require("rest-nvim.script.lua").load_post_req_hook(script, ctx)
+        h(res)
+        assert.same(vim.env["__TEST"], "123")
+    end)
 end)
