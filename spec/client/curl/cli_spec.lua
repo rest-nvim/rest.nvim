@@ -2,6 +2,15 @@
 ---@module 'luassert'
 
 require("spec.minimal_init")
+vim.g.rest_nvim = vim.tbl_deep_extend("force", {
+    clients = {
+        curl = {
+            opts = {
+                set_compressed = true,
+            }
+        }
+    }
+}, vim.g.rest_nvim)
 
 local Context = require("rest-nvim.context").Context
 local curl = require("rest-nvim.client.curl.cli")
@@ -90,6 +99,28 @@ describe("curl cli builder", function()
             "POST",
             "--data-binary",
             "@spec/test_server/post_json.json",
+            "-w",
+            STAT_FORMAT,
+        }, args)
+    end)
+    it("with opts.set_compressed", function ()
+        local args = builder.build({
+            context = Context:new(),
+            method = "POST",
+            url = "http://localhost:8000",
+            headers = {
+                ["accept-encoding"] = { "gzip" },
+            },
+            cookies = {},
+            handlers = {},
+        })
+        assert.same({
+            "http://localhost:8000",
+            "--compressed",
+            "-X",
+            "POST",
+            "-H",
+            "Accept-Encoding: gzip",
             "-w",
             STAT_FORMAT,
         }, args)
