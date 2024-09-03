@@ -74,7 +74,7 @@ client.global.set("MYVAR", json.var)
         end)
         assert.same("boo", ctx:resolve("MYVAR"))
     end)
-    it("use lua stdlib from script", function ()
+    it("use lua stdlib from script", function()
         local ctx = Context:new()
         local res = {}
         local script = [[
