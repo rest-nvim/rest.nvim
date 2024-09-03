@@ -62,6 +62,13 @@ local config
 ---@class rest.Opts.Clients.Curl
 --- Statistics to parse from curl request output
 ---@field statistics? RestStatisticsStyle[]
+--- Curl-specific options
+---@field opts? rest.Opts.Clients.Curl.Opts
+
+---@class rest.Opts.Clients.Curl.Opts
+--- Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
+--- (Default: `false`)
+---@field set_compressed? boolean
 
 ---@class RestStatisticsStyle
 --- Identifier used used in curl's `--write-out` option

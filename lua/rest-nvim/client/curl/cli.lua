@@ -165,14 +165,16 @@ local builder = {}
 ---@return string[] args
 function builder.extras(req)
     local args = {}
-    local upper = function(str)
-        return string.gsub(" " .. str, "%W%l", string.upper):sub(2)
-    end
-    for key, values in pairs(req.headers) do
-        for _, value in ipairs(values) do
-            if upper(key) == "Accept-Encoding" and string.find(value, "gzip") then
-                vim.list_extend(args, { "--compressed" })
-            end
+    if config.clients.curl.opts.set_compressed then
+        if
+            vim.iter(req.headers):any(function(key, values)
+                return key == "accept-encoding"
+                    and vim.iter(values):any(function(value)
+                        return value:find("gzip")
+                    end)
+            end)
+        then
+            vim.list_extend(args, { "--compressed" })
         end
     end
     return args

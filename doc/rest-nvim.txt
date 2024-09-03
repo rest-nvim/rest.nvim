@@ -178,7 +178,15 @@ rest.Opts.Clients                                            *rest.Opts.Clients*
 rest.Opts.Clients.Curl                                  *rest.Opts.Clients.Curl*
 
     Fields: ~
-        {statistics?}  (RestStatisticsStyle[])   Statistics to parse from curl request output
+        {statistics?}  (RestStatisticsStyle[])         Statistics to parse from curl request output
+        {opts?}        (rest.Opts.Clients.Curl.Opts)   Curl-specific options
+
+
+rest.Opts.Clients.Curl.Opts                        *rest.Opts.Clients.Curl.Opts*
+
+    Fields: ~
+        {set_compressed?}  (boolean)   Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
+                                       (Default: `false`)
 
 
 RestStatisticsStyle                                        *RestStatisticsStyle*

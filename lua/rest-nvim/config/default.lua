@@ -23,6 +23,7 @@ local default_config = {
     },
     ---@class rest.Config.Response
     response = {
+        ---Default response hooks
         ---@class rest.Config.Response.Hooks
         hooks = {
             ---@type boolean Decode the request URL segments on response UI to improve readability
@@ -41,6 +42,13 @@ local default_config = {
             statistics = {
                 { id = "time_total", winbar = "take", title = "Time taken" },
                 { id = "size_download", winbar = "size", title = "Download size" },
+            },
+            ---Curl-secific request/response hooks
+            ---@class rest.Config.Clients.Curl.Opts
+            opts = {
+                ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
+                ---`gzip`
+                set_compressed = false,
             },
         },
     },
