@@ -161,6 +161,23 @@ end
 ---@private
 local builder = {}
 
+---@param req rest.Request
+---@return string[] args
+function builder.extras(req)
+    local args = {}
+    local upper = function(str)
+        return string.gsub(" " .. str, "%W%l", string.upper):sub(2)
+    end
+    for key, values in pairs(req.headers) do
+        for _, value in ipairs(values) do
+            if upper(key) == "Accept-Encoding" and string.find(value, "gzip") then
+                vim.list_extend(args, { "--compressed" })
+            end
+        end
+    end
+    return args
+end
+
 ---@param method string
 ---@return string[] args
 function builder.method(method)
@@ -272,6 +289,7 @@ function builder.build(req, ignore_stats)
         end
     end
     insert(args, req.url)
+    insert(args, builder.extras(req))
     insert(args, builder.method(req.method))
     insert(args, builder.headers(req.headers))
     insert(args, builder.cookies(req.cookies))
