@@ -288,6 +288,7 @@ end
 ---@param lines string[]
 ---@param filetype string
 ---@return string[]
+---@return boolean ok Whether formatting is done with `gq`
 function utils.gq_lines(lines, filetype)
     logger.debug("formatting with `gq`")
     local format_buf = vim.api.nvim_create_buf(false, true)
@@ -313,12 +314,12 @@ function utils.gq_lines(lines, filetype)
         logger.debug(("formatting %s filetype with formatprg=%s"):format(filetype, formatprg))
     else
         logger.debug(("can't find formatexpr or formatprg for %s filetype. Formatting is canceled"):format(filetype))
-        return lines
+        return lines, false
     end
     vim.api.nvim_buf_call(format_buf, function()
         vim.cmd("silent normal gggqG")
     end)
-    return vim.api.nvim_buf_get_lines(format_buf, 0, -1, false)
+    return vim.api.nvim_buf_get_lines(format_buf, 0, -1, false), true
 end
 
 return utils

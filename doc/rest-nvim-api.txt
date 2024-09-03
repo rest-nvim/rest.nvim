@@ -372,6 +372,7 @@ utils.gq_lines({lines}, {filetype})                             *utils.gq_lines*
 
     Returns: ~
         (string[])
+        (boolean)   Whether formatting is done with `gq`
 
 
 ==============================================================================

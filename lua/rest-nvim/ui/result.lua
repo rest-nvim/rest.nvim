@@ -76,9 +76,8 @@ local panes = {
                     )
                 )
                 local content_type = data.response.headers["content-type"]
-                table.insert(lines, "")
-                table.insert(lines, "# @_RES")
                 local body = vim.split(data.response.body, "\n")
+                local body_meta = {}
                 if content_type then
                     local base_type, res_type = content_type[1]:match("(.*)/([^;]+)")
                     if base_type == "image" then
@@ -87,9 +86,19 @@ local panes = {
                         body = { "Binary answer" }
                     elseif config.response.hooks.format then
                         -- NOTE: format hook runs here because it should be done last.
-                        body = utils.gq_lines(body, res_type)
+                        local ok
+                        body, ok = utils.gq_lines(body, res_type)
+                        if ok then
+                            table.insert(body_meta, "formatted")
+                        end
                     end
                 end
+                local meta_str = ""
+                if #body_meta > 0 then
+                    meta_str = " (" .. table.concat(body_meta, ",") .. ")"
+                end
+                table.insert(lines, "")
+                table.insert(lines, "# @_RES" .. meta_str)
                 vim.list_extend(lines, body)
                 table.insert(lines, "# @_END")
             else
