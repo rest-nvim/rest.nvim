@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.4](https://github.com/rest-nvim/rest.nvim/compare/v3.3.3...v3.3.4) (2024-09-03)
+
+
+### Bug Fixes
+
+* use lua stdlib in scripts (fix [#437](https://github.com/rest-nvim/rest.nvim/issues/437)) ([08f8d02](https://github.com/rest-nvim/rest.nvim/commit/08f8d0298228076a5155f9b76051e0e88a2aac3a))
+
 ## [3.3.3](https://github.com/rest-nvim/rest.nvim/compare/v3.3.2...v3.3.3) (2024-09-02)
 
 
