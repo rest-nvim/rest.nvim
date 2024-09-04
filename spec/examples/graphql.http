@@ -1,0 +1,30 @@
+@token = YOUR_GITHUB_OAUTH_TOKEN
+
+### GraphQL request
+GRAPHQL https://api.github.com/graphql
+Authorization: token {{token}}
+
+query ($name: String!, $owner: String!) {
+    repository(name: $name, owner: $owner) {
+        name
+            fullName: nameWithOwner
+            description
+            diskUsage
+            forkCount
+            stargazers(first: 5) {
+                totalCount
+                nodes {
+                    login
+                    name
+                }
+            }
+        watchers {
+            totalCount
+        }
+    }
+}
+
+{
+    "name": "NativeVim",
+    "owner": "boltlessengineer"
+}

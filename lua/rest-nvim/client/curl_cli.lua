@@ -11,6 +11,7 @@ local COMPATIBLE_METHODS = {
     "CONNECT",
     "PATCH",
     "LIST",
+    "GRAPHQL",
 }
 
 ---@type rest.Client

@@ -202,6 +202,41 @@ key5 = value5
                 },
             }, parser.parse(req_node, source))
         end)
+        it("parse graphql body", function ()
+            local source = open("spec/examples/graphql.http")
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(1))
+            local req = parser.parse(req_node, source)
+            assert(req)
+            assert.same("POST", req.method)
+            assert.same("graphql", req.body.__TYPE)
+            assert.same({
+                query = [[query ($name: String!, $owner: String!) {
+    repository(name: $name, owner: $owner) {
+        name
+            fullName: nameWithOwner
+            description
+            diskUsage
+            forkCount
+            stargazers(first: 5) {
+                totalCount
+                nodes {
+                    login
+                    name
+                }
+            }
+        watchers {
+            totalCount
+        }
+    }
+}
+]],
+                variables = {
+                    name = "NativeVim",
+                    owner = "boltlessengineer",
+                }
+            }, vim.json.decode(req.body.data))
+        end)
     end)
 
     describe("variables", function()

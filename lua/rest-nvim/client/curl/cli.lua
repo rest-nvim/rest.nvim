@@ -298,11 +298,9 @@ function builder.build(req, ignore_stats)
     if req.body then
         if req.body.__TYPE == "external" then
             insert(args, builder.file(req.body.data.path))
-        elseif req.body.__TYPE == "graphql" then
-            log.error("graqphql body is not supportted yet")
         elseif req.body.__TYPE == "multipart_form_data" then
             log.error("multipart-form-data body is not supportted yet")
-        elseif vim.list_contains({ "json", "xml", "raw" }, req.body.__TYPE) then
+        elseif vim.list_contains({ "json", "xml", "raw", "graphql", }, req.body.__TYPE) then
             insert(args, builder.raw_body(req.body.data))
         else
             log.error(("unkown body type: '%s'"):format(req.body.__TYPE))

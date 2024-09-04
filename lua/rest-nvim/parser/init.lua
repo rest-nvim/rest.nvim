@@ -136,6 +136,19 @@ function parser.parse_body(content_type, body_node, source, context)
             name = get_node_field_text(body_node, "name", source),
             path = path,
         }
+    elseif node_type == "graphql_body" then
+        body.__TYPE = "graphql"
+        local query_text = vim.treesitter.get_node_text(assert(body_node:named_child(0)), source)
+        local variables_text
+        local variables_node = body_node:named_child(1)
+        if variables_node then
+            variables_text = vim.treesitter.get_node_text(variables_node, source)
+        end
+        body.data = vim.json.encode({
+            query = query_text,
+            variables = vim.json.decode(variables_text)
+        })
+        logger.debug(body.data)
     elseif node_type == "json_body" or content_type == "application/json" then
         body.__TYPE = "json"
         body.data = vim.trim(vim.treesitter.get_node_text(body_node, source))
@@ -171,8 +184,6 @@ function parser.parse_body(content_type, body_node, source, context)
         body.__TYPE = "multipart_form_data"
         -- TODO:
         logger.error("multipart form data is not supported yet")
-    elseif node_type == "graphql_body" then
-        logger.error("graphql body is not supported yet")
     end
     return body
 end
@@ -369,6 +380,9 @@ function parser.parse(node, source, ctx)
     if not method then
         logger.info("no method provided, falling back to 'GET'")
         method = "GET"
+    end
+    if method == "GRAPHQL" then
+        method = "POST"
     end
     -- NOTE: url will be parsed after because in-place variables should be parsed first
     local url
