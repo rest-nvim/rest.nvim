@@ -139,10 +139,12 @@ function parser.parse_body(content_type, body_node, source, context)
     elseif node_type == "graphql_body" then
         body.__TYPE = "graphql"
         local query_text = vim.treesitter.get_node_text(assert(body_node:named_child(0)), source)
+        query_text = expand_variables(query_text, context)
         local variables_text
         local variables_node = body_node:named_child(1)
         if variables_node then
             variables_text = vim.treesitter.get_node_text(variables_node, source)
+            variables_text = expand_variables(variables_text, context)
         end
         body.data = vim.json.encode({
             query = query_text,
