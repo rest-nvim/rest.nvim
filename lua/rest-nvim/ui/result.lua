@@ -34,6 +34,8 @@ local data = {
     request = nil,
     ---@type rest.Response?
     response = nil,
+    ---@type table<string,string>?
+    statistics = nil,
 }
 
 ---@param req rest.Request
@@ -76,8 +78,9 @@ local panes = {
                     )
                 )
                 local content_type = data.response.headers["content-type"]
+                table.insert(lines, "")
+                table.insert(lines, "# @_RES")
                 local body = vim.split(data.response.body, "\n")
-                local body_meta = {}
                 if content_type then
                     local base_type, res_type = content_type[1]:match("(.*)/([^;]+)")
                     if base_type == "image" then
@@ -86,19 +89,9 @@ local panes = {
                         body = { "Binary answer" }
                     elseif config.response.hooks.format then
                         -- NOTE: format hook runs here because it should be done last.
-                        local ok
-                        body, ok = utils.gq_lines(body, res_type)
-                        if ok then
-                            table.insert(body_meta, "formatted")
-                        end
+                        body = utils.gq_lines(body, res_type)
                     end
                 end
-                local meta_str = ""
-                if #body_meta > 0 then
-                    meta_str = " (" .. table.concat(body_meta, ",") .. ")"
-                end
-                table.insert(lines, "")
-                table.insert(lines, "# @_RES" .. meta_str)
                 vim.list_extend(lines, body)
                 table.insert(lines, "# @_END")
             else
@@ -166,14 +159,14 @@ local panes = {
                 return
             end
             local lines = {}
-            if not data.response.statistics then
+            if not data.statistics then
                 set_lines(self.bufnr, { "No Statistics" })
                 return
             end
             syntax_highlight(self.bufnr, "http_stat")
             for _, style in ipairs(config.clients.curl.statistics) do
                 local title = style.title or style.id
-                local value = data.response.statistics[style.id] or ""
+                local value = data.statistics[style.id] or ""
                 table.insert(lines, ("%s: %s"):format(title, value))
             end
             set_lines(self.bufnr, lines)
@@ -191,7 +184,7 @@ winbar = winbar .. "%#RestText#Press %#Keyword#?%#RestText# for help%#Normal# "
 ---@return string
 function ui.stat_winbar()
     local content = ""
-    if not data.response then
+    if not data.statistics then
         return "Loading...%#Normal#"
     end
     for _, style in ipairs(config.clients.curl.statistics) do
@@ -200,7 +193,7 @@ function ui.stat_winbar()
             if title ~= "" then
                 title = title .. ": "
             end
-            local value = data.response.statistics[style.id] or ""
+            local value = data.statistics[style.id] or ""
             content = content .. "  %#RestText#" .. title .. "%#Normal#" .. value
         end
     end
