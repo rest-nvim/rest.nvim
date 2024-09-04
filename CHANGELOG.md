@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.5.0](https://github.com/rest-nvim/rest.nvim/compare/v3.4.0...v3.5.0) (2024-09-04)
+
+
+### Features
+
+* graphql support ([#433](https://github.com/rest-nvim/rest.nvim/issues/433)) ([91a9293](https://github.com/rest-nvim/rest.nvim/commit/91a929305f910b49b9c1d2f250585ec87e59c076))
+* **ui:** show if response body is formatted ([3030841](https://github.com/rest-nvim/rest.nvim/commit/3030841e97f4e017930a874c9482db82567f49c4))
+
+
+### Bug Fixes
+
+* expand variables in graphql ([d3acfb5](https://github.com/rest-nvim/rest.nvim/commit/d3acfb524290f297542233e66c4241decaa97d38))
+* **gq:** catch error while setting filetype ([b08b2c2](https://github.com/rest-nvim/rest.nvim/commit/b08b2c23480a8c760cdf1863f9debedb0ed369ea))
+
 ## [3.4.0](https://github.com/rest-nvim/rest.nvim/compare/v3.3.4...v3.4.0) (2024-09-03)
 
 
