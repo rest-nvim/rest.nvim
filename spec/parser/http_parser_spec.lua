@@ -202,7 +202,7 @@ key5 = value5
                 },
             }, parser.parse(req_node, source))
         end)
-        it("parse graphql body", function ()
+        it("parse graphql body", function()
             local source = open("spec/examples/graphql.http")
             local _, tree = utils.ts_parse_source(source)
             local req_node = assert(tree:root():child(1))
@@ -234,7 +234,7 @@ key5 = value5
                 variables = {
                     name = "NativeVim",
                     owner = "boltlessengineer",
-                }
+                },
             }, vim.json.decode(req.body.data))
         end)
     end)
