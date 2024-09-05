@@ -292,7 +292,7 @@ end
 function utils.gq_lines(lines, filetype)
     logger.debug("formatting with `gq`")
     local format_buf = vim.api.nvim_create_buf(false, true)
-    local ok, errmsg = pcall(vim.api.nvim_set_option_value, "filetype", filetype, { scope = "local", buf = format_buf })
+    local ok, errmsg = pcall(vim.api.nvim_set_option_value, "filetype", filetype, { buf = format_buf })
     if not ok then
         local msg = ("Can't set filetype to '%s' (%s). Formatting is canceled"):format(filetype, errmsg)
         logger.warn(msg)
