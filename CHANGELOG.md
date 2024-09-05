@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/rest-nvim/rest.nvim/compare/v3.5.0...v3.5.1) (2024-09-05)
+
+
+### Bug Fixes
+
+* scope and buf number in setting options ([252d56a](https://github.com/rest-nvim/rest.nvim/commit/252d56a7334838e2406ebd58f780e3d9becfbf73))
+
 ## [3.5.0](https://github.com/rest-nvim/rest.nvim/compare/v3.4.0...v3.5.0) (2024-09-04)
 
 
