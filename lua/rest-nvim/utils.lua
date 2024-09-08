@@ -325,7 +325,9 @@ function utils.gq_lines(lines, filetype)
     vim.api.nvim_buf_call(format_buf, function()
         vim.cmd("silent normal gggqG")
     end)
-    return vim.api.nvim_buf_get_lines(format_buf, 0, -1, false), true
+    local buf_lines = vim.api.nvim_buf_get_lines(format_buf, 0, -1, false)
+    vim.api.nvim_buf_delete(format_buf, { force = true })
+    return buf_lines, true
 end
 
 return utils
