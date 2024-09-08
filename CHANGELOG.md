@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.6.0](https://github.com/rest-nvim/rest.nvim/compare/v3.5.1...v3.6.0) (2024-09-08)
+
+
+### Features
+
+* save response to file (close [#359](https://github.com/rest-nvim/rest.nvim/issues/359)) ([f9a5ebb](https://github.com/rest-nvim/rest.nvim/commit/f9a5ebbad35481343ea8b3a578bc30c00beb45e4))
+
+
+### Bug Fixes
+
+* force delete scratch buffer ([34f3fe9](https://github.com/rest-nvim/rest.nvim/commit/34f3fe9660b912429279ba87ab49aa3d0c37e0c9))
+
 ## [3.5.1](https://github.com/rest-nvim/rest.nvim/compare/v3.5.0...v3.5.1) (2024-09-05)
 
 
