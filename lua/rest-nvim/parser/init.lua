@@ -323,7 +323,7 @@ function parser.parse_redirect_path(node, source, ctx)
     local path = get_node_field_text(node, "path", source)
     if path then
         path = expand_variables(path, ctx)
-        return function (res)
+        return function(res)
             if not res.body then
                 return
             end
