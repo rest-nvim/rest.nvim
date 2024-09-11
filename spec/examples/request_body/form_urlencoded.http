@@ -1,0 +1,19 @@
+# form-urlencoded type is recognized with `Content-Type` header
+
+### form-urlencoded
+POST https://ijhttp-examples.jetbrains.com/post
+Content-Type: application/x-www-form-urlencoded
+
+key1=value1&key2=value2&key3=value3&key4=value4&key5=value5
+
+### form-urlencoded (multiline)
+# you can put some whitespaces in urlencoded form
+# rest.nvim will recognize whitespaces and remove them before request
+POST https://ijhttp-examples.jetbrains.com/post
+Content-Type: application/x-www-form-urlencoded
+
+key1 = value1 &
+key2 = value2 &
+key3 = value3 &
+key4 = value4 &
+key5 = value5

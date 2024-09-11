@@ -4,3 +4,13 @@ user-agent: neovim
 
 ### get statement for localhost
 GET localhost:9999
+
+### multi-line url
+// reference: https://www.jetbrains.com/help/idea/exploring-http-syntax.html#break-long-requests-into-several-lines
+// You can span url to multiple lines by adding whitespace indents
+GET http://example.com:8080
+    /api
+    /html
+    /get
+    ?id=123
+    &value=content

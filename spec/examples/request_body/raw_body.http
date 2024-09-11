@@ -1,0 +1,29 @@
+# all bodies including json are treated as raw body
+
+### json body
+# request body starting with `{\n` will have json syntax injection via tree-sitter
+# rest.nvim provides opt-out json validation feature
+POST https://example.com HTTP/1.1
+Content-Type: application/json
+
+{
+    "foo": 123
+}
+
+### xml body
+# request body starting with `<.*` will have xml syntax injection via tree-sitter
+# rest.nvim provides opt-out xml validation feature
+POST https://example.com HTTP/1.1
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<Request>
+  <Login>login</Login>
+  <Password>password</Password>
+</Request>
+
+### raw body
+# all other bodies will be treated as raw body type
+POST https://example.com HTTP/1.1
+
+Hello world!

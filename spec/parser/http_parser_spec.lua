@@ -184,7 +184,7 @@ key5 = value5
         end)
         it("parse external body", function()
             -- external body can be only sourced when
-            local source = open("spec/examples/post_with_external_body.http")
+            local source = open("spec/examples/request_body/external_body.http")
             local _, tree = utils.ts_parse_source(source)
             local req_node = assert(tree:root():child(0))
             assert.same({
@@ -193,17 +193,17 @@ key5 = value5
                 headers = {},
                 cookies = {},
                 handlers = {},
-                name = "The request body is read from a file",
+                name = "External body",
                 body = {
                     __TYPE = "external",
                     data = {
-                        path = "spec/examples/input.json",
+                        path = "spec/examples/request_body/input.json",
                     },
                 },
             }, parser.parse(req_node, source))
         end)
         it("parse graphql body", function()
-            local source = open("spec/examples/graphql.http")
+            local source = open("spec/examples/request_body/graphql.http")
             local _, tree = utils.ts_parse_source(source)
             local req_node = assert(tree:root():child(1))
             local req = parser.parse(req_node, source)

@@ -1,3 +1,4 @@
+### dynamic variables
 POST https://reqres.in/api/users
 Content-Type: application/json
 
