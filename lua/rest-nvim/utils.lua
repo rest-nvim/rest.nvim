@@ -21,7 +21,7 @@ local uv = vim.uv or vim.loop
 function utils.escape(str, only_necessary)
     local ignore = "%w%-%.%_%~%+"
     if only_necessary then
-        ignore = ignore .. "%:%/%?%=%&%#"
+        ignore = ignore .. "%:%/%?%=%&%#%@"
     end
     local pattern = "([^" .. ignore .. "])"
     local encoded = string.gsub(str, pattern, function(c)
