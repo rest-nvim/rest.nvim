@@ -105,9 +105,11 @@ function parser.parse_stat_pair(str)
         return
     end
     value = vim.trim(value)
-    if key:find("size") then
+    if key:find("size") and tonumber(value) then
+        log.debug("transforming stat pair as size:", key, value)
         value = utils.transform_size(value)
-    elseif key:find("time") then
+    elseif key:find("time") and tonumber(value) then
+        log.debug("transforming stat pair as time:", key, value)
         value = utils.transform_time(value)
     end
     return key, value
