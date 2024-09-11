@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/rest-nvim/rest.nvim/compare/v3.6.0...v3.6.1) (2024-09-11)
+
+
+### Bug Fixes
+
+* don't encode `@` character (fix [#453](https://github.com/rest-nvim/rest.nvim/issues/453)) ([48fe19c](https://github.com/rest-nvim/rest.nvim/commit/48fe19c9c1e291d11fb2aa9608ea11ef9a8aa5dc))
+
 ## [3.6.0](https://github.com/rest-nvim/rest.nvim/compare/v3.5.1...v3.6.0) (2024-09-08)
 
 
