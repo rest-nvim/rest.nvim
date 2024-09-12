@@ -4,6 +4,7 @@ local M = {}
 
 local dotenv_parser = require("rest-nvim.parser.dotenv")
 local config = require("rest-nvim.config")
+local logger = require("rest-nvim.logger")
 
 ---load dotenv file
 ---This function will set environment variables in current editor session.
@@ -85,11 +86,20 @@ function M.find_relevent_env_file()
     ---@type string?
     local env_file
     -- search for `/same/path/filename.env`
-    env_file = vim.fs.find(filename .. ".env", { type = "file" })[1]
+    logger.debug("searching for " .. filename .. ".env file")
+    env_file = vim.fs.find(filename .. ".env", {
+        path = vim.fn.expand("%:h"),
+        upward = true,
+        stop = vim.fn.getcwd(),
+        type = "file",
+        limit = math.huge,
+    })[1]
     if env_file then
+        logger.debug("found .env file:", env_file)
         return env_file
     end
     -- search upward for `.env` file
+    logger.debug("searching for .env file")
     env_file = vim.fs.find(function(name, _)
         return name == ".env"
     end, {
@@ -100,7 +110,10 @@ function M.find_relevent_env_file()
         limit = math.huge,
     })[1]
     if env_file then
+        logger.debug("found .env file:", env_file)
         return env_file
+    else
+        logger.debug("no .env file found")
     end
 end
 
