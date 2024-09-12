@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.2](https://github.com/rest-nvim/rest.nvim/compare/v3.6.1...v3.6.2) (2024-09-12)
+
+
+### Bug Fixes
+
+* add logs & limits to dotenv module ([#456](https://github.com/rest-nvim/rest.nvim/issues/456)) ([ec8cbb2](https://github.com/rest-nvim/rest.nvim/commit/ec8cbb26eea517c0b32f7ac85341d8842e536db9))
+
 ## [3.6.1](https://github.com/rest-nvim/rest.nvim/compare/v3.6.0...v3.6.1) (2024-09-11)
 
 
