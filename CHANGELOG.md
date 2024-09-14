@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.7.0](https://github.com/rest-nvim/rest.nvim/compare/v3.6.2...v3.7.0) (2024-09-14)
+
+
+### Features
+
+* remove env file extension validation ([6edb8fd](https://github.com/rest-nvim/rest.nvim/commit/6edb8fdb8c03ac9dcfce2b6dae09ab8c6f0f7ba4))
+
+
+### Bug Fixes
+
+* **ui:** always use `rest_nvim_result` filetype ([3bf17a2](https://github.com/rest-nvim/rest.nvim/commit/3bf17a2a955853d865feb9e2f0e6f3addf17acaa))
+
 ## [3.6.2](https://github.com/rest-nvim/rest.nvim/compare/v3.6.1...v3.6.2) (2024-09-12)
 
 
