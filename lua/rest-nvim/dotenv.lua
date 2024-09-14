@@ -33,15 +33,6 @@ end
 ---@param path string file path of dotenv file
 ---@param bufnr number? buffer identifier, default to current buffer
 function M.register_file(path, bufnr)
-    vim.validate({
-        path = {
-            path,
-            function(p)
-                return vim.endswith(p, ".env") or vim.endswith(p, ".json")
-            end,
-            "`.env` or `.json` filetype",
-        },
-    })
     bufnr = bufnr or 0
     vim.b[bufnr]._rest_nvim_env_file = path
     vim.notify("Env file '" .. path .. "' has been registered", vim.log.levels.INFO, { title = "rest.nvim" })
