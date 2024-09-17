@@ -136,6 +136,14 @@ function parser.parse_body(content_type, body_node, source, context)
             name = get_node_field_text(body_node, "name", source),
             path = path,
         }
+        local body_text = vim.treesitter.get_node_text(body_node, source)
+        if vim.startswith(body_text, "<@") then
+            logger.debug("external body with '<@' prefix")
+            return body
+        end
+        local file_content = utils.read_file(path)
+        file_content = expand_variables(file_content, context)
+        body.data.content = file_content
     elseif node_type == "graphql_body" then
         body.__TYPE = "graphql"
         local query_text = vim.treesitter.get_node_text(assert(body_node:named_child(0)), source)

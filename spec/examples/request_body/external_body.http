@@ -1,5 +1,12 @@
+@bar=baz
 ### External body
 POST https://example.com:8080/api/html/post
 # rest.nvim can guess and fill the Content-Type header from file path
 
 < ./input.json
+
+### External body (raw)
+POST https://example.com:8080/api/html/post
+# rest.nvim can guess and fill the Content-Type header from file path
+
+<@ ./input.json

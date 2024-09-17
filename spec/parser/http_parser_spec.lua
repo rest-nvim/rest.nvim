@@ -186,7 +186,7 @@ key5 = value5
             -- external body can be only sourced when
             local source = open("spec/examples/request_body/external_body.http")
             local _, tree = utils.ts_parse_source(source)
-            local req_node = assert(tree:root():child(0))
+            local req_node = assert(tree:root():child(1))
             assert.same({
                 method = "POST",
                 url = "https://example.com:8080/api/html/post",
@@ -194,6 +194,27 @@ key5 = value5
                 cookies = {},
                 handlers = {},
                 name = "External body",
+                body = {
+                    __TYPE = "external",
+                    data = {
+                        path = "spec/examples/request_body/input.json",
+                        content = '{\n    "foo": "baz"\n}\n',
+                    },
+                },
+            }, parser.parse(req_node, source))
+        end)
+        it("parse external body (raw)", function()
+            -- external body can be only sourced when
+            local source = open("spec/examples/request_body/external_body.http")
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(2))
+            assert.same({
+                method = "POST",
+                url = "https://example.com:8080/api/html/post",
+                headers = {},
+                cookies = {},
+                handlers = {},
+                name = "External body (raw)",
                 body = {
                     __TYPE = "external",
                     data = {

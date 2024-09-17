@@ -299,7 +299,11 @@ function builder.build(req, ignore_stats)
     insert(args, builder.cookies(req.cookies))
     if req.body then
         if req.body.__TYPE == "external" then
-            insert(args, builder.file(req.body.data.path))
+            if req.body.data.content then
+                insert(args, builder.raw_body(req.body.data.content))
+            else
+                insert(args, builder.file(req.body.data.path))
+            end
         elseif req.body.__TYPE == "multipart_form_data" then
             log.error("multipart-form-data body is not supportted yet")
         elseif vim.list_contains({ "json", "xml", "raw", "graphql" }, req.body.__TYPE) then
