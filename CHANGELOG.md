@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.8.0](https://github.com/rest-nvim/rest.nvim/compare/v3.7.0...v3.8.0) (2024-09-20)
+
+
+### Features
+
+* allow custom dynamic variables without `$` prefix ([359d089](https://github.com/rest-nvim/rest.nvim/commit/359d089e822c553312d634d1572b2225b800e4a8))
+* expand variables inside external body (fix [#455](https://github.com/rest-nvim/rest.nvim/issues/455)) ([97cc922](https://github.com/rest-nvim/rest.nvim/commit/97cc9224993387510e7b4a9cfff2b6b9bfb54bd6))
+
+
+### Bug Fixes
+
+* remove unrecognized option check (close [#461](https://github.com/rest-nvim/rest.nvim/issues/461)) ([6a7c193](https://github.com/rest-nvim/rest.nvim/commit/6a7c193c2b5f030d085544e58b36f2e7413e1728))
+
 ## [3.7.0](https://github.com/rest-nvim/rest.nvim/compare/v3.6.2...v3.7.0) (2024-09-14)
 
 

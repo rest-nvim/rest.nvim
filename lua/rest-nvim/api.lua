@@ -18,7 +18,7 @@ local client = function() return require("rest-nvim.client") end
 ---rest.nvim API version, equals to the current rest.nvim version. Meant to be used by modules later
 ---@type string
 ---@see vim.version
-api.VERSION = "3.7.0" -- x-release-please-version
+api.VERSION = "3.8.0" -- x-release-please-version
 
 ---rest.nvim namespace used for buffer highlights
 ---@type number
