@@ -88,12 +88,6 @@ local default_config = {
     ---@see vim.log.levels
     ---@type integer log level
     _log_level = vim.log.levels.WARN,
-    ---@class rest.Config.DebugInfo
-    _debug_info = {
-        -- NOTE: default option is `nil` to prevent overwriting as empty array
-        ---@type string[]
-        unrecognized_configs = nil,
-    },
 }
 ---@comment default-config:end
 

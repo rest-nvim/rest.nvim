@@ -118,23 +118,12 @@ local default_config = require("rest-nvim.config.default")
 
 local check = require("rest-nvim.config.check")
 local opts = vim.g.rest_nvim or {}
-config = vim.tbl_deep_extend("force", {
-    _debug_info = {
-        unrecognized_configs = check.get_unrecognized_keys(opts, default_config),
-    },
-}, default_config, opts)
+config = vim.tbl_deep_extend("force", default_config, opts)
 ---@cast config rest.Config
 local ok, err = check.validate(config)
 
 if not ok then
     vim.notify(err, vim.log.levels.ERROR, { title = "rest.nvim" })
-end
-
-if #config._debug_info.unrecognized_configs > 0 then
-    vim.notify(
-        "[rest.nvim] Unrecognized configs found in setup: " .. vim.inspect(config._debug_info.unrecognized_configs),
-        vim.log.levels.WARN
-    )
 end
 
 return config

@@ -8,8 +8,6 @@
 
 local health = {}
 
-local config = require("rest-nvim.config")
-
 local function install_health()
     vim.health.start("Installation")
 
@@ -55,20 +53,6 @@ local function install_health()
     end
 end
 
-local function configuration_health()
-    vim.health.start("Configuration")
-
-    -- Configuration options
-    local unrecognized_configs = config._debug_info.unrecognized_configs
-    if not vim.tbl_isempty(unrecognized_configs) then
-        for _, config_key in ipairs(unrecognized_configs) do
-            vim.health.warn("Unrecognized configuration option `" .. config_key .. "` found")
-        end
-    else
-        vim.health.ok("No unrecognized configuration options were found")
-    end
-end
-
 local function formatter_health()
     vim.health.start("Response body formatters")
 
@@ -91,7 +75,6 @@ end
 
 function health.check()
     install_health()
-    configuration_health()
     formatter_health()
 end
 
