@@ -31,14 +31,14 @@ end
 
 ---@type table<string,fun():string>
 local rest_variables = {
-    ["$uuid"] = uuid,
-    ["$date"] = function()
+    uuid = uuid,
+    date = function()
         return os.date("%Y-%m-%d") --[[@as string]]
     end,
-    ["$timestamp"] = function()
+    timestamp = function()
         return tostring(os.time()) or ""
     end,
-    ["$randomInt"] = function()
+    randomInt = function()
         return tostring(math.random(0, 1000))
     end,
 }
@@ -92,7 +92,13 @@ end
 ---@return nil|fun():string
 local function get_dynamic_vars(key)
     local user_variables = config.custom_dynamic_variables
-    return user_variables[key] or rest_variables[key]
+    if user_variables[key] then
+        return user_variables[key]
+        -- TODO: remove this elseif statement in 4.0.0 release
+    elseif user_variables["$" .. key] then
+        return user_variables["$" .. key]
+    end
+    return rest_variables[key]
 end
 
 ---resolves variable
@@ -104,9 +110,14 @@ end
 ---@return string value
 function Context:resolve(key)
     -- find from dynamic variables
-    local var = get_dynamic_vars(key)
+    if vim.startswith(key, "$") then
+        logger.debug("resolving dynamic variable:", key)
+        local var = get_dynamic_vars(key:sub(2))
+        return var and var() or ""
+    end
     -- find from local variable table or vim.env
-    return var and var() or self.lv[key] or self.vars[key] or vim.env[key] or ""
+    logger.debug("resolving variable:", key)
+    return self.lv[key] or self.vars[key] or vim.env[key] or ""
 end
 
 M.Context = Context
