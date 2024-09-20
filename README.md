@@ -187,20 +187,14 @@ local default_config = {
     ---@see vim.log.levels
     ---@type integer log level
     _log_level = vim.log.levels.WARN,
-    ---@class rest.Config.DebugInfo
-    _debug_info = {
-        -- NOTE: default option is `nil` to prevent overwriting as empty array
-        ---@type string[]
-        unrecognized_configs = nil,
-    },
 }
 ```
 <!-- default-config:end -->
 
 ## Usage
 
-Create a new http file or open an existing one and run the <kbd>:Rest run {name}</kbd> command, or
-just place the cursor over the request and simply run <kbd>:Rest run</kbd>.
+Create a new http file or open an existing one and run the `:Rest run {name}` command, or
+just place the cursor over the request and simply run `:Rest run`.
 
 ### HTTP file syntax
 
@@ -321,9 +315,9 @@ Here is a preview of the component working :)
 ## Contribute
 
 1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
-2. Create your feature branch (<kbd>git checkout -b my-new-feature</kbd>)
-3. Commit your changes (<kbd>git commit -am 'feat: add some feature'</kbd>)
-4. Push to the branch (<kbd>git push -u origin my-new-feature</kbd>)
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'feat: add some feature'`)
+4. Push to the branch (`git push -u origin my-new-feature`)
 5. Create a new Pull Request
 
 > [!IMPORTANT]
