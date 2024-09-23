@@ -156,7 +156,7 @@ function parser.parse_body(content_type, body_node, source, context)
         end
         body.data = vim.json.encode({
             query = query_text,
-            variables = vim.json.decode(variables_text),
+            variables = variables_text and vim.json.decode(variables_text),
         })
         logger.debug(body.data)
     elseif node_type == "json_body" or content_type == "application/json" then

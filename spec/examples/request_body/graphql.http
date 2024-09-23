@@ -1,6 +1,30 @@
 @token = YOUR_GITHUB_OAUTH_TOKEN
 
-### GraphQL request
+### GraphQL request (without json variables)
+GRAPHQL https://api.github.com/graphql
+Authorization: token {{token}}
+
+query {
+    repository(name: "NativeVim", owner: "boltlessengineer") {
+        name
+            fullName: nameWithOwner
+            description
+            diskUsage
+            forkCount
+            stargazers(first: 5) {
+                totalCount
+                nodes {
+                    login
+                    name
+                }
+            }
+        watchers {
+            totalCount
+        }
+    }
+}
+
+### GraphQL request (with json variables)
 GRAPHQL https://api.github.com/graphql
 Authorization: token {{token}}
 

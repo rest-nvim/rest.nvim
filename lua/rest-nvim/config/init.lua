@@ -123,6 +123,7 @@ config = vim.tbl_deep_extend("force", default_config, opts)
 local ok, err = check.validate(config)
 
 if not ok then
+    ---@cast err string
     vim.notify(err, vim.log.levels.ERROR, { title = "rest.nvim" })
 end
 
