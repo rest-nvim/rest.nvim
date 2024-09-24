@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.1](https://github.com/rest-nvim/rest.nvim/compare/v3.8.0...v3.8.1) (2024-09-24)
+
+
+### Bug Fixes
+
+* handle graphql without json variables (close [#470](https://github.com/rest-nvim/rest.nvim/issues/470)) ([851f19c](https://github.com/rest-nvim/rest.nvim/commit/851f19c29bfc9b51ee8f52749cd9a1e1b35901d9))
+
 ## [3.8.0](https://github.com/rest-nvim/rest.nvim/compare/v3.7.0...v3.8.0) (2024-09-20)
 
 
