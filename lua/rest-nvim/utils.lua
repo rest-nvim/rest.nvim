@@ -291,6 +291,10 @@ end
 ---@return boolean ok Whether formatting is done with `gq`
 function utils.gq_lines(lines, filetype)
     logger.debug("formatting with `gq`")
+    if #lines == 0 then
+        logger.debug("content is empty. Formatting is canceled")
+        return lines, true
+    end
     local format_buf = vim.api.nvim_create_buf(false, true)
     local ok, errmsg = pcall(vim.api.nvim_set_option_value, "filetype", filetype, { buf = format_buf })
     if not ok then

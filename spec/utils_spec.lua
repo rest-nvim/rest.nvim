@@ -85,4 +85,8 @@ describe("gq_lines", function()
             "</note>",
         }, utils.gq_lines(lines, "xml"))
     end)
+    it("handle empty content #473", function()
+        local lines = {}
+        assert.same({}, utils.gq_lines(lines, "json"))
+    end)
 end)
