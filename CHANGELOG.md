@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.2](https://github.com/rest-nvim/rest.nvim/compare/v3.8.1...v3.8.2) (2024-09-28)
+
+
+### Bug Fixes
+
+* handle when format target is empty string (# 473) ([c703d54](https://github.com/rest-nvim/rest.nvim/commit/c703d54440c90e4fbecda3748c6286551d57eab0))
+
 ## [3.8.1](https://github.com/rest-nvim/rest.nvim/compare/v3.8.0...v3.8.1) (2024-09-24)
 
 
