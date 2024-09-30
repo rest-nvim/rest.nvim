@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.3](https://github.com/rest-nvim/rest.nvim/compare/v3.8.2...v3.8.3) (2024-09-30)
+
+
+### Bug Fixes
+
+* **utils:** safely call `:normal gggqG` (fix [#478](https://github.com/rest-nvim/rest.nvim/issues/478)) ([be234c8](https://github.com/rest-nvim/rest.nvim/commit/be234c8236ff9df06f620ed70d5bd730854fb0a4))
+
 ## [3.8.2](https://github.com/rest-nvim/rest.nvim/compare/v3.8.1...v3.8.2) (2024-09-28)
 
 
