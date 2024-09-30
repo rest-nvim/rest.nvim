@@ -43,6 +43,7 @@ local function rest_env_select(_)
                 return true
             end,
             previewer = conf.file_previewer(opts),
+            sorter = conf.file_sorter(opts),
         })
         :find()
 end
