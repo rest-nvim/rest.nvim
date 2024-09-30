@@ -327,7 +327,13 @@ function utils.gq_lines(lines, filetype)
         return lines, false
     end
     vim.api.nvim_buf_call(format_buf, function()
-        vim.cmd("silent normal gggqG")
+        -- HACK: dirty fix for neovim/neovim#30593
+        local gq_ok, res = pcall(vim.api.nvim_command, "silent normal gggqG")
+        if not gq_ok then
+            local msg = ("formatting %s filetype failed"):format(filetype)
+            logger.warn(msg, res)
+            vim.notify(msg, vim.log.levels.WARN, { title = "rest.nvim" })
+        end
     end)
     local buf_lines = vim.api.nvim_buf_get_lines(format_buf, 0, -1, false)
     vim.api.nvim_buf_delete(format_buf, { force = true })
