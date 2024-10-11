@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.8.3](https://github.com/rest-nvim/rest.nvim/compare/v3.8.2...v3.8.3) (2024-10-11)
+
+
+### Bug Fixes
+
+* **telescope:** pass correct file sorter (close [#481](https://github.com/rest-nvim/rest.nvim/issues/481)) ([999c867](https://github.com/rest-nvim/rest.nvim/commit/999c8673641dcb26dced133e3953d4a91b9ed753))
+* **utils:** safely call `:normal gggqG` (fix [#478](https://github.com/rest-nvim/rest.nvim/issues/478)) ([be234c8](https://github.com/rest-nvim/rest.nvim/commit/be234c8236ff9df06f620ed70d5bd730854fb0a4))
+
 ## [3.8.2](https://github.com/rest-nvim/rest.nvim/compare/v3.8.1...v3.8.2) (2024-09-28)
 
 
