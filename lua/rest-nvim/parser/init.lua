@@ -97,11 +97,12 @@ end
 
 ---@param str string
 ---@return string?
-local function parse_urlencoded_form(str)
+local function parse_urlencoded_form(str, context)
     local query_pairs = vim.split(str, "&")
     return vim.iter(query_pairs)
         :map(function(query)
             local key, value = query:match("([^=]+)=?(.*)")
+            value = expand_variables(str, context)
             if not key then
                 logger.error(("Error while parsing query '%s' from urlencoded form '%s'"):format(query_pairs, str))
                 return nil
@@ -181,7 +182,7 @@ function parser.parse_body(content_type, body_node, source, context)
         local text = vim.treesitter.get_node_text(body_node, source)
         if content_type and vim.startswith(content_type, "application/x-www-form-urlencoded") then
             body.__TYPE = "raw"
-            body.data = parse_urlencoded_form(text)
+            body.data = parse_urlencoded_form(text, context)
             if not body.data then
                 logger.error("Error while parsing urlencoded form")
                 return nil
