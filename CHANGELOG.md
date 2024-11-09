@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.4](https://github.com/rest-nvim/rest.nvim/compare/v3.8.3...v3.8.4) (2024-11-09)
+
+
+### Bug Fixes
+
+* expand variables in content type application/x-www-form-urlencoded ([#491](https://github.com/rest-nvim/rest.nvim/issues/491)) ([4eb74dc](https://github.com/rest-nvim/rest.nvim/commit/4eb74dcebb3a239246153f3d1c5c0fc8552980f3))
+
 ## [3.8.3](https://github.com/rest-nvim/rest.nvim/compare/v3.8.2...v3.8.3) (2024-10-11)
 
 
