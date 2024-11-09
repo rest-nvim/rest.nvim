@@ -326,6 +326,23 @@ Authorization: Bearer {{TOKEN}}
 }]],
             }, req.body)
         end)
+        it("parse with variables in urlencoded body", function ()
+            vim.env["VAR"] = "variable"
+            local source = [[POST https://example.com
+Content-Type: application/x-www-form-urlencoded
+
+foo={{VAR}}
+]]
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(0))
+            local req = parser.parse(req_node, source)
+            assert.not_nil(req)
+            ---@cast req rest.Request
+            assert.same({
+                __TYPE = "raw",
+                data = "foo=variable"
+            }, req.body)
+        end)
         it("parse variable declaration", function()
             local source = "@foo = bar\n"
             local _, tree = utils.ts_parse_source(source)
