@@ -326,7 +326,7 @@ Authorization: Bearer {{TOKEN}}
 }]],
             }, req.body)
         end)
-        it("parse with variables in urlencoded body", function ()
+        it("parse with variables in urlencoded body", function()
             vim.env["VAR"] = "variable"
             local source = [[POST https://example.com
 Content-Type: application/x-www-form-urlencoded
@@ -340,7 +340,7 @@ foo={{VAR}}
             ---@cast req rest.Request
             assert.same({
                 __TYPE = "raw",
-                data = "foo=variable"
+                data = "foo=variable",
             }, req.body)
         end)
         it("parse variable declaration", function()
