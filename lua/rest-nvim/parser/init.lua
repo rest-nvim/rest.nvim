@@ -182,6 +182,7 @@ function parser.parse_body(content_type, body_node, source, context)
         if content_type and vim.startswith(content_type, "application/x-www-form-urlencoded") then
             body.__TYPE = "raw"
             body.data = parse_urlencoded_form(text)
+            body.data = expand_variables(body.data, context)
             if not body.data then
                 logger.error("Error while parsing urlencoded form")
                 return nil
