@@ -31,7 +31,6 @@ local Context = require("rest-nvim.context").Context
 ---@field status rest.Response.status Status information from response
 ---@field body string? Raw response body
 ---@field headers table<string,string[]> Response headers
----@field statistics table<string,string> Response statistics
 
 ---@class rest.Response.status
 ---@field code number
@@ -69,8 +68,10 @@ local function run_request(req)
             vim.notify("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
             return
         end
-        ---@cast res rest.Response
+        ---@cast res rest.Result
         logger.info("request success")
+
+        local last_response = res.requests[#res.requests].response
 
         -- run request handler scripts
         logger.debug(("run %d handers"):format(#req.handlers))
@@ -80,7 +81,7 @@ local function run_request(req)
         logger.info("handler done")
 
         _G.rest_request = req
-        _G.rest_response = res
+        _G.rest_response = last_response
         vim.api.nvim_exec_autocmds("User", {
             pattern = { "RestResponse", "RestResponsePre" },
         })
@@ -88,10 +89,10 @@ local function run_request(req)
         _G.rest_response = nil
 
         -- update cookie jar
-        jar.update_jar(req.url, res)
+        jar.update_jar(req.url, last_response)
 
         -- update result UI
-        ui.update({ response = res })
+        ui.update({ response = last_response, statistics = res.statistics })
     end)
     -- FIXME(boltless): return future to pass the command state
 end

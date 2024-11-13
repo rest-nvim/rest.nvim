@@ -146,20 +146,128 @@ describe("curl cli response parser", function()
             "{ [15 bytes data]",
             "* Connection #0 to host localhost left intact",
         }
-        local response = parser.parse_verbose(stdin)
+        local result = parser.parse_verbose(stdin)
         assert.same({
-            status = {
-                version = "HTTP/1.1",
-                code = 200,
-                text = "OK",
+            request = {
+                method = "GET",
+                url = "/",
+                http_version = "HTTP/1.1",
+                headers = {
+                    host = { "localhost:8000" },
+                    ["user-agent"] = { "curl/7.81.0" },
+                    accept = { "*/*" },
+                },
             },
-            statistics = {},
-            headers = {
-                ["content-type"] = { "text/plain" },
-                date = { "Tue, 06 Aug 2024 12:22:44 GMT" },
-                ["content-length"] = { "15" },
+            response = {
+                status = {
+                    version = "HTTP/1.1",
+                    code = 200,
+                    text = "OK",
+                },
+                headers = {
+                    ["content-type"] = { "text/plain" },
+                    date = { "Tue, 06 Aug 2024 12:22:44 GMT" },
+                    ["content-length"] = { "15" },
+                },
             },
-        }, response)
+        }, result.requests[1])
+    end)
+    it("from redirected request", function()
+        local stdin = {
+            "*   Trying 127.0.0.1:8000...",
+            "* Connected to localhost (127.0.0.1) port 8000 (#0)",
+            -- first request
+            "> GET /api/v1 HTTP/1.1",
+            "> Host: localhost:8000",
+            "> User-Agent: curl/7.81.0",
+            "> Accept: */*",
+            ">",
+            --
+            "* Mark bundle as not supporting multiuse",
+            -- first response
+            "< HTTP/1.1 301 Moved Permanently",
+            "< Content-Type: text/html; charset=utf-8",
+            "< Location: /api/v1/",
+            "< Date: Tue, 03 Sep 2024 17:28:35 GMT",
+            "< Content-Length: 43",
+            "<",
+            --
+            "* Ignoring the response-body",
+            "{ [43 bytes data]",
+            "* Connection #0 to host localhost left intact",
+            "* Issue another request to this URL: 'http://localhost:8000/api/v1/'",
+            "* Found bundle for host localhost: 0xaaaac8b6bca0 [serially]",
+            "* Can not multiplex, even if we wanted to!",
+            "* Re-using existing connection! (#0) with host localhost",
+            "* Connected to localhost (127.0.0.1) port 8000 (#0)",
+            -- second request
+            "> GET /api/v1/ HTTP/1.1",
+            "> Host: localhost:8000",
+            "> User-Agent: curl/7.81.0",
+            "> Accept: */*",
+            ">",
+            --
+            "* Mark bundle as not supporting multiuse",
+            -- second response
+            "< HTTP/1.1 200 OK",
+            "< Date: Tue, 03 Sep 2024 17:28:35 GMT",
+            "< Content-Length: 24",
+            "< Content-Type: text/plain; charset=utf-8",
+            "<",
+            "{ [24 bytes data]",
+            --
+            "* Connection #0 to host localhost left intact",
+        }
+        local result = parser.parse_verbose(stdin)
+        assert.same({
+            request = {
+                method = "GET",
+                url = "/api/v1",
+                http_version = "HTTP/1.1",
+                headers = {
+                    host = { "localhost:8000" },
+                    ["user-agent"] = { "curl/7.81.0" },
+                    accept = { "*/*" },
+                },
+            },
+            response = {
+                status = {
+                    version = "HTTP/1.1",
+                    code = 301,
+                    text = "Moved Permanently",
+                },
+                headers = {
+                    ["content-type"] = { "text/html; charset=utf-8" },
+                    date = { "Tue, 03 Sep 2024 17:28:35 GMT" },
+                    ["content-length"] = { "43" },
+                    location = { "/api/v1/" },
+                },
+            },
+        }, result.requests[1])
+        assert.same({
+            request = {
+                method = "GET",
+                url = "/api/v1/",
+                http_version = "HTTP/1.1",
+                headers = {
+                    host = { "localhost:8000" },
+                    ["user-agent"] = { "curl/7.81.0" },
+                    accept = { "*/*" },
+                },
+            },
+            response = {
+                status = {
+                    version = "HTTP/1.1",
+                    code = 200,
+                    text = "OK",
+                },
+                headers = {
+                    ["content-type"] = { "text/plain; charset=utf-8" },
+                    date = { "Tue, 03 Sep 2024 17:28:35 GMT" },
+                    ["content-length"] = { "24" },
+                },
+            },
+        }, result.requests[2])
     end)
 end)
 
