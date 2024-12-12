@@ -42,11 +42,12 @@ CLI.
 ## Install
 
 > [!NOTE]
->
-> rest.nvim requires Neovim >= 0.10.1 to work.
+> Check [this troubleshooting guide](./INSTALLATION_TROUBLESHOOTING.md) if you have any issues while
+> installing this plugin.
 
 ### Dependencies
 
+- Neovim >= 0.10.1
 - `curl`
 - [tree-sitter-http] (`scm` version)
 
