@@ -105,6 +105,17 @@ function utils.parse_http_time(time_str)
     return os.time(time_table) + gmt_offset
 end
 
+---parse url to domain and path
+---path will be fallback to "/" if not found
+---@param url string
+---@return string domain
+---@return string path
+function utils.parse_url(url)
+    local domain = url:match("^%a+://([^/]+)") or url:match("^([^/]+)")
+    local path = url:match("[^:/]+(/[^?#]*)") or "/"
+    return domain, path
+end
+
 --- Default transformers for statistics
 local transform = {
     ---Transform `time` into a readable typed time (e.g. 200ms)

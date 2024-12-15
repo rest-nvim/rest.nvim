@@ -7,6 +7,27 @@ local function open(path)
     return 0
 end
 
+describe("basic utils", function()
+    it("parse_url", function()
+        local function parse_url(url)
+            local domain, path = utils.parse_url(url)
+            return { domain = domain, path = path }
+        end
+        assert.same({
+            domain = "domain.com",
+            path = "/some/path",
+        }, parse_url("http://domain.com/some/path?query=value"))
+        assert.same({
+            domain = "domain.com",
+            path = "/some/path",
+        }, parse_url("domain.com/some/path?query=value"))
+        assert.same({
+            domain = "localhost:8000",
+            path = "/some/path",
+        }, parse_url("localhost:8000/some/path?query=value"))
+    end)
+end)
+
 describe("tree-sitter utils", function()
     local source = open("spec/examples/script/post_request_script.http")
     it("ts_parse_source", function()

@@ -54,20 +54,6 @@ function M.load_jar()
     end
 end
 
----parse url to domain and path
----path will be fallback to "/" if not found
----@param url string
----@return string domain
----@return string path
-local function parse_url(url)
-    local domain, path = url:match("^%a+://([^/]+)(/[^?#]*)$")
-    if not path then
-        domain = url:match("^%a+://([^/]+)")
-        path = "/"
-    end
-    return domain, path
-end
-
 ---@private
 ---parse Set-Cookie header to cookie
 ---@param req_url string request URL to be used as fallback domain & path of cookie
@@ -105,7 +91,7 @@ function M.parse_set_cookie(req_url, header)
             cookie.priority = val
         end
     end
-    cookie.domain = cookie.domain or ("." .. req_url:match("^%a+://([^/]+)"))
+    cookie.domain = cookie.domain or ("." .. utils.parse_url(req_url))
     cookie.path = cookie.path or "/"
     if max_age == -1 then
         cookie.expires = -1
@@ -184,7 +170,7 @@ function M.save_jar()
 end
 
 local function match_cookie(url, cookie)
-    local req_domain, req_path = parse_url(url)
+    local req_domain, req_path = utils.parse_url(url)
     if not req_domain then
         return false
     end
