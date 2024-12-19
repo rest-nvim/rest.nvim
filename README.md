@@ -252,6 +252,115 @@ response.body = vim.json.encode(json)
 Put `# @lang=lua` comment just above any script elements.
 Scripts without `@lang` will be parsed as javascript code to match with [http spec](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#response-handling).
 
+### Reference configs
+
+The configs in this section are to be used as a reference, you may use it as is, or modify it to suit
+your needs.
+
+#### LazyVim
+
+<details>
+  <summary>plugins/rest-nvim.lua</summary>
+
+```lua
+return {
+  {
+    "rest-nvim/tree-sitter-http",
+  },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        "http",
+      },
+    },
+  },
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    opts_extend = { "spec" },
+    opts = {
+      spec = {
+        {
+          mode = { "n", "v" },
+          { "<leader>h", group = "rest", icon = { icon = "󰒲", color = "purple" } },
+        },
+      },
+    },
+  },
+  {
+    "rest-nvim/rest.nvim",
+    event = "VeryLazy",
+    ft = { "http" },
+    keys = {
+      {
+        "<leader>ho",
+        "<cmd>Rest open<cr>",
+        desc = "Open result pane",
+      },
+      {
+        "<leader>hr",
+        "<cmd>Rest run<cr>",
+        desc = "Run request under the cursor",
+      },
+      {
+        "<leader>hn",
+        function()
+          vim.ui.input({ prompt = "Enter request @name" }, function(input)
+            if input and input ~= "" then
+              vim.cmd("Rest run " .. input)
+            else
+              vim.notify("No input provided", vim.log.levels.ERROR) -- Show error
+            end
+          end)
+        end,
+        desc = "Run request with name <name>",
+      },
+      {
+        "<leader>hh",
+        "<cmd>Rest last<cr>",
+        desc = "Run request under the cursor",
+      },
+      {
+        "<leader>hl",
+        "<cmd>Rest logs<cr>",
+        desc = "Edit logs file",
+      },
+      {
+        "<leader>hc",
+        "<cmd>Rest cookies<cr>",
+        desc = "Edit cookies file",
+      },
+      {
+        "<leader>he",
+        "<cmd>Rest env show<cr>",
+        desc = "Show dotenv file registered to current .http file",
+      },
+      {
+        "<leader>h.",
+        "<cmd>Rest env select<cr>",
+        desc = "Select & register .env file with vim.ui.select()",
+      },
+      {
+        "<leader>hs",
+        function()
+          vim.ui.input({ prompt = "Enter env path" }, function(input)
+            if input and input ~= "" then
+              vim.cmd("Rest env set " .. input)
+            else
+              vim.notify("No input provided", vim.log.levels.ERROR) -- Show error
+            end
+          end)
+        end,
+        desc = "Register .env file to current .http file",
+      },
+    },
+  },
+}
+```
+
+</details>
+
 ## Extensions
 
 ### Telescope Extension
@@ -315,7 +424,7 @@ Here is a preview of the component working :)
 
 ## Contribute
 
-1. Fork it (https://github.com/rest-nvim/rest.nvim/fork)
+1. Fork it (<https://github.com/rest-nvim/rest.nvim/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'feat: add some feature'`)
 4. Push to the branch (`git push -u origin my-new-feature`)
