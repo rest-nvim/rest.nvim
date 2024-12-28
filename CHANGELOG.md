@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.1](https://github.com/rest-nvim/rest.nvim/compare/v3.9.0...v3.9.1) (2024-12-28)
+
+
+### Bug Fixes
+
+* **ci:** install tree-sitter dependencies before luarocks release ([d41334d](https://github.com/rest-nvim/rest.nvim/commit/d41334da3f368cec47988283c62a76be2c6e2ef1))
+
 ## [3.9.0](https://github.com/rest-nvim/rest.nvim/compare/v3.8.5...v3.9.0) (2024-12-28)
 
 
