@@ -10,6 +10,15 @@ jobs:
   luarocks-upload:
     runs-on: ubuntu-22.04
     steps:
+      # HACK: move tree-sitter-cli & c/c++ compilers to luarocks-build-treesitter-parser dependencies
+      - name: Install tree-sitter CLI
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: tree-sitter-cli
+      - name: Install C/C++ Compiler
+        uses: rlalik/setup-cpp-compiler@master
+        with:
+          compiler: clang-latest
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Required to count the commits
@@ -33,6 +42,7 @@ jobs:
             mimetypes
             xml2lua
             fidget.nvim
+            tree-sitter-http == 0.0.33
           test_dependencies: |
             nlua
           copy_directories: |
