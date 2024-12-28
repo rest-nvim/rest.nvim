@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.8.5](https://github.com/rest-nvim/rest.nvim/compare/v3.8.4...v3.8.5) (2024-12-28)
+
+
+### Bug Fixes
+
+* guess correct filetype from `vnd.api+json` style content-type ([576f8e6](https://github.com/rest-nvim/rest.nvim/commit/576f8e6a40345f51f7bdb12f5df2be0382f7d6ca)), closes [#382](https://github.com/rest-nvim/rest.nvim/issues/382)
+* handle localhost domains in cookies ([a52b83b](https://github.com/rest-nvim/rest.nvim/commit/a52b83bd78566e475363660421569c1334f852ba))
+
 ## [3.8.4](https://github.com/rest-nvim/rest.nvim/compare/v3.8.3...v3.8.4) (2024-11-09)
 
 
