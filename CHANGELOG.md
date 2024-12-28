@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/rest-nvim/rest.nvim/compare/v3.8.5...v3.9.0) (2024-12-28)
+
+
+### Features
+
+* use tree-sitter-http parser from luarocks dependency ([e2d9dc8](https://github.com/rest-nvim/rest.nvim/commit/e2d9dc8b0400cb5d52f10925d2c39dfe11663e57))
+
 ## [3.8.5](https://github.com/rest-nvim/rest.nvim/compare/v3.8.4...v3.8.5) (2024-12-28)
 
 
