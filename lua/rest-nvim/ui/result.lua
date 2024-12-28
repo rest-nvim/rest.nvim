@@ -78,6 +78,8 @@ local panes = {
                 local body_meta = {}
                 if content_type then
                     local base_type, res_type = content_type[1]:match("(.*)/([^;]+)")
+                    -- HACK: handle application/vnd.api+json style content types
+                    res_type = res_type:match(".+%+(.*)") or res_type
                     if base_type == "image" then
                         body = { "Binary(image) answer" }
                     elseif res_type == "octet_stream" then
