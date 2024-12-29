@@ -135,6 +135,143 @@ function M.last_request()
     return rest_nvim_last_request
 end
 
+function M.download_graphql_schema()
+    local req_node = parser.get_request_node()
+    if not req_node then
+        return
+    end
+    local ctx = Context:new()
+    if config.env.enable and vim.b._rest_nvim_env_file then
+        ctx:load_file(vim.b._rest_nvim_env_file)
+    end
+    local req = parser.parse(req_node, 0, ctx)
+    if not req then
+        return
+    end
+    if req.body.__TYPE ~= "graphql" then
+        return
+    end
+    -- TODO: read from introspection.graphql file
+    req.body.data = [[{"query":"query IntrospectionQuery {
+  __schema {
+
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      ...FullType
+    }
+    directives {
+      name
+      description
+
+      locations
+      args {
+        ...InputValue
+      }
+    }
+  }
+}
+
+fragment FullType on __Type {
+  kind
+  name
+  description
+
+  fields(includeDeprecated: true) {
+    name
+    description
+    args {
+      ...InputValue
+    }
+    type {
+      ...TypeRef
+    }
+    isDeprecated
+    deprecationReason
+  }
+  inputFields {
+    ...InputValue
+  }
+  interfaces {
+    ...TypeRef
+  }
+  enumValues(includeDeprecated: true) {
+    name
+    description
+    isDeprecated
+    deprecationReason
+  }
+  possibleTypes {
+    ...TypeRef
+  }
+}
+
+fragment InputValue on __InputValue {
+  name
+  description
+  type { ...TypeRef }
+  defaultValue
+
+
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}"
+} ]]
+    req.body.data = req.body.data:gsub("\n", " ")
+    local client = clients.get_available_clients(req)[1]
+    if not client then
+        return
+    end
+    nio.run(function()
+        local ok, res = pcall(client.request(req).wait)
+        if not ok then
+            return
+        end
+        if not res.body then
+            return
+        end
+        local filename = vim.fn.expand("%:t:r") .. ".graphql-schema.json"
+        local file = io.open(filename, "w")
+        if not file then
+            return
+        end
+        file:write(res.body)
+        file:close()
+    end)
+end
+
 -- ---run all requests in current file with same context
 -- function M.run_all()
 --     local reqs = parser.get_all_request_nodes(0)
