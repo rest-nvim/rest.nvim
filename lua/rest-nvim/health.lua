@@ -73,9 +73,34 @@ local function formatter_health()
     vim.health.info("You can set formatter for each filetype via 'formatexpr' or 'formatprg' option")
 end
 
+-- TODO: check if http parser exist (it may not exist in rtp but registered manually)
+local function parser_health()
+    vim.health.start("tree-sitter parsers")
+    local parser = vim.api.nvim_get_runtime_file('parser/http.so', true)[1]
+    local parsername = vim.fn.fnamemodify(parser, ':t:r')
+    local is_loadable, err_or_nil = pcall(vim.treesitter.language.add, parsername)
+
+    if not is_loadable then
+        vim.health.error(
+            string.format(
+                'Parser "%s" failed to load (path: %s): %s',
+                parsername,
+                parser,
+                err_or_nil or '?'
+            )
+        )
+    else
+        local lang = vim.treesitter.language.inspect(parsername)
+        vim.health.ok(
+            string.format('Parser: %-20s ABI: %d, path: %s', parsername, lang._abi_version, parser)
+        )
+    end
+end
+
 function health.check()
     install_health()
     formatter_health()
+    parser_health()
 end
 
 return health
