@@ -49,13 +49,12 @@ CLI.
 
 - Neovim >= 0.10.1
 - `curl`
-- [tree-sitter-http] (`scm` version)
+- [tree-sitter-http] (if you use `lazy.nvim`)
 
 ### [rocks.nvim](https://github.com/nvim-neorocks/rocks.nvim) (recommended)
 
 ```vim
 :Rocks install rest.nvim
-:Rocks install tree-sitter-http dev
 ```
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -63,12 +62,19 @@ CLI.
 ```lua
 {
   "rest-nvim/rest.nvim",
+  dependencies = {
+    "nvim-treesitter/nvim-treesitter",
+    opts = function (_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
+      table.insert(opts.ensure_installed, "http")
+    end,
+  }
 }
 ```
 
 > [!NOTE]
-> you also need to install latest [tree-sitter-http] parser using
-> `:TSInstall http`
+> You also need to install latest [tree-sitter-http] parser using
+> `:TSInstall http` if you are using `lazy.nvim`
 
 <!-- TODO: I'm not sure packer supporst tree-sitter installation via luarocks -->
 <!-- ### [packer.nvim](https://github.com/wbthomason/packer.nvim) -->
