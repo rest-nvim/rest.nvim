@@ -5,7 +5,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     neorocks.url = "github:nvim-neorocks/neorocks";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     cats-doc.url = "github:mrcjkb/vimcats";
   };
 
@@ -13,15 +13,27 @@
     self,
     nixpkgs,
     neorocks,
-    flake-utils,
+    flake-parts,
     ...
   }: let
     test-overlay = import ./nix/test-overlay.nix {
       inherit self inputs;
     };
   in
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+      perSystem = {
+        config,
+        self',
+        inputs',
+        system,
+        ...
+      }: let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
@@ -35,11 +47,15 @@
           shellHook = ''
             export LUA_PATH="$(luarocks path --lr-path --lua-version 5.1 --local)"
             export LUA_CPATH="$(luarocks path --lr-cpath --lua-version 5.1 --local)"
+            # HACK: install tree-sitter-http manually
+            # TODO: add it as a test dependency using nix
+            luarocks install --local --lua-version 5.1 --dev tree-sitter-http
           '';
           buildInputs = [
             pkgs.sumneko-lua-language-server
             pkgs.stylua
             pkgs.docgen
+            pkgs.neovim
             (pkgs.lua5_1.withPackages (ps: with ps; [luarocks luacheck]))
           ];
         };
@@ -60,10 +76,12 @@
         };
 
         checks = {
-          neorocks-test = pkgs.neorocksTest {
-            src = self;
-            name = "rest.nvim";
-          };
+          inherit
+            (pkgs)
+            # integration-stable
+            integration-nightly
+            ;
         };
-      });
+      };
+    };
 }
