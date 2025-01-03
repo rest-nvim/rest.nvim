@@ -56,7 +56,7 @@ end
 ---Execute an HTTP request using cURL
 ---return return nil if execution failed
 ---@param req rest.Request Request data to be passed to cURL
----@return rest.Response? info The request information (url, method, headers, body, etc)
+---@return rest.Result?
 function client.request(req)
     logger.info("sending request to: " .. req.url)
     if not found_curl then
@@ -162,8 +162,13 @@ function client.request(req)
         logger.error("Something went wrong when making the request with cURL:\n" .. curl_utils.curl_error(err:no()))
         return
     end
+    local status_str = table.remove(res_raw_headers, 1)
     ---@diagnostic disable-next-line: invisible
-    local status = curl_cli.parser.parse_verbose_status(table.remove(res_raw_headers, 1))
+    local status = curl_cli.parser.parse_res_status(status_str)
+    if not status then
+        logger.error("can't parse response status:", status_str)
+        return
+    end
     local res_headers = {}
     for _, header in ipairs(res_raw_headers) do
         ---@diagnostic disable-next-line: invisible
@@ -180,12 +185,25 @@ function client.request(req)
         status = status,
         headers = res_headers,
         body = table.concat(res_result),
-        statistics = get_stats(req_, {}),
     }
     logger.debug(vim.inspect(res.headers))
     res.status.text = vim.trim(res.status.text)
     req_:close()
-    return res
+    ---@type rest.Result
+    return {
+        requests = {
+            {
+                request = {
+                    method = req.method,
+                    url = req.url,
+                    http_version = req.http_version or "HTTP/1.1",
+                    headers = req.headers,
+                },
+                response = res,
+            },
+        },
+        statistics = get_stats(req_, {}),
+    }
 end
 
 return client
