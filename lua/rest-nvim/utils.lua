@@ -14,12 +14,19 @@ local utils = {}
 -- NOTE: vim.loop has been renamed to vim.uv in Neovim >= 0.10 and will be removed later
 local uv = vim.uv or vim.loop
 
+-- TODO: refactor the escape algorithm
+-- - grab string after `?`
+-- - split them with `&`, `=`
+-- - url-encode each uricomponents
+-- - concat again to original text
+-- - rename option name to `smart_encode_uri`
+
 ---Encodes a string into its escaped hexadecimal representation
 ---@param str string Binary string to be encoded
 ---@param only_necessary? boolean Encode only necessary characters
 ---@return string
 function utils.escape(str, only_necessary)
-    local ignore = "%w%-%.%_%~%+"
+    local ignore = "%w%-%.%_%~%+%%"
     if only_necessary then
         ignore = ignore .. "%:%/%?%=%&%#%@"
     end
@@ -34,6 +41,8 @@ function utils.escape(str, only_necessary)
     return encoded
 end
 
+-- TODO: proper decodeURI from https://chromium.googlesource.com/v8/v8/+/3.26.4/src/uri.js#213
+
 ---@param str string
 function utils.url_decode(str)
     str = string.gsub(str, "%+", " ")
@@ -41,6 +50,59 @@ function utils.url_decode(str)
         return string.char(tonumber(hex, 16))
     end)
     return str
+end
+
+---@param uri string
+---@param unescape fun(c:string):string
+---@return string
+local function encode(uri, unescape)
+    uri = uri:gsub(".", function(c)
+        c = unescape(c) and c or string.format("%%%02X", c:byte())
+        return c
+    end)
+    return uri
+end
+
+---@param c string
+---@return boolean
+local function is_alphanumeric(c)
+    -- stylua: ignore
+    return ('A' <= c and c <= 'Z')
+        or ('a' <= c and c <= 'z')
+        or ('0' <= c and c <= '9')
+end
+
+---reference: https://chromium.googlesource.com/v8/v8/+/3.26.4/src/uri.js#329
+---@param uri string
+---@return string
+function utils.encodeURI(uri)
+    local function unescape_predicate(c)
+        return is_alphanumeric(c)
+            or c == "!"
+            or ("#" <= c and c <= "$") -- #$
+            or ("&" <= c and c <= "/") -- &'()*+,-./
+            or (":" <= c and c <= ";") -- :;
+            or c == "="
+            or ("?" <= c and c <= "@") -- ?@
+            or c == "_"
+            or c == "~"
+    end
+    return encode(uri, unescape_predicate)
+end
+
+---reference: https://chromium.googlesource.com/v8/v8/+/3.26.4/src/uri.js#358
+---@param uri string
+---@return string
+function utils.encodeURIComponents(uri)
+    local function unescape_predicate(c)
+        return is_alphanumeric(c)
+            or c == "!"
+            or ("(" <= c and c <= "*") -- ()*
+            or ("-" <= c and c <= ".") -- -.
+            or c == "_"
+            or c == "~"
+    end
+    return encode(uri, unescape_predicate)
 end
 
 ---Check if a file exists in the given `path`
