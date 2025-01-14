@@ -59,6 +59,9 @@ local function run_request(req)
     _G.rest_request = nil
 
     ui.update({ request = req })
+    vim.api.nvim_exec_autocmds("User", {
+        pattern = { "RestRequestPost" },
+    })
 
     -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
     -- callback from `vim.system()` call)
@@ -92,6 +95,9 @@ local function run_request(req)
 
         -- update result UI
         ui.update({ response = res })
+        vim.api.nvim_exec_autocmds("User", {
+            pattern = { "RestResponsePost" },
+        })
     end)
     -- FIXME(boltless): return future to pass the command state
 end
