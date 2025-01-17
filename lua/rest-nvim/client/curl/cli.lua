@@ -48,11 +48,65 @@ end
 ---@private
 local parser = {}
 
+---@class rest.Result
+---@field requests rest.Response_[]
+---@field statistics table<string,string> Response statistics
+
+---@class rest.Response_
+---@field request rest.RequestCore
+---@field response rest.Response
+
+---@class rest.RequestCore
+---@field method string
+---@field url string
+---@field http_version string
+---@field headers table<string,string[]>
+
 ---@package
 ---@param str string
----@return rest.Response.status
-function parser.parse_verbose_status(str)
-    local version, code, text = str:match("^(%S+) (%d+) ?(.*)")
+---@return rest.RequestCore?
+function parser.parse_req_info(str)
+    local method, url, version = str:match("^([A-Z]+) (.+) (HTTP/[%d%.]+)")
+    if not method then
+        return
+    end
+    return {
+        method = method,
+        url = url,
+        http_version = version,
+        headers = {},
+    }
+end
+
+function parser.parse_req_header(str, requests)
+    local info = parser.parse_req_info(str)
+    if info then
+        table.insert(requests, {
+            request = info,
+            response = {},
+        })
+        return
+    end
+    local req = requests[#requests].request
+    local key, value = parser.parse_header_pair(str)
+    if key then
+        if not req.headers[key] then
+            req.headers[key] = {}
+        end
+        table.insert(req.headers[key], value)
+    else
+        log.error("Error while parsing verbose curl output header:", str)
+    end
+end
+
+---@package
+---@param str string
+---@return rest.Response.status?
+function parser.parse_res_status(str)
+    local version, code, text = str:match("^(HTTP/[%d%.]+) (%d+) ?(.*)")
+    if not version then
+        return
+    end
     return {
         version = version,
         code = tonumber(code),
@@ -73,22 +127,49 @@ function parser.parse_header_pair(str)
 end
 
 ---@package
+---@param str string
+function parser.parse_res_header(str, requests)
+    local status = parser.parse_res_status(str)
+    if status then
+        -- reset response object
+        requests[#requests].response = {
+            status = status,
+            headers = {},
+        }
+        return
+    end
+    local res = requests[#requests].response
+    local key, value = parser.parse_header_pair(str)
+    if key then
+        if not res.headers[key] then
+            res.headers[key] = {}
+        end
+        table.insert(res.headers[key], value)
+    else
+        log.error("Error while parsing verbose curl output header:", str)
+    end
+end
+
+---@package
+---@param idx number
 ---@param line string
----@return {prefix:string,str:string?}|nil
-function parser.parse_verbose_line(line)
+---@return {idx:number,prefix:string,str:string?}|nil
+function parser.lex_verbose_line(idx, line)
     local prefix, str = line:match("(.) ?(.*)")
+    log.debug("line", idx, line)
     if not prefix then
-        log.error("Error while parsing verbose curl output:\n" .. line)
+        log.error(("Error while parsing verbose curl output at line %d:"):format(idx), line)
         return
     end
     return {
+        idx = idx,
         prefix = prefix,
         str = str,
     }
 end
 
 local _VERBOSE_PREFIX_META = "*"
-local _VERBOSE_PREFIX_REQ_HEADER = ">"
+local VERBOSE_PREFIX_REQ_HEADER = ">"
 local _VERBOSE_PREFIX_REQ_BODY = "}"
 local VERBOSE_PREFIX_RES_HEADER = "<"
 -- NOTE: we don't parse response body with trace output. response body will
@@ -116,35 +197,32 @@ function parser.parse_stat_pair(str)
 end
 
 ---@param lines string[]
----@return rest.Response
+---@return rest.Result
 function parser.parse_verbose(lines)
-    local response = {
-        headers = {},
+    ---@type rest.Result
+    local result = {
+        ---@type rest.Response_[]
+        requests = {},
+        ---@type table<string,string> Response statistics
         statistics = {},
     }
-    vim.iter(lines):map(parser.parse_verbose_line):each(function(ln)
-        if ln.prefix == VERBOSE_PREFIX_RES_HEADER then
-            if not response.status then
-                -- response status
-                response.status = parser.parse_verbose_status(ln.str)
-            else
-                -- response header
-                local key, value = parser.parse_header_pair(ln.str)
-                if key then
-                    if not response.headers[key] then
-                        response.headers[key] = {}
-                    end
-                    table.insert(response.headers[key], value)
-                end
-            end
+    -- ignore last newline
+    if lines[#lines] == "" then
+        lines[#lines] = nil
+    end
+    vim.iter(lines):enumerate():map(parser.lex_verbose_line):each(function(ln)
+        if ln.prefix == VERBOSE_PREFIX_REQ_HEADER then
+            parser.parse_req_header(ln.str, result.requests)
+        elseif ln.prefix == VERBOSE_PREFIX_RES_HEADER then
+            parser.parse_res_header(ln.str, result.requests)
         elseif ln.prefix == VERBOSE_PREFIX_STAT then
             local key, value = parser.parse_stat_pair(ln.str)
             if key then
-                response.statistics[key] = value
+                result.statistics[key] = value
             end
         end
     end)
-    return response
+    return result
 end
 
 --- Builder ---
@@ -336,7 +414,7 @@ end
 
 ---Send request via `curl` cli
 ---@param request rest.Request Request data to be passed to cURL
----@return nio.control.Future future Future containing rest.Response
+---@return nio.control.Future future Future containing rest.Result
 function curl.request(request)
     local progress_handle = progress.handle.create({
         title = "Executing",
@@ -358,9 +436,9 @@ function curl.request(request)
             progress_handle:report({
                 message = "Parsing response...",
             })
-            local response = parser.parse_verbose(vim.split(sc.stderr, "\n"))
-            response.body = sc.stdout
-            future.set(response)
+            local result = parser.parse_verbose(vim.split(sc.stderr, "\n"))
+            result.requests[#result.requests].response.body = sc.stdout
+            future.set(result)
             progress_handle:report({
                 message = "Success",
             })
