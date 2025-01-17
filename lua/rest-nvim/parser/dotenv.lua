@@ -66,12 +66,15 @@ function M.parse(path, setter)
         local vars_tbl = vim.split(file_contents, "\n", { trimempty = true })
         logger.debug(vars_tbl)
         for _, var in ipairs(vars_tbl) do
-            local variable_name, variable_value = var:match("([^#=%s]+)%s*=%s*([^#]*)")
+            if var:match("^%s*#.*") then goto continue end
+            local variable_name, variable_value = var:match("([^#=%s]+)%s*=%s*(.*)")
             if variable_name then
+                variable_value = variable_value:match("(.*)(%s#.*)") or variable_value
                 variable_value = variable_value:match('^"(.*)"$') or variable_value:match("^'(.*)'$") or variable_value
                 logger.debug("set " .. variable_name .. "=" .. variable_value)
                 setter(variable_name, value_tostring(variable_value))
             end
+            ::continue::
         end
     end
     return true, vars
