@@ -1,3 +1,5 @@
 doc/tags
 .repro/
 repro*.lua
+lua/rest-nvim/script/node_modules
+lua/rest-nvim/script/last_javascript.mjs
