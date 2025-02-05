@@ -167,18 +167,29 @@ local builder = {}
 ---@return string[] args
 function builder.extras(req)
     local args = {}
+
     if config.clients.curl.opts.set_compressed then
-        if
-            vim.iter(req.headers):any(function(key, values)
-                return key == "accept-encoding"
-                    and vim.iter(values):any(function(value)
-                        return value:find("gzip")
-                    end)
+        if vim.iter(req.headers):any(function(key, values)
+            return key == "accept-encoding" and vim.iter(values):any(function(value)
+                return value:find("gzip")
             end)
-        then
+        end) then
             vim.list_extend(args, { "--compressed" })
         end
     end
+    --
+    for domain, _ in pairs(config.clients.curl.opts.certificates) do
+        local target = req.url
+
+        local s, _ = string.find(target, domain, 1, true)
+
+        if s ~= nil then
+            vim.list_extend(args, { "--cert", config.clients.curl.opts.certificates[domain].set_certificate_crt })
+            vim.list_extend(args, { "--key", config.clients.curl.opts.certificates[domain].set_certificate_key })
+            break
+        end
+    end
+
     return args
 end
 
@@ -202,7 +213,7 @@ function builder.headers(header)
     end
     for key, values in pairs(header) do
         for _, value in ipairs(values) do
-            vim.list_extend(args, { "-H", upper(key) .. ": " .. value })
+            vim.list_extend(args, { "-H", "'" .. upper(key) .. ": " .. value .. "'" })
         end
     end
     return args
@@ -273,7 +284,10 @@ function builder.statistics()
             return ("? %s:%%{%s}\n"):format(style.id, style.id)
         end)
         :join("")
-    return { "-w", "%{stderr}" .. format }
+
+    local output_str = "'%{stderr}" .. format .. "'"
+
+    return { "-w", output_str }
 end
 
 ---@package
@@ -320,6 +334,7 @@ function builder.build(req, ignore_stats)
     if not ignore_stats then
         insert(args, builder.STAT_ARGS)
     end
+
     return vim.iter(args):flatten(math.huge):totable()
 end
 
@@ -345,6 +360,7 @@ function curl.request(request)
     })
     local future = nio.control.future()
     local args = builder.build(request)
+
     curl.cli(args, function(sc)
         if sc.code ~= 0 then
             local message = "Something went wrong when making the request with cURL:\n"
