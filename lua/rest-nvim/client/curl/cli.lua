@@ -213,7 +213,7 @@ function builder.headers(header)
     end
     for key, values in pairs(header) do
         for _, value in ipairs(values) do
-            vim.list_extend(args, { "-H", "'" .. upper(key) .. ": " .. value .. "'" })
+            vim.list_extend(args, { "-H", upper(key) .. ": " .. value })
         end
     end
     return args
