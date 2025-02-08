@@ -12,6 +12,8 @@ body:
           required: true
         - label: I am using the latest version of the plugin
           required: true
+        - label: I can reproduce the bug with minimal config below
+          required: false
 
   - type: input
     attributes:
@@ -50,13 +52,10 @@ body:
 
   - type: textarea
     attributes:
-      label: "Other information"
-      description: "Other information that could be helpful with debugging."
-
-  - type: textarea
-    attributes:
-      label: Repro (`lazy.nvim`)
-      description: Minimal `init.lua` using `lazy.nvim` to reproduce this issue. Save as `repro.lua` and run with `nvim -u repro.lua`
+      label: Minimal config for repro (using `lazy.nvim`)
+      description: |
+        Minimal `init.lua` using `lazy.nvim` to reproduce this issue.
+        Save as `repro.lua` and run with `nvim -u repro.lua`.
       render: lua
       value: |
         vim.env.LAZY_STDPATH = ".repro"
@@ -79,4 +78,9 @@ body:
             },
         })
     validations:
-      required: false
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Other information"
+      description: "Other information that could be helpful with debugging."
