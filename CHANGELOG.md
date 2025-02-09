@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.10.0](https://github.com/rest-nvim/rest.nvim/compare/v3.9.1...v3.10.0) (2025-02-09)
+
+
+### Features
+
+* add `rest.Opts.Env.find` option. (fixes [#518](https://github.com/rest-nvim/rest.nvim/issues/518)) ([5c1fc0f](https://github.com/rest-nvim/rest.nvim/commit/5c1fc0f87e622a5a17258bac8dd05fcac31745c2))
+
+
+### Bug Fixes
+
+* correct uri scheme parsing ([62606c3](https://github.com/rest-nvim/rest.nvim/commit/62606c3599bd304227457d6e20580965939b191e))
+
 ## [3.9.1](https://github.com/rest-nvim/rest.nvim/compare/v3.9.0...v3.9.1) (2024-12-28)
 
 
