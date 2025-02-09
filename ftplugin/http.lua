@@ -6,7 +6,11 @@ vim.opt.comments:remove("n:>")
 -- Just in case user didn't enabled auto highlighting option.
 local ok = pcall(vim.treesitter.start, 0, "http")
 if not ok then
-    vim.notify("Failed to attach tree-sitter-http parser to current buffer", vim.log.levels.ERROR, { title = "rest.nvim" })
+    vim.notify(
+        "Failed to attach tree-sitter-http parser to current buffer",
+        vim.log.levels.ERROR,
+        { title = "rest.nvim" }
+    )
 end
 
 local dotenv = require("rest-nvim.dotenv")
