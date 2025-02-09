@@ -210,8 +210,11 @@ rest.Opts.Cookies                                            *rest.Opts.Cookies*
 rest.Opts.Env                                                    *rest.Opts.Env*
 
     Fields: ~
-        {enable?}   (boolean)   Enable the `.env` files support (Default: `true`)
-        {pattern?}  (string)    Environment variables file pattern for telescope.nvim (Default: `"%.env.*"`)
+        {enable?}   (boolean)          Enable the `.env` files support (Default: `true`)
+        {pattern?}  (string)           Environment variables file pattern for telescope.nvim (Default: `"%.env.*"`)
+        {find?}     (fun():string[])   Function lists environment files (used for `:Rest env select`)
+                                       Searches for file matching *rest.Opts.Env.pattern* under same directory by
+                                       default
 
 
 rest.Opts.UI                                                      *rest.Opts.UI*

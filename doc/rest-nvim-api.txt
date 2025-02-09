@@ -153,6 +153,15 @@ parser.parse_request_handler({node}, {source}, {context})
         {context}  (rest.Context)  @return function?
 
 
+                                                    *parser.parse_redirect_path*
+parser.parse_redirect_path({node}, {source}, {ctx})
+
+    Parameters: ~
+        {node}    (TSNode)
+        {source}  (Source)
+        {ctx}     (rest.Context)  @return function?
+
+
 parser.get_request_names({source})                    *parser.get_request_names*
 
     Parameters: ~
@@ -289,6 +298,18 @@ utils.read_file({path})                                        *utils.read_file*
 
 
 utils.parse_http_time()                                  *utils.parse_http_time*
+
+
+utils.parse_url({url})                                         *utils.parse_url*
+    parse url to domain and path
+    path will be fallback to "/" if not found
+
+    Parameters: ~
+        {url}  (string)
+
+    Returns: ~
+        (string)  domain
+        (string)  path
 
 
                                                        *utils.ts_highlight_node*
