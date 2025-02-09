@@ -90,6 +90,10 @@ local default_config = {
             ---@type string Mapping for cycle to next result pane
             next = "L",
         },
+        -- TODO: add panes object as configurable pane list
+        -- including raw or request log
+        panes = require("rest-nvim.ui.panes.preset.browser"),
+        -- panes = require("rest-nvim.ui.panes.preset.onepage"),
     },
     ---@class rest.Config.Highlight
     highlight = {
