@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.10.1](https://github.com/rest-nvim/rest.nvim/compare/v3.10.0...v3.10.1) (2025-02-09)
+
+
+### Bug Fixes
+
+* **curl/cli:** parse redirected response as list ([d5228fe](https://github.com/rest-nvim/rest.nvim/commit/d5228fe86b726cc12e555651e7098c58a6efb914))
+* **treesitter:** manually start http parser (fix [#508](https://github.com/rest-nvim/rest.nvim/issues/508)) ([4449bca](https://github.com/rest-nvim/rest.nvim/commit/4449bcaa86ac5b1e7019e92d8eb6320ca1ae3e47))
+
 ## [3.10.0](https://github.com/rest-nvim/rest.nvim/compare/v3.9.1...v3.10.0) (2025-02-09)
 
 
