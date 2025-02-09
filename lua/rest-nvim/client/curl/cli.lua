@@ -118,15 +118,19 @@ end
 ---@param lines string[]
 ---@return rest.Response
 function parser.parse_verbose(lines)
-    local response = {
-        headers = {},
-        statistics = {},
-    }
+    ---@type rest.Response[]
+    local list = {}
+    ---@type rest.Response
+    local response
     vim.iter(lines):map(parser.parse_verbose_line):each(function(ln)
         if ln.prefix == VERBOSE_PREFIX_RES_HEADER then
-            if not response.status then
-                -- response status
-                response.status = parser.parse_verbose_status(ln.str)
+            if vim.startswith(ln.str, "HTTP/") then
+                response = {
+                    status = parser.parse_verbose_status(ln.str),
+                    headers = {},
+                    statistics = {},
+                }
+                table.insert(list, response)
             else
                 -- response header
                 local key, value = parser.parse_header_pair(ln.str)
@@ -137,14 +141,15 @@ function parser.parse_verbose(lines)
                     table.insert(response.headers[key], value)
                 end
             end
-        elseif ln.prefix == VERBOSE_PREFIX_STAT then
+        elseif response and ln.prefix == VERBOSE_PREFIX_STAT then
             local key, value = parser.parse_stat_pair(ln.str)
             if key then
                 response.statistics[key] = value
             end
         end
     end)
-    return response
+    -- TODO: return all response history
+    return list[#list]
 end
 
 --- Builder ---
