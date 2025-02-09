@@ -53,18 +53,11 @@ function M.show_registered_file(bufnr)
     end
 end
 
----Find a list of environment files starting from the current directory
+---Find a list of environment files
+---@see rest.Opts.Env.find
 ---@return string[] files Environment variable files path
 function M.find_env_files()
-    -- We are currently looking for any ".*env*" file, e.g. ".env", ".env.json"
-    --
-    -- This algorithm can be improved later on to search from a parent directory if the desired environment file
-    -- is somewhere else but in the current working directory.
-    local files = vim.fs.find(function(name, _)
-        return name:match(config.env.pattern)
-    end, { limit = math.huge, type = "file", path = "./" })
-
-    return files
+    return config.env.find()
 end
 
 ---@return string? dotenv file

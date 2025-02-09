@@ -92,6 +92,10 @@ local config
 ---@field enable? boolean
 --- Environment variables file pattern for telescope.nvim (Default: `"%.env.*"`)
 ---@field pattern? string
+--- Function lists environment files (used for `:Rest env select`)
+--- Searches for file matching *rest.Opts.Env.pattern* under same directory by
+--- default
+---@field find? fun():string[]
 
 ---@class rest.Opts.UI
 --- Set winbar in result pane (Default: `true`)
