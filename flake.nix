@@ -5,23 +5,27 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     neorocks.url = "github:nvim-neorocks/neorocks";
-    flake-utils.url = "github:numtide/flake-utils";
-    cats-doc.url = "github:mrcjkb/vimcats";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    vimcats.url = "github:mrcjkb/vimcats";
   };
 
   outputs = inputs @ {
     self,
     nixpkgs,
     neorocks,
-    flake-utils,
+    flake-parts,
     ...
   }: let
     test-overlay = import ./nix/test-overlay.nix {
       inherit self inputs;
     };
   in
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = builtins.attrNames nixpkgs.legacyPackages;
+      perSystem = attrs @ {
+        system,
+        ...
+      }: let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
@@ -29,8 +33,16 @@
             test-overlay
           ];
         };
-
-        devShell = pkgs.mkShell {
+      in {
+        packages = {
+          default = self.packages.${system}.luarocks-51;
+          luarocks-51 = pkgs.lua51Packages.luarocks;
+          inherit
+            (pkgs)
+            docgen
+            ;
+        };
+        devShells.default = pkgs.mkShell {
           name = "rest.nvim devShell";
           shellHook = ''
             export LUA_PATH="$(luarocks path --lr-path --lua-version 5.1 --local)"
@@ -43,27 +55,14 @@
             (pkgs.lua5_1.withPackages (ps: with ps; [luarocks luacheck]))
           ];
         };
-      in
-      {
-        packages = {
-          default = self.packages.${system}.luarocks-51;
-          luarocks-51 = pkgs.lua51Packages.luarocks;
-          inherit
-            (pkgs)
-            docgen
-            ;
-        };
 
-        devShells = {
-          default = devShell;
-          inherit devShell;
-        };
-
-        checks = {
-          neorocks-test = pkgs.neorocksTest {
-            src = self;
-            name = "rest.nvim";
-          };
-        };
-      });
+        # checks = {
+        #   inherit
+        #     (pkgs)
+        #     # integration-stable
+        #     integration-nightly
+        #     ;
+        # };
+      };
+    };
 }

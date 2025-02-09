@@ -1,19 +1,18 @@
 {
   self,
   inputs,
-}: final: prev: let
+}: final: prev: {
   docgen = final.writeShellApplication {
     name = "docgen";
     runtimeInputs = [
-      inputs.cats-doc.packages.${final.system}.default
+      inputs.vimcats.packages.${final.system}.default
     ];
-    text = /*bash*/ ''
+    text = /* bash */ ''
       mkdir -p doc
-      lemmy-help lua/rest-nvim/{init,commands,autocmds,config/init}.lua > doc/rest-nvim.txt
-      lemmy-help lua/rest-nvim/{api,client/init,parser/init,script/init,cookie_jar,utils,logger}.lua > doc/rest-nvim-api.txt
-      lemmy-help lua/rest-nvim/client/curl/{cli,utils}.lua > doc/rest-nvim-client-curl.txt
+      vimcats lua/rest-nvim/{init,commands,autocmds,config/init}.lua > doc/rest-nvim.txt
+      vimcats lua/rest-nvim/{api,client/init,parser/init,script/init,cookie_jar,utils,logger}.lua > doc/rest-nvim-api.txt
+      vimcats lua/rest-nvim/client/curl/{cli,utils}.lua > doc/rest-nvim-client-curl.txt
     '';
   };
-in {
-  inherit docgen;
+  # TODO: add tests with tree-sitter-http packaged in nix
 }
