@@ -13,22 +13,6 @@ local utils = require("rest-nvim.utils")
 local paneui = require("rest-nvim.ui.panes")
 local logger = require("rest-nvim.logger")
 
-local function set_lines(buffer, lines)
-    vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
-end
-
----@param buffer integer
----@param filetype string
-local function syntax_highlight(buffer, filetype)
-    -- manually stop any attached tree-sitter parsers (#424, #429)
-    vim.treesitter.stop(buffer)
-    local lang = vim.treesitter.language.get_lang(filetype)
-    local ok = lang ~= nil and pcall(vim.treesitter.start, buffer, lang)
-    if not lang or not ok then
-        vim.bo[buffer].syntax = filetype
-    end
-end
-
 ---data used to render the UI
 ---@class rest.UIData
 local data = {
@@ -38,148 +22,30 @@ local data = {
     response = nil,
 }
 
----@param req rest.Request
----@return string[]
-local function render_request(req)
-    local req_line = req.method .. " " .. req.url
-    if req.http_version then
-        req_line = req_line .. " " .. req.http_version
-    end
-    return {
-        "### " .. req.name,
-        req_line,
-    }
-end
+-- TODO: refactor UI update logic
+-- - UI will have global "state" object
+-- - when state object is updated, all panes will be re-rendered
 
----@type rest.ui.panes.PaneOpts[]
-local panes = {
-    {
-        name = "Response",
-        render = function(self)
-            if not data.request then
-                vim.bo[self.bufnr].undolevels = -1
-                set_lines(self.bufnr, { "No Request running" })
-                return
-            end
-            syntax_highlight(self.bufnr, "rest_nvim_result")
-            local lines = render_request(data.request)
-            if data.response then
-                logger.debug(data.response.status)
-                table.insert(
-                    lines,
-                    ("%s %d %s"):format(
-                        data.response.status.version,
-                        data.response.status.code,
-                        data.response.status.text
-                    )
-                )
-                local content_type = data.response.headers["content-type"]
-                local body = vim.split(data.response.body, "\n")
-                local body_meta = {}
-                if content_type then
-                    local base_type, res_type = content_type[1]:match("(.*)/([^;]+)")
-                    -- HACK: handle application/vnd.api+json style content types
-                    res_type = res_type:match(".+%+(.*)") or res_type
-                    if base_type == "image" then
-                        body = { "Binary(image) answer" }
-                    elseif res_type == "octet_stream" then
-                        body = { "Binary answer" }
-                    elseif config.response.hooks.format then
-                        -- NOTE: format hook runs here because it should be done last.
-                        local ok
-                        body, ok = utils.gq_lines(body, res_type)
-                        if ok then
-                            table.insert(body_meta, "formatted")
-                        end
-                    end
-                end
-                local meta_str = ""
-                if #body_meta > 0 then
-                    meta_str = " (" .. table.concat(body_meta, ",") .. ")"
-                end
-                table.insert(lines, "")
-                table.insert(lines, "# @_RES" .. meta_str)
-                vim.list_extend(lines, body)
-                table.insert(lines, "# @_END")
-            else
-                vim.list_extend(lines, { "", "# Loading..." })
-            end
-            set_lines(self.bufnr, lines)
-            return false
-        end,
-    },
-    {
-        name = "Headers",
-        render = function(self)
-            if not data.response then
-                set_lines(self.bufnr, { "Loading..." })
-                return
-            end
-            syntax_highlight(self.bufnr, "jproperties")
-            local lines = {}
-            logger.debug(data.response.headers)
-            local headers = vim.iter(data.response.headers):totable()
-            table.sort(headers, function(b, a)
-                return a[1] > b[1]
-            end)
-            logger.debug(headers)
-            for _, header in ipairs(headers) do
-                if header[1] ~= "set-cookie" then
-                    vim.list_extend(
-                        lines,
-                        vim.iter(header[2])
-                            :map(function(value)
-                                return header[1] .. ": " .. value
-                            end)
-                            :totable()
-                    )
-                end
-            end
-            set_lines(self.bufnr, lines)
-        end,
-    },
-    {
-        name = "Cookies",
-        render = function(self)
-            if not data.response then
-                set_lines(self.bufnr, { "Loading..." })
-                return
-            end
-            local lines = {}
-            ---@type string[]?
-            local cookie_headers = vim.tbl_get(data.response, "headers", "set-cookie")
-            if not cookie_headers then
-                set_lines(self.bufnr, { "No Cookies" })
-                return
-            end
-            syntax_highlight(self.bufnr, "jproperties")
-            table.sort(cookie_headers)
-            vim.list_extend(lines, cookie_headers)
-            set_lines(self.bufnr, lines)
-        end,
-    },
-    {
-        name = "Statistics",
-        render = function(self)
-            if not data.response then
-                set_lines(self.bufnr, { "Loading..." })
-                return
-            end
-            local lines = {}
-            if not data.response.statistics then
-                set_lines(self.bufnr, { "No Statistics" })
-                return
-            end
-            syntax_highlight(self.bufnr, "http_stat")
-            for _, style in ipairs(config.clients.curl.statistics) do
-                local title = style.title or style.id
-                local value = data.response.statistics[style.id] or ""
-                table.insert(lines, ("%s: %s"):format(title, value))
-            end
-            set_lines(self.bufnr, lines)
-        end,
-    },
-}
+-- TODO:
+--
+-- Browser style:
+-- Headers (request & response) <- in rest_nvim_result filetype
+-- Payload (request body) <- in proper filetype
+-- Response (response body) <- in proper filetype
+-- Trace
+--
+-- OnePage style:
+-- Response (request uri & response body) <- in rest_nvim_result filetype
+-- Headers (response headers) <- manual highlighting
+-- Cookies (response cookies) <- manual highlighting
+-- Statistics <- manual highlighting
+--
+-- TODO: Request pane showing what is sent
+-- TODO: change Response pane to only show the actual response (including headers if Headers
+-- pane is not visible)
+-- TODO: Body panes for dedicated bodies (like browser)
+-- TODO: rename current Response pane to Summary pane
+-- TODO: Raw pane showing raw curl log
 
 local winbar = "%#Normal# %{%v:lua.require('rest-nvim.ui.panes').winbar()%}"
 winbar = winbar .. "%=%<"
@@ -208,7 +74,7 @@ function ui.stat_winbar()
 end
 
 ---@type rest.ui.panes.PaneGroup
-local group = paneui.create_pane_group("rest_nvim_result", panes, {
+local group = paneui.create_pane_group("rest_nvim_result", config.ui.panes, {
     on_init = function(self)
         local help = require("rest-nvim.ui.help")
         vim.keymap.set("n", config.ui.keybinds.prev, function()
@@ -217,8 +83,9 @@ local group = paneui.create_pane_group("rest_nvim_result", panes, {
         vim.keymap.set("n", config.ui.keybinds.next, function()
             self.group:cycle(1)
         end, { buffer = self.bufnr })
+        -- TODO(v4): change `?` mapping to `g?`
         vim.keymap.set("n", "?", help.open, { buffer = self.bufnr })
-        vim.bo[self.bufnr].filetype = "rest_nvim_result"
+        vim.bo[self.bufnr].buftype = "nofile"
         if config.ui.winbar then
             utils.nvim_lazy_set_wo(self.bufnr, "winbar", winbar)
         end
@@ -243,14 +110,14 @@ end
 ---Clear the UI
 function ui.clear()
     data = {}
-    group:render()
+    group:set_state(data)
 end
 
 ---Update data and rerender the UI
 ---@param new_data rest.UIData
 function ui.update(new_data)
-    data = vim.tbl_deep_extend("force", data, new_data)
-    group:render()
+    data = vim.tbl_deep_extend("force", group.state, new_data)
+    group:set_state(data)
 end
 
 return ui

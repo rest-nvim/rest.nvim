@@ -4,16 +4,17 @@
 ---@field name string
 ---@field bufnr number
 ---@field group rest.ui.panes.PaneGroup
----@field render fun(self:rest.ui.panes.Pane)
+---@field render fun(self:rest.ui.panes.Pane, state:any)
 
 ---@class rest.ui.panes.PaneOpts
 ---@field name string
 ---@field on_init? fun(self:rest.ui.panes.Pane)
----@field render fun(self:rest.ui.panes.Pane):(modifiable:boolean?)
+---@field render fun(self:rest.ui.panes.Pane, state:any):(modifiable:boolean?)
 
 ---@class rest.ui.panes.PaneGroup
 ---@field name string
 ---@field panes rest.ui.panes.Pane[]
+---@field state any
 local RestUIPaneGroup = {}
 ---@param direction number
 function RestUIPaneGroup:cycle(direction)
@@ -28,7 +29,7 @@ function RestUIPaneGroup:cycle(direction)
 end
 function RestUIPaneGroup:render()
     for _, pane in ipairs(self.panes) do
-        pane:render()
+        pane:render(self.state)
     end
 end
 ---@param winnr integer
@@ -37,6 +38,10 @@ function RestUIPaneGroup:enter(winnr)
         self:render()
     end
     vim.api.nvim_win_set_buf(winnr, self.panes[1].bufnr)
+end
+function RestUIPaneGroup:set_state(state)
+    self.state = state
+    self:render()
 end
 
 ---@class rest.ui.panes.PaneGroupOpts
@@ -65,7 +70,7 @@ function M.create_pane_group(name, pane_opts, opts)
         local pane = {
             name = pane_opt.name,
             group = group,
-            render = function(self)
+            render = function(self, state)
                 if not self.bufnr or not vim.api.nvim_buf_is_loaded(self.bufnr) then
                     self.bufnr = self.bufnr or vim.api.nvim_create_buf(false, false)
                     -- small trick to ensure buffer is loaded before the `BufWinEnter` event
@@ -82,7 +87,7 @@ function M.create_pane_group(name, pane_opts, opts)
                     end
                 end
                 vim.bo[self.bufnr].modifiable = true
-                local modifiable = pane_opt.render(self) or false
+                local modifiable = pane_opt.render(self, state) or false
                 if not modifiable then
                     vim.bo[self.bufnr].undolevels = -1
                 else
