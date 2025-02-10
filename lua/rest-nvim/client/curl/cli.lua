@@ -167,7 +167,6 @@ local builder = {}
 ---@return string[] args
 function builder.extras(req)
     local args = {}
-
     if config.clients.curl.opts.set_compressed then
         if
             vim.iter(req.headers):any(function(key, values)
@@ -287,7 +286,6 @@ function builder.statistics()
             return ("? %s:%%{%s}\n"):format(style.id, style.id)
         end)
         :join("")
-
     return { "-w", "%{stderr}" .. format }
 end
 
@@ -335,7 +333,6 @@ function builder.build(req, ignore_stats)
     if not ignore_stats then
         insert(args, builder.STAT_ARGS)
     end
-
     return vim.iter(args):flatten(math.huge):totable()
 end
 
@@ -361,7 +358,6 @@ function curl.request(request)
     })
     local future = nio.control.future()
     local args = builder.build(request)
-
     curl.cli(args, function(sc)
         if sc.code ~= 0 then
             local message = "Something went wrong when making the request with cURL:\n"
