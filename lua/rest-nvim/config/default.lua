@@ -49,10 +49,8 @@ local default_config = {
                 ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
                 ---`gzip`
                 set_compressed = false,
-                ---@class rest.Config.Clients.Curl.Certificates
-                ---@field set_certificate_crt string
-                ---@field set_certificate_key string
-                ---@type table<string, rest.Config.Clients.Curl.Certificates>
+                ---@class Certificates
+                ---@type table<string, Certificate>
                 certificates = nil,
             },
         },

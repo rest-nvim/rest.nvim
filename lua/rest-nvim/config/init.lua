@@ -69,6 +69,13 @@ local config
 --- Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
 --- (Default: `false`)
 ---@field set_compressed? boolean
+--- Add `--cert`, `--key` or `--pem` to the `curl` command when required with specific domains
+--- (default: `nil`)
+---@field certificates? Certificates
+---
+---@class Certificate
+---@field set_certificate_crt string
+---@field set_certificate_key string
 
 ---@class RestStatisticsStyle
 --- Identifier used used in curl's `--write-out` option
