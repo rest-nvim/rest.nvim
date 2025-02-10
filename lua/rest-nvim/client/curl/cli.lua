@@ -288,9 +288,7 @@ function builder.statistics()
         end)
         :join("")
 
-    local output_str = "'%{stderr}" .. format .. "'"
-
-    return { "-w", output_str }
+    return { "-w", "%{stderr}" .. format }
 end
 
 ---@package
