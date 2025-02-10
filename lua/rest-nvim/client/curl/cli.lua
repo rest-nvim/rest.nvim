@@ -169,11 +169,14 @@ function builder.extras(req)
     local args = {}
 
     if config.clients.curl.opts.set_compressed then
-        if vim.iter(req.headers):any(function(key, values)
-            return key == "accept-encoding" and vim.iter(values):any(function(value)
-                return value:find("gzip")
+        if
+            vim.iter(req.headers):any(function(key, values)
+                return key == "accept-encoding"
+                    and vim.iter(values):any(function(value)
+                        return value:find("gzip")
+                    end)
             end)
-        end) then
+        then
             vim.list_extend(args, { "--compressed" })
         end
     end
