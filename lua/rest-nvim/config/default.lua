@@ -51,7 +51,7 @@ local default_config = {
                 set_compressed = false,
                 ---@class Certificates
                 ---@type table<string, Certificate>
-                certificates = nil,
+                certificates = {},
             },
         },
     },
