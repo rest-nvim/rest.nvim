@@ -187,7 +187,7 @@ rest.Opts.Clients.Curl.Opts                        *rest.Opts.Clients.Curl.Opts*
     Fields: ~
         {set_compressed?}  (boolean)         Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
                                              (Default: `false`)
-        {certificates?}    (Certificates[])  Add `--cert`, `--key` or `--pem` to the `curl` command when required with 
+        {certificates?}    (Certificates[])  Add `--cert` or `--key`  to the `curl` command when required with
                                              specific domains
                                              (default: nil)
 
