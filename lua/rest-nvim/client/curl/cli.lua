@@ -184,6 +184,20 @@ function builder.extras(req)
             vim.list_extend(args, { "--compressed" })
         end
     end
+    --
+    for domain, _ in pairs(config.clients.curl.opts.certificates) do
+        local target = req.url
+
+        -- TODO(boltless): this is temporary solution. use same logic from cookie_jar instead
+        local s, _ = string.find(target, domain, 1, true)
+
+        if s ~= nil then
+            vim.list_extend(args, { "--cert", config.clients.curl.opts.certificates[domain].set_certificate_crt })
+            vim.list_extend(args, { "--key", config.clients.curl.opts.certificates[domain].set_certificate_key })
+            break
+        end
+    end
+
     return args
 end
 

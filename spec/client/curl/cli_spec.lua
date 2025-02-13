@@ -7,6 +7,7 @@ vim.g.rest_nvim = vim.tbl_deep_extend("force", {
         curl = {
             opts = {
                 set_compressed = true,
+                certificates = {},
             },
         },
     },
