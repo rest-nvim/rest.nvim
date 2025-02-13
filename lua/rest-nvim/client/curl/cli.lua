@@ -183,6 +183,7 @@ function builder.extras(req)
     for domain, _ in pairs(config.clients.curl.opts.certificates) do
         local target = req.url
 
+        -- TODO(boltless): this is temporary solution. use same logic from cookie_jar instead
         local s, _ = string.find(target, domain, 1, true)
 
         if s ~= nil then

@@ -28,7 +28,7 @@ require("rest-nvim.client.curl.cli").config = vim.g.rest_nvim
 describe("Curl cli builder", function()
     it("with opts.certificates", function()
         local args = builder.build({
-            context = Context.new(),
+            context = Context:new(),
             method = "POST",
             url = "http://localhost:8000",
             headers = {},

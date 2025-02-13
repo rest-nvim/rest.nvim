@@ -49,8 +49,7 @@ local default_config = {
                 ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
                 ---`gzip`
                 set_compressed = false,
-                ---@class Certificates
-                ---@type table<string, Certificate>
+                ---@type table<string, Certificate> Table containing certificates for each domains
                 certificates = {},
             },
         },

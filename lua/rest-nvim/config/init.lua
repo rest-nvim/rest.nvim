@@ -71,8 +71,8 @@ local config
 ---@field set_compressed? boolean
 --- Add `--cert`, `--key` or `--pem` to the `curl` command when required with specific domains
 --- (default: `nil`)
----@field certificates? Certificates|nil
----
+---@field certificates? table<string, Certificate>
+
 ---@class Certificate
 ---@field set_certificate_crt string
 ---@field set_certificate_key string
