@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/rest-nvim/rest.nvim/compare/v3.10.1...v3.11.0) (2025-02-13)
+
+
+### Features
+
+* add ability to pass certs ([#519](https://github.com/rest-nvim/rest.nvim/issues/519)) ([fc34f46](https://github.com/rest-nvim/rest.nvim/commit/fc34f46906c454aab5e404a8c6d150a84175293c))
+
 ## [3.10.1](https://github.com/rest-nvim/rest.nvim/compare/v3.10.0...v3.10.1) (2025-02-09)
 
 
