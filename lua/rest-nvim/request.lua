@@ -58,11 +58,10 @@ local function run_request(req)
     })
     _G.rest_request = nil
 
-    ui.update({ request = req })
-
     -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
     -- callback from `vim.system()` call)
     nio.run(function()
+        ui.update({ request = req })
         local ok, res = pcall(client.request(req).wait)
         if not ok then
             logger.error("request failed")

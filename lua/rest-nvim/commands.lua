@@ -121,8 +121,8 @@ local rest_command_tbl = {
                 return
             end
             ui().clear()
-            open_result_ui(opts)
             request().run(args[1])
+            open_result_ui(opts)
         end,
         ---@return string[]
         complete = function(args)
