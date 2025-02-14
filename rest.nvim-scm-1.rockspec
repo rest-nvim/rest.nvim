@@ -25,6 +25,7 @@ dependencies = {
   "mimetypes",
   "xml2lua",
   "fidget.nvim",
+  "base64",
   "tree-sitter-http == 0.0.35",
 }
 
