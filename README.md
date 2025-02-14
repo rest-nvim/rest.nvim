@@ -155,6 +155,8 @@ local default_config = {
                 ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
                 ---`gzip`
                 set_compressed = false,
+                ---@type table<string, Certificate> Table containing certificates for each domains
+                certificates = {},
             },
         },
     },
@@ -171,6 +173,17 @@ local default_config = {
         enable = true,
         ---@type string
         pattern = ".*%.env.*",
+        ---@type fun():string[]
+        find = function()
+            local config = require("rest-nvim.config")
+            return vim.fs.find(function(name, _)
+                return name:match(config.env.pattern)
+            end, {
+                path = vim.fn.getcwd(),
+                type = "file",
+                limit = math.huge,
+            })
+        end,
     },
     ---@class rest.Config.UI
     ui = {

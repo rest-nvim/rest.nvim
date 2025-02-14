@@ -185,11 +185,17 @@ rest.Opts.Clients.Curl                                  *rest.Opts.Clients.Curl*
 rest.Opts.Clients.Curl.Opts                        *rest.Opts.Clients.Curl.Opts*
 
     Fields: ~
-        {set_compressed?}  (boolean)         Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
-                                             (Default: `false`)
-        {certificates?}    (Certificates[])  Add `--cert` or `--key`  to the `curl` command when required with
-                                             specific domains
-                                             (default: nil)
+        {set_compressed?}  (boolean)                     Add `--compressed` argument when `Accept-Encoding` header includes `gzip`
+                                                         (Default: `false`)
+        {certificates?}    (table<string,Certificate>)   Add `--cert`, `--key` or `--pem` to the `curl` command when required with specific domains
+                                                         (default: `nil`)
+
+
+Certificate                                                        *Certificate*
+
+    Fields: ~
+        {set_certificate_crt}  (string)
+        {set_certificate_key}  (string)
 
 
 RestStatisticsStyle                                        *RestStatisticsStyle*
