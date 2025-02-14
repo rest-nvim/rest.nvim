@@ -81,6 +81,14 @@ function autocmds.setup()
                     end
                 end
             end
+            if hooks.interpret_basic_auth then
+                local auth_header = req.headers["authorization"]
+                if auth_header then
+                    local auth_header_value = auth_header[#auth_header]
+                    local id, pw = auth_header_value:match("Basic%s+([^:%s]+)%s*[:(%s+)]%s*(.*)")
+                    auth_header[#auth_header] = "Basic " .. require("base64").encode(id .. ":" .. pw)
+                end
+            end
         end,
     })
     vim.api.nvim_create_autocmd("User", {

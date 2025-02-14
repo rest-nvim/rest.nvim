@@ -43,6 +43,11 @@ local config
 ---@field user_agent? string
 --- Set `Content-Type` header when it is empty but request body is provided
 ---@field set_content_type? boolean
+--- Interpret `Authorization` header when it is set in form of
+--- "Basic username:password" or "Basic username password"
+--- It will convert header to "Basic <base64-encoded-username:password>"
+--- (Default: `true`)
+---@field interpret_basic_auth? boolean
 
 ---@class rest.Opts.Response
 --- Default response hooks (aka. request handlers) configuration

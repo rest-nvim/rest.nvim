@@ -14,6 +14,7 @@
           mimetypes
           xml2lua
           fidget-nvim
+          final.lua51Packages.base64
           final.lua51Packages.tree-sitter-http
         ];
       extraPackages = [
