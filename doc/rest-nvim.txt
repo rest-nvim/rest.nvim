@@ -189,7 +189,7 @@ rest.Opts.Clients.Curl.Opts                        *rest.Opts.Clients.Curl.Opts*
                                              (Default: `false`)
         {certificates?}    (Certificates[])  Add `--cert` or `--key`  to the `curl` command when required with
                                              specific domains
-                                             (default: nil)
+                                             (default: table `{}`)
 
 
 RestStatisticsStyle                                        *RestStatisticsStyle*
