@@ -158,3 +158,9 @@ describe("builtin request hooks", function()
         end)
     end)
 end)
+it("make sure md5 work", function()
+    local md5 = require("md5")
+    local md5sum = md5.sumhexa
+    assert.same("9236657b478ea807fdfa275d24990843", md5sum("qwer:asdf"))
+    -- TODO: implement digest auth with https://github.com/catwell/lua-http-digest/blob/master/http-digest.lua
+end)

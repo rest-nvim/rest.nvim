@@ -43,6 +43,27 @@
 
 local autocmds = {}
 
+---@param req rest.Request
+local function interpret_basic_auth(req)
+    local auth_header = req.headers["authorization"]
+    if not auth_header then
+        return
+    end
+    local auth_header_value = auth_header[#auth_header]
+    local auth_type, id, pw = auth_header_value:match("(%w+)%s+([^:%s]+)%s*[:(%s+)]%s*(.*)")
+    if auth_type == "Basic" then
+        auth_header[#auth_header] = "Basic " .. require("base64").encode(id .. ":" .. pw)
+    elseif auth_type == "Digest" then
+        -- TODO: implement digest tokens... but how?
+        -- we can update headers but digest tokens require multiple requests
+        -- So it can only be supported after we have chained requests support.
+        -- see https://github.com/catwell/lua-http-digest/blob/master/http-digest.lua
+        -- as example implementation of digest tokens
+    else
+        require("rest-nvim.logger").info("Unsupported auth-type:", auth_type)
+    end
+end
+
 ---Set up Rest autocommands group
 ---@package
 function autocmds.setup()
@@ -82,12 +103,7 @@ function autocmds.setup()
                 end
             end
             if hooks.interpret_basic_auth then
-                local auth_header = req.headers["authorization"]
-                if auth_header then
-                    local auth_header_value = auth_header[#auth_header]
-                    local id, pw = auth_header_value:match("Basic%s+([^:%s]+)%s*[:(%s+)]%s*(.*)")
-                    auth_header[#auth_header] = "Basic " .. require("base64").encode(id .. ":" .. pw)
-                end
+                interpret_basic_auth(req)
             end
         end,
     })
