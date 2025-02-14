@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.1](https://github.com/rest-nvim/rest.nvim/compare/v3.11.0...v3.11.1) (2025-02-14)
+
+
+### Bug Fixes
+
+* run request before ui open ([d10001b](https://github.com/rest-nvim/rest.nvim/commit/d10001b81c95cf61220290800cf93404f7f34ba4))
+
 ## [3.11.0](https://github.com/rest-nvim/rest.nvim/compare/v3.10.1...v3.11.0) (2025-02-13)
 
 
