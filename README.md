@@ -155,6 +155,8 @@ local default_config = {
                 ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
                 ---`gzip`
                 set_compressed = false,
+                ---@type table<string, Certificate> Table containing certificates for each domains
+                certificates = {},
             },
         },
     },
@@ -197,6 +199,45 @@ local default_config = {
 }
 ```
 <!-- default-config:end -->
+
+#### Adding certificates for requests
+
+<!-- certs-config:start -->
+```lua
+---rest.nvim cert configuration
+---@class rest.Config
+local default_config = {
+    ---@class rest.Config.Clients
+    clients = {
+        ---@class rest.Config.Clients.Curl
+        curl = {
+            ---Statistics to be shown, takes cURL's `--write-out` flag variables
+            ---See `man curl` for `--write-out` flag
+            ---@type RestStatisticsStyle[]
+            statistics = {
+                { id = "time_total", winbar = "take", title = "Time taken" },
+                { id = "size_download", winbar = "size", title = "Download size" },
+            },
+            ---Curl-secific request/response hooks
+            ---@class rest.Config.Clients.Curl.Opts
+            opts = {
+                ---@type boolean Add `--compressed` argument when `Accept-Encoding` header includes
+                ---`gzip`
+                set_compressed = false,
+                ---@type table<string, Certificate> Table containing certificates for each domains
+                certificates = {
+                    ["your.domain.tld"] = {
+                        ---@field set_certificate_crt string
+                        set_certificate_crt = "/path/to/your.cert",
+                        ---@field set_certificate_key string
+                        set_certificate_key = "/path/to/your.cert"
+                    }
+                },
+            },
+        },
+    },
+```
+<!-- certs-config:end -->
 
 ## Usage
 
