@@ -38,6 +38,14 @@
 ---                                 but directly insert curl command as a comment
 ---                                 instead.
 ---
+--- encodeuri                       Encodes selected URI text while preserving
+---                                 characters that are part of the URI syntax.
+---
+--- encodeuricomponents             Encodes selected URI text while including
+---                                 characters that are part of the URI syntax.
+---
+--- decodeuri                       Decodes selected URI text.
+---
 ---NOTE: All `:Rest` commands opening new window support |command-modifiers|.
 ---For example, you can run `:hor Rest open` to open result pane in horizontal
 ---split or run `:tab Rest logs` to open logs file in a new tab.
@@ -61,6 +69,7 @@ local function logger() return require("rest-nvim.logger") end
 local function parser() return require("rest-nvim.parser") end
 local function ui() return require("rest-nvim.ui.result") end
 local function config() return require("rest-nvim.config") end
+local function utils() return require("rest-nvim.utils") end
 -- stylua: ignore end
 
 ---Open window based on command mods and return new window identifier
@@ -90,12 +99,54 @@ local function open_result_ui(opts)
     vim.cmd.wincmd("p")
 end
 
+local function get_selected(buf)
+    local _, srow, scol = unpack(vim.fn.getpos("'<"))
+    local _, erow, ecol = unpack(vim.fn.getpos("'>"))
+    return vim.fn.getregion({ buf, srow, scol, 0 }, { buf, erow, ecol, 0 }),
+        vim.fn.getregionpos({ buf, srow, scol, 0 }, { buf, erow, ecol, 0 }, {
+            selection = true
+        })
+end
+
+local function encode_selected(encode)
+    local texts, ranges = get_selected(0)
+    local range = ranges[1]
+    local rep = vim.tbl_map(encode, texts)
+    local _, srow, scol = unpack(range[1])
+    local _, erow, ecol = unpack(range[2])
+    vim.api.nvim_buf_set_text(0, srow - 1, scol - 1, erow - 1, ecol, rep)
+end
+
 ---@type table<string, RestCmd>
 local rest_command_tbl = {
     open = {
         impl = function(_, opts)
             local winnr = split_open_cmd(opts)
             ui().enter(winnr)
+        end,
+    },
+    encodeuri = {
+        impl = function(_, opts)
+            if opts.range < 2 then
+                return
+            end
+            encode_selected(utils().encodeURI)
+        end,
+    },
+    encodeuricomponents = {
+        impl = function(_, opts)
+            if opts.range < 2 then
+                return
+            end
+            encode_selected(utils().encodeURIComponents)
+        end
+    },
+    decodeuri = {
+        impl = function(_, opts)
+            if opts.range < 2 then
+                return
+            end
+            encode_selected(utils().url_decode)
         end,
     },
     run = {
@@ -315,6 +366,7 @@ function commands.setup()
         nargs = "+",
         desc = "Run your HTTP requests",
         bar = true,
+        range = true,
         complete = function(arg_lead, cmdline, _)
             local rest_commands = vim.tbl_keys(rest_command_tbl)
             local subcmd, subcmd_arg_lead = cmdline:match("Rest*%s(%S+)%s(.*)$")
