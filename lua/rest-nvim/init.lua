@@ -6,7 +6,7 @@
 ---
 ---@brief ]]
 
----@toc rocks-contents
+---@toc rest-contents
 
 local rest = {}
 
