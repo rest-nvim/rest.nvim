@@ -107,7 +107,8 @@ function M.run(name)
     if config.env.enable and vim.b._rest_nvim_env_file then
         ctx:load_file(vim.b._rest_nvim_env_file)
     end
-    local req = parser.parse(req_node, 0, ctx)
+    local bufnr = vim.api.nvim_get_current_buf()
+    local req = parser.parse(req_node, bufnr, ctx)
     if not req then
         logger.error("failed to parse request")
         vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
