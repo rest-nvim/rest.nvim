@@ -60,7 +60,6 @@ local function run_request(req)
 
     -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
     -- callback from `vim.system()` call)
-    nio.run(function()
         ui.update({ request = req })
         local ok, res = pcall(client.request(req).wait)
         if not ok then
@@ -91,7 +90,6 @@ local function run_request(req)
 
         -- update result UI
         ui.update({ response = res })
-    end)
     -- FIXME(boltless): return future to pass the command state
 end
 
@@ -108,6 +106,7 @@ function M.run(name)
         ctx:load_file(vim.b._rest_nvim_env_file)
     end
     local bufnr = vim.api.nvim_get_current_buf()
+    nio.run(function()
     local req = parser.parse(req_node, bufnr, ctx)
     if not req then
         logger.error("failed to parse request")
@@ -119,6 +118,7 @@ function M.run(name)
         utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace, highlight.timeout)
     end
     run_request(req)
+    end)
 end
 
 ---run last request
@@ -134,32 +134,5 @@ end
 function M.last_request()
     return rest_nvim_last_request
 end
-
--- ---run all requests in current file with same context
--- function M.run_all()
---     local reqs = parser.get_all_request_nodes(0)
---     local ctx = Context:new()
---     for _, req_node in ipairs(reqs) do
---         local req = parser.parse(req_node, 0, ctx)
---         if not req then
---             vim.notify(
---                 "Parsing request failed. See `:Rest logs` for more info",
---                 vim.log.levels.ERROR,
---                 { title = "rest.nvim" }
---             )
---             return false
---         end
---         -- FIXME: wait for previous request ends
---         local ok = run_request(req)
---         if not ok then
---             vim.notify(
---                 "Running request failed. See `:Rest logs` for more info",
---                 vim.log.levels.ERROR,
---                 { title = "rest.nvim" }
---             )
---             return
---         end
---     end
--- end
 
 return M

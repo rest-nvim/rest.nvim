@@ -440,7 +440,6 @@ function parser.parse(node, source, ctx)
     ---@type string|nil
     local name
     local handlers = {}
-    nio.run(function()
         for child, _ in node:iter_children() do
             local child_type = child:type()
             if child_type == "request" then
@@ -479,7 +478,6 @@ function parser.parse(node, source, ctx)
                 parser.parse_variable_declaration(child, source, ctx)
             end
         end
-    end)
     for child, _ in req_node:iter_children() do
         local child_type = child:type()
         if child_type == "res_handler_script" then
