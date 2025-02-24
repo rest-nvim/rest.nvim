@@ -13,6 +13,7 @@ local Context = require("rest-nvim.context").Context
 local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local jar = require("rest-nvim.cookie_jar")
+local nio = require("nio")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
@@ -414,6 +415,9 @@ function parser.parse(node, source, ctx)
     assert(not node:has_error())
     local req_node = node:field("request")[1]
     assert(req_node)
+    if source == 0 then
+        source = vim.api.nvim_get_current_buf()
+    end
 
     ctx = ctx or Context:new()
     -- TODO: note that in-place variables won't be evaluated for raw string due to treesitter limitations
@@ -443,7 +447,7 @@ function parser.parse(node, source, ctx)
             url = url:gsub("\n%s+", "")
         elseif child_type == "pre_request_script" then
             parser.parse_pre_request_script(child, source, ctx)
-        -- won't be a case anymore with latest tree-sitter-http parser. just for backward compatibility
+            -- won't be a case anymore with latest tree-sitter-http parser. just for backward compatibility
         elseif child_type == "res_handler_script" then
             local handler = parser.parse_request_handler(child, source, ctx)
             if handler then
@@ -461,14 +465,14 @@ function parser.parse(node, source, ctx)
                 if var_description == "" then
                     var_description = nil
                 end
-                vim.ui.input({
+                ---@diagnostic disable-next-line: missing-fields
+                local input = nio.ui.input({
                     prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
                     default = ctx:resolve(var_name),
-                }, function(input)
-                    if input then
-                        ctx:set_local(var_name, input)
-                    end
-                end)
+                })
+                if input then
+                    ctx:set_local(var_name, input)
+                end
             end
         elseif child_type == "variable_declaration" then
             parser.parse_variable_declaration(child, source, ctx)
