@@ -60,36 +60,36 @@ local function run_request(req)
 
     -- NOTE: wrap with schedule to do vim stuffs outside of lua callback loop (`on_exit`
     -- callback from `vim.system()` call)
-        ui.update({ request = req })
-        local ok, res = pcall(client.request(req).wait)
-        if not ok then
-            logger.error("request failed")
-            vim.notify("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
-            return
-        end
-        ---@cast res rest.Response
-        logger.info("request success")
+    ui.update({ request = req })
+    local ok, res = pcall(client.request(req).wait)
+    if not ok then
+        logger.error("request failed")
+        vim.notify("request failed. See `:Rest logs` for more info", vim.log.levels.ERROR, { title = "rest.nvim" })
+        return
+    end
+    ---@cast res rest.Response
+    logger.info("request success")
 
-        -- run request handler scripts
-        logger.debug(("run %d handers"):format(#req.handlers))
-        vim.iter(req.handlers):each(function(f)
-            f(res)
-        end)
-        logger.info("handler done")
+    -- run request handler scripts
+    logger.debug(("run %d handers"):format(#req.handlers))
+    vim.iter(req.handlers):each(function(f)
+        f(res)
+    end)
+    logger.info("handler done")
 
-        _G.rest_request = req
-        _G.rest_response = res
-        vim.api.nvim_exec_autocmds("User", {
-            pattern = { "RestResponse", "RestResponsePre" },
-        })
-        _G.rest_request = nil
-        _G.rest_response = nil
+    _G.rest_request = req
+    _G.rest_response = res
+    vim.api.nvim_exec_autocmds("User", {
+        pattern = { "RestResponse", "RestResponsePre" },
+    })
+    _G.rest_request = nil
+    _G.rest_response = nil
 
-        -- update cookie jar
-        jar.update_jar(req.url, res)
+    -- update cookie jar
+    jar.update_jar(req.url, res)
 
-        -- update result UI
-        ui.update({ response = res })
+    -- update result UI
+    ui.update({ response = res })
     -- FIXME(boltless): return future to pass the command state
 end
 
@@ -107,17 +107,17 @@ function M.run(name)
     end
     local bufnr = vim.api.nvim_get_current_buf()
     nio.run(function()
-    local req = parser.parse(req_node, bufnr, ctx)
-    if not req then
-        logger.error("failed to parse request")
-        vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
-        return
-    end
-    local highlight = config.highlight
-    if highlight.enable then
-        utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace, highlight.timeout)
-    end
-    run_request(req)
+        local req = parser.parse(req_node, bufnr, ctx)
+        if not req then
+            logger.error("failed to parse request")
+            vim.notify("failed to parse request", vim.log.levels.ERROR, { title = "rest.nvim" })
+            return
+        end
+        local highlight = config.highlight
+        if highlight.enable then
+            utils.ts_highlight_node(0, req_node, require("rest-nvim.api").namespace, highlight.timeout)
+        end
+        run_request(req)
     end)
 end
 

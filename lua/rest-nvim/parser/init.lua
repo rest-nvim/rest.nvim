@@ -440,44 +440,44 @@ function parser.parse(node, source, ctx)
     ---@type string|nil
     local name
     local handlers = {}
-        for child, _ in node:iter_children() do
-            local child_type = child:type()
-            if child_type == "request" then
-                url = expand_variables(assert(get_node_field_text(req_node, "url", source)), ctx)
-                url = url:gsub("\n%s+", "")
-            elseif child_type == "pre_request_script" then
-                parser.parse_pre_request_script(child, source, ctx)
+    for child, _ in node:iter_children() do
+        local child_type = child:type()
+        if child_type == "request" then
+            url = expand_variables(assert(get_node_field_text(req_node, "url", source)), ctx)
+            url = url:gsub("\n%s+", "")
+        elseif child_type == "pre_request_script" then
+            parser.parse_pre_request_script(child, source, ctx)
             -- won't be a case anymore with latest tree-sitter-http parser. just for backward compatibility
-            elseif child_type == "res_handler_script" then
-                local handler = parser.parse_request_handler(child, source, ctx)
-                if handler then
-                    table.insert(handlers, handler)
-                end
-            elseif child_type == "request_separator" then
-                name = get_node_field_text(child, "value", source)
-            elseif child_type == "comment" and child:field("name")[1] then
-                local comment_name = get_node_field_text(child, "name", source)
-                local comment_value = get_node_field_text(child, "value", source)
-                if comment_name == "name" then
-                    name = comment_value or name
-                elseif comment_name == "prompt" and comment_value then
-                    local var_name, var_description = comment_value:match("(%S+)%s*(.*)")
-                    if var_description == "" then
-                        var_description = nil
-                    end
-                    ---@diagnostic disable-next-line: missing-fields
-                    local input = nio.ui.input({
-                        prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
-                        default = ctx:resolve(var_name),
-                    })
-                    if input then
-                        ctx:set_local(var_name, input)
-                    end
-                end
-            elseif child_type == "variable_declaration" then
-                parser.parse_variable_declaration(child, source, ctx)
+        elseif child_type == "res_handler_script" then
+            local handler = parser.parse_request_handler(child, source, ctx)
+            if handler then
+                table.insert(handlers, handler)
             end
+        elseif child_type == "request_separator" then
+            name = get_node_field_text(child, "value", source)
+        elseif child_type == "comment" and child:field("name")[1] then
+            local comment_name = get_node_field_text(child, "name", source)
+            local comment_value = get_node_field_text(child, "value", source)
+            if comment_name == "name" then
+                name = comment_value or name
+            elseif comment_name == "prompt" and comment_value then
+                local var_name, var_description = comment_value:match("(%S+)%s*(.*)")
+                if var_description == "" then
+                    var_description = nil
+                end
+                ---@diagnostic disable-next-line: missing-fields
+                local input = nio.ui.input({
+                    prompt = (var_description or ("Enter value for `%s`"):format(var_name)) .. ": ",
+                    default = ctx:resolve(var_name),
+                })
+                if input then
+                    ctx:set_local(var_name, input)
+                end
+            end
+        elseif child_type == "variable_declaration" then
+            parser.parse_variable_declaration(child, source, ctx)
         end
+    end
     for child, _ in req_node:iter_children() do
         local child_type = child:type()
         if child_type == "res_handler_script" then
