@@ -63,16 +63,21 @@ function M.parse(path, setter)
         end
     else
         -- TODO: rewrite the parser with tree-sitter-bash instead
-        local vars_tbl = vim.split(file_contents, "\n", { trimempty = true })
-        logger.debug(vars_tbl)
-        for _, var in ipairs(vars_tbl) do
-            local variable_name, variable_value = var:match("([^#=%s]+)%s*=%s*([^#]*)")
-            if variable_name then
-                variable_value = variable_value:match('^"(.*)"$') or variable_value:match("^'(.*)'$") or variable_value
-                logger.debug("set " .. variable_name .. "=" .. variable_value)
-                setter(variable_name, value_tostring(variable_value))
-            end
-        end
+        local lines = vim.split(file_contents, "\n", { trimempty = true })
+        logger.debug(lines)
+        vim.iter(lines)
+            :filter(function(line)
+                return not line:match("^%s*#")
+            end)
+            :map(function(line)
+                return line:match("^export%s*(.*)") or line
+            end)
+            :each(function(line)
+                local name, value = line:match("([^#=%s]+)%s*=%s*(.*)")
+                if name then
+                    setter(name, value:match('^"([^"]*)"$') or value:match("^'([^']*)'$") or value:match("([^%s#]*)"))
+                end
+            end)
     end
     return true, vars
 end
