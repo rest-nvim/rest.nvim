@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.11.2](https://github.com/rest-nvim/rest.nvim/compare/v3.11.1...v3.11.2) (2025-02-24)
+
+
+### Bug Fixes
+
+* **dotenv:** allow hash inside quoted environment variables (fix [#514](https://github.com/rest-nvim/rest.nvim/issues/514)) ([c94d89f](https://github.com/rest-nvim/rest.nvim/commit/c94d89f1f0627e2446024d3c99b189e9e7591390))
+* prevent buffer change while parsing ([#535](https://github.com/rest-nvim/rest.nvim/issues/535)) ([98f0bfc](https://github.com/rest-nvim/rest.nvim/commit/98f0bfc0c4d8b0c75df1d9fe30293f2a0e390504))
+
 ## [3.11.1](https://github.com/rest-nvim/rest.nvim/compare/v3.11.0...v3.11.1) (2025-02-14)
 
 
