@@ -72,9 +72,9 @@ CLI.
 }
 ```
 
-> [!NOTE]
-> You also need to install latest [tree-sitter-http] parser using
-> `:TSInstall http` if you are using `lazy.nvim`
+> [!IMPORTANT]
+>
+> You need lazy.nvim higher than v11 to install rockspec dependencies
 
 <!-- TODO: I'm not sure packer supporst tree-sitter installation via luarocks -->
 <!-- ### [packer.nvim](https://github.com/wbthomason/packer.nvim) -->
