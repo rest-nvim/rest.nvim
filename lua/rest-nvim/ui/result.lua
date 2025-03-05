@@ -233,12 +233,13 @@ local function get_hl_group_fg(name)
     return string.format("#%06X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
 end
 
-vim.api.nvim_set_hl(0, "RestText", { fg = get_hl_group_fg("Comment") })
-vim.api.nvim_set_hl(0, "RestPaneTitleNC", { fg = get_hl_group_fg("Statement") })
+vim.api.nvim_set_hl(0, "RestText", { fg = get_hl_group_fg("Comment"), default = true })
+vim.api.nvim_set_hl(0, "RestPaneTitleNC", { fg = get_hl_group_fg("Statement"), default = true })
 vim.api.nvim_set_hl(0, "RestPaneTitle", {
     fg = get_hl_group_fg("Statement"),
     bold = true,
     underline = true,
+    default = true,
 })
 
 ---Check if UI window is shown in current tabpage
