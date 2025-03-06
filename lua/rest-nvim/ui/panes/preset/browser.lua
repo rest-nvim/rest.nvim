@@ -58,6 +58,10 @@ return {
             end
             -- TODO: render based on body types
             local body = state.request.body
+            if not body then
+                set_lines(self.bufnr, {})
+                return
+            end
             if vim.list_contains({ "json", "xml", "raw", "graphql" }, body.__TYPE) then
                 set_lines(self.bufnr, vim.split(body.data, "\n"))
                 if body.__TYPE == "graphql" then
