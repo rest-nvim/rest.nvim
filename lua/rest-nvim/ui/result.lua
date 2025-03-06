@@ -23,7 +23,7 @@ local function syntax_highlight(buffer, filetype)
     -- manually stop any attached tree-sitter parsers (#424, #429)
     vim.treesitter.stop(buffer)
     local lang = vim.treesitter.language.get_lang(filetype)
-    local ok = pcall(vim.treesitter.start, buffer, lang)
+    local ok = lang ~= nil and pcall(vim.treesitter.start, buffer, lang)
     if not lang or not ok then
         vim.bo[buffer].syntax = filetype
     end
