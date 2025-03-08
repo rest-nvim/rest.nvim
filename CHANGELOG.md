@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.12.0](https://github.com/rest-nvim/rest.nvim/compare/v3.11.2...v3.12.0) (2025-03-08)
+
+
+### Features
+
+* add default = true for highlight groups definition. ([#541](https://github.com/rest-nvim/rest.nvim/issues/541)) ([54ee52a](https://github.com/rest-nvim/rest.nvim/commit/54ee52ab94ff52055259b79d3aef5311913f0c5f))
+
+
+### Bug Fixes
+
+* Statistics syntax highlight ([#540](https://github.com/rest-nvim/rest.nvim/issues/540)) ([7ca9204](https://github.com/rest-nvim/rest.nvim/commit/7ca92042e0f0fa78bccb929782e542bff827bf74))
+
 ## [3.11.2](https://github.com/rest-nvim/rest.nvim/compare/v3.11.1...v3.11.2) (2025-02-24)
 
 
