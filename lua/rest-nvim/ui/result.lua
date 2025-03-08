@@ -225,22 +225,6 @@ local group = paneui.create_pane_group("rest_nvim_result", panes, {
     end,
 })
 
----Get the foreground value of a highlighting group
----@param name string Highlighting group name
----@return string
-local function get_hl_group_fg(name)
-    -- This will still error out if the highlight doesn't exist
-    return string.format("#%06X", vim.api.nvim_get_hl(0, { name = name, link = false }).fg)
-end
-
-vim.api.nvim_set_hl(0, "RestText", { fg = get_hl_group_fg("Comment") })
-vim.api.nvim_set_hl(0, "RestPaneTitleNC", { fg = get_hl_group_fg("Statement") })
-vim.api.nvim_set_hl(0, "RestPaneTitle", {
-    fg = get_hl_group_fg("Statement"),
-    bold = true,
-    underline = true,
-})
-
 ---Check if UI window is shown in current tabpage
 ---@return boolean
 function ui.is_open()

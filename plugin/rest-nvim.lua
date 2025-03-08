@@ -74,4 +74,7 @@ require("rest-nvim.autocmds").setup()
 require("rest-nvim.commands").setup()
 vim.treesitter.language.register("http", "rest_nvim_result")
 
+-- setup highlight groups
+require("rest-nvim.ui.highlights")
+
 vim.g.loaded_rest_nvim = true
