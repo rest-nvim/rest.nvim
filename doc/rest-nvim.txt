@@ -6,7 +6,7 @@ rest.nvim                                                            *rest-nvim*
 
 
 ==============================================================================
-Table of Contents                                               *rocks-contents*
+Table of Contents                                                *rest-contents*
 
 rest.nvim ·························································· |rest-nvim|
 rest.nvim user commands ··································· |rest-nvim.commands|
@@ -252,10 +252,12 @@ rest.Opts.Highlight                                        *rest.Opts.Highlight*
 rest.nvim highlight groups                          *rest-nvim.highlight-groups*
 
 
-  Highlight Group      Default                          Description
-  -------------------- -------------------------------- --------------------
-  RestText             Comment                          winbar text
-  RestPaneTitleNC      Statement                        winbar text in non-current pane
-  RestPaneTitle        Statement + bold + underline     winbar Text in current pane
+ rest.nvim result UI implementation
+ Highlight Group      Default                          Description
+ -------------------- -------------------------------- --------------------
+ RestText             Comment                          winbar text
+ RestPaneTitleNC      Statement                        winbar text in non-current pane
+ RestPaneTitle        Statement + bold + underline     winbar Text in current pane
+
 
 vim:tw=78:ts=8:noet:ft=help:norl:

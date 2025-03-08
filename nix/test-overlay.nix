@@ -35,7 +35,7 @@ in {
     ];
     text = /* bash */ ''
       mkdir -p doc
-      vimcats lua/rest-nvim/{init,commands,autocmds,config/init}.lua > doc/rest-nvim.txt
+      vimcats lua/rest-nvim/{init,commands,autocmds,config/init,ui/highlights}.lua > doc/rest-nvim.txt
       vimcats lua/rest-nvim/{api,client/init,parser/init,script/init,cookie_jar,utils,logger}.lua > doc/rest-nvim-api.txt
       vimcats lua/rest-nvim/client/curl/{cli,utils}.lua > doc/rest-nvim-client-curl.txt
     '';
