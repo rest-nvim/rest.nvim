@@ -149,10 +149,14 @@ rest.Opts.Request                                            *rest.Opts.Request*
 rest.Opts.Request.Hooks                                *rest.Opts.Request.Hooks*
 
     Fields: ~
-        {encode_url?}        (boolean)   Encode URL before making request (Default: `true`)
-        {user_agent?}        (string)    Set `User-Agent` header when it is empty. Set as empty string to disable.
-                                         (Default: `rest.nvim {version}`)
-        {set_content_type?}  (boolean)   Set `Content-Type` header when it is empty but request body is provided
+        {encode_url?}            (boolean)   Encode URL before making request (Default: `true`)
+        {user_agent?}            (string)    Set `User-Agent` header when it is empty. Set as empty string to disable.
+                                             (Default: `rest.nvim {version}`)
+        {set_content_type?}      (boolean)   Set `Content-Type` header when it is empty but request body is provided
+        {interpret_basic_auth?}  (boolean)   Interpret `Authorization` header when it is set in form of
+                                             "Basic username:password" or "Basic username password"
+                                             It will convert header to "Basic <base64-encoded-username:password>"
+                                             (Default: `true`)
 
 
 rest.Opts.Response                                          *rest.Opts.Response*
