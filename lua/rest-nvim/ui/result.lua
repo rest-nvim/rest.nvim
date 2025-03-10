@@ -11,7 +11,6 @@ local ui = {}
 local config = require("rest-nvim.config")
 local utils = require("rest-nvim.utils")
 local paneui = require("rest-nvim.ui.panes")
-local logger = require("rest-nvim.logger")
 
 ---data used to render the UI
 ---@class rest.UIData
@@ -21,31 +20,6 @@ local data = {
     ---@type rest.Response?
     response = nil,
 }
-
--- TODO: refactor UI update logic
--- - UI will have global "state" object
--- - when state object is updated, all panes will be re-rendered
-
--- TODO:
---
--- Browser style:
--- Headers (request & response) <- in rest_nvim_result filetype
--- Payload (request body) <- in proper filetype
--- Response (response body) <- in proper filetype
--- Trace
---
--- OnePage style:
--- Response (request uri & response body) <- in rest_nvim_result filetype
--- Headers (response headers) <- manual highlighting
--- Cookies (response cookies) <- manual highlighting
--- Statistics <- manual highlighting
---
--- TODO: Request pane showing what is sent
--- TODO: change Response pane to only show the actual response (including headers if Headers
--- pane is not visible)
--- TODO: Body panes for dedicated bodies (like browser)
--- TODO: rename current Response pane to Summary pane
--- TODO: Raw pane showing raw curl log
 
 local winbar = "%#Normal# %{%v:lua.require('rest-nvim.ui.panes').winbar()%}"
 winbar = winbar .. "%=%<"
