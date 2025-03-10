@@ -90,6 +90,8 @@ local default_config = {
             ---@type string Mapping for cycle to next result pane
             next = "L",
         },
+        ---@type rest.ui.panes.PaneOpts[]
+        panes = require("rest-nvim.ui.panes.preset.legacy"),
     },
     ---@class rest.Config.Highlight
     highlight = {
