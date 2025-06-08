@@ -47,6 +47,8 @@ end
 ---@return string
 ---@return integer
 local function expand_variables(src, context)
+    -- remove $dotenv tags, which are used by the vscode rest client for cross compatibility
+    src = src:gsub("%$dotenv ", ""):gsub("%$DOTENV ", "")
     return src:gsub("{{(.-)}}", function(name)
         name = vim.trim(name)
         local res = context:resolve(name)
