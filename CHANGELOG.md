@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.0](https://github.com/rest-nvim/rest.nvim/compare/v3.12.0...v3.13.0) (2025-06-11)
+
+
+### Features
+
+* remove $dotenv tags from variables ([#546](https://github.com/rest-nvim/rest.nvim/issues/546)) ([5e7cc25](https://github.com/rest-nvim/rest.nvim/commit/5e7cc25b9e10674cc8d0773a17d947a8ef537ae8))
+
 ## [3.12.0](https://github.com/rest-nvim/rest.nvim/compare/v3.11.2...v3.12.0) (2025-03-08)
 
 
