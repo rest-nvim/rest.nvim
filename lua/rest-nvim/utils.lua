@@ -83,6 +83,14 @@ function utils.read_file(path)
     return content
 end
 
+local function fix_year(year)
+    if year < 100 then
+        return year + 2000
+    end
+
+    return year
+end
+
 function utils.parse_http_time(time_str)
     local pattern = "(%a+), (%d+)[%s-](%a+)[%s-](%d+) (%d+):(%d+):(%d+) GMT"
     local _, day, month_name, year, hour, min, sec = time_str:match(pattern)
@@ -92,7 +100,7 @@ function utils.parse_http_time(time_str)
     Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12,
   }
     local time_table = {
-        year = tonumber(year),
+        year = fix_year(tonumber(year)),
         month = months[month_name],
         day = tonumber(day),
         hour = tonumber(hour),
