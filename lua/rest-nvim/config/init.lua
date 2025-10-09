@@ -109,6 +109,8 @@ local config
 ---@field winbar? boolean
 --- Default mappings for result pane
 ---@field keybinds? rest.Opts.UI.Keybinds
+--- Result UI (Default: `rest-nvim.ui.panes.preset.legacy`)
+---@field panes? rest.ui.panes.PaneOpts[]
 
 ---@class rest.Opts.UI.Keybinds
 --- Mapping for cycle to previous result pane (Default: `"H"`)
