@@ -27,6 +27,9 @@ local Context = require("rest-nvim.context").Context
 ---@field body? rest.Request.Body
 ---@field handlers fun()[]
 
+---@class rest.RequestSpec: rest.Request
+---@field next_request? rest.Request
+
 ---@class rest.Response
 ---@field status rest.Response.status Status information from response
 ---@field body string? Raw response body

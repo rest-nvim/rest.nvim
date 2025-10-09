@@ -119,4 +119,48 @@ describe("builtin request hooks", function()
             assert.same({ "application/json" }, req.headers["content-type"])
         end)
     end)
+    ---@return rest.Request
+    local function sample_request(opts)
+        return vim.tbl_deep_extend("keep", opts, {
+            method = "GET",
+            url = "https://example.com",
+            headers = {},
+            cookies = {},
+            handlers = {},
+        })
+    end
+    describe("interpret_basic_auth", function()
+        it("with valid vscode style token", function()
+            local req = sample_request({
+                headers = {
+                    ["authorization"] = { "Basic username:password" },
+                },
+            })
+            _G.rest_request = req
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = { "RestRequest", "RestRequestPre" },
+            })
+            _G.rest_request = nil
+            assert.same({ "Basic dXNlcm5hbWU6cGFzc3dvcmQ=" }, req.headers["authorization"])
+        end)
+        it("with valid intellij style token", function()
+            local req = sample_request({
+                headers = {
+                    ["authorization"] = { "Basic username password" },
+                },
+            })
+            _G.rest_request = req
+            vim.api.nvim_exec_autocmds("User", {
+                pattern = { "RestRequest", "RestRequestPre" },
+            })
+            _G.rest_request = nil
+            assert.same({ "Basic dXNlcm5hbWU6cGFzc3dvcmQ=" }, req.headers["authorization"])
+        end)
+    end)
+end)
+it("make sure md5 work", function()
+    local md5 = require("md5")
+    local md5sum = md5.sumhexa
+    assert.same("9236657b478ea807fdfa275d24990843", md5sum("qwer:asdf"))
+    -- TODO: implement digest auth with https://github.com/catwell/lua-http-digest/blob/master/http-digest.lua
 end)
