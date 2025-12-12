@@ -235,45 +235,49 @@ local rest_command_tbl = {
                 if not req_node then
                     return
                 end
-                local req = parser().parse(req_node, 0)
-                if not req then
-                    logger().error("failed to parse request")
-                    vim.notify(
-                        "failed to parse request. See `:Rest logs` for more info",
-                        vim.log.levels.ERROR,
-                        { title = "rest.nvim" }
-                    )
-                    return
-                end
-                local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
-                vim.fn.setreg("+", curl_command .. "\n")
-                vim.notify("Copied curl command to clipboard", vim.log.levels.INFO, { title = "rest.nvim" })
+                require("nio").run(function()
+                    local req = parser().parse(req_node, 0)
+                    if not req then
+                        logger().error("failed to parse request")
+                        vim.notify(
+                            "failed to parse request. See `:Rest logs` for more info",
+                            vim.log.levels.ERROR,
+                            { title = "rest.nvim" }
+                        )
+                        return
+                    end
+                    local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
+                    vim.fn.setreg("+", curl_command .. "\n")
+                    vim.notify("Copied curl command to clipboard", vim.log.levels.INFO, { title = "rest.nvim" })
+                end)
             elseif args[1] == "comment" then
                 local req_node = parser().get_request_node(args[2])
                 if not req_node then
                     return
                 end
-                local req = parser().parse(req_node, 0)
-                if not req then
-                    logger().error("failed to parse request")
-                    vim.notify(
-                        "failed to parse request. See `:Rest logs` for more info",
-                        vim.log.levels.ERROR,
-                        { title = "rest.nvim" }
+                require("nio").run(function()
+                    local req = parser().parse(req_node, 0)
+                    if not req then
+                        logger().error("failed to parse request")
+                        vim.notify(
+                            "failed to parse request. See `:Rest logs` for more info",
+                            vim.log.levels.ERROR,
+                            { title = "rest.nvim" }
+                        )
+                        return
+                    end
+                    local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
+                    local start = req_node:range()
+                    vim.api.nvim_buf_set_lines(
+                        0,
+                        start,
+                        start,
+                        false,
+                        vim.tbl_map(function(line)
+                            return "# " .. line
+                        end, vim.split(curl_command, "\n"))
                     )
-                    return
-                end
-                local curl_command = require("rest-nvim.client.curl.cli").builder.build_command(req)
-                local start = req_node:range()
-                vim.api.nvim_buf_set_lines(
-                    0,
-                    start,
-                    start,
-                    false,
-                    vim.tbl_map(function(line)
-                        return "# " .. line
-                    end, vim.split(curl_command, "\n"))
-                )
+                end)
             -- elseif args[1] == "to-http" then
             --   -- TODO: convert comment with curl to http request and insert it below
             else
