@@ -19,6 +19,9 @@ local default_config = {
             user_agent = "rest.nvim v" .. require("rest-nvim.api").VERSION,
             ---@type boolean Set `Content-Type` header when it is empty and body is provided
             set_content_type = true,
+            ---@type boolean Interpret `Authorization` header when it is set in form of
+            ---"Basic username:password" or "Basic username password"
+            interpret_basic_auth = true,
         },
     },
     ---@class rest.Config.Response

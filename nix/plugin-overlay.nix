@@ -1,6 +1,44 @@
 { self }: final: prev: let
   luaPackages-override = luaself: luaprev: {
     tree-sitter-http = luaself.callPackage ./tree-sitter-http.nix {};
+    base64 = luaself.callPackage ({
+      buildLuarocksPackage,
+      fetchurl,
+      fetchzip,
+      luaOlder,
+    }:
+      buildLuarocksPackage {
+        pname = "base64";
+        version = "1.5-3";
+        knownRockspec = (fetchurl {
+          url    = "mirror://luarocks/base64-1.5-3.rockspec";
+          sha256 = "sha256-jMWugDDJMOfapPyEWVrC2frF24MSr8pLsNtwK9ejLwM=";
+        }).outPath;
+        src = fetchzip {
+          url    = "https://github.com/iskolbin/lbase64/archive/c261320edbdf82c16409d893a96c28c704aa0ab8.zip";
+          sha256 = "sha256-Ucu7pxEbyeUyV12+FeFbGNhXiKsGYlXFMrb1Vhsnfrc=";
+        };
+        disabled = luaOlder "5.1";
+      }) {};
+    md5 = luaself.callPackage ({
+      buildLuarocksPackage,
+      fetchurl,
+      fetchzip,
+      luaOlder,
+    }:
+      buildLuarocksPackage {
+        pname = "md5";
+        version = "1.3-1";
+        knownRockspec = (fetchurl {
+          url    = "mirror://luarocks/md5-1.3-1.rockspec";
+          sha256 = "sha256-2S6Dvk0yazW8DCJf2DYxrLW11+B7r6DCJZ7CMCMAfSI=";
+        }).outPath;
+        src = fetchzip {
+          url    = "https://github.com/lunarmodules/md5/archive/refs/tags/1.3.zip";
+          sha256 = "sha256-mCN7mmCGf2vdXriT1q8rrhUmKh49AY8A+cZVCu6XJzY=";
+        };
+        disabled = luaOlder "5.0";
+      }) {};
     rest-nvim = luaself.callPackage ({
       buildLuarocksPackage,
       fetchurl,
@@ -19,6 +57,8 @@
           mimetypes
           xml2lua
           fidget-nvim
+          base64
+          md5
           tree-sitter-http
         ];
       }) {};
