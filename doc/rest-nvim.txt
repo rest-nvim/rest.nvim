@@ -230,8 +230,9 @@ rest.Opts.Env                                                    *rest.Opts.Env*
 rest.Opts.UI                                                      *rest.Opts.UI*
 
     Fields: ~
-        {winbar?}    (boolean)                 Set winbar in result pane (Default: `true`)
-        {keybinds?}  (rest.Opts.UI.Keybinds)   Default mappings for result pane
+        {winbar?}    (boolean)                    Set winbar in result pane (Default: `true`)
+        {keybinds?}  (rest.Opts.UI.Keybinds)      Default mappings for result pane
+        {panes?}     (rest.ui.panes.PaneOpts[])   Result UI (Default: `rest-nvim.ui.panes.preset.legacy`)
 
 
 rest.Opts.UI.Keybinds                                    *rest.Opts.UI.Keybinds*

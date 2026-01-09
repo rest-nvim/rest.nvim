@@ -84,6 +84,19 @@ local function run_request(req)
     })
     _G.rest_request = nil
     _G.rest_response = nil
+    -- format body *after* RestResponse event
+    local content_type = res.headers["content-type"]
+    if content_type and config.response.hooks.format then
+        local _, res_type = content_type[#content_type]:match("(.*)/([^;]+)")
+        -- HACK: handle application/vnd.api+json style content types
+        res_type = res_type:match(".+%+(.*)") or res_type
+        local body, gq_ok = utils.gq_lines(vim.split(res.body, "\n"), res_type)
+        if not gq_ok then
+            res.body = "failed"
+        else
+            res.body = table.concat(body, "\n")
+        end
+    end
 
     -- update cookie jar
     jar.update_jar(req.url, res)
