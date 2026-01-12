@@ -120,4 +120,16 @@ describe("gq_lines", function()
         local lines = { "" }
         assert.same({ "" }, utils.gq_lines(lines, "json"))
     end)
+    it("returns original lines when json parsing fails", function()
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "json",
+            callback = function(ev)
+                vim.bo[ev.buf].formatprg = "jq --indent 4"
+            end,
+        })
+        local lines = { "this is not valid json {{{" }
+        local result, ok = utils.gq_lines(lines, "json")
+        assert.is_false(ok)
+        assert.same(lines, result)
+    end)
 end)

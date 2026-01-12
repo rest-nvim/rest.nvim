@@ -345,15 +345,28 @@ function utils.gq_lines(lines, filetype)
         logger.debug(("can't find formatexpr or formatprg for %s filetype. Formatting is canceled"):format(filetype))
         return lines, false
     end
+    local gq_ok
+    local shell_error
     vim.api.nvim_buf_call(format_buf, function()
         -- HACK: dirty fix for neovim/neovim#30593
-        local gq_ok, res = pcall(vim.api.nvim_command, "silent normal gggqG")
+        local res
+        gq_ok, res = pcall(vim.api.nvim_command, "silent normal gggqG")
+        shell_error = vim.v.shell_error
         if not gq_ok then
             local msg = ("formatting %s filetype failed"):format(filetype)
             logger.warn(msg, res)
             vim.notify(msg, vim.log.levels.WARN, { title = "rest.nvim" })
         end
     end)
+    if not gq_ok or shell_error ~= 0 then
+        if shell_error ~= 0 then
+            local msg = ("formatting %s filetype failed (exit code %d)"):format(filetype, shell_error)
+            logger.warn(msg)
+            vim.notify(msg, vim.log.levels.WARN, { title = "rest.nvim" })
+        end
+        vim.api.nvim_buf_delete(format_buf, { force = true })
+        return lines, false
+    end
     local buf_lines = vim.api.nvim_buf_get_lines(format_buf, 0, -1, false)
     vim.api.nvim_buf_delete(format_buf, { force = true })
     return buf_lines, true
