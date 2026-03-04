@@ -44,6 +44,7 @@ function check.validate(cfg)
     compat_deprecated(cfg)
     local ok, err = validate({
         custom_dynamic_variables = { cfg.custom_dynamic_variables, "table" },
+        custom_directives = { cfg.custom_directives, "table" },
         request = { cfg.request, "table" },
         ["request.skip_ssl_verification"] = { cfg.request.skip_ssl_verification, "boolean" },
         ["request.hooks"] = { cfg.request.hooks, "table" },

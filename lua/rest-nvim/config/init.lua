@@ -21,6 +21,8 @@ local config
 ---@class rest.Opts
 --- Table of custom dynamic variables
 ---@field custom_dynamic_variables? table<string, fun():string>
+--- Table of custom directives
+---@field custom_directives? rest.Opts.Directives
 ---@field request? rest.Opts.Request
 ---@field response? rest.Opts.Response
 ---@field clients? rest.Opts.Clients
@@ -28,6 +30,13 @@ local config
 ---@field env? rest.Opts.Env
 ---@field ui? rest.Opts.UI
 ---@field highlight? rest.Opts.Highlight
+
+--- Custom directive handlers, keyed by directive name.
+--- Each handler receives the request context and space-separated arguments
+--- from the comment. For example, given:
+---   `custom_directives = { var = function(ctx, name, value) ctx:set_local(name, value) end }`
+--- then `# @var foo bar` is equivalent to `@foo = bar`.
+---@alias rest.Opts.Directives table<string, fun(ctx: rest.Context, ...: string)>
 
 ---@class rest.Opts.Request
 --- Skip SSL verification, useful for unknown certificates (Default: `false`)

@@ -14,6 +14,7 @@ local utils = require("rest-nvim.utils")
 local logger = require("rest-nvim.logger")
 local jar = require("rest-nvim.cookie_jar")
 local nio = require("nio")
+local config = require("rest-nvim.config")
 
 ---@alias Source integer|string Buffer or string which the `node` is extracted
 
@@ -475,6 +476,9 @@ function parser.parse(node, source, ctx)
                 if input then
                     ctx:set_local(var_name, input)
                 end
+            elseif config.custom_directives[comment_name] ~= nil and comment_value then
+                local args = vim.split(comment_value, ' +')
+                config.custom_directives[comment_name](ctx, unpack(args))
             end
         elseif child_type == "variable_declaration" then
             parser.parse_variable_declaration(child, source, ctx)

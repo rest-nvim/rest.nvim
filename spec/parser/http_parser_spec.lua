@@ -6,6 +6,7 @@ local parser = require("rest-nvim.parser")
 local utils = require("rest-nvim.utils")
 local context = require("rest-nvim.context").Context
 local logger = require("rest-nvim.logger")
+local config = require("rest-nvim.config")
 
 local spy = require("luassert.spy")
 
@@ -364,6 +365,84 @@ foo={{VAR}}
                 foo = "bar",
                 baz = "bar " .. os.date("%Y-%m-%d"),
             }, c.vars)
+        end)
+    end)
+
+    describe("custom directives", function()
+        local source = [[### test request
+# @mydir foo bar baz
+GET http://localhost
+]]
+
+        after_each(function()
+            config.custom_directives = nil
+        end)
+
+        it("registered directive handler is called", function()
+            local called = false
+            config.custom_directives = {
+                mydir = function(_ctx, ...)
+                    called = true
+                end,
+            }
+
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(0))
+            parser.parse(req_node, source)
+
+            assert.is_true(called)
+        end)
+
+        it("handler receives correct varargs", function()
+            local received = {}
+            config.custom_directives = {
+                mydir = function(_ctx, ...)
+                    received = { ... }
+                end,
+            }
+
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(0))
+            parser.parse(req_node, source)
+
+            assert.same({ "foo", "bar", "baz" }, received)
+        end)
+
+        it("handler can set a variable resolved in request", function()
+            config.custom_directives = {
+                mydir = function(ctx, var_name, value)
+                    ctx:set_local(var_name, value)
+                end,
+            }
+            local src = [[### test request
+# @mydir token secret123
+GET http://localhost/{{token}}
+]]
+
+            local _, tree = utils.ts_parse_source(src)
+            local req_node = assert(tree:root():child(0))
+            local req = assert(parser.parse(req_node, src))
+
+            assert.same("http://localhost/secret123", req.url)
+        end)
+
+        it("unknown directive is silently ignored", function()
+            local called = false
+            config.custom_directives = {
+                foo = function()
+                    called = true
+                end
+            }
+            local spy_log_error = spy.on(logger, "error")
+
+            local _, tree = utils.ts_parse_source(source)
+            local req_node = assert(tree:root():child(0))
+            local req = parser.parse(req_node, source)
+
+            assert.is_false(called)
+            assert.not_nil(req)
+            ---@diagnostic disable-next-line: undefined-field
+            assert.spy(spy_log_error).was_not_called()
         end)
     end)
 

@@ -112,6 +112,8 @@ vim.g.rest_nvim = {
 local default_config = {
     ---@type table<string, fun():string> Table of custom dynamic variables
     custom_dynamic_variables = {},
+    ---@type rest.Opts.Directives Table of custom directives
+    custom_directives = {},
     ---@class rest.Config.Request
     request = {
         ---@type boolean Skip SSL verification, useful for unknown certificates
