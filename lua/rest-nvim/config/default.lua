@@ -6,7 +6,7 @@
 local default_config = {
     ---@type table<string, fun():string> Table of custom dynamic variables
     custom_dynamic_variables = {},
-    ---@type table<string, rest.Opts.DirectiveFn> Table of custom directives
+    ---@type rest.Opts.Directives Table of custom directives
     custom_directives = {},
     ---@class rest.Config.Request
     request = {
@@ -42,7 +42,7 @@ local default_config = {
             ---See `man curl` for `--write-out` flag
             ---@type RestStatisticsStyle[]
             statistics = {
-                { id = "time_total", winbar = "take", title = "Time taken" },
+                { id = "time_total",    winbar = "take", title = "Time taken" },
                 { id = "size_download", winbar = "size", title = "Download size" },
             },
             ---Curl-secific request/response hooks
