@@ -130,6 +130,7 @@ rest.Opts                                                            *rest.Opts*
 
     Fields: ~
         {custom_dynamic_variables?}  (table<string,fun():string>)   Table of custom dynamic variables
+        {custom_directives?}         (rest.Opts.Directives)         Table of custom directives
         {request?}                   (rest.Opts.Request)
         {response?}                  (rest.Opts.Response)
         {clients?}                   (rest.Opts.Clients)
@@ -137,6 +138,17 @@ rest.Opts                                                            *rest.Opts*
         {env?}                       (rest.Opts.Env)
         {ui?}                        (rest.Opts.UI)
         {highlight?}                 (rest.Opts.Highlight)
+
+
+rest.Opts.Directives                                      *rest.Opts.Directives*
+     Custom directive handlers, keyed by directive name.
+     Each handler receives the request context and space-separated arguments
+     from the comment. For example, given:
+       `custom_directives = { var = function(ctx, name, value) ctx:set_local(name, value) end }`
+     then `# @var foo bar` is equivalent to `@foo = bar`.
+
+    Type: ~
+        table
 
 
 rest.Opts.Request                                            *rest.Opts.Request*
