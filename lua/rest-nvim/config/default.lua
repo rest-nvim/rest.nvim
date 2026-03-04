@@ -42,7 +42,7 @@ local default_config = {
             ---See `man curl` for `--write-out` flag
             ---@type RestStatisticsStyle[]
             statistics = {
-                { id = "time_total",    winbar = "take", title = "Time taken" },
+                { id = "time_total", winbar = "take", title = "Time taken" },
                 { id = "size_download", winbar = "size", title = "Download size" },
             },
             ---Curl-secific request/response hooks
