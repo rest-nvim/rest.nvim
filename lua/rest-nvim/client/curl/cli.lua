@@ -377,7 +377,7 @@ function curl.request(request)
             progress_handle:report({
                 message = "Parsing response...",
             })
-            local response = parser.parse_verbose(vim.split(sc.stderr, "\n"))
+            local response = parser.parse_verbose(vim.split(sc.stderr, "\n", { trimempty = true }))
             response.body = sc.stdout
             future.set(response)
             progress_handle:report({

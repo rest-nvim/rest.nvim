@@ -128,7 +128,9 @@ function M.run_last()
         vim.notify("No last request found", vim.log.levels.WARN, { title = "rest.nvim" })
         return false
     end
-    run_request(req)
+    nio.run(function()
+        run_request(req)
+    end)
 end
 
 function M.last_request()
